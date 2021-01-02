@@ -1,0 +1,19 @@
+<idea-plugin>
+    <id>org.example.Testspector</id>
+    <name>Testspector</name>
+    <vendor email="hradil.o@email.cz" url="http://www.testspector.com">Testspector</vendor>
+
+    <description><![CDATA[Plugin for checking the quality of unit tests. It support implementation for multiple languages and xUnit testing frameworks]]></description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>
