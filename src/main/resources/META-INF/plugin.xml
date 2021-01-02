@@ -3,7 +3,7 @@
     <name>Testspector</name>
     <vendor email="hradil.o@email.cz" url="http://www.testspector.com">Testspector</vendor>
 
-    <description><![CDATA[Plugin for checking the quality of unit tests. It support implementation for multiple languages and xUnit testing frameworks]]></description>
+    <description><![CDATA[Plugin for checking the quality of unit tests. It supports implementation for multiple languages and  testing frameworks of the xUnit family.]]></description>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
