@@ -4,8 +4,6 @@ import com.intellij.psi.PsiElement;
 
 public abstract class TestResolveStrategy {
 
-	public PsiElement resolveTest(PsiElement element) {
-		return null;
-	}
+	public abstract PsiElement resolveTest(PsiElement element);
 
 }

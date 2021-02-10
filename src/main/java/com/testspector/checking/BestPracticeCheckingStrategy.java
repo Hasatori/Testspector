@@ -26,8 +26,6 @@ public abstract class BestPracticeCheckingStrategy {
 
     public abstract List<BestPracticeViolation> checkBestPractices(List<PsiFile> psiFiles);
 
-    public List<BestPracticeViolation> checkBestPractices(PsiElement element) {
-        return null;
-    }
+    public abstract List<BestPracticeViolation> checkBestPractices(PsiElement element);
 
 }

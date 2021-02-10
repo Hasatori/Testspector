@@ -1,5 +1,6 @@
 package com.testspector.checking.java.junit;
 
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.testspector.checking.BestPracticeViolation;
 import com.testspector.checking.java.JavaBestPracticeCheckingStrategy;
@@ -22,6 +23,11 @@ public class JUnitBestPracticeCheckingStrategy extends JavaBestPracticeCheckingS
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiFile> psiFiles) {
+        return null;
+    }
+
+    @Override
+    public List<BestPracticeViolation> checkBestPractices(PsiElement element) {
         return null;
     }
 }
