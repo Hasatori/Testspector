@@ -7,7 +7,7 @@ public class ProgrammingLanguageResolver {
 
 	private ProgrammingLanguageResolver(){}
 
-	public static ProgrammingLanguage resolveFramework(PsiFile psiFile) {
+	public static ProgrammingLanguage resolveProgrammingLanguage(PsiFile psiFile) {
 		return null;
 	}
 
