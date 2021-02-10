@@ -5,7 +5,9 @@ import com.testspector.enums.ProgrammingLanguage;
 
 public class ProgrammingLanguageResolver {
 
-	public ProgrammingLanguage resolveFramework(PsiFile psiFile) {
+	private ProgrammingLanguageResolver(){}
+
+	public static ProgrammingLanguage resolveFramework(PsiFile psiFile) {
 		return null;
 	}
 

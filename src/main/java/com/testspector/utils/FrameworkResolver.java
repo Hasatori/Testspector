@@ -5,7 +5,10 @@ import com.testspector.enums.UnitTestFramework;
 
 public class FrameworkResolver {
 
-	public UnitTestFramework resolveLanguage(PsiFile psiFile) {
+	private FrameworkResolver(){}
+
+
+	public static UnitTestFramework resolveLanguage(PsiFile psiFile) {
 		return null;
 	}
 
