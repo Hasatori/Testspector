@@ -1,10 +1,12 @@
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '0.6.5'
+
 }
 
 group 'org.example'
 version '1.0-SNAPSHOT'
+
 
 repositories {
     mavenCentral()
@@ -16,10 +18,16 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2020.2'
+    type 'IU'
+    version = '2019.3'
+    plugins = ['com.intellij.java',"JavaScriptLanguage"]
 }
 patchPluginXml {
     changeNotes """
       Add change notes here.<br>
       <em>most HTML tags may be used</em>"""
+}
+
+publishPlugin {
+    token = System.getenv("ORG_GRADLE_PROJECT_intellijPublishToken")
 }
