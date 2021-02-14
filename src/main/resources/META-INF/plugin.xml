@@ -9,6 +9,13 @@
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+    <depends>JavaScript</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="com.testspector.gui.TestLineMarkerFactory"/>
+
+    </extensions>
 
     <actions>
         <action id="org.intellij.sdk.action.PopupDialogAction" class="com.testspector.gui.InspectTestAction"

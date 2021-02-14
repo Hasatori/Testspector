@@ -6,8 +6,8 @@ import java.util.List;
 
 public class ReportFactory {
 
-	public Report getReport(List<BestPracticeViolation> bestPracticeViolations) {
-		return null;
-	}
+    public Report getReport(List<BestPracticeViolation> bestPracticeViolations) {
+        return null;
+    }
 
 }

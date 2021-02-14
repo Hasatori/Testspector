@@ -7,13 +7,13 @@ import org.jetbrains.annotations.NotNull;
 public class InspectTestAction extends AnAction {
 
 
-	@Override
-	public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+    @Override
+    public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
 
-	}
+    }
 
-	@Override
-	public boolean isDumbAware() {
-		return false;
-	}
+    @Override
+    public boolean isDumbAware() {
+        return false;
+    }
 }
