@@ -33,6 +33,7 @@ public class ToolWindowContent {
     private static final Cursor CURSOR_DEFAULT = new Cursor(Cursor.DEFAULT_CURSOR);
     private static final Color BORDER_COLOR = new Color(50, 50, 50);
     private final Project project;
+    private RerunToolWindowContentAction rerunToolWindowContentAction;
 
 
     private JPanel leftNav;
@@ -52,35 +53,33 @@ public class ToolWindowContent {
     private JPanel processingWrapper;
     private JPanel contentWrapper;
     private JLabel clearConsole;
+    private JPanel rightNav;
     private ConsoleView consoleView;
 
     private TreeViewReport reportContent = null;
 
 
-    public ToolWindowContent(Project project, RerunToolWindowContentAction rerunToolWindowContentAction) {
+    public ToolWindowContent(Project project) {
         this.project = project;
         consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
         splitPane.setRightComponent(consoleView.getComponent());
+
         splitPane.getComponent(0).setForeground(Color.cyan);
         splitPane.getComponent(0).setBackground(Color.cyan);
         ((BasicSplitPaneDivider) splitPane.getComponent(0)).setBorder(BorderFactory.createEmptyBorder());
         leftNav.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
         splitPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
+        rightNav.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
+
         setupActionLabel(expand, EXPAND_ALL_ICON, EXPAND_ALL_ICON_HOVER, () -> this.reportContent.expandAll());
         setupActionLabel(clearConsole, CLEAR_CONSOLE_ICON, CLEAR_CONSOLE_ICON_HOVER, () -> this.consoleView.clear());
         setupActionLabel(collapse, COLLAPSE_ALL_ICON, COLLAPSE_ALL_ICON_HOVER, () -> this.reportContent.collapseAll());
-        setupActionLabel(rerun, RERUN_ICON, RERUN_ICON_HOVER, () -> {
-            this.contentWrapper.remove(reportContent);
-            this.contentWrapper.add(processingWrapper);
-            this.panel1.validate();
-            this.panel1.repaint();
-            rerunToolWindowContentAction.rerun(this);
-        });
         setupActionLabel(highlightAll, HIGHLIGHT_ALL_ICON, HIGHLIGHT_ALL_ICON_HOVER, () -> {
                     this.reportContent.highlightAll();
                     this.contentWrapper.repaint();
                 }
         );
+        rerun.setEnabled(false);
         splitPane.setDividerLocation(panel1.getPreferredSize().width / 2);
     }
 
@@ -132,6 +131,21 @@ public class ToolWindowContent {
         return highlightAll;
     }
 
+    public RerunToolWindowContentAction getRerunToolWindowContentAction() {
+        return rerunToolWindowContentAction;
+    }
+
+    public void setRerunToolWindowContentAction(RerunToolWindowContentAction rerunToolWindowContentAction) {
+        rerun.setEnabled(true);
+        this.rerunToolWindowContentAction = rerunToolWindowContentAction;
+        setupActionLabel(rerun, RERUN_ICON, RERUN_ICON_HOVER, () -> {
+            this.contentWrapper.remove(reportContent);
+            this.contentWrapper.add(processingWrapper);
+            this.panel1.validate();
+            this.panel1.repaint();
+            this.rerunToolWindowContentAction.rerun(this);
+        });
+    }
 
     public void showReport(List<BestPracticeViolation> bestPracticeViolations) {
         this.contentWrapper.removeAll();
