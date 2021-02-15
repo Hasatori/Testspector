@@ -20,8 +20,8 @@ public class TreeViewReport extends JTree {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
         for (BestPracticeViolation bestPracticeViolation : bestPracticeViolations) {
             DefaultMutableTreeNode bestPracticeViolationNode = new BestPracticeViolationWrapperNode(bestPracticeViolation);
-            bestPracticeViolationNode.add(new ShowHideNode(bestPracticeViolation, project, this));
             bestPracticeViolationNode.add(new ViolatedRuleNode(bestPracticeViolation));
+            bestPracticeViolationNode.add(new ShowHideNode(bestPracticeViolation, project, this));
             bestPracticeViolationNode.add(new DescriptionNode(bestPracticeViolation));
             root.add(bestPracticeViolationNode);
         }

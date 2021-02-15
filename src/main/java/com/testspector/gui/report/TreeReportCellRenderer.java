@@ -36,8 +36,9 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
             ruleAttributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
             ruleLabel.setFont(ruleFont.deriveFont(ruleAttributes));
             panel.add(ruleLabel);
+            panel.add(new JLabel(" - "));
             JLabel linkLabel = new JLabel();
-            linkLabel.setText(" - get more information");
+            linkLabel.setText("get more information");
             linkLabel.setForeground(Color.CYAN);
             Font font = linkLabel.getFont();
             Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());

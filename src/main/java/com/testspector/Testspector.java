@@ -2,7 +2,6 @@ package com.testspector;
 
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.IconLoader;
@@ -19,10 +18,10 @@ import com.testspector.enums.UnitTestFramework;
 import com.testspector.gui.ToolWindowContent;
 import com.testspector.utils.ProgrammingLanguageResolver;
 import com.testspector.utils.UnitTestFrameworkResolver;
-import org.eclipse.jdt.internal.compiler.ProcessTaskManager;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class Testspector {
@@ -33,6 +32,7 @@ public class Testspector {
     }
 
     public static void initializeTestspector(PsiFile file) {
+
         initializeTestspector(Collections.singletonList(file), file.getName());
     }
 
@@ -81,8 +81,8 @@ public class Testspector {
             t.start();
         }
         toolWindowContent.start(toolWindowContent1 -> {
-            threads.forEach(Thread::interrupt);
-            threads.clear();
+                    threads.forEach(Thread::interrupt);
+                    threads.clear();
                     List<PsiElement> elements1 = new ArrayList<>();
                     for (PsiFile file : files) {
 
@@ -135,17 +135,6 @@ public class Testspector {
                 }, () -> {
                     threads.forEach(Thread::interrupt);
                     threads.clear();
-                },
-                () -> {
-                    threads.forEach(Object::notify);
-                }, () -> {
-                    threads.forEach(thread -> {
-                        try {
-                            thread.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    });
                 });
 
 
@@ -170,7 +159,7 @@ public class Testspector {
         ToolWindow toolWindow = getToolWindow(project);
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
         ToolWindowContent toolWindowContent = new ToolWindowContent(project);
-        List<Thread> threads =  new CopyOnWriteArrayList<>();
+        List<Thread> threads = new CopyOnWriteArrayList<>();
         toolWindowContent.start((content) -> {
             threads.forEach(Thread::interrupt);
             threads.clear();
@@ -181,16 +170,6 @@ public class Testspector {
         }, () -> {
             threads.forEach(Thread::interrupt);
             threads.clear();
-        }, () -> {
-            threads.forEach(Thread::notify);
-        }, () -> {
-            threads.forEach(thread -> {
-                try {
-                    thread.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
         });
         Content content = contentFactory.createContent(toolWindowContent.getPanel1(), element.toString(), false);
         toolWindow.getContentManager().addContent(content);
@@ -201,10 +180,9 @@ public class Testspector {
         toolWindowContent.getConsoleView().print(String.format("\nProgramming language:%s and unit testig framework:%s were detected", programmingLanguage, unitTestFramework), ConsoleViewContentType.LOG_INFO_OUTPUT);
         toolWindowContent.getConsoleView().print("\nInitializing inspection.... This might take a while...", ConsoleViewContentType.LOG_INFO_OUTPUT);
         Runnable runInspection = new RunInspectionTest(toolWindowContent, Collections.singletonList(element));
-
-        threads.add(new Thread(runInspection));
-        threads.forEach(Thread::start);
-
+        Thread thread = new Thread(runInspection);
+        threads.add(thread);
+        thread.start();
     }
 
 
@@ -251,5 +229,6 @@ public class Testspector {
             }
         }
     }
+
 
 }
