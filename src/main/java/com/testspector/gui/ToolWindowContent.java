@@ -71,9 +71,6 @@ public class ToolWindowContent {
         this.project = project;
         consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
         splitPane.setRightComponent(consoleView.getComponent());
-
-        splitPane.getComponent(0).setForeground(Color.cyan);
-        splitPane.getComponent(0).setBackground(Color.cyan);
         ((BasicSplitPaneDivider) splitPane.getComponent(0)).setBorder(BorderFactory.createEmptyBorder());
         leftNav.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
         splitPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
