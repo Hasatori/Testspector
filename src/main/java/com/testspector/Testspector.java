@@ -1,8 +1,8 @@
 package com.testspector;
 
-import a.f.I;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.IconLoader;
@@ -16,12 +16,13 @@ import com.testspector.checking.BestPracticeViolation;
 import com.testspector.enums.BestPractice;
 import com.testspector.enums.ProgrammingLanguage;
 import com.testspector.enums.UnitTestFramework;
-import com.testspector.gui.RerunToolWindowContentAction;
 import com.testspector.gui.ToolWindowContent;
 import com.testspector.utils.ProgrammingLanguageResolver;
 import com.testspector.utils.UnitTestFrameworkResolver;
+import org.eclipse.jdt.internal.compiler.ProcessTaskManager;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class Testspector {
@@ -49,18 +50,18 @@ public class Testspector {
         }
         toolWindowContent.getConsoleView().print("\nInspecting tests in " + name, ConsoleViewContentType.LOG_INFO_OUTPUT);
         List<PsiElement> elements = new ArrayList<>();
-        List<Thread> threads = new ArrayList<>();
+        List<Thread> threads = new CopyOnWriteArrayList<>();
         for (PsiFile file : files) {
 
             Thread t = new Thread(() -> {
                 ProgrammingLanguage programmingLanguage = ProgrammingLanguageResolver.resolveProgrammingLanguage(file);
                 if (programmingLanguage != null) {
-                    toolWindowContent.getConsoleView().print("\n["+file.getName()+"] Programming language " + programmingLanguage + " detected", ConsoleViewContentType.LOG_INFO_OUTPUT);
+                    toolWindowContent.getConsoleView().print("\n[" + file.getName() + "] Programming language " + programmingLanguage + " detected", ConsoleViewContentType.LOG_INFO_OUTPUT);
 
                     UnitTestFramework unitTestFramework = ApplicationManager.getApplication().runReadAction((Computable<UnitTestFramework>) () -> UnitTestFrameworkResolver.resolveUnitTestFramework(programmingLanguage, file));
                     if (unitTestFramework != null) {
-                        toolWindowContent.getConsoleView().print("\n["+file.getName()+"] Tests from unit testing framework " + unitTestFramework + " detected", ConsoleViewContentType.LOG_INFO_OUTPUT);
-                        toolWindowContent.getConsoleView().print("\n["+file.getName()+"] Initializing inspection.... This might take a while...", ConsoleViewContentType.LOG_INFO_OUTPUT);
+                        toolWindowContent.getConsoleView().print("\n[" + file.getName() + "] Tests from unit testing framework " + unitTestFramework + " detected", ConsoleViewContentType.LOG_INFO_OUTPUT);
+                        toolWindowContent.getConsoleView().print("\n[" + file.getName() + "] Initializing inspection.... This might take a while...", ConsoleViewContentType.LOG_INFO_OUTPUT);
                         elements.addAll(ApplicationManager.getApplication().runReadAction((Computable<List<PsiElement>>) () -> {
                             List<PsiElement> resultElements = new ArrayList<>();
                             PsiClass psiClass = (PsiClass) Arrays.stream(file.getChildren()).filter(child -> child instanceof PsiClass).findFirst().orElse(null);
@@ -70,67 +71,84 @@ public class Testspector {
                             return resultElements;
                         }));
                     } else {
-                        toolWindowContent.getConsoleView().print("\n["+file.getName()+"] Not a test class or test are written in a unit testing framework which is not supported yet!", ConsoleViewContentType.ERROR_OUTPUT);
+                        toolWindowContent.getConsoleView().print("\n[" + file.getName() + "] Not a test class or test are written in a unit testing framework which is not supported yet!", ConsoleViewContentType.ERROR_OUTPUT);
                     }
                 } else {
-                    toolWindowContent.getConsoleView().print("\n["+file.getName()+"] Not supported programming language!", ConsoleViewContentType.ERROR_OUTPUT);
+                    toolWindowContent.getConsoleView().print("\n[" + file.getName() + "] Not supported programming language!", ConsoleViewContentType.ERROR_OUTPUT);
                 }
             });
             threads.add(t);
             t.start();
         }
-        toolWindowContent.setRerunToolWindowContentAction(toolWindowContent1 -> {
-            List<PsiElement> elements1 = new ArrayList<>();
-            List<Thread> threads1 = new ArrayList<>();
-            for (PsiFile file : files) {
+        toolWindowContent.start(toolWindowContent1 -> {
+            threads.forEach(Thread::interrupt);
+            threads.clear();
+                    List<PsiElement> elements1 = new ArrayList<>();
+                    for (PsiFile file : files) {
 
-                Thread t = new Thread(() -> {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    ProgrammingLanguage programmingLanguage = ProgrammingLanguageResolver.resolveProgrammingLanguage(file);
-                    if (programmingLanguage != null) {
-                        toolWindowContent1.getConsoleView().print("\n[" + file.getName() + "] Programming language " + programmingLanguage + " detected", ConsoleViewContentType.LOG_INFO_OUTPUT);
+                        Thread t = new Thread(() -> {
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            ProgrammingLanguage programmingLanguage = ProgrammingLanguageResolver.resolveProgrammingLanguage(file);
+                            if (programmingLanguage != null) {
+                                toolWindowContent1.getConsoleView().print("\n[" + file.getName() + "] Programming language " + programmingLanguage + " detected", ConsoleViewContentType.LOG_INFO_OUTPUT);
 
-                        UnitTestFramework unitTestFramework = ApplicationManager.getApplication().runReadAction((Computable<UnitTestFramework>) () -> UnitTestFrameworkResolver.resolveUnitTestFramework(programmingLanguage, file));
-                        if (unitTestFramework != null) {
-                            toolWindowContent1.getConsoleView().print("\n[" + file.getName() + "] Tests from unit testing framework " + unitTestFramework + " detected", ConsoleViewContentType.LOG_INFO_OUTPUT);
-                            toolWindowContent1.getConsoleView().print("\n[" + file.getName() + "] Initializing inspection.... This might take a while...", ConsoleViewContentType.LOG_INFO_OUTPUT);
-                            elements1.addAll(ApplicationManager.getApplication().runReadAction((Computable<List<PsiElement>>) () -> {
-                                List<PsiElement> resultElements = new ArrayList<>();
-                                PsiClass psiClass = (PsiClass) Arrays.stream(file.getChildren()).filter(child -> child instanceof PsiClass).findFirst().orElse(null);
-                                if (psiClass != null) {
-                                    resultElements.addAll(Arrays.stream(psiClass.getChildren()).filter(child -> child instanceof PsiMethod).collect(Collectors.toList()));
+                                UnitTestFramework unitTestFramework = ApplicationManager.getApplication().runReadAction((Computable<UnitTestFramework>) () -> UnitTestFrameworkResolver.resolveUnitTestFramework(programmingLanguage, file));
+                                if (unitTestFramework != null) {
+                                    toolWindowContent1.getConsoleView().print("\n[" + file.getName() + "] Tests from unit testing framework " + unitTestFramework + " detected", ConsoleViewContentType.LOG_INFO_OUTPUT);
+                                    toolWindowContent1.getConsoleView().print("\n[" + file.getName() + "] Initializing inspection.... This might take a while...", ConsoleViewContentType.LOG_INFO_OUTPUT);
+                                    elements1.addAll(ApplicationManager.getApplication().runReadAction((Computable<List<PsiElement>>) () -> {
+                                        List<PsiElement> resultElements = new ArrayList<>();
+                                        PsiClass psiClass = (PsiClass) Arrays.stream(file.getChildren()).filter(child -> child instanceof PsiClass).findFirst().orElse(null);
+                                        if (psiClass != null) {
+                                            resultElements.addAll(Arrays.stream(psiClass.getChildren()).filter(child -> child instanceof PsiMethod).collect(Collectors.toList()));
+                                        }
+                                        return resultElements;
+                                    }));
+                                } else {
+                                    toolWindowContent1.getConsoleView().print("\n[" + file.getName() + "] Not a test class or test are written in a unit testing framework which is not supported yet!", ConsoleViewContentType.ERROR_OUTPUT);
                                 }
-                                return resultElements;
-                            }));
-                        } else {
-                            toolWindowContent1.getConsoleView().print("\n[" + file.getName() + "] Not a test class or test are written in a unit testing framework which is not supported yet!", ConsoleViewContentType.ERROR_OUTPUT);
+                            } else {
+                                toolWindowContent1.getConsoleView().print("\n[" + file.getName() + "] Not supported programming language!", ConsoleViewContentType.ERROR_OUTPUT);
+                            }
+                        });
+                        threads.add(t);
+                        t.start();
+                    }
+                    for (Thread thread : threads) {
+                        try {
+                            thread.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
+                    }
+                    if (!elements1.isEmpty()) {
+                        Runnable runInspection = new RunInspectionTest(toolWindowContent1, elements1);
+                        new Thread(runInspection).start();
                     } else {
-                        toolWindowContent1.getConsoleView().print("\n[" + file.getName() + "] Not supported programming language!", ConsoleViewContentType.ERROR_OUTPUT);
+                        toolWindowContent1.getConsoleView().print("\nNo testing methods present!", ConsoleViewContentType.ERROR_OUTPUT);
                     }
-                });
-                threads1.add(t);
-                t.start();
-            }
-                for (Thread thread : threads1) {
-                    try {
-                        thread.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (!elements1.isEmpty()) {
-                    Runnable runInspection = new RunInspectionTest(toolWindowContent1, elements1);
-                    new Thread(runInspection).start();
-                } else {
-                    toolWindowContent1.getConsoleView().print("\nNo testing methods present!", ConsoleViewContentType.ERROR_OUTPUT);
-                }
 
-        });
+                }, () -> {
+                    threads.forEach(Thread::interrupt);
+                    threads.clear();
+                },
+                () -> {
+                    threads.forEach(Object::notify);
+                }, () -> {
+                    threads.forEach(thread -> {
+                        try {
+                            thread.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                });
+
+
         for (Thread thread : threads) {
             try {
                 thread.join();
@@ -152,10 +170,27 @@ public class Testspector {
         ToolWindow toolWindow = getToolWindow(project);
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
         ToolWindowContent toolWindowContent = new ToolWindowContent(project);
-        toolWindowContent.setRerunToolWindowContentAction((content) -> {
+        List<Thread> threads =  new CopyOnWriteArrayList<>();
+        toolWindowContent.start((content) -> {
+            threads.forEach(Thread::interrupt);
+            threads.clear();
             Runnable runInspection = new RunInspectionTest(content, Collections.singletonList(element));
             content.getConsoleView().print("\nRerunning inspection on " + element.toString(), ConsoleViewContentType.LOG_INFO_OUTPUT);
-            new Thread(runInspection).start();
+            threads.add(new Thread(runInspection));
+            threads.forEach(Thread::start);
+        }, () -> {
+            threads.forEach(Thread::interrupt);
+            threads.clear();
+        }, () -> {
+            threads.forEach(Thread::notify);
+        }, () -> {
+            threads.forEach(thread -> {
+                try {
+                    thread.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
         });
         Content content = contentFactory.createContent(toolWindowContent.getPanel1(), element.toString(), false);
         toolWindow.getContentManager().addContent(content);
@@ -166,7 +201,9 @@ public class Testspector {
         toolWindowContent.getConsoleView().print(String.format("\nProgramming language:%s and unit testig framework:%s were detected", programmingLanguage, unitTestFramework), ConsoleViewContentType.LOG_INFO_OUTPUT);
         toolWindowContent.getConsoleView().print("\nInitializing inspection.... This might take a while...", ConsoleViewContentType.LOG_INFO_OUTPUT);
         Runnable runInspection = new RunInspectionTest(toolWindowContent, Collections.singletonList(element));
-        new Thread(runInspection).start();
+
+        threads.add(new Thread(runInspection));
+        threads.forEach(Thread::start);
 
     }
 
@@ -214,4 +251,5 @@ public class Testspector {
             }
         }
     }
+
 }

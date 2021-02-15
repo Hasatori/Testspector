@@ -112,7 +112,7 @@
         </children>
       </grid>
       <grid id="d09be" binding="rightNav" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="10" left="0" bottom="0" right="5"/>
+        <margin top="10" left="0" bottom="0" right="6"/>
         <constraints>
           <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>

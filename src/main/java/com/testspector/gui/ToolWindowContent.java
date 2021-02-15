@@ -92,14 +92,11 @@ public class ToolWindowContent {
                     this.contentWrapper.repaint();
                 }
         );
-        setupActionLabel(stop, STOP_ICON, STOP_ICON_HOVER, STOP_ICON_DISABLED, () -> {
-        });
+        setupActionLabel(stop, STOP_ICON, STOP_ICON_HOVER, STOP_ICON_DISABLED);
         stop.setEnabled(false);
-        setupActionLabel(pause, PAUSE_ICON, PAUSE_ICON_HOVER, PAUSE_ICON_DISABLED, () -> {
-        });
+        setupActionLabel(pause, PAUSE_ICON, PAUSE_ICON_HOVER, PAUSE_ICON_DISABLED);
         pause.setEnabled(false);
-        setupActionLabel(resume, RESUME_ICON, RESUME_ICON_HOVER, RESUME_ICON_DISABLED, () -> {
-        });
+        setupActionLabel(resume, RESUME_ICON, RESUME_ICON_HOVER, RESUME_ICON_DISABLED);
         resume.setEnabled(false);
         Arrays.stream(lefNavElementsWrapper.getComponents()).filter(component -> component instanceof JLabel).forEach(leftNavComp->{((JLabel) leftNavComp).setBorder(new EmptyBorder(2,0,2,0));});
 
@@ -107,6 +104,17 @@ public class ToolWindowContent {
     }
 
     private void setupActionLabel(JLabel label, Icon icon, Icon hoverIcon, Icon disabledIcon, Runnable onClick) {
+        setupActionLabel(label,icon,hoverIcon,disabledIcon);
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                onClick.run();
+            }
+        });
+    }
+
+    private void setupActionLabel(JLabel label, Icon icon, Icon hoverIcon, Icon disabledIcon){
         label.setIcon(icon);
         label.setDisabledIcon(disabledIcon);
         label.addMouseListener(new MouseAdapter() {
@@ -124,13 +132,6 @@ public class ToolWindowContent {
                 super.mouseExited(e);
                 label.setIcon(icon);
                 label.setCursor(CURSOR_DEFAULT);
-            }
-        });
-        label.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                onClick.run();
             }
         });
     }
@@ -159,7 +160,7 @@ public class ToolWindowContent {
         return rerunToolWindowContentAction;
     }
 
-    public void setRerunToolWindowContentAction(RerunToolWindowContentAction rerunToolWindowContentAction) {
+    public void start(RerunToolWindowContentAction rerunToolWindowContentAction,Runnable onStop,Runnable onResume,Runnable onPause) {
         rerun.setEnabled(true);
         this.rerunToolWindowContentAction = rerunToolWindowContentAction;
         setupActionLabel(rerun, RERUN_ICON, RERUN_ICON_HOVER,RESUME_ICON_DISABLED, () -> {
@@ -168,6 +169,42 @@ public class ToolWindowContent {
             this.panel1.validate();
             this.panel1.repaint();
             this.rerunToolWindowContentAction.rerun(this);
+            stop.setEnabled(true);
+            pause.setEnabled(true);
+            resume.setEnabled(false);
+        });
+        this.stop.setEnabled(true);
+        this.stop.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                stop.setEnabled(false);
+                pause.setEnabled(false);
+                resume.setEnabled(false);
+                onStop.run();
+            }
+        });
+        this.resume.setEnabled(true);
+        this.resume.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                stop.setEnabled(true);
+                pause.setEnabled(true);
+                resume.setEnabled(false);
+                onResume.run();
+            }
+        });
+        this.pause.setEnabled(true);
+        this.pause.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                stop.setEnabled(true);
+                pause.setEnabled(false);
+                resume.setEnabled(true);
+                onPause.run();
+            }
         });
     }
 
