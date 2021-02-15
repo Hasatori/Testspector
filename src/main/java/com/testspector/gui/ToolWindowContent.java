@@ -8,10 +8,12 @@ import com.testspector.checking.BestPracticeViolation;
 import com.testspector.gui.report.TreeViewReport;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.List;
 
 public class ToolWindowContent {
@@ -19,6 +21,7 @@ public class ToolWindowContent {
 
     private static final Icon RERUN_ICON = IconLoader.getIcon("/icons/rerun.svg");
     private static final Icon RERUN_ICON_HOVER = IconLoader.getIcon("/icons/rerunHover.svg");
+    private static final Icon RERUN_ICON_DISABLED = IconLoader.getIcon("/icons/rerunDisabled.svg");
     private static final Icon EXPAND_ALL_ICON = IconLoader.getIcon("/icons/expandAll.svg");
     private static final Icon EXPAND_ALL_ICON_HOVER = IconLoader.getIcon("/icons/expandAllHover.svg");
     private static final Icon COLLAPSE_ALL_ICON_HOVER = IconLoader.getIcon("/icons/collapseAllHover.svg");
@@ -29,6 +32,15 @@ public class ToolWindowContent {
     private static final Icon HIDE_ALL_ICON_HOVER = IconLoader.getIcon("/icons/hide_darkHover.svg");
     private static final Icon CLEAR_CONSOLE_ICON = IconLoader.getIcon("/icons/delete_dark.svg");
     private static final Icon CLEAR_CONSOLE_ICON_HOVER = IconLoader.getIcon("/icons/delete_darkHover.svg");
+    private static final Icon STOP_ICON = IconLoader.getIcon("/icons/stop.svg");
+    private static final Icon STOP_ICON_HOVER = IconLoader.getIcon("/icons/stopHover.svg");
+    private static final Icon STOP_ICON_DISABLED = IconLoader.getIcon("/icons/stopDisabled.svg");
+    private static final Icon PAUSE_ICON = IconLoader.getIcon("/icons/pause_dark.svg");
+    private static final Icon PAUSE_ICON_HOVER = IconLoader.getIcon("/icons/pause_darkHover.svg");
+    private static final Icon PAUSE_ICON_DISABLED = IconLoader.getIcon("/icons/pause_darkDisabled.svg");
+    private static final Icon RESUME_ICON = IconLoader.getIcon("/icons/resume.svg");
+    private static final Icon RESUME_ICON_HOVER = IconLoader.getIcon("/icons/resumeHover.svg");
+    private static final Icon RESUME_ICON_DISABLED = IconLoader.getIcon("/icons/resumeDisabled.svg");
     private static final Cursor CURSOR_HAND = new Cursor(Cursor.HAND_CURSOR);
     private static final Cursor CURSOR_DEFAULT = new Cursor(Cursor.DEFAULT_CURSOR);
     private static final Color BORDER_COLOR = new Color(50, 50, 50);
@@ -38,9 +50,6 @@ public class ToolWindowContent {
 
     private JPanel leftNav;
     private JLabel rerun;
-    private JPanel topNav;
-    private JComboBox comboBox1;
-    private JComboBox comboBox2;
     private JLabel expand;
     private JLabel collapse;
     private JTree reportTree;
@@ -54,6 +63,10 @@ public class ToolWindowContent {
     private JPanel contentWrapper;
     private JLabel clearConsole;
     private JPanel rightNav;
+    private JLabel pause;
+    private JLabel stop;
+    private JLabel resume;
+    private JPanel lefNavElementsWrapper;
     private ConsoleView consoleView;
 
     private TreeViewReport reportContent = null;
@@ -71,20 +84,31 @@ public class ToolWindowContent {
         splitPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
         rightNav.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
-        setupActionLabel(expand, EXPAND_ALL_ICON, EXPAND_ALL_ICON_HOVER, () -> this.reportContent.expandAll());
-        setupActionLabel(clearConsole, CLEAR_CONSOLE_ICON, CLEAR_CONSOLE_ICON_HOVER, () -> this.consoleView.clear());
-        setupActionLabel(collapse, COLLAPSE_ALL_ICON, COLLAPSE_ALL_ICON_HOVER, () -> this.reportContent.collapseAll());
-        setupActionLabel(highlightAll, HIGHLIGHT_ALL_ICON, HIGHLIGHT_ALL_ICON_HOVER, () -> {
+        setupActionLabel(expand, EXPAND_ALL_ICON, EXPAND_ALL_ICON_HOVER, null, () -> this.reportContent.expandAll());
+        setupActionLabel(clearConsole, CLEAR_CONSOLE_ICON, CLEAR_CONSOLE_ICON_HOVER, null, () -> this.consoleView.clear());
+        setupActionLabel(collapse, COLLAPSE_ALL_ICON, COLLAPSE_ALL_ICON_HOVER, null, () -> this.reportContent.collapseAll());
+        setupActionLabel(highlightAll, HIGHLIGHT_ALL_ICON, HIGHLIGHT_ALL_ICON_HOVER, null, () -> {
                     this.reportContent.highlightAll();
                     this.contentWrapper.repaint();
                 }
         );
-        rerun.setEnabled(false);
+        setupActionLabel(stop, STOP_ICON, STOP_ICON_HOVER, STOP_ICON_DISABLED, () -> {
+        });
+        stop.setEnabled(false);
+        setupActionLabel(pause, PAUSE_ICON, PAUSE_ICON_HOVER, PAUSE_ICON_DISABLED, () -> {
+        });
+        pause.setEnabled(false);
+        setupActionLabel(resume, RESUME_ICON, RESUME_ICON_HOVER, RESUME_ICON_DISABLED, () -> {
+        });
+        resume.setEnabled(false);
+        Arrays.stream(lefNavElementsWrapper.getComponents()).filter(component -> component instanceof JLabel).forEach(leftNavComp->{((JLabel) leftNavComp).setBorder(new EmptyBorder(2,0,2,0));});
+
         splitPane.setDividerLocation(panel1.getPreferredSize().width / 2);
     }
 
-    private void setupActionLabel(JLabel label, Icon icon, Icon hoverIcon, Runnable onClick) {
+    private void setupActionLabel(JLabel label, Icon icon, Icon hoverIcon, Icon disabledIcon, Runnable onClick) {
         label.setIcon(icon);
+        label.setDisabledIcon(disabledIcon);
         label.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -138,7 +162,7 @@ public class ToolWindowContent {
     public void setRerunToolWindowContentAction(RerunToolWindowContentAction rerunToolWindowContentAction) {
         rerun.setEnabled(true);
         this.rerunToolWindowContentAction = rerunToolWindowContentAction;
-        setupActionLabel(rerun, RERUN_ICON, RERUN_ICON_HOVER, () -> {
+        setupActionLabel(rerun, RERUN_ICON, RERUN_ICON_HOVER,RESUME_ICON_DISABLED, () -> {
             this.contentWrapper.remove(reportContent);
             this.contentWrapper.add(processingWrapper);
             this.panel1.validate();
