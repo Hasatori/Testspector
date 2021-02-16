@@ -10,22 +10,8 @@ import java.util.List;
 
 public abstract class BestPracticeCheckingStrategy {
 
-    private final ProgrammingLanguage supportedProgrammingLanguage;
+    public abstract List<BestPracticeViolation> checkBestPractices(PsiElement psiElement);
 
-    private final List<BestPractice> supportedRules;
-
-    private final UnitTestFramework supportedFramework;
-
-    public BestPracticeCheckingStrategy(ProgrammingLanguage supportedProgrammingLanguage, List<BestPractice> supportedRules, UnitTestFramework supportedFramework) {
-        this.supportedProgrammingLanguage = supportedProgrammingLanguage;
-        this.supportedRules = supportedRules;
-        this.supportedFramework = supportedFramework;
-    }
-
-    public abstract List<BestPracticeViolation> checkBestPractices(PsiFile psiFile);
-
-    public abstract List<BestPracticeViolation> checkBestPractices(List<PsiFile> psiFiles);
-
-    public abstract List<BestPracticeViolation> checkBestPractices(PsiElement element);
+    public abstract List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements);
 
 }

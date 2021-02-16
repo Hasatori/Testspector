@@ -1,49 +1,37 @@
 package com.testspector.model.checking.java.junit;
 
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
+import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.JavaBestPracticeCheckingStrategy;
-import com.testspector.model.enums.ProgrammingLanguage;
-import com.testspector.model.enums.UnitTestFramework;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-
-import static com.testspector.model.enums.BestPractice.*;
+import java.util.stream.Collectors;
 
 public class JUnitBestPracticeCheckingStrategy extends JavaBestPracticeCheckingStrategy {
 
+    private final List<BestPracticeCheckingStrategy> checkingStrategies;
+
     public JUnitBestPracticeCheckingStrategy() {
-        super(ProgrammingLanguage.JAVA,
-                Arrays.asList(
-                        TEST_ONLY_PUBLIC_BEHAVIOUR,
-                        NO_SIMPLE_TESTS,
-                        AT_LEAST_ONE_ASSERTION,
-                        ONLY_ONE_ASSERTION,
-                        NO_GLOBAL_STATIC_PROPERTIES,
-                        CREATE_CUSTOM_DATA_AND_SOURCES,
-                        SETUP_A_TEST_NAMING_STRATEGY,
-                        CATCH_EXCEPTIONS_USING_FRAMEWORK_TOOLS,
-                        NO_CONDITIONAL_LOGIC,
-                        THREE_PHASE_TEST_STRUCTURE
-                )
-                , UnitTestFramework.JUNIT);
+        checkingStrategies = new ArrayList<>();
+        checkingStrategies.add(new NoSimpleTestsJunitBestPracticeCheckingStrategy());
+
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(PsiFile psiFile) {
-        return new ArrayList<>();
+    public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
+        return checkingStrategies.stream()
+                .map(bestPracticeCheckingStrategy -> bestPracticeCheckingStrategy.checkBestPractices(psiElement))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(List<PsiFile> psiFiles) {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public List<BestPracticeViolation> checkBestPractices(PsiElement element) {
-        return new ArrayList<>();
+    public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
+        return psiElements.stream().map(this::checkBestPractices)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 }
