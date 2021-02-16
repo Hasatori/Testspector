@@ -88,6 +88,7 @@ public class ToolWindowContent {
         Arrays.stream(lefNavElementsWrapper.getComponents()).filter(component -> component instanceof JLabel).forEach(leftNavComp -> {
             ((JLabel) leftNavComp).setBorder(new EmptyBorder(2, 0, 2, 0));
         });
+        setupActionLabel(clearConsole,CLEAR_CONSOLE_ICON,CLEAR_CONSOLE_ICON_HOVER,null,true);
         splitPane.setDividerLocation(panel1.getPreferredSize().width / 2);
     }
 
