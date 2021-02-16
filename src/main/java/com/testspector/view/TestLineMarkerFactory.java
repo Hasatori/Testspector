@@ -7,10 +7,10 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.psi.PsiElement;
 import com.sun.istack.NotNull;
 import com.testspector.controller.TestspectorController;
-import com.testspector.model.ProgrammingLanguageFactory;
-import com.testspector.model.TestResolveStrategy;
-import com.testspector.model.UnitTestFrameworkFactory;
-import com.testspector.model.java.junit.JUnitTestResolveStrategy;
+import com.testspector.model.checking.ProgrammingLanguageFactory;
+import com.testspector.model.checking.TestResolveStrategy;
+import com.testspector.model.checking.UnitTestFrameworkFactory;
+import com.testspector.model.checking.java.junit.JUnitTestResolveStrategy;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 

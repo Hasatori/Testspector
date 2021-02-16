@@ -1,4 +1,4 @@
-package com.testspector.model;
+package com.testspector.model.checking;
 
 import com.intellij.psi.PsiElement;
 

@@ -1,6 +1,6 @@
-package com.testspector.model.java;
+package com.testspector.model.checking.java;
 
-import com.testspector.model.BestPracticeCheckingStrategy;
+import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.enums.BestPractice;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;

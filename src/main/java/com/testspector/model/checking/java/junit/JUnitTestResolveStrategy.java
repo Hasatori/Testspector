@@ -1,9 +1,9 @@
-package com.testspector.model.java.junit;
+package com.testspector.model.checking.java.junit;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethod;
-import com.testspector.model.TestResolveStrategy;
+import com.testspector.model.checking.TestResolveStrategy;
 
 import java.util.Arrays;
 import java.util.List;

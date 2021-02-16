@@ -1,9 +1,9 @@
-package com.testspector.model.java.junit;
+package com.testspector.model.checking.java.junit;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.testspector.model.BestPracticeViolation;
-import com.testspector.model.java.JavaBestPracticeCheckingStrategy;
+import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.java.JavaBestPracticeCheckingStrategy;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 

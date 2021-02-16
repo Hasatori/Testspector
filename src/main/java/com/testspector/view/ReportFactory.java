@@ -1,6 +1,6 @@
 package com.testspector.view;
 
-import com.testspector.model.BestPracticeViolation;
+import com.testspector.model.checking.BestPracticeViolation;
 
 import java.util.List;
 

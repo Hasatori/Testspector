@@ -1,7 +1,7 @@
 package com.testspector.view.report;
 
 
-import com.testspector.model.BestPracticeViolation;
+import com.testspector.model.checking.BestPracticeViolation;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 

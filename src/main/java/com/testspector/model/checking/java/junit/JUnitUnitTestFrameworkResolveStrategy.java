@@ -1,10 +1,10 @@
-package com.testspector.model.java.junit;
+package com.testspector.model.checking.java.junit;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiImportList;
 import com.intellij.psi.PsiMethod;
-import com.testspector.model.UnitTestFrameworkResolveStrategy;
+import com.testspector.model.checking.UnitTestFrameworkResolveStrategy;
 
 import java.util.Arrays;
 import java.util.List;
