@@ -13,12 +13,12 @@
     <depends>JavaScript</depends>
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="com.testspector.gui.TestLineMarkerFactory"/>
+                                        implementationClass="com.testspector.view.TestLineMarkerFactory"/>
 
     </extensions>
 
     <actions>
-        <action id="org.intellij.sdk.action.PopupDialogAction" class="com.testspector.gui.InspectTestAction"
+        <action id="org.intellij.sdk.action.PopupDialogAction" class="com.testspector.view.InspectTestAction"
                 text="Inspect tests" description="SDK action example" icon="/icons/logo.svg">
             <!--         <add-to-group group-id="EditorPopupMenu" anchor="first"/>
                      <add-to-group group-id="ToolsMenu" anchor="first"/>-->
