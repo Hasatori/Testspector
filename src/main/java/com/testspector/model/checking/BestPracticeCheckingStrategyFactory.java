@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class BestPracticeCheckingStrategyFactory {
 
-    public Optional<BestPracticeCheckingStrategy> getBestPracticeChecker(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
+    public Optional<BestPracticeCheckingStrategy> getBestPracticeCheckingStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
         if (programmingLanguage == ProgrammingLanguage.JAVA && unitTestFramework == UnitTestFramework.JUNIT) {
             return Optional.of(new JUnitBestPracticeCheckingStrategy());
         }

@@ -1,7 +1,7 @@
 package com.testspector.model.utils;
 
 
-public class Constants {
+public final class Constants {
     public static final String WEB_PAGE_BEST_PRACTICES_ULR = "https://testspector.com/best-practices";
 
 

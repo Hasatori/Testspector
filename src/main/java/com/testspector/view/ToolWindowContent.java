@@ -203,7 +203,7 @@ public class ToolWindowContent {
             collapse.setEnabled(false);
             expand.setEnabled(false);
             highlightAll.setEnabled(false);
-            JLabel noErrorsLabel = new JLabel("Not best practice violations found. Great job");
+            JLabel noErrorsLabel = new JLabel("Not best practice violations found. Great job!");
             noErrorsLabel.setIcon(SUCCEEDED_ICON);
             this.contentWrapper.add(noErrorsLabel);
         } else {
