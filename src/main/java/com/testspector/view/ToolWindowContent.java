@@ -3,7 +3,6 @@ package com.testspector.view;
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.IconLoader;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.view.report.TreeViewReport;
 
@@ -16,28 +15,10 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.testspector.view.Icons.*;
+
 public class ToolWindowContent {
 
-
-    private static final Icon RERUN_ICON = IconLoader.getIcon("/icons/rerun.svg");
-    private static final Icon RERUN_ICON_HOVER = IconLoader.getIcon("/icons/rerunHover.svg");
-    private static final Icon RERUN_ICON_DISABLED = IconLoader.getIcon("/icons/rerunDisabled.svg");
-    private static final Icon EXPAND_ALL_ICON = IconLoader.getIcon("/icons/expandAll.svg");
-    private static final Icon EXPAND_ALL_ICON_HOVER = IconLoader.getIcon("/icons/expandAllHover.svg");
-    private static final Icon EXPAND_ALL_ICON_DISABLED = IconLoader.getIcon("/icons/expandAllDisabled.svg");
-    private static final Icon COLLAPSE_ALL_ICON_HOVER = IconLoader.getIcon("/icons/collapseAllHover.svg");
-    private static final Icon COLLAPSE_ALL_ICON = IconLoader.getIcon("/icons/collapseAll.svg");
-    private static final Icon COLLAPSE_ALL_ICON_DISABLED = IconLoader.getIcon("/icons/collapseAllDisabled.svg");
-    private static final Icon HIGHLIGHT_ALL_ICON = IconLoader.getIcon("/icons/show_dark.svg");
-    private static final Icon HIGHLIGHT_ALL_ICON_HOVER = IconLoader.getIcon("/icons/show_darkHover.svg");
-    private static final Icon HIGHLIGHT_ALL_ICON_DISABLED = IconLoader.getIcon("/icons/show_darkDisabled.svg");
-    private static final Icon CLEAR_CONSOLE_ICON = IconLoader.getIcon("/icons/delete_dark.svg");
-    private static final Icon CLEAR_CONSOLE_ICON_HOVER = IconLoader.getIcon("/icons/delete_darkHover.svg");
-    private static final Icon STOP_ICON = IconLoader.getIcon("/icons/stop.svg");
-    private static final Icon STOP_ICON_HOVER = IconLoader.getIcon("/icons/stopHover.svg");
-    private static final Icon STOP_ICON_DISABLED = IconLoader.getIcon("/icons/stopDisabled.svg");
-    private static final Icon SUCCEEDED_ICON = IconLoader.getIcon("/icons/succeeded_dark.svg");
-    private static final Icon WARNING_ICON = IconLoader.getIcon( "/icons/balloonWarning_dark.svg");
     private static final Cursor CURSOR_HAND = new Cursor(Cursor.HAND_CURSOR);
     private static final Cursor CURSOR_DEFAULT = new Cursor(Cursor.DEFAULT_CURSOR);
     private static final Color BORDER_COLOR = new Color(50, 50, 50);
@@ -76,19 +57,19 @@ public class ToolWindowContent {
         splitPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
         rightNav.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
-        setupActionLabel(expand, EXPAND_ALL_ICON, EXPAND_ALL_ICON_HOVER, EXPAND_ALL_ICON_DISABLED, false, () -> this.reportContent.expandAll());
-        setupActionLabel(clearConsole, CLEAR_CONSOLE_ICON, CLEAR_CONSOLE_ICON_HOVER, null, false, () -> this.consoleView.clear());
-        setupActionLabel(collapse, COLLAPSE_ALL_ICON, COLLAPSE_ALL_ICON_HOVER, COLLAPSE_ALL_ICON_DISABLED, false, () -> this.reportContent.collapseAll());
-        setupActionLabel(highlightAll, HIGHLIGHT_ALL_ICON, HIGHLIGHT_ALL_ICON_HOVER, HIGHLIGHT_ALL_ICON_DISABLED, false, () -> {
+        setupActionLabel(expand, EXPAND_ALL, EXPAND_ALL_HOVER, EXPAND_ALL_DISABLED, false, () -> this.reportContent.expandAll());
+        setupActionLabel(clearConsole, CLEAR_CONSOLE, CLEAR_CONSOLE_HOVER, null, false, () -> this.consoleView.clear());
+        setupActionLabel(collapse, COLLAPSE_ALL, COLLAPSE_ALL_HOVER, COLLAPSE_ALL_DISABLED, false, () -> this.reportContent.collapseAll());
+        setupActionLabel(highlightAll, SHOW, SHOW_HOVER, SHOW_DISABLED, false, () -> {
             this.reportContent.highlightAll();
             this.contentWrapper.repaint();
         });
-        setupActionLabel(stop, STOP_ICON, STOP_ICON_HOVER, STOP_ICON_DISABLED, false);
-        setupActionLabel(rerun, RERUN_ICON, RERUN_ICON_HOVER, RERUN_ICON_DISABLED, false);
+        setupActionLabel(stop, STOP, STOP_HOVER, STOP_DISABLED, false);
+        setupActionLabel(rerun, RERUN, RERUN_HOVER, RERUN_DISABLED, false);
         Arrays.stream(lefNavElementsWrapper.getComponents()).filter(component -> component instanceof JLabel).forEach(leftNavComp -> {
             ((JLabel) leftNavComp).setBorder(new EmptyBorder(2, 0, 2, 0));
         });
-        setupActionLabel(clearConsole,CLEAR_CONSOLE_ICON,CLEAR_CONSOLE_ICON_HOVER,null,true);
+        setupActionLabel(clearConsole, CLEAR_CONSOLE, CLEAR_CONSOLE_HOVER, null, true);
         splitPane.setDividerLocation(panel1.getPreferredSize().width / 2);
     }
 
@@ -188,7 +169,7 @@ public class ToolWindowContent {
                 highlightAll.setEnabled(false);
                 contentWrapper.removeAll();
                 JLabel interruptedLabel = new JLabel("Interrupted");
-                interruptedLabel.setIcon(WARNING_ICON);
+                interruptedLabel.setIcon(WARNING);
                 contentWrapper.add(interruptedLabel);
                 panel1.revalidate();
                 panel1.repaint();
@@ -204,7 +185,7 @@ public class ToolWindowContent {
             expand.setEnabled(false);
             highlightAll.setEnabled(false);
             JLabel noErrorsLabel = new JLabel("Not best practice violations found. Great job!");
-            noErrorsLabel.setIcon(SUCCEEDED_ICON);
+            noErrorsLabel.setIcon(SUCCEEDED);
             this.contentWrapper.add(noErrorsLabel);
         } else {
             collapse.setEnabled(true);

@@ -17,6 +17,7 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.view.Icons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -107,7 +108,7 @@ public class ShowHideNode extends BestPracticeViolationNode {
                     @NotNull
                     @Override
                     public Icon getIcon() {
-                        return IconLoader.getIcon("/icons/deleteTag_dark.svg");
+                        return Icons.DELETE;
                     }
 
                     @Override

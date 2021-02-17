@@ -3,7 +3,6 @@ package com.testspector.view;
 import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.psi.PsiElement;
 import com.sun.istack.NotNull;
 import com.testspector.controller.TestspectorController;
@@ -32,7 +31,7 @@ public class TestLineMarkerFactory implements LineMarkerProvider {
                         return new LineMarkerInfo<>(
                                 test,
                                 test.getTextRange(),
-                                IconLoader.getIcon("/icons/logo.svg"),
+                                Icons.LOGO,
                                 psiElement -> "Invoke inspection",
                                 (mouseEvent, psiElement) -> TestspectorController.initializeTestspector(element.getProject(), psiElement.getParent(), optionalProgrammingLanguage.get(), optionalUnitTestFramework.get()),
                                 GutterIconRenderer.Alignment.RIGHT

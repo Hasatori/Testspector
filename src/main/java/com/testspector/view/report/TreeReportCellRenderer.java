@@ -1,6 +1,6 @@
 package com.testspector.view.report;
 
-import com.intellij.openapi.util.IconLoader;
+import com.testspector.view.Icons;
 
 import javax.swing.*;
 import javax.swing.tree.TreeCellRenderer;
@@ -16,17 +16,17 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
         if (value instanceof BestPracticeViolationWrapperNode) {
             BestPracticeViolationWrapperNode bestPracticeViolationWrapperNode = (BestPracticeViolationWrapperNode) value;
             label.setText(bestPracticeViolationWrapperNode.getName());
-            label.setIcon(IconLoader.getIcon("/icons/package.svg"));
+            label.setIcon(Icons.PACKAGE);
             return label;
         } else if (value instanceof DescriptionNode) {
             DescriptionNode descriptionNode = (DescriptionNode) value;
             label.setText(String.format("<html><b>%s</b></html>", descriptionNode.getBestPracticeViolation().getDescription()));
-            label.setIcon(IconLoader.getIcon("/icons/balloonWarning_dark.svg"));
+            label.setIcon(Icons.WARNING);
             return label;
         } else if (value instanceof ViolatedRuleNode) {
             ViolatedRuleNode violatedRuleNode = (ViolatedRuleNode) value;
             label.setText("Broken rule: ");
-            label.setIcon(IconLoader.getIcon("/icons/file.svg"));
+            label.setIcon(Icons.FILE);
             JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
             panel.add(label);
             JLabel ruleLabel = new JLabel(violatedRuleNode.getBestPracticeViolation().getViolatedRule().getDisplayName());
@@ -50,10 +50,10 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
             ShowHideNode showHideNode = (ShowHideNode) value;
             if (showHideNode.isCodeHighlighted()) {
                 label.setText("Delete highlighting of the code");
-                label.setIcon(IconLoader.getIcon("/icons/hide_dark.svg"));
+                label.setIcon(Icons.HIDE);
             } else {
                 label.setText("Highlight problematic code");
-                label.setIcon(IconLoader.getIcon("/icons/show_dark.svg"));
+                label.setIcon(Icons.SHOW);
             }
 
         }
