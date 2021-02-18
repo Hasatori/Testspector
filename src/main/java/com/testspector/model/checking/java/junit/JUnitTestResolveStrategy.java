@@ -18,13 +18,13 @@ public class JUnitTestResolveStrategy extends TestResolveStrategy {
 
 
     @Override
-    public PsiElement resolveTest(PsiElement element) {
+    public Optional<PsiElement> resolveTest(PsiElement element) {
         if (element instanceof PsiMethod) {
             Optional<PsiIdentifier> identifier = Arrays.stream(element.getChildren()).filter(psiElement -> psiElement instanceof PsiIdentifier).findFirst().map(ident -> (PsiIdentifier) ident);
             if (identifier.isPresent() && Arrays.stream(((PsiMethod) element).getAnnotations()).anyMatch(psiAnnotation -> TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
-                return identifier.get();
+                return Optional.of(identifier.get());
             }
         }
-        return null;
+        return Optional.empty();
     }
 }

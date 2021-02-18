@@ -2,8 +2,10 @@ package com.testspector.model.checking;
 
 import com.intellij.psi.PsiElement;
 
+import java.util.Optional;
+
 public abstract class TestResolveStrategy {
 
-    public abstract PsiElement resolveTest(PsiElement element);
+    public abstract Optional<PsiElement> resolveTest(PsiElement element);
 
 }

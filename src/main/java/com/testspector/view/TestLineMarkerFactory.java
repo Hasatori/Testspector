@@ -26,11 +26,11 @@ public class TestLineMarkerFactory implements LineMarkerProvider {
             if (optionalUnitTestFramework.isPresent()) {
                 Optional<TestResolveStrategy> optionalTestResolveStrategy = selectStrategy(optionalProgrammingLanguage.get(), optionalUnitTestFramework.get());
                 if (optionalTestResolveStrategy.isPresent()) {
-                    PsiElement test = optionalTestResolveStrategy.get().resolveTest(element);
-                    if (test != null) {
+                    Optional<PsiElement> optionalTest = optionalTestResolveStrategy.get().resolveTest(element);
+                    if (optionalTest.isPresent()) {
                         return new LineMarkerInfo<>(
-                                test,
-                                test.getTextRange(),
+                                optionalTest.get(),
+                                optionalTest.get().getTextRange(),
                                 Icons.LOGO,
                                 psiElement -> "Invoke inspection",
                                 (mouseEvent, psiElement) -> TestspectorController.initializeTestspector(element.getProject(), psiElement.getParent(), optionalProgrammingLanguage.get(), optionalUnitTestFramework.get()),
