@@ -111,7 +111,6 @@ public final class TestspectorController {
             consoleView.print("\nEntering ", ConsoleViewContentType.SYSTEM_OUTPUT);
             consoleView.print(file.getName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
             Optional<ProgrammingLanguage> optionalProgrammingLanguage = PROGRAMMING_LANGUAGE_FACTORY.resolveProgrammingLanguage(file);
-            optionalProgrammingLanguage.map(programmingLanguage -> UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY.getUnitTestFramework(optionalProgrammingLanguage.get(), file));
             if (optionalProgrammingLanguage.isPresent()) {
                 Optional<UnitTestFramework> optionalUnitTestFramework = UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY.getUnitTestFramework(optionalProgrammingLanguage.get(), file);
                 consoleView.print("\nProgramming language: ", ConsoleViewContentType.SYSTEM_OUTPUT);

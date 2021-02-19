@@ -11,7 +11,6 @@ public class UnitTestFrameworkFactory {
 
 
     public Optional<UnitTestFramework> getUnitTestFramework(ProgrammingLanguage programmingLanguage, PsiElement psiElement) {
-        if (programmingLanguage != null) {
             switch (programmingLanguage) {
                 case JAVA:
                     if (new JUnitUnitTestFrameworkResolveStrategy().canResolveFromPsiElement(psiElement)) {
@@ -19,7 +18,6 @@ public class UnitTestFrameworkFactory {
                     }
 
             }
-        }
         return Optional.empty();
     }
 
