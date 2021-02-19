@@ -4,9 +4,7 @@ public enum ProgrammingLanguage {
 
     JAVA("Java"),
     PHP("Php"),
-    C_PLUS_PLUS("C++"),
-    C_SHARP("C#"),
-    JAVASCRIPT("Javascript");
+    TYPESCRIPT("Typescript");
 
     private final String displayName;
 

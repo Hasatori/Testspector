@@ -13,15 +13,20 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    testImplementation group: 'org.easymock', name: 'easymock', version: '4.2'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1',group: 'org.junit.platform', name: 'junit-platform-runner', version: '1.7.0'
+    testCompile 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+
+
 }
+
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     type 'IU'
     version = '2019.3'
-    plugins = ['com.intellij.java',"JavaScriptLanguage"]
+    plugins = ['com.intellij.java',"JavaScriptLanguage","com.jetbrains.php:193.5233.21"]
 }
 patchPluginXml {
     changeNotes """

@@ -4,20 +4,22 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiImportList;
 import com.intellij.psi.PsiMethod;
-import com.testspector.model.checking.UnitTestFrameworkResolveStrategy;
+import com.testspector.model.checking.UnitTestFrameworkResolveIndicationStrategy;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class JUnitUnitTestFrameworkResolveStrategy extends UnitTestFrameworkResolveStrategy {
+public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFrameworkResolveIndicationStrategy {
 
     private static final List<String> JUNIT_PACKAGES_QUALIFIED_NAMES = Arrays.asList(
             "org.junit.jupiter.api",
-            "org.junit.jupiter.params"
+            "org.junit.jupiter.params",
+            "org.junit"
     );
 
     private static final List<String> TEST_QUALIFIED_NAMES = Arrays.asList(
+            "org.junit.Test",
             "org.junit.jupiter.api.Test",
             "org.junit.jupiter.params.ParameterizedTest"
     );

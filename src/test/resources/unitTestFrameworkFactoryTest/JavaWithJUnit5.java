@@ -26,15 +26,6 @@ import static org.easymock.EasyMock.*;
 @RunWith(JUnitPlatform.class)
 public class ProgrammingLanguageFactoryTest {
 
-    private static Stream<Arguments> provideSupportedProgrammingLanguageAndCorrespondingFileCombinations() {
-        return Stream.of(
-                // Expected language | file name
-                Arguments.of(JavaLanguage.INSTANCE, ProgrammingLanguage.JAVA),
-                Arguments.of(PhpLanguage.INSTANCE, ProgrammingLanguage.PHP),
-                Arguments.of(TypeScriptLanguageDialect.findLanguageByID("TypeScript"), ProgrammingLanguage.TYPESCRIPT)
-        );
-    }
-
     @DisplayName("Programming language:{0} | test data file:{1}")
     @ParameterizedTest
     @MethodSource(value = {"provideSupportedProgrammingLanguageAndCorrespondingFileCombinations"})
@@ -52,6 +43,15 @@ public class ProgrammingLanguageFactoryTest {
 
     }
 
+    private static Stream<Arguments> provideSupportedProgrammingLanguageAndCorrespondingFileCombinations() {
+        return Stream.of(
+                // Expected language | file name
+                Arguments.of(JavaLanguage.INSTANCE, ProgrammingLanguage.JAVA),
+                Arguments.of(PhpLanguage.INSTANCE, ProgrammingLanguage.PHP),
+                Arguments.of(new TypeScriptLanguageDialect(), ProgrammingLanguage.TYPESCRIPT)
+        );
+    }
+
     @Test
     public void resolveProgrammingLanguage_NullElement_ShouldNoReturnLanguage() {
         ProgrammingLanguageFactory programmingLanguageFactory = new ProgrammingLanguageFactory();
@@ -67,7 +67,7 @@ public class ProgrammingLanguageFactoryTest {
         PsiElement psiElement = mock(PsiElement.class);
         PsiFile languageFile = mock(PsiFile.class);
         expect(psiElement.getContainingFile()).andReturn(languageFile).times(1);
-        expect(languageFile.getLanguage()).andReturn(ECMA6LanguageDialect.findLanguageByID("ECMAScript 6")).times(1);
+        expect(languageFile.getLanguage()).andReturn(new ECMA6LanguageDialect()).times(1);
         replay(psiElement, languageFile);
         ProgrammingLanguageFactory programmingLanguageFactory = new ProgrammingLanguageFactory();
 

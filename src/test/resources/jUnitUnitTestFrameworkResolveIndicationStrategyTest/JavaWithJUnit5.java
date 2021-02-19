@@ -26,17 +26,8 @@ import static org.easymock.EasyMock.*;
 @RunWith(JUnitPlatform.class)
 public class ProgrammingLanguageFactoryTest {
 
-    private static Stream<Arguments> provideSupportedProgrammingLanguageAndCorrespondingFileCombinations() {
-        return Stream.of(
-                // Expected language | file name
-                Arguments.of(JavaLanguage.INSTANCE, ProgrammingLanguage.JAVA),
-                Arguments.of(PhpLanguage.INSTANCE, ProgrammingLanguage.PHP),
-                Arguments.of(TypeScriptLanguageDialect.findLanguageByID("TypeScript"), ProgrammingLanguage.TYPESCRIPT)
-        );
-    }
-
     @DisplayName("Programming language:{0} | test data file:{1}")
-    @ParameterizedTest
+    @org.junit.jupiter.params.ParameterizedTest
     @MethodSource(value = {"provideSupportedProgrammingLanguageAndCorrespondingFileCombinations"})
     public void resolveProgrammingLanguage_FilesWithSupportedProgrammingLanguages_ShouldReturnExpectedLanguage(Language fileLanguage, ProgrammingLanguage expectedLanguage) {
         PsiElement psiElement = mock(PsiElement.class);
@@ -50,6 +41,15 @@ public class ProgrammingLanguageFactoryTest {
 
         Assertions.assertSame(expectedLanguage, returnedProgrammingLanguage, "Invalid programming language returned!");
 
+    }
+
+    private static Stream<Arguments> provideSupportedProgrammingLanguageAndCorrespondingFileCombinations() {
+        return Stream.of(
+                // Expected language | file name
+                Arguments.of(JavaLanguage.INSTANCE, ProgrammingLanguage.JAVA),
+                Arguments.of(PhpLanguage.INSTANCE, ProgrammingLanguage.PHP),
+                Arguments.of(new TypeScriptLanguageDialect(), ProgrammingLanguage.TYPESCRIPT)
+        );
     }
 
     @Test
@@ -67,7 +67,7 @@ public class ProgrammingLanguageFactoryTest {
         PsiElement psiElement = mock(PsiElement.class);
         PsiFile languageFile = mock(PsiFile.class);
         expect(psiElement.getContainingFile()).andReturn(languageFile).times(1);
-        expect(languageFile.getLanguage()).andReturn(ECMA6LanguageDialect.findLanguageByID("ECMAScript 6")).times(1);
+        expect(languageFile.getLanguage()).andReturn(new ECMA6LanguageDialect()).times(1);
         replay(psiElement, languageFile);
         ProgrammingLanguageFactory programmingLanguageFactory = new ProgrammingLanguageFactory();
 
