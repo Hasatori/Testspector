@@ -10,21 +10,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT_PACKAGES_QUALIFIED_NAMES;
+import static com.testspector.model.checking.java.junit.JUnitConstants.TEST_QUALIFIED_NAMES;
+
 public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFrameworkResolveIndicationStrategy {
-
-    private static final List<String> JUNIT_PACKAGES_QUALIFIED_NAMES = Arrays.asList(
-            "org.junit.jupiter.api",
-            "org.junit.jupiter.params",
-            "org.junit"
-    );
-
-    private static final List<String> TEST_QUALIFIED_NAMES = Arrays.asList(
-            "org.junit.Test",
-            "org.junit.jupiter.api.Test",
-            "org.junit.jupiter.params.ParameterizedTest",
-            "org.junit.jupiter.api.RepeatedTest"
-    );
-
 
     @Override
     public boolean canResolveFromPsiElement(PsiElement psiElement) {

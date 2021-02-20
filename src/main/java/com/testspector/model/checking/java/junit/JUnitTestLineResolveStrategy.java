@@ -9,15 +9,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.testspector.model.checking.java.junit.JUnitConstants.TEST_QUALIFIED_NAMES;
+
 public class JUnitTestLineResolveStrategy extends TestResolveStrategy {
-
-    private static final List<String> TEST_QUALIFIED_NAMES = Arrays.asList(
-            "org.junit.Test",
-            "org.junit.jupiter.api.Test",
-            "org.junit.jupiter.params.ParameterizedTest",
-            "org.junit.jupiter.api.RepeatedTest"
-    );
-
 
     @Override
     public Optional<PsiElement> resolveTestLine(PsiElement element) {
