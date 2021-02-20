@@ -18,6 +18,9 @@ import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 
+import static com.testspector.model.checking.java.junit.JUnitTestUtil.getFirstMethodWithAnnotationQualifiedName;
+import static com.testspector.model.checking.java.junit.JUnitTestUtil.getMethodFromFileByName;
+
 @RunWith(JUnitPlatform.class)
 public class JUnitUnitTestFrameworkResolveIndicationStrategyTest extends BasePlatformTestCase {
 
@@ -64,9 +67,11 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategyTest extends BasePla
         assertTrue(canResolveJUnitFramework);
     }
 
-    @Test
-    public void canResolveFromPsiElement_JUnit5MethodTest_ShoudIndicateThatCanResolve() {
-        PsiMethod psiMethod = this.getSomeJUnit5PsiMethod();
+    @DisplayName("Test method qualified name:{0}")
+    @ParameterizedTest
+    @ValueSource(strings = {"org.junit.jupiter.api.Test","org.junit.jupiter.params.ParameterizedTest","org.junit.jupiter.api.RepeatedTest"})
+    public void canResolveFromPsiElement_AllJUnit5Methods_ShoudIndicateThatCanResolve(String testMethodQualifiedName) {
+        PsiMethod psiMethod = this.getSomeJUnit5PsiMethodByAnnotationQualifiedName(testMethodQualifiedName);
 
         boolean canResolveJUnitFramework = ApplicationManager
                 .getApplication()
@@ -90,24 +95,13 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategyTest extends BasePla
 
     private PsiMethod getSomeJUnit4PsiMethod() {
         PsiJavaFile file = (PsiJavaFile) myFixture.configureByFile("JavaWithJunit4.java");
-        return getMethodFromFileByName(file, "substraction");
+        return getMethodFromFileByName(file, "substraction").get();
     }
 
-    private PsiMethod getSomeJUnit5PsiMethod() {
+    private PsiMethod getSomeJUnit5PsiMethodByAnnotationQualifiedName(String qualifiedName) {
         PsiJavaFile file = (PsiJavaFile) myFixture.configureByFile("JavaWithJunit5.java");
-        return getMethodFromFileByName(file, "resolveProgrammingLanguage_FilesWithSupportedProgrammingLanguages_ShouldReturnExpectedLanguage");
+        return getFirstMethodWithAnnotationQualifiedName(file, qualifiedName).get();
     }
 
-    private PsiMethod getMethodFromFileByName(PsiJavaFile psiJavaFile, String methodName) {
-        return ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<PsiMethod>) () -> {
-                    PsiMethod[] methods = Arrays.stream(psiJavaFile.getClasses())
-                            .findFirst()
-                            .map(PsiClass::getMethods)
-                            .get();
-                    return Arrays.stream(methods).filter(psiMethod -> methodName.equals(psiMethod.getName())).findFirst().get();
-                }
-                ));
-    }
+
 }

@@ -21,7 +21,8 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFra
     private static final List<String> TEST_QUALIFIED_NAMES = Arrays.asList(
             "org.junit.Test",
             "org.junit.jupiter.api.Test",
-            "org.junit.jupiter.params.ParameterizedTest"
+            "org.junit.jupiter.params.ParameterizedTest",
+            "org.junit.jupiter.api.RepeatedTest"
     );
 
 

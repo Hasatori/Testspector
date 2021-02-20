@@ -10,6 +10,7 @@ import com.jetbrains.php.lang.PhpLanguage;
 import com.testspector.model.enums.ProgrammingLanguage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -52,7 +53,7 @@ public class ProgrammingLanguageFactoryTest {
         );
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void resolveProgrammingLanguage_NullElement_ShouldNoReturnLanguage() {
         ProgrammingLanguageFactory programmingLanguageFactory = new ProgrammingLanguageFactory();
 
@@ -62,7 +63,7 @@ public class ProgrammingLanguageFactoryTest {
 
     }
 
-    @Test
+    @org.junit.jupiter.api.RepeatedTest(5)
     public void resolveProgrammingLanguage_NotSupportedLanguage_ShouldNoReturnLanguage() {
         PsiElement psiElement = mock(PsiElement.class);
         PsiFile languageFile = mock(PsiFile.class);
