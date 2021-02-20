@@ -3,20 +3,16 @@ package com.testspector.model.checking.java.junit;
 import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.JavaBestPracticeCheckingStrategy;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class JUnitBestPracticeCheckingStrategy extends JavaBestPracticeCheckingStrategy {
+public class JUnitBestPracticeCheckingStrategy implements BestPracticeCheckingStrategy{
 
-    private final List<BestPracticeCheckingStrategy> checkingStrategies;
+    private final List<JUnitSingleBestPracticeCheckingStrategy> checkingStrategies;
 
-    public JUnitBestPracticeCheckingStrategy() {
-        checkingStrategies = new ArrayList<>();
-        checkingStrategies.add(new NoSimpleTestsJunitBestPracticeCheckingStrategy());
+    public JUnitBestPracticeCheckingStrategy(List<JUnitSingleBestPracticeCheckingStrategy> checkingStrategies) {
+        this.checkingStrategies = checkingStrategies;
 
     }
 
