@@ -6,6 +6,6 @@ import java.util.Optional;
 
 public abstract class TestResolveStrategy {
 
-    public abstract Optional<PsiElement> resolveTest(PsiElement element);
+    public abstract Optional<PsiElement> resolveTestLine(PsiElement element);
 
 }

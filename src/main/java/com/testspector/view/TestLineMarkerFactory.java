@@ -9,7 +9,7 @@ import com.testspector.controller.TestspectorController;
 import com.testspector.model.checking.ProgrammingLanguageFactory;
 import com.testspector.model.checking.TestResolveStrategy;
 import com.testspector.model.checking.UnitTestFrameworkFactory;
-import com.testspector.model.checking.java.junit.JUnitTestResolveStrategy;
+import com.testspector.model.checking.java.junit.JUnitTestLineResolveStrategy;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 
@@ -26,7 +26,7 @@ public class TestLineMarkerFactory implements LineMarkerProvider {
             if (optionalUnitTestFramework.isPresent()) {
                 Optional<TestResolveStrategy> optionalTestResolveStrategy = selectStrategy(optionalProgrammingLanguage.get(), optionalUnitTestFramework.get());
                 if (optionalTestResolveStrategy.isPresent()) {
-                    Optional<PsiElement> optionalTest = optionalTestResolveStrategy.get().resolveTest(element);
+                    Optional<PsiElement> optionalTest = optionalTestResolveStrategy.get().resolveTestLine(element);
                     if (optionalTest.isPresent()) {
                         return new LineMarkerInfo<>(
                                 optionalTest.get(),
@@ -45,7 +45,7 @@ public class TestLineMarkerFactory implements LineMarkerProvider {
 
     private Optional<TestResolveStrategy> selectStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
         if (programmingLanguage == ProgrammingLanguage.JAVA && unitTestFramework == UnitTestFramework.JUNIT) {
-            return Optional.of(new JUnitTestResolveStrategy());
+            return Optional.of(new JUnitTestLineResolveStrategy());
         }
         return Optional.empty();
     }
