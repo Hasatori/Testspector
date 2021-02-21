@@ -8,13 +8,13 @@ import com.sun.istack.NotNull;
 import com.testspector.controller.TestspectorController;
 import com.testspector.model.checking.ProgrammingLanguageFactory;
 import com.testspector.model.checking.UnitTestLineResolveStrategy;
-import com.testspector.model.checking.java.junit.JUnitUnitTestLineLineResolveStrategy;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 
 import java.util.List;
 import java.util.Optional;
 
+import static com.testspector.Configuration.PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP;
 import static com.testspector.Configuration.UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY;
 
 public class TestLineMarkerFactory implements LineMarkerProvider {
@@ -46,8 +46,12 @@ public class TestLineMarkerFactory implements LineMarkerProvider {
     }
 
     private Optional<UnitTestLineResolveStrategy> selectStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
-        if (programmingLanguage == ProgrammingLanguage.JAVA && unitTestFramework == UnitTestFramework.JUNIT) {
-            return Optional.of(new JUnitUnitTestLineLineResolveStrategy());
+        List<UnitTestLineResolveStrategy> unitTestLineResolveStrategies = PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP.get(programmingLanguage);
+        if (unitTestLineResolveStrategies != null) {
+            return unitTestLineResolveStrategies
+                    .stream()
+                    .filter(unitTestLineResolveStrategy -> unitTestLineResolveStrategy.getUnitTestFramework() == unitTestFramework)
+                    .findFirst();
         }
         return Optional.empty();
     }
