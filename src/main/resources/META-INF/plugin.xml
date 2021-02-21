@@ -21,9 +21,8 @@
     <actions>
         <action id="org.intellij.sdk.action.PopupDialogAction" class="com.testspector.view.InspectTestAction"
                 text="Inspect tests" description="SDK action example" icon="/icons/logo.svg">
-            <!--         <add-to-group group-id="EditorPopupMenu" anchor="first"/>
-                     <add-to-group group-id="ToolsMenu" anchor="first"/>-->
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </action>
     </actions>
 </idea-plugin>

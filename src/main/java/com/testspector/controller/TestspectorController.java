@@ -110,12 +110,18 @@ public final class TestspectorController {
                 toolWindowContent.getConsoleView().print(" were detected", ConsoleViewContentType.SYSTEM_OUTPUT);
                 toolWindowContent.getConsoleView().print("\nInitializing inspection.... This might take a while...", ConsoleViewContentType.SYSTEM_OUTPUT);
                 Optional<BestPracticeCheckingStrategy> optionalBestPracticeCheckingStrategy = BEST_PRACTICE_CHECKING_STRATEGY_FACTORY.getBestPracticeCheckingStrategy(programmingLanguage, unitTestFramework);
-                toolWindowContent.getConsoleView().print("\nInspection done ", ConsoleViewContentType.LOG_INFO_OUTPUT);
                 if (optionalBestPracticeCheckingStrategy.isPresent()) {
+                    toolWindowContent.getConsoleView().print(String.format("\nchecking for following best practices: %s", optionalBestPracticeCheckingStrategy
+                            .get()
+                            .getCheckedBestPractice()
+                            .stream()
+                            .map(BestPractice::getDisplayName)
+                            .collect(Collectors.toList())), ConsoleViewContentType.SYSTEM_OUTPUT);
                     toolWindowContent.showReport(optionalBestPracticeCheckingStrategy.get().checkBestPractices(element));
                 } else {
                     logNoBestPracticeCheckingStrategyFound(toolWindowContent.getConsoleView(), programmingLanguage, unitTestFramework);
                 }
+                toolWindowContent.getConsoleView().print("\nInspection done ", ConsoleViewContentType.LOG_INFO_OUTPUT);
             });
         });
     }

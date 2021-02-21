@@ -1,5 +1,6 @@
 package com.testspector.model.checking.java.junit;
 
+import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethod;
@@ -16,8 +17,15 @@ public class JUnitUnitTestLineResolveStrategy extends UnitTestLineResolveStrateg
     @Override
     public Optional<PsiElement> resolveTestLine(PsiElement element) {
         if (element instanceof PsiMethod) {
-            Optional<PsiIdentifier> identifier = Arrays.stream(element.getChildren()).filter(psiElement -> psiElement instanceof PsiIdentifier).findFirst().map(ident -> (PsiIdentifier) ident);
-            if (identifier.isPresent() && Arrays.stream(((PsiMethod) element).getAnnotations()).anyMatch(psiAnnotation -> TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
+            PsiMethod method = (PsiMethod) element;
+            Optional<PsiIdentifier> identifier = getIdentifier(method);
+            if (identifier.isPresent() && isJunitTestMethod((method))) {
+                return Optional.of(identifier.get());
+            }
+        } else if (element instanceof PsiClass) {
+            PsiClass psiClass = (PsiClass) element;
+            Optional<PsiIdentifier> identifier = getIdentifier(element);
+            if (identifier.isPresent() && Arrays.stream(psiClass.getMethods()).anyMatch(this::isJunitTestMethod)) {
                 return Optional.of(identifier.get());
             }
         }
@@ -27,5 +35,18 @@ public class JUnitUnitTestLineResolveStrategy extends UnitTestLineResolveStrateg
     @Override
     public UnitTestFramework getUnitTestFramework() {
         return UnitTestFramework.JUNIT;
+    }
+
+
+    private Optional<PsiIdentifier> getIdentifier(PsiElement element) {
+        return Arrays
+                .stream(element.getChildren())
+                .filter(psiElement -> psiElement instanceof PsiIdentifier).findFirst().map(ident -> (PsiIdentifier) ident);
+    }
+
+    private boolean isJunitTestMethod(PsiMethod method) {
+        return Arrays
+                .stream((method).getAnnotations())
+                .anyMatch(psiAnnotation -> TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()));
     }
 }

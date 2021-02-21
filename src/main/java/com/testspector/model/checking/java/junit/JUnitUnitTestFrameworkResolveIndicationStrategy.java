@@ -1,7 +1,6 @@
 package com.testspector.model.checking.java.junit;
 
 import com.intellij.psi.*;
-import com.testspector.model.checking.UnitTestFrameworkFactory;
 import com.testspector.model.checking.UnitTestFrameworkResolveIndicationStrategy;
 import com.testspector.model.enums.UnitTestFramework;
 
@@ -18,6 +17,8 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFra
         boolean resolved = false;
         if (psiElement instanceof PsiFile) {
             resolved = isFromFile((PsiFile) psiElement);
+        } else if (psiElement instanceof PsiClass) {
+            resolved = isFromFile(psiElement.getContainingFile());
         } else if (psiElement instanceof PsiMethod) {
             resolved = isFromMethod((PsiMethod) psiElement);
         }
