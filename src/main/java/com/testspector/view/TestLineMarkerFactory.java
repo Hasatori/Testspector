@@ -6,53 +6,22 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.psi.PsiElement;
 import com.sun.istack.NotNull;
 import com.testspector.controller.TestspectorController;
-import com.testspector.model.checking.ProgrammingLanguageFactory;
-import com.testspector.model.checking.UnitTestLineResolveStrategy;
-import com.testspector.model.enums.ProgrammingLanguage;
-import com.testspector.model.enums.UnitTestFramework;
+import com.testspector.model.TestLineCrate;
 
-import java.util.List;
 import java.util.Optional;
-import static com.testspector.controller.TestspectorController.PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP;
-import static com.testspector.controller.TestspectorController.UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY;
 
 public class TestLineMarkerFactory implements LineMarkerProvider {
 
     @Override
     public LineMarkerInfo<PsiElement> getLineMarkerInfo(@NotNull PsiElement element) {
-        Optional<ProgrammingLanguage> optionalProgrammingLanguage = new ProgrammingLanguageFactory().resolveProgrammingLanguage(element);
-        if (optionalProgrammingLanguage.isPresent()) {
-            List<UnitTestFramework> unitTestFrameworks = UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY.getUnitTestFrameworks(optionalProgrammingLanguage.get(), element);
-            if (!unitTestFrameworks.isEmpty()) {
-                UnitTestFramework unitTestFramework = unitTestFrameworks.get(0);
-                Optional<UnitTestLineResolveStrategy> optionalTestResolveStrategy = selectStrategy(optionalProgrammingLanguage.get(), unitTestFramework);
-                if (optionalTestResolveStrategy.isPresent()) {
-                    Optional<PsiElement> optionalTest = optionalTestResolveStrategy.get().resolveTestLine(element);
-                    if (optionalTest.isPresent()) {
-                        return new LineMarkerInfo<>(
-                                optionalTest.get(),
-                                optionalTest.get().getTextRange(),
-                                Icons.LOGO,
-                                psiElement -> "Invoke inspection",
-                                (mouseEvent, psiElement) -> TestspectorController.initializeTestspector(element.getProject(), psiElement.getParent(), optionalProgrammingLanguage.get(), unitTestFramework),
-                                GutterIconRenderer.Alignment.RIGHT
-                        );
-                    }
-                }
-            }
-        }
-        return null;
+        Optional<TestLineCrate> optionalTestLineCrate = TestspectorController.resolveTestLineCrate(element);
+        return optionalTestLineCrate.map(testLineCrate -> new LineMarkerInfo<>(
+                testLineCrate.getLineElement(),
+                testLineCrate.getLineElement().getTextRange(),
+                Icons.LOGO,
+                psiElement -> "Invoke inspection",
+                (mouseEvent, psiElement) -> TestspectorController.initializeTestspector(element.getProject(), psiElement.getParent(), testLineCrate.getProgrammingLanguage(), testLineCrate.getUnitTestFramework()),
+                GutterIconRenderer.Alignment.RIGHT
+        )).orElse(null);
     }
-
-    private Optional<UnitTestLineResolveStrategy> selectStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
-        List<UnitTestLineResolveStrategy> unitTestLineResolveStrategies = PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP.get(programmingLanguage);
-        if (unitTestLineResolveStrategies != null) {
-            return unitTestLineResolveStrategies
-                    .stream()
-                    .filter(unitTestLineResolveStrategy -> unitTestLineResolveStrategy.getUnitTestFramework() == unitTestFramework)
-                    .findFirst();
-        }
-        return Optional.empty();
-    }
-
 }

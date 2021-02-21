@@ -13,6 +13,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
+import com.testspector.model.TestLineCrate;
 import com.testspector.model.checking.*;
 import com.testspector.model.checking.java.junit.JUnitUnitTestFrameworkResolveIndicationStrategy;
 import com.testspector.model.checking.java.junit.JUnitUnitTestLineResolveStrategy;
@@ -34,15 +35,15 @@ import static com.testspector.model.utils.Constants.WEB_PAGE_BEST_PRACTICES_ULR;
 
 public final class TestspectorController {
 
-    public static final Map<ProgrammingLanguage, List<UnitTestLineResolveStrategy>> PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<>(){{
-        put(JAVA,Arrays.asList(new JUnitUnitTestLineResolveStrategy()));
+    private static final Map<ProgrammingLanguage, List<UnitTestLineResolveStrategy>> PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<>() {{
+        put(JAVA, Arrays.asList(new JUnitUnitTestLineResolveStrategy()));
     }});
-    public static final Map<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> PROGRAMMING_LANGUAGE_UNIT_TEST_FRAMEWORK_RESOLVE_INDICATION_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<>(){{
-        put(JAVA,Arrays.asList(new JUnitUnitTestFrameworkResolveIndicationStrategy()));
+    private static final Map<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> PROGRAMMING_LANGUAGE_UNIT_TEST_FRAMEWORK_RESOLVE_INDICATION_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<>() {{
+        put(JAVA, Arrays.asList(new JUnitUnitTestFrameworkResolveIndicationStrategy()));
     }});
-    public static final UnitTestFrameworkFactory UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY = new UnitTestFrameworkFactory(PROGRAMMING_LANGUAGE_UNIT_TEST_FRAMEWORK_RESOLVE_INDICATION_STRATEGY_HASH_MAP);
-    public static final ProgrammingLanguageFactory PROGRAMMING_LANGUAGE_FACTORY = new ProgrammingLanguageFactory();
-    public static final BestPracticeCheckingStrategyFactory BEST_PRACTICE_CHECKING_STRATEGY_FACTORY = new BestPracticeCheckingStrategyFactory();
+    private static final UnitTestFrameworkFactory UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY = new UnitTestFrameworkFactory(PROGRAMMING_LANGUAGE_UNIT_TEST_FRAMEWORK_RESOLVE_INDICATION_STRATEGY_HASH_MAP);
+    private static final ProgrammingLanguageFactory PROGRAMMING_LANGUAGE_FACTORY = new ProgrammingLanguageFactory();
+    private static final BestPracticeCheckingStrategyFactory BEST_PRACTICE_CHECKING_STRATEGY_FACTORY = new BestPracticeCheckingStrategyFactory();
 
     private static final String TOOL_WINDOW_NAME = "Testspector";
     private static final HashMap<Project, ToolWindow> PROJECT_TOOL_WINDOW_HASH_MAP = new HashMap<>();
@@ -75,7 +76,6 @@ public final class TestspectorController {
             });
         });
     }
-
 
     public static void initializeTestspector(Project project, PsiElement element, ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
         String name = element.toString();
@@ -113,6 +113,27 @@ public final class TestspectorController {
                 }
             });
         });
+    }
+
+
+    public static Optional<TestLineCrate> resolveTestLineCrate(PsiElement element) {
+        Optional<ProgrammingLanguage> optionalProgrammingLanguage=PROGRAMMING_LANGUAGE_FACTORY.resolveProgrammingLanguage(element);
+        if (optionalProgrammingLanguage.isPresent()) {
+            List<UnitTestFramework> unitTestFrameworks = UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY.getUnitTestFrameworks(optionalProgrammingLanguage.get(), element);
+            if (!unitTestFrameworks.isEmpty()) {
+                UnitTestFramework unitTestFramework = unitTestFrameworks.get(0);
+                Optional<UnitTestLineResolveStrategy> optionalUnitTestLineResolveStrategy=selectTestLineResolveStrategy(optionalProgrammingLanguage.get(), unitTestFramework);
+                if (optionalUnitTestLineResolveStrategy.isPresent()){
+                    Optional<PsiElement> optionalLineElement = optionalUnitTestLineResolveStrategy.get().resolveTestLine(element);
+                    if (optionalLineElement.isPresent()){
+                        return Optional.of(new TestLineCrate(optionalLineElement.get(),optionalProgrammingLanguage.get(),unitTestFramework));
+                    }
+                }
+
+
+            }
+        }
+        return Optional.empty();
     }
 
     private static List<BestPracticeViolation> gatherBestPracticeViolations(ConsoleView consoleView, List<PsiFile> files) {
@@ -178,5 +199,17 @@ public final class TestspectorController {
             PROJECT_TOOL_WINDOW_HASH_MAP.put(project, resultToolWindow);
         }
         return resultToolWindow;
+    }
+
+
+    private static Optional<UnitTestLineResolveStrategy> selectTestLineResolveStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
+        List<UnitTestLineResolveStrategy> unitTestLineResolveStrategies = PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP.get(programmingLanguage);
+        if (unitTestLineResolveStrategies != null) {
+            return unitTestLineResolveStrategies
+                    .stream()
+                    .filter(unitTestLineResolveStrategy -> unitTestLineResolveStrategy.getUnitTestFramework() == unitTestFramework)
+                    .findFirst();
+        }
+        return Optional.empty();
     }
 }
