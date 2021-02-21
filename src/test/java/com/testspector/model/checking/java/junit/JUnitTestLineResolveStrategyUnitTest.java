@@ -50,7 +50,7 @@ public class JUnitTestLineResolveStrategyUnitTest extends BasePlatformTestCase {
                 .getApplication()
                 .runReadAction(((Computable<PsiElement>) someJUnit5Method::getNameIdentifier
                 ));
-        JUnitUnitTestLineLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineLineResolveStrategy();
+        JUnitUnitTestLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineResolveStrategy();
 
         PsiElement resolvedTestLine = ApplicationManager
                 .getApplication()
@@ -66,7 +66,7 @@ public class JUnitTestLineResolveStrategyUnitTest extends BasePlatformTestCase {
                 .getApplication()
                 .runReadAction(((Computable<PsiElement>) someJUnit5Method::getNameIdentifier
                 ));
-        JUnitUnitTestLineLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineLineResolveStrategy();
+        JUnitUnitTestLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineResolveStrategy();
 
         PsiElement resolvedTestLine = ApplicationManager
                 .getApplication()
@@ -77,7 +77,7 @@ public class JUnitTestLineResolveStrategyUnitTest extends BasePlatformTestCase {
 
     @Test
     public void resolveTest_NullElement_ShouldReturnEmpty() {
-        JUnitUnitTestLineLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineLineResolveStrategy();
+        JUnitUnitTestLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineResolveStrategy();
 
         Optional<PsiElement> optionalPsiElement = ApplicationManager
                 .getApplication()
@@ -89,7 +89,7 @@ public class JUnitTestLineResolveStrategyUnitTest extends BasePlatformTestCase {
     @Test
     public void resolveTest_TestNGTestMethod_ShouldReturnEmpty() {
         PsiMethod someTestNgMethod = getSomeTestNGPsiMethod();
-        JUnitUnitTestLineLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineLineResolveStrategy();
+        JUnitUnitTestLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineResolveStrategy();
 
         Optional<PsiElement> optionalPsiElement = ApplicationManager
                 .getApplication()

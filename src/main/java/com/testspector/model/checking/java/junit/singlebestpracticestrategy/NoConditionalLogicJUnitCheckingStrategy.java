@@ -2,11 +2,11 @@ package com.testspector.model.checking.java.junit.singlebestpracticestrategy;
 
 import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.junit.JUnitSingleBestPracticeCheckingStrategy;
+import com.testspector.model.checking.BestPracticeCheckingStrategy;
 
 import java.util.List;
 
-public class NoConditionalLogicJUnitCheckingStrategy implements JUnitSingleBestPracticeCheckingStrategy {
+public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {

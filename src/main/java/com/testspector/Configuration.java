@@ -2,7 +2,7 @@ package com.testspector;
 
 import com.testspector.model.checking.*;
 import com.testspector.model.checking.java.junit.JUnitUnitTestFrameworkResolveIndicationStrategy;
-import com.testspector.model.checking.java.junit.JUnitUnitTestLineLineResolveStrategy;
+import com.testspector.model.checking.java.junit.JUnitUnitTestLineResolveStrategy;
 import com.testspector.model.enums.ProgrammingLanguage;
 
 import static com.testspector.model.enums.ProgrammingLanguage.*;
@@ -14,7 +14,7 @@ public final class Configuration {
     private Configuration(){}
 
     public static final Map<ProgrammingLanguage, List<UnitTestLineResolveStrategy>> PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<>(){{
-        put(JAVA,Arrays.asList(new JUnitUnitTestLineLineResolveStrategy()));
+        put(JAVA,Arrays.asList(new JUnitUnitTestLineResolveStrategy()));
     }});
     public static final Map<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> PROGRAMMING_LANGUAGE_UNIT_TEST_FRAMEWORK_RESOLVE_INDICATION_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<>(){{
         put(JAVA,Arrays.asList(new JUnitUnitTestFrameworkResolveIndicationStrategy()));

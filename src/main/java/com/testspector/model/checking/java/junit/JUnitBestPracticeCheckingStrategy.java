@@ -3,15 +3,18 @@ package com.testspector.model.checking.java.junit;
 import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.UnitTestFrameworkComponent;
+import com.testspector.model.enums.UnitTestFramework;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class JUnitBestPracticeCheckingStrategy implements BestPracticeCheckingStrategy{
+public class JUnitBestPracticeCheckingStrategy implements BestPracticeCheckingStrategy, UnitTestFrameworkComponent {
 
-    private final List<JUnitSingleBestPracticeCheckingStrategy> checkingStrategies;
+    private final List<BestPracticeCheckingStrategy> checkingStrategies;
 
-    public JUnitBestPracticeCheckingStrategy(List<JUnitSingleBestPracticeCheckingStrategy> checkingStrategies) {
+    public JUnitBestPracticeCheckingStrategy(List<BestPracticeCheckingStrategy> checkingStrategies) {
         this.checkingStrategies = checkingStrategies;
 
     }
@@ -29,5 +32,10 @@ public class JUnitBestPracticeCheckingStrategy implements BestPracticeCheckingSt
         return psiElements.stream().map(this::checkBestPractices)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public UnitTestFramework getUnitTestFramework() {
+        return UnitTestFramework.JUNIT;
     }
 }

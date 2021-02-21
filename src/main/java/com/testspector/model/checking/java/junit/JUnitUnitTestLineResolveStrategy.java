@@ -4,13 +4,14 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethod;
 import com.testspector.model.checking.UnitTestLineResolveStrategy;
+import com.testspector.model.enums.UnitTestFramework;
 
 import java.util.Arrays;
 import java.util.Optional;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.TEST_QUALIFIED_NAMES;
 
-public class JUnitUnitTestLineLineResolveStrategy extends UnitTestLineResolveStrategy {
+public class JUnitUnitTestLineResolveStrategy extends UnitTestLineResolveStrategy {
 
     @Override
     public Optional<PsiElement> resolveTestLine(PsiElement element) {
@@ -21,5 +22,10 @@ public class JUnitUnitTestLineLineResolveStrategy extends UnitTestLineResolveStr
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public UnitTestFramework getUnitTestFramework() {
+        return UnitTestFramework.JUNIT;
     }
 }

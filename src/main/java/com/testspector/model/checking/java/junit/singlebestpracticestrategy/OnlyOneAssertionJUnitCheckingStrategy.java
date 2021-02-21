@@ -5,12 +5,12 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiMethod;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.junit.JUnitSingleBestPracticeCheckingStrategy;
+import com.testspector.model.checking.BestPracticeCheckingStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OnlyOneAssertionJUnitCheckingStrategy implements JUnitSingleBestPracticeCheckingStrategy {
+public class OnlyOneAssertionJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
