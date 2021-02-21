@@ -29,7 +29,6 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.testspector.Configuration.*;
 import static com.testspector.model.enums.ProgrammingLanguage.JAVA;
 import static com.testspector.model.utils.Constants.WEB_PAGE_BEST_PRACTICES_ULR;
 
