@@ -1,5 +1,8 @@
 package com.testspector.model.checking;
 
+import com.testspector.model.checking.java.JavaClassHelper;
+import com.testspector.model.checking.java.JavaElementHelper;
+import com.testspector.model.checking.java.JavaMethodHelper;
 import com.testspector.model.checking.java.junit.strategy.*;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
@@ -18,7 +21,7 @@ public class BestPracticeCheckingStrategyFactory {
                     new AtLeastOneAssertionJUnitCheckingStrategy(),
                     new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(),
                     new CreateCustomDataSourcesJUnitCheckingStrategy(),
-                    new NoConditionalLogicJUnitCheckingStrategy(),
+                    new NoConditionalLogicJUnitCheckingStrategy(new JavaElementHelper(new JavaClassHelper()),new JavaClassHelper(),new JavaMethodHelper()),
                     new NoGlobalStaticPropertiesJUnitCheckingStrategy(),
                     new NoSimpleTestsJUnitCheckingStrategy(),
                     new OnlyOneAssertionJUnitCheckingStrategy(),
