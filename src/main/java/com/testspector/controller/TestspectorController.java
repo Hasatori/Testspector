@@ -14,6 +14,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.testspector.model.checking.*;
+import com.testspector.model.checking.java.junit.JUnitUnitTestFrameworkResolveIndicationStrategy;
+import com.testspector.model.checking.java.junit.JUnitUnitTestLineResolveStrategy;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 import com.testspector.view.ToolWindowContent;
@@ -28,9 +30,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static com.testspector.Configuration.*;
+import static com.testspector.model.enums.ProgrammingLanguage.JAVA;
 import static com.testspector.model.utils.Constants.WEB_PAGE_BEST_PRACTICES_ULR;
 
 public final class TestspectorController {
+
+    public static final Map<ProgrammingLanguage, List<UnitTestLineResolveStrategy>> PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<>(){{
+        put(JAVA,Arrays.asList(new JUnitUnitTestLineResolveStrategy()));
+    }});
+    public static final Map<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> PROGRAMMING_LANGUAGE_UNIT_TEST_FRAMEWORK_RESOLVE_INDICATION_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<>(){{
+        put(JAVA,Arrays.asList(new JUnitUnitTestFrameworkResolveIndicationStrategy()));
+    }});
+    public static final UnitTestFrameworkFactory UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY = new UnitTestFrameworkFactory(PROGRAMMING_LANGUAGE_UNIT_TEST_FRAMEWORK_RESOLVE_INDICATION_STRATEGY_HASH_MAP);
+    public static final ProgrammingLanguageFactory PROGRAMMING_LANGUAGE_FACTORY = new ProgrammingLanguageFactory();
+    public static final BestPracticeCheckingStrategyFactory BEST_PRACTICE_CHECKING_STRATEGY_FACTORY = new BestPracticeCheckingStrategyFactory();
 
     private static final String TOOL_WINDOW_NAME = "Testspector";
     private static final HashMap<Project, ToolWindow> PROJECT_TOOL_WINDOW_HASH_MAP = new HashMap<>();

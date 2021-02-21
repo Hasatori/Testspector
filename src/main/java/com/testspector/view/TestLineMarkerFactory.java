@@ -13,9 +13,8 @@ import com.testspector.model.enums.UnitTestFramework;
 
 import java.util.List;
 import java.util.Optional;
-
-import static com.testspector.Configuration.PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP;
-import static com.testspector.Configuration.UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY;
+import static com.testspector.controller.TestspectorController.PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP;
+import static com.testspector.controller.TestspectorController.UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY;
 
 public class TestLineMarkerFactory implements LineMarkerProvider {
 
