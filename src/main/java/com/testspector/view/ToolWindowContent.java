@@ -180,7 +180,7 @@ public class ToolWindowContent {
 
     public void showReport(List<BestPracticeViolation> bestPracticeViolations) {
         this.contentWrapper.removeAll();
-        if (bestPracticeViolations.size() == 0) {
+        if (bestPracticeViolations == null || bestPracticeViolations.size() == 0) {
             collapse.setEnabled(false);
             expand.setEnabled(false);
             highlightAll.setEnabled(false);

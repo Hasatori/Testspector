@@ -5,6 +5,7 @@ import com.testspector.model.enums.BestPractice;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class GroupBestPracticeCheckingStrategyDecorator implements BestPracticeCheckingStrategy {
@@ -21,6 +22,7 @@ public class GroupBestPracticeCheckingStrategyDecorator implements BestPracticeC
     public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
         return bestPracticeCheckingStrategies.stream()
                 .map(bestPracticeCheckingStrategy -> bestPracticeCheckingStrategy.checkBestPractices(psiElement))
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
@@ -28,6 +30,7 @@ public class GroupBestPracticeCheckingStrategyDecorator implements BestPracticeC
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         return psiElements.stream().map(this::checkBestPractices)
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
@@ -36,6 +39,7 @@ public class GroupBestPracticeCheckingStrategyDecorator implements BestPracticeC
     public List<BestPractice> getCheckedBestPractice() {
         return bestPracticeCheckingStrategies.stream()
                 .map(BestPracticeCheckingStrategy::getCheckedBestPractice)
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
