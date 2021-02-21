@@ -1,6 +1,7 @@
 package com.testspector.model.checking.java.junit;
 
 import com.intellij.psi.*;
+import com.testspector.model.checking.UnitTestFrameworkFactory;
 import com.testspector.model.checking.UnitTestFrameworkResolveIndicationStrategy;
 import com.testspector.model.enums.UnitTestFramework;
 
@@ -11,10 +12,6 @@ import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT_PAC
 import static com.testspector.model.checking.java.junit.JUnitConstants.TEST_QUALIFIED_NAMES;
 
 public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFrameworkResolveIndicationStrategy {
-
-    public JUnitUnitTestFrameworkResolveIndicationStrategy() {
-        super(UnitTestFramework.JUNIT);
-    }
 
     @Override
     public boolean canResolveFromPsiElement(PsiElement psiElement) {
@@ -51,5 +48,10 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFra
                 .stream(psiMethod.getModifierList().getAnnotations())
                 .anyMatch(psiAnnotation -> TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()));
 
+    }
+
+    @Override
+    public UnitTestFramework getUnitTestFramework() {
+        return UnitTestFramework.JUNIT;
     }
 }

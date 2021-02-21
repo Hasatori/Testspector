@@ -19,7 +19,6 @@ import static com.testspector.Configuration.UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY
 
 public class TestLineMarkerFactory implements LineMarkerProvider {
 
-
     @Override
     public LineMarkerInfo<PsiElement> getLineMarkerInfo(@NotNull PsiElement element) {
         Optional<ProgrammingLanguage> optionalProgrammingLanguage = new ProgrammingLanguageFactory().resolveProgrammingLanguage(element);
