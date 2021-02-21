@@ -5,6 +5,8 @@ import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class BestPracticeCheckingStrategyFactory {
@@ -29,4 +31,11 @@ public class BestPracticeCheckingStrategyFactory {
         return Optional.empty();
     }
 
+    public List<ProgrammingLanguage> getSupportedLanguages(){
+        return Collections.singletonList(ProgrammingLanguage.JAVA);
+    }
+
+    public List<UnitTestFramework> getSupportedUnitTestFrameworks(){
+        return Collections.singletonList(UnitTestFramework.JUNIT);
+    }
 }
