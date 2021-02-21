@@ -22,7 +22,7 @@ public class BestPracticeCheckingStrategyFactoryTest {
                 .getBestPracticeCheckingStrategy(ProgrammingLanguage.JAVA, UnitTestFramework.JUNIT)
                 .get();
 
-        Assertions.assertTrue(returnedStrategy instanceof JUnitBestPracticeCheckingStrategy);
+        Assertions.assertTrue(returnedStrategy instanceof GroupBestPracticeCheckingStrategyDecorator);
 
     }
 
