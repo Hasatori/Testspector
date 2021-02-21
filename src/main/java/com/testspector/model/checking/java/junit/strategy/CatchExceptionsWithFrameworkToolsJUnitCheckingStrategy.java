@@ -1,16 +1,14 @@
-package com.testspector.model.checking.java.junit.singlebestpracticestrategy;
+package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiMethod;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
+import com.testspector.model.enums.BestPractice;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class OnlyOneAssertionJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
+public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
@@ -20,5 +18,10 @@ public class OnlyOneAssertionJUnitCheckingStrategy implements BestPracticeChecki
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         return null;
+    }
+
+    @Override
+    public List<BestPractice> getCheckedBestPractice() {
+        return Collections.singletonList(BestPractice.CATCH_EXCEPTIONS_USING_FRAMEWORK_TOOLS);
     }
 }

@@ -14,4 +14,6 @@ public interface  BestPracticeCheckingStrategy {
 
   List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements);
 
+  List<BestPractice> getCheckedBestPractice();
+
 }

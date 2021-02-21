@@ -1,12 +1,14 @@
-package com.testspector.model.checking.java.junit.singlebestpracticestrategy;
+package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
+import com.testspector.model.enums.BestPractice;
 
+import java.util.Collections;
 import java.util.List;
 
-public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
+public class ThreePhaseTestStructureJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
@@ -16,5 +18,10 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         return null;
+    }
+
+    @Override
+    public List<BestPractice> getCheckedBestPractice() {
+        return Collections.singletonList(BestPractice.THREE_PHASE_TEST_STRUCTURE);
     }
 }
