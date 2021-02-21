@@ -20,7 +20,7 @@ public class TestLineMarkerFactory implements LineMarkerProvider {
                 testLineCrate.getLineElement().getTextRange(),
                 Icons.LOGO,
                 psiElement -> "Invoke inspection",
-                (mouseEvent, psiElement) -> TestspectorController.initializeTestspector(element.getProject(), psiElement.getParent(), testLineCrate.getProgrammingLanguage(), testLineCrate.getUnitTestFramework()),
+                (mouseEvent, psiElement) -> TestspectorController.initializeTestspector(psiElement.getProject(), psiElement.getParent(), testLineCrate.getProgrammingLanguage(), testLineCrate.getUnitTestFramework()),
                 GutterIconRenderer.Alignment.RIGHT
         )).orElse(null);
     }
