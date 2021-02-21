@@ -3,15 +3,14 @@ package com.testspector.model.checking.java.junit;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethod;
-import com.testspector.model.checking.TestResolveStrategy;
+import com.testspector.model.checking.UnitTestLineResolveStrategy;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.TEST_QUALIFIED_NAMES;
 
-public class JUnitTestLineResolveStrategy extends TestResolveStrategy {
+public class JUnitUnitTestLineLineResolveStrategy extends UnitTestLineResolveStrategy {
 
     @Override
     public Optional<PsiElement> resolveTestLine(PsiElement element) {

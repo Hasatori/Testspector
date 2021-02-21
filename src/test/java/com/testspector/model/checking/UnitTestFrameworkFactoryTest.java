@@ -1,62 +1,73 @@
 package com.testspector.model.checking;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.util.Computable;
-import com.intellij.psi.PsiFile;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import com.intellij.psi.PsiElement;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
+import static org.easymock.EasyMock.*;
 
 @RunWith(JUnitPlatform.class)
-public class UnitTestFrameworkFactoryTest extends BasePlatformTestCase {
-
-
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        this.setUp();
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        this.tearDown();
-    }
-
-    @Override
-    protected String getTestDataPath() {
-        return "src/test/resources/unitTestFrameworkFactoryTest";
-    }
-
+public class UnitTestFrameworkFactoryTest {
 
     @Test
-    public void getUnitTestFramework_JavaAndFileWithJUnit_ShouldReturnJunit() {
-        PsiFile psiFile = myFixture.configureByFile("JavaWithJUnit5.java");
-        UnitTestFrameworkFactory unitTestFrameworkFactory = new UnitTestFrameworkFactory();
-        UnitTestFramework returnedUnitTestFramework = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<UnitTestFramework>) () -> unitTestFrameworkFactory.getUnitTestFramework(ProgrammingLanguage.JAVA, psiFile).get()));
-        Assert.assertSame(UnitTestFramework.JUNIT, returnedUnitTestFramework);
+    public void getUnitTestFramework_FactoryHasStrategyForJavaToResolveJUnitFromPsiElement_ShouldReturnJUnit() {
+        UnitTestFrameworkResolveIndicationStrategy mockedUnitTestIndicationStrategy = mock(UnitTestFrameworkResolveIndicationStrategy.class);
+        PsiElement mockedPsiElement = createNiceMock(PsiElement.class);
+        expect(mockedUnitTestIndicationStrategy.canResolveFromPsiElement(anyObject())).andReturn(true).times(1);
+        expect(mockedUnitTestIndicationStrategy.getUnitTestFramework()).andReturn(UnitTestFramework.JUNIT);
+        replay(mockedUnitTestIndicationStrategy,mockedPsiElement);
+        HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<>() {{
+            put(ProgrammingLanguage.JAVA, Arrays.asList(mockedUnitTestIndicationStrategy));
+        }};
+        UnitTestFrameworkFactory unitTestFrameworkFactory = new UnitTestFrameworkFactory(programmingLanguageListHashMap);
+
+        List<UnitTestFramework> returnedUnitTestFrameworks = unitTestFrameworkFactory.getUnitTestFrameworks(ProgrammingLanguage.JAVA, mockedPsiElement);
+
+        Assertions.assertSame(UnitTestFramework.JUNIT, returnedUnitTestFrameworks.get(0));
 
     }
 
+    @Test
+    public void getUnitTestFramework_FactoryHasStrategyForJavaButStrategyCannotResolveFrameworkFromPsiElement_ShouldReturnEmptyList() {
+        UnitTestFrameworkResolveIndicationStrategy mockedUnitTestIndicationStrategy = mock(UnitTestFrameworkResolveIndicationStrategy.class);
+        PsiElement mockedPsiElement = createNiceMock(PsiElement.class);
+        expect(mockedUnitTestIndicationStrategy.canResolveFromPsiElement(anyObject())).andReturn(false).times(1);
+        expect(mockedUnitTestIndicationStrategy.getUnitTestFramework()).andReturn(UnitTestFramework.JUNIT);
+        replay(mockedUnitTestIndicationStrategy,mockedPsiElement);
+        HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<>() {{
+            put(ProgrammingLanguage.JAVA, Arrays.asList(mockedUnitTestIndicationStrategy));
+        }};
+        UnitTestFrameworkFactory unitTestFrameworkFactory = new UnitTestFrameworkFactory(programmingLanguageListHashMap);
+
+        List<UnitTestFramework> returnedUnitTestFrameworks = unitTestFrameworkFactory.getUnitTestFrameworks(ProgrammingLanguage.JAVA, mockedPsiElement);
+
+        Assertions.assertTrue(returnedUnitTestFrameworks.isEmpty());
+
+    }
 
     @Test
-    public void getUnitTestFramework_JavaButGroovyFile_ShouldNotReturnFramework() {
-        PsiFile psiFile = myFixture.configureByFile("Groovy.groovy");
+    public void getUnitTestFramework_FactoryDoestNotHaveStrategyToResolveFrameworkForPhp_ShouldReturnEmptyList() {
+        UnitTestFrameworkResolveIndicationStrategy mockedUnitTestIndicationStrategy = mock(UnitTestFrameworkResolveIndicationStrategy.class);
+        PsiElement mockedPsiElement = createNiceMock(PsiElement.class);
+        expect(mockedUnitTestIndicationStrategy.canResolveFromPsiElement(anyObject())).andReturn(true).times(1);
+        expect(mockedUnitTestIndicationStrategy.getUnitTestFramework()).andReturn(UnitTestFramework.PHP_UNIT);
+        replay(mockedUnitTestIndicationStrategy,mockedPsiElement);
+        HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<>() {{
+            put(ProgrammingLanguage.PHP, Arrays.asList(mockedUnitTestIndicationStrategy));
+        }};
+        UnitTestFrameworkFactory unitTestFrameworkFactory = new UnitTestFrameworkFactory(programmingLanguageListHashMap);
 
-        UnitTestFrameworkFactory unitTestFrameworkFactory = new UnitTestFrameworkFactory();
-        Optional<UnitTestFramework> optionalUnitTestFramework = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<Optional<UnitTestFramework>>) () -> unitTestFrameworkFactory.getUnitTestFramework(ProgrammingLanguage.JAVA, psiFile)));
+        List<UnitTestFramework> returnedUnitTestFrameworks = unitTestFrameworkFactory.getUnitTestFrameworks(ProgrammingLanguage.JAVA, mockedPsiElement);
 
-        Assert.assertFalse(optionalUnitTestFramework.isPresent());
-
+        Assertions.assertTrue(returnedUnitTestFrameworks.isEmpty());
     }
 }

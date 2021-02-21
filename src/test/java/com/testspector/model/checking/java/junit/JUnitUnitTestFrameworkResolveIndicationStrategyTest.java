@@ -2,7 +2,6 @@ package com.testspector.model.checking.java.junit;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.Computable;
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiMethod;
@@ -15,8 +14,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
-
-import java.util.Arrays;
 
 import static com.testspector.model.checking.java.junit.JUnitTestUtil.getFirstMethodWithAnnotationQualifiedName;
 import static com.testspector.model.checking.java.junit.JUnitTestUtil.getMethodFromFileByName;

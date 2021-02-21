@@ -22,7 +22,7 @@ import static com.testspector.model.checking.java.junit.JUnitTestUtil.getFirstMe
 import static com.testspector.model.checking.java.junit.JUnitTestUtil.getMethodFromFileByName;
 
 @RunWith(JUnitPlatform.class)
-public class JUnitTestLineResolveStrategyTest extends BasePlatformTestCase {
+public class JUnitTestLineResolveStrategyUnitTest extends BasePlatformTestCase {
 
 
     @BeforeEach
@@ -50,7 +50,7 @@ public class JUnitTestLineResolveStrategyTest extends BasePlatformTestCase {
                 .getApplication()
                 .runReadAction(((Computable<PsiElement>) someJUnit5Method::getNameIdentifier
                 ));
-        JUnitTestLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitTestLineResolveStrategy();
+        JUnitUnitTestLineLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineLineResolveStrategy();
 
         PsiElement resolvedTestLine = ApplicationManager
                 .getApplication()
@@ -66,7 +66,7 @@ public class JUnitTestLineResolveStrategyTest extends BasePlatformTestCase {
                 .getApplication()
                 .runReadAction(((Computable<PsiElement>) someJUnit5Method::getNameIdentifier
                 ));
-        JUnitTestLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitTestLineResolveStrategy();
+        JUnitUnitTestLineLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineLineResolveStrategy();
 
         PsiElement resolvedTestLine = ApplicationManager
                 .getApplication()
@@ -77,7 +77,7 @@ public class JUnitTestLineResolveStrategyTest extends BasePlatformTestCase {
 
     @Test
     public void resolveTest_NullElement_ShouldReturnEmpty() {
-        JUnitTestLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitTestLineResolveStrategy();
+        JUnitUnitTestLineLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineLineResolveStrategy();
 
         Optional<PsiElement> optionalPsiElement = ApplicationManager
                 .getApplication()
@@ -89,7 +89,7 @@ public class JUnitTestLineResolveStrategyTest extends BasePlatformTestCase {
     @Test
     public void resolveTest_TestNGTestMethod_ShouldReturnEmpty() {
         PsiMethod someTestNgMethod = getSomeTestNGPsiMethod();
-        JUnitTestLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitTestLineResolveStrategy();
+        JUnitUnitTestLineLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitUnitTestLineLineResolveStrategy();
 
         Optional<PsiElement> optionalPsiElement = ApplicationManager
                 .getApplication()

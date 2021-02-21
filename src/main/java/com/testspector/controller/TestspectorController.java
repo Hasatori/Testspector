@@ -27,15 +27,13 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static com.testspector.Configuration.*;
 import static com.testspector.model.utils.Constants.WEB_PAGE_BEST_PRACTICES_ULR;
 
 public final class TestspectorController {
 
     private static final String TOOL_WINDOW_NAME = "Testspector";
     private static final HashMap<Project, ToolWindow> PROJECT_TOOL_WINDOW_HASH_MAP = new HashMap<>();
-    private static final UnitTestFrameworkFactory UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY = new UnitTestFrameworkFactory();
-    private static final ProgrammingLanguageFactory PROGRAMMING_LANGUAGE_FACTORY = new ProgrammingLanguageFactory();
-    private static final BestPracticeCheckingStrategyFactory BEST_PRACTICE_CHECKING_STRATEGY_FACTORY = new BestPracticeCheckingStrategyFactory();
 
     private TestspectorController() {
     }
@@ -60,7 +58,7 @@ public final class TestspectorController {
                     toolWindowContent.showReport(bestPracticeViolations);
                 }, executorService::shutdownNow);
                 toolWindowContent.getConsoleView().print("\nInspecting tests in ", ConsoleViewContentType.SYSTEM_OUTPUT);
-                toolWindowContent.getConsoleView().print(name,ConsoleViewContentType.LOG_INFO_OUTPUT);
+                toolWindowContent.getConsoleView().print(name, ConsoleViewContentType.LOG_INFO_OUTPUT);
                 toolWindowContent.showReport(gatherBestPracticeViolations(toolWindowContent.getConsoleView(), files));
             });
         });
@@ -88,11 +86,11 @@ public final class TestspectorController {
                 }, executorService::shutdownNow);
 
                 toolWindowContent.getConsoleView().print("\nInspecting tests in ", ConsoleViewContentType.SYSTEM_OUTPUT);
-                toolWindowContent.getConsoleView().print(name,ConsoleViewContentType.LOG_INFO_OUTPUT);
+                toolWindowContent.getConsoleView().print(name, ConsoleViewContentType.LOG_INFO_OUTPUT);
                 toolWindowContent.getConsoleView().print("\nProgramming language: ", ConsoleViewContentType.SYSTEM_OUTPUT);
-                toolWindowContent.getConsoleView().print(programmingLanguage.toString(),ConsoleViewContentType.LOG_INFO_OUTPUT);
+                toolWindowContent.getConsoleView().print(programmingLanguage.getDisplayName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
                 toolWindowContent.getConsoleView().print(" and unit testing framework: ", ConsoleViewContentType.SYSTEM_OUTPUT);
-                toolWindowContent.getConsoleView().print(unitTestFramework.toString(),ConsoleViewContentType.LOG_INFO_OUTPUT);
+                toolWindowContent.getConsoleView().print(unitTestFramework.getDisplayName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
                 toolWindowContent.getConsoleView().print(" were detected", ConsoleViewContentType.SYSTEM_OUTPUT);
                 toolWindowContent.getConsoleView().print("\nInitializing inspection.... This might take a while...", ConsoleViewContentType.SYSTEM_OUTPUT);
                 Optional<BestPracticeCheckingStrategy> optionalBestPracticeCheckingStrategy = BEST_PRACTICE_CHECKING_STRATEGY_FACTORY.getBestPracticeCheckingStrategy(programmingLanguage, unitTestFramework);
@@ -112,20 +110,22 @@ public final class TestspectorController {
             consoleView.print(file.getName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
             Optional<ProgrammingLanguage> optionalProgrammingLanguage = PROGRAMMING_LANGUAGE_FACTORY.resolveProgrammingLanguage(file);
             if (optionalProgrammingLanguage.isPresent()) {
-                Optional<UnitTestFramework> optionalUnitTestFramework = UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY.getUnitTestFramework(optionalProgrammingLanguage.get(), file);
+                List<UnitTestFramework> unitTestFrameworks = UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY.getUnitTestFrameworks(optionalProgrammingLanguage.get(), file);
                 consoleView.print("\nProgramming language: ", ConsoleViewContentType.SYSTEM_OUTPUT);
-                consoleView.print(optionalProgrammingLanguage.get().toString(), ConsoleViewContentType.LOG_INFO_OUTPUT);
+                consoleView.print(optionalProgrammingLanguage.get().getDisplayName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
                 consoleView.print(" detected", ConsoleViewContentType.SYSTEM_OUTPUT);
-                optionalUnitTestFramework.flatMap(unitTestFramework ->
-                        BEST_PRACTICE_CHECKING_STRATEGY_FACTORY.getBestPracticeCheckingStrategy(optionalProgrammingLanguage.get(), unitTestFramework))
-                        .ifPresent(bestPracticeCheckingStrategy -> {
-                            consoleView.print("\nUnit test framework: ", ConsoleViewContentType.SYSTEM_OUTPUT);
-                            consoleView.print(optionalUnitTestFramework.get().toString(), ConsoleViewContentType.LOG_INFO_OUTPUT);
-                            consoleView.print(" detected", ConsoleViewContentType.SYSTEM_OUTPUT);
-                            List<BestPracticeViolation> foundViolations = bestPracticeCheckingStrategy.checkBestPractices(file);
-                            consoleView.print(String.format("\n%d best practice violations found", foundViolations.size()), ConsoleViewContentType.SYSTEM_OUTPUT);
-                            bestPracticeViolations.addAll(foundViolations);
-                        });
+                unitTestFrameworks.forEach(unitTestFramework -> {
+                    BEST_PRACTICE_CHECKING_STRATEGY_FACTORY.getBestPracticeCheckingStrategy(optionalProgrammingLanguage.get(), unitTestFramework)
+                            .ifPresent(bestPracticeCheckingStrategy -> {
+                                consoleView.print("\nUnit test framework: ", ConsoleViewContentType.SYSTEM_OUTPUT);
+                                consoleView.print(unitTestFramework.getDisplayName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
+                                consoleView.print(" detected", ConsoleViewContentType.SYSTEM_OUTPUT);
+                                List<BestPracticeViolation> foundViolations = bestPracticeCheckingStrategy.checkBestPractices(file);
+                                consoleView.print(String.format("\n%d best practice violations found", foundViolations.size()), ConsoleViewContentType.SYSTEM_OUTPUT);
+                                bestPracticeViolations.addAll(foundViolations);
+                            });
+                });
+
             }
         }
         return bestPracticeViolations;

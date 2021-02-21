@@ -4,7 +4,7 @@ import com.intellij.psi.PsiElement;
 
 import java.util.Optional;
 
-public abstract class TestResolveStrategy {
+public abstract class UnitTestLineResolveStrategy {
 
     public abstract Optional<PsiElement> resolveTestLine(PsiElement element);
 

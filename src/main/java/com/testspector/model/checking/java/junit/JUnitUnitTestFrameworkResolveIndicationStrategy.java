@@ -1,19 +1,20 @@
 package com.testspector.model.checking.java.junit;
 
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiImportList;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
 import com.testspector.model.checking.UnitTestFrameworkResolveIndicationStrategy;
+import com.testspector.model.enums.UnitTestFramework;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT_PACKAGES_QUALIFIED_NAMES;
 import static com.testspector.model.checking.java.junit.JUnitConstants.TEST_QUALIFIED_NAMES;
 
 public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFrameworkResolveIndicationStrategy {
+
+    public JUnitUnitTestFrameworkResolveIndicationStrategy() {
+        super(UnitTestFramework.JUNIT);
+    }
 
     @Override
     public boolean canResolveFromPsiElement(PsiElement psiElement) {
@@ -25,6 +26,7 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFra
         }
         return resolved;
     }
+
 
     private boolean isFromFile(PsiFile psiFile) {
         Optional<PsiElement> optionalPsiElement = Arrays.stream(psiFile.getChildren())
