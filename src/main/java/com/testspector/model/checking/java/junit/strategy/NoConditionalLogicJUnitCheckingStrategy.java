@@ -70,22 +70,6 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         return conditionalStatements;
     }
 
-/*
-    private List<PsiIfStatement> getIfStatements(PsiMethod method, PsiClass psiClass) {
-        List<PsiIfStatement> psiIfStatements = new ArrayList<>();
-        psiIfStatements.addAll(javaMethodHelper.getIfStatements(method));
-        List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantMethodExpression(method);
-        for (PsiMethodCallExpression psiMethodCallExpression : psiMethodCallExpressions) {
-            PsiMethod referencedMethod = psiMethodCallExpression.resolveMethod();
-            if (referencedMethod != null && referencedMethod.getContainingClass() == psiClass) {
-                psiIfStatements.addAll(getIfStatements(referencedMethod, psiClass));
-            }
-        }
-        return psiIfStatements;
-    }
-*/
-
-
     private List<PsiMethodCallExpression> getRelevantMethodExpression(PsiElement psiElement) {
         List<PsiMethodCallExpression> psiMethodCallExpressions = new ArrayList<>();
         List<PsiElement> children = Arrays.stream(psiElement.getChildren()).collect(Collectors.toList());
