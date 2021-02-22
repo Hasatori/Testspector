@@ -21,7 +21,7 @@ public class BestPracticeCheckingStrategyFactory {
                     new AtLeastOneAssertionJUnitCheckingStrategy(),
                     new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(),
                     new CreateCustomDataSourcesJUnitCheckingStrategy(),
-                    new NoConditionalLogicJUnitCheckingStrategy(new JavaElementHelper(new JavaClassHelper()),new JavaClassHelper(),new JavaMethodHelper()),
+                    new NoConditionalLogicJUnitCheckingStrategy(new JavaElementHelper(new JavaClassHelper())),
                     new NoGlobalStaticPropertiesJUnitCheckingStrategy(),
                     new NoSimpleTestsJUnitCheckingStrategy(),
                     new OnlyOneAssertionJUnitCheckingStrategy(),

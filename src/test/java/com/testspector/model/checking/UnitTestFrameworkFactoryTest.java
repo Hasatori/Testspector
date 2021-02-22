@@ -25,7 +25,7 @@ public class UnitTestFrameworkFactoryTest {
         expect(mockedUnitTestIndicationStrategy.canResolveFromPsiElement(anyObject())).andReturn(true).times(1);
         expect(mockedUnitTestIndicationStrategy.getUnitTestFramework()).andReturn(UnitTestFramework.JUNIT);
         replay(mockedUnitTestIndicationStrategy,mockedPsiElement);
-        HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<>() {{
+        HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>>() {{
             put(ProgrammingLanguage.JAVA, Arrays.asList(mockedUnitTestIndicationStrategy));
         }};
         UnitTestFrameworkFactory unitTestFrameworkFactory = new UnitTestFrameworkFactory(programmingLanguageListHashMap);
@@ -43,7 +43,7 @@ public class UnitTestFrameworkFactoryTest {
         expect(mockedUnitTestIndicationStrategy.canResolveFromPsiElement(anyObject())).andReturn(false).times(1);
         expect(mockedUnitTestIndicationStrategy.getUnitTestFramework()).andReturn(UnitTestFramework.JUNIT);
         replay(mockedUnitTestIndicationStrategy,mockedPsiElement);
-        HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<>() {{
+        HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>>() {{
             put(ProgrammingLanguage.JAVA, Arrays.asList(mockedUnitTestIndicationStrategy));
         }};
         UnitTestFrameworkFactory unitTestFrameworkFactory = new UnitTestFrameworkFactory(programmingLanguageListHashMap);
@@ -61,7 +61,7 @@ public class UnitTestFrameworkFactoryTest {
         expect(mockedUnitTestIndicationStrategy.canResolveFromPsiElement(anyObject())).andReturn(true).times(1);
         expect(mockedUnitTestIndicationStrategy.getUnitTestFramework()).andReturn(UnitTestFramework.PHP_UNIT);
         replay(mockedUnitTestIndicationStrategy,mockedPsiElement);
-        HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<>() {{
+        HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>>() {{
             put(ProgrammingLanguage.PHP, Arrays.asList(mockedUnitTestIndicationStrategy));
         }};
         UnitTestFrameworkFactory unitTestFrameworkFactory = new UnitTestFrameworkFactory(programmingLanguageListHashMap);

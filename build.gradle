@@ -17,8 +17,7 @@ dependencies {
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1',group: 'org.junit.platform', name: 'junit-platform-runner', version: '1.7.0'
     testCompile 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
-
-
+    testCompile("org.assertj:assertj-core:3.19.0")
 }
 
 

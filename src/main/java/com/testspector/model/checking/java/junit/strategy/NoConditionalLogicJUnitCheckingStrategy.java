@@ -18,14 +18,10 @@ import java.util.stream.Collectors;
 public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
     private final JavaElementHelper javaElementHelper;
-    private final JavaClassHelper javaClassHelper;
-    private final JavaMethodHelper javaMethodHelper;
 
 
-    public NoConditionalLogicJUnitCheckingStrategy(JavaElementHelper javaElementHelper, JavaClassHelper javaClassHelper, JavaMethodHelper javaMethodHelper) {
+    public NoConditionalLogicJUnitCheckingStrategy(JavaElementHelper javaElementHelper) {
         this.javaElementHelper = javaElementHelper;
-        this.javaClassHelper = javaClassHelper;
-        this.javaMethodHelper = javaMethodHelper;
     }
 
     @Override
@@ -45,7 +41,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         for (PsiStatement psiStatement : statements) {
             bestPracticeViolations.add(new BestPracticeViolation(
                     psiStatement,
-                    Arrays.stream(psiStatement.getChildren()).filter(child->child instanceof PsiKeyword).findFirst().orElse(psiStatement).getTextRange(),
+                    psiStatement.getTextRange(),
                     psiStatement.toString() + " statement logic should not be part of the test method, it makes test hard to understand and read. Remove if statements and create separate test scenario for each branch.",
                     getCheckedBestPractice().get(0)));
         }
@@ -57,7 +53,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         PsiCodeBlock methodBody = method.getBody();
         if (methodBody != null) {
             conditionalStatements.addAll(Arrays.stream(methodBody.getStatements()).filter(psiStatement ->
-                    psiStatement instanceof PsiIfStatement || psiStatement instanceof PsiForStatement || psiStatement instanceof PsiWhileStatement
+                    psiStatement instanceof PsiIfStatement || psiStatement instanceof PsiForStatement || psiStatement instanceof PsiWhileStatement || psiStatement instanceof PsiSwitchStatement
             ).collect(Collectors.toList()));
         }
         List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantMethodExpression(method);
