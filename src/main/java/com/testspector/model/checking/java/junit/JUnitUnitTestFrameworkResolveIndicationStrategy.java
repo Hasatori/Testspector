@@ -7,8 +7,8 @@ import com.testspector.model.enums.UnitTestFramework;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT_PACKAGES_QUALIFIED_NAMES;
-import static com.testspector.model.checking.java.junit.JUnitConstants.TEST_QUALIFIED_NAMES;
+import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT_ALL_PACKAGES_QUALIFIED_NAMES;
+import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES;
 
 public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFrameworkResolveIndicationStrategy {
 
@@ -34,7 +34,7 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFra
             PsiImportList psiImportList = (PsiImportList) optionalPsiElement.get();
             return Arrays.stream(psiImportList.getImportStatements())
                     .anyMatch(
-                            psiImportStatement -> JUNIT_PACKAGES_QUALIFIED_NAMES
+                            psiImportStatement -> JUNIT_ALL_PACKAGES_QUALIFIED_NAMES
                                     .stream()
                                     .anyMatch(junitPackageName -> psiImportStatement.getQualifiedName() != null && psiImportStatement.getQualifiedName().startsWith(junitPackageName))
                     );
@@ -47,7 +47,7 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFra
     private boolean isFromMethod(PsiMethod psiMethod) {
         return Arrays
                 .stream(psiMethod.getModifierList().getAnnotations())
-                .anyMatch(psiAnnotation -> TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()));
+                .anyMatch(psiAnnotation -> JUNIT_ALL_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()));
 
     }
 

@@ -3,9 +3,9 @@ package com.testspector.view.report;
 
 import com.testspector.model.checking.BestPracticeViolation;
 
-public class DescriptionNode extends BestPracticeViolationNode {
+public class HintDescriptionNode extends BestPracticeViolationNode {
 
-    public DescriptionNode(BestPracticeViolation bestPracticeViolation) {
+    public HintDescriptionNode(BestPracticeViolation bestPracticeViolation) {
         super(bestPracticeViolation);
     }
 }

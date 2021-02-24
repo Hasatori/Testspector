@@ -1,6 +1,9 @@
 package com.testspector.model.checking.java;
 
-import com.intellij.psi.*;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.PsiMethod;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,4 +57,10 @@ public class JavaElementHelper {
     }
 
 
+    public <T extends PsiElement> List<T> getElementsByType(PsiElement psiElement, Class<T> elementType) {
+        return Arrays.stream(psiElement.getChildren())
+                .filter(elementType::isInstance)
+                .map(elementType::cast)
+                .collect(Collectors.toList());
+    }
 }

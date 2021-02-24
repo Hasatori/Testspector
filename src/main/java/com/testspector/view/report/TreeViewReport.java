@@ -22,7 +22,11 @@ public class TreeViewReport extends JTree {
             DefaultMutableTreeNode bestPracticeViolationNode = new BestPracticeViolationWrapperNode(bestPracticeViolation);
             bestPracticeViolationNode.add(new ViolatedRuleNode(bestPracticeViolation));
             bestPracticeViolationNode.add(new ShowHideNode(bestPracticeViolation, project, this));
-            bestPracticeViolationNode.add(new DescriptionNode(bestPracticeViolation));
+            bestPracticeViolationNode.add(new ProblemDescriptionNode(bestPracticeViolation));
+            if (bestPracticeViolation.getHintDescription() != null) {
+                bestPracticeViolationNode.add(new HintDescriptionNode(bestPracticeViolation));
+            }
+
             root.add(bestPracticeViolationNode);
         }
         this.setAlignmentX(LEFT_ALIGNMENT);

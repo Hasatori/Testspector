@@ -10,14 +10,21 @@ public class BestPracticeViolation {
 
     private final TextRange textRange;
 
-    private final String description;
+    private final String problemDescription;
+
+    private final String hintDescription;
 
     private final BestPractice violatedRule;
 
-    public BestPracticeViolation(PsiElement psiElement, TextRange textRange, String description, BestPractice violatedRule) {
+    public BestPracticeViolation(PsiElement psiElement, TextRange textRange, String problemDescription, BestPractice violatedRule) {
+        this(psiElement,textRange,problemDescription,null, violatedRule);
+    }
+
+    public BestPracticeViolation(PsiElement psiElement, TextRange textRange, String problemDescription, String hintDescription, BestPractice violatedRule) {
         this.psiElement = psiElement;
         this.textRange = textRange;
-        this.description = description;
+        this.problemDescription = problemDescription;
+        this.hintDescription = hintDescription;
         this.violatedRule = violatedRule;
     }
 
@@ -29,8 +36,12 @@ public class BestPracticeViolation {
         return textRange;
     }
 
-    public String getDescription() {
-        return description;
+    public String getProblemDescription() {
+        return problemDescription;
+    }
+
+    public String getHintDescription() {
+        return hintDescription;
     }
 
     public BestPractice getViolatedRule() {

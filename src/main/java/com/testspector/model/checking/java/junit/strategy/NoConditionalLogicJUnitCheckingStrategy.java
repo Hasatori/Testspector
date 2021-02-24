@@ -3,9 +3,7 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.JavaClassHelper;
 import com.testspector.model.checking.java.JavaElementHelper;
-import com.testspector.model.checking.java.JavaMethodHelper;
 import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
@@ -32,7 +30,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         List<PsiStatement> statements = new ArrayList<>();
         for (PsiMethod method : methods) {
             statements.addAll(getConditionalStatements(method, method.getContainingClass()));

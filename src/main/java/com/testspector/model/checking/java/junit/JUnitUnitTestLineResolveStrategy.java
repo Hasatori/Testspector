@@ -10,7 +10,7 @@ import com.testspector.model.enums.UnitTestFramework;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static com.testspector.model.checking.java.junit.JUnitConstants.TEST_QUALIFIED_NAMES;
+import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES;
 
 public class JUnitUnitTestLineResolveStrategy extends UnitTestLineResolveStrategy {
 
@@ -47,6 +47,6 @@ public class JUnitUnitTestLineResolveStrategy extends UnitTestLineResolveStrateg
     private boolean isJunitTestMethod(PsiMethod method) {
         return Arrays
                 .stream((method).getAnnotations())
-                .anyMatch(psiAnnotation -> TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()));
+                .anyMatch(psiAnnotation -> JUNIT_ALL_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()));
     }
 }

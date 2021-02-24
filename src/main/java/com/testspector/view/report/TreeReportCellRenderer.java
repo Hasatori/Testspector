@@ -18,9 +18,9 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
             label.setText(bestPracticeViolationWrapperNode.getName());
             label.setIcon(Icons.PACKAGE);
             return label;
-        } else if (value instanceof DescriptionNode) {
-            DescriptionNode descriptionNode = (DescriptionNode) value;
-            label.setText(String.format("<html><b>%s</b></html>", descriptionNode.getBestPracticeViolation().getDescription()));
+        } else if (value instanceof ProblemDescriptionNode) {
+            ProblemDescriptionNode problemDescriptionNode = (ProblemDescriptionNode) value;
+            label.setText(String.format("<html><b>%s</b></html>", problemDescriptionNode.getBestPracticeViolation().getProblemDescription()));
             label.setIcon(Icons.WARNING);
             return label;
         } else if (value instanceof ViolatedRuleNode) {
@@ -46,6 +46,11 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
             linkLabel.setFont(font.deriveFont(attributes));
             panel.add(linkLabel);
             return panel;
+        } else if (value instanceof HintDescriptionNode) {
+            HintDescriptionNode hintDescriptionNode = (HintDescriptionNode) value;
+            label.setText(String.format("<html><b>%s</b></html>", hintDescriptionNode.getBestPracticeViolation().getHintDescription()));
+            label.setIcon(Icons.INFO);
+            return label;
         } else if (value instanceof ShowHideNode) {
             ShowHideNode showHideNode = (ShowHideNode) value;
             if (showHideNode.isCodeHighlighted()) {

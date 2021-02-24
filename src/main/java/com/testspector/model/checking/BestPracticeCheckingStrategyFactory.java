@@ -2,7 +2,6 @@ package com.testspector.model.checking;
 
 import com.testspector.model.checking.java.JavaClassHelper;
 import com.testspector.model.checking.java.JavaElementHelper;
-import com.testspector.model.checking.java.JavaMethodHelper;
 import com.testspector.model.checking.java.junit.strategy.*;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
@@ -18,7 +17,7 @@ public class BestPracticeCheckingStrategyFactory {
         if (programmingLanguage == ProgrammingLanguage.JAVA && unitTestFramework == UnitTestFramework.JUNIT) {
             return Optional.of(new GroupBestPracticeCheckingStrategyDecorator(Arrays.asList(
                     new NoSimpleTestsJUnitCheckingStrategy(),
-                    new AtLeastOneAssertionJUnitCheckingStrategy(),
+                    new AssertionCountJUnitCheckingStrategy(new JavaElementHelper(new JavaClassHelper())),
                     new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(),
                     new CreateCustomDataSourcesJUnitCheckingStrategy(),
                     new NoConditionalLogicJUnitCheckingStrategy(new JavaElementHelper(new JavaClassHelper())),
