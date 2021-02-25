@@ -8,7 +8,16 @@ import java.util.stream.Stream;
 
 public final class JUnitConstants {
 
-    private JUnitConstants(){
+    public static final String JUNIT5_ASSERTIONS_CLASS_PATH = "org.junit.jupiter.api.Assertions";
+    public static final String JUNIT4_ASSERTIONS_CLASS_PATH = "org.junit.Assert";
+    public static final String HAMCREST_ASSERTIONS_CLASS_PATH = "org.hamcrest.MatcherAssert";
+    public static final List<String> ASSERTION_CLASS_PATHS = Collections.unmodifiableList(Arrays.asList(
+            JUNIT5_ASSERTIONS_CLASS_PATH,
+            HAMCREST_ASSERTIONS_CLASS_PATH,
+            JUNIT4_ASSERTIONS_CLASS_PATH
+    ));
+
+    private JUnitConstants() {
 
     }
 

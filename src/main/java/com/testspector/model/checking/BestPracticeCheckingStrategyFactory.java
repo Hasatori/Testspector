@@ -15,13 +15,13 @@ public class BestPracticeCheckingStrategyFactory {
 
     public Optional<BestPracticeCheckingStrategy> getBestPracticeCheckingStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
         if (programmingLanguage == ProgrammingLanguage.JAVA && unitTestFramework == UnitTestFramework.JUNIT) {
-
+            JavaElementHelper javaElementHelper = new JavaElementHelper(new JavaClassHelper());
             return Optional.of(new GroupBestPracticeCheckingStrategyDecorator(Arrays.asList(
                     new NoSimpleTestsJUnitCheckingStrategy(),
-                    new AssertionCountJUnitCheckingStrategy(new JavaElementHelper(new JavaClassHelper())),
-                    new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(),
+                    new AssertionCountJUnitCheckingStrategy(javaElementHelper),
+                    new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(javaElementHelper),
                     new CreateCustomDataSourcesJUnitCheckingStrategy(),
-                    new NoConditionalLogicJUnitCheckingStrategy(new JavaElementHelper(new JavaClassHelper())),
+                    new NoConditionalLogicJUnitCheckingStrategy(javaElementHelper),
                     new NoGlobalStaticPropertiesJUnitCheckingStrategy(),
                     new NoSimpleTestsJUnitCheckingStrategy(),
                     new TestNamingStrategyJUnitCheckingStrategy(),

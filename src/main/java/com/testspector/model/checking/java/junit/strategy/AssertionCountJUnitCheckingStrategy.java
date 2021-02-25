@@ -16,14 +16,6 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
     private final JavaElementHelper javaElementHelper;
 
 
-    private static final String JUNIT5_ASSERTIONS_CLASS_PATH = "org.junit.jupiter.api.Assertions";
-    private static final String HAMCREST_ASSERTIONS_CLASS_PATH = "org.hamcrest.MatcherAssert";
-    private static final List<String> ASSERTION_CLASS_PATHS = Collections.unmodifiableList(Arrays.asList(
-            JUNIT5_ASSERTIONS_CLASS_PATH,
-            HAMCREST_ASSERTIONS_CLASS_PATH,
-            "org.junit.Assert"
-    ));
-
     public AssertionCountJUnitCheckingStrategy(JavaElementHelper javaElementHelper) {
         this.javaElementHelper = javaElementHelper;
     }
@@ -51,9 +43,9 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
                 StringBuilder hintMessageBuilder = new StringBuilder();
                 String message = "Test should contain only one assertion method!";
                 if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
-                    hintMessageBuilder.append(String.format("You are using JUnit5 so it can be solved by wrapping multiple assertions into %s.assertAll() method", JUNIT5_ASSERTIONS_CLASS_PATH));
+                    hintMessageBuilder.append(String.format("You are using JUnit5 so it can be solved by wrapping multiple assertions into %s.assertAll() method", JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH));
                 }
-                if (assertionMethods.stream().anyMatch(isAssertionMethodFrom(HAMCREST_ASSERTIONS_CLASS_PATH))) {
+                if (assertionMethods.stream().anyMatch(isAssertionMethodFrom(JUnitConstants.HAMCREST_ASSERTIONS_CLASS_PATH))) {
                     if (hintMessageBuilder.length() != 0) {
                         hintMessageBuilder.append(" or ");
                     }
@@ -106,7 +98,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
     private Predicate<PsiMethodCallExpression> isAssertionMethod() {
         return psiMethodCallExpression -> Optional.ofNullable(psiMethodCallExpression.resolveMethod())
                 .map(PsiJvmMember::getContainingClass)
-                .map(psiClass -> ASSERTION_CLASS_PATHS.contains(psiClass.getQualifiedName()))
+                .map(psiClass -> JUnitConstants.ASSERTION_CLASS_PATHS.contains(psiClass.getQualifiedName()))
                 .orElse(false);
     }
 
