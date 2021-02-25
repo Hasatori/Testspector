@@ -15,6 +15,7 @@ public class BestPracticeCheckingStrategyFactory {
 
     public Optional<BestPracticeCheckingStrategy> getBestPracticeCheckingStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
         if (programmingLanguage == ProgrammingLanguage.JAVA && unitTestFramework == UnitTestFramework.JUNIT) {
+
             return Optional.of(new GroupBestPracticeCheckingStrategyDecorator(Arrays.asList(
                     new NoSimpleTestsJUnitCheckingStrategy(),
                     new AssertionCountJUnitCheckingStrategy(new JavaElementHelper(new JavaClassHelper())),
@@ -23,7 +24,6 @@ public class BestPracticeCheckingStrategyFactory {
                     new NoConditionalLogicJUnitCheckingStrategy(new JavaElementHelper(new JavaClassHelper())),
                     new NoGlobalStaticPropertiesJUnitCheckingStrategy(),
                     new NoSimpleTestsJUnitCheckingStrategy(),
-                    new OnlyOneAssertionJUnitCheckingStrategy(),
                     new TestNamingStrategyJUnitCheckingStrategy(),
                     new TestOnlyPublicBehaviourJUnitCheckingStrategy(),
                     new ThreePhaseTestStructureJUnitCheckingStrategy()
