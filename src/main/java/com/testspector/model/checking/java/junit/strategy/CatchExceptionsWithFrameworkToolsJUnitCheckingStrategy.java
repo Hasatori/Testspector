@@ -63,7 +63,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         if (psiCodeBlock != null) {
 
             tryStatements.addAll(new ArrayList<>(javaElementHelper.getElementsByType(psiCodeBlock, PsiTryStatement.class)));
-            List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantTryStatements(psiCodeBlock);
+            List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantMethodCalls(psiCodeBlock);
             for (PsiMethodCallExpression psiMethodCallExpression : psiMethodCallExpressions) {
                 PsiMethod referencedMethod = psiMethodCallExpression.resolveMethod();
                 if (referencedMethod != null && referencedMethod.getContainingClass() == psiClass) {
@@ -74,14 +74,14 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         return tryStatements;
     }
 
-    private List<PsiMethodCallExpression> getRelevantTryStatements(PsiElement psiElement) {
+    private List<PsiMethodCallExpression> getRelevantMethodCalls(PsiElement psiElement) {
         List<PsiMethodCallExpression> psiMethodCallExpressions = new ArrayList<>();
         List<PsiElement> children = Arrays.stream(psiElement.getChildren()).collect(Collectors.toList());
         for (PsiElement child : children) {
             if (child instanceof PsiMethodCallExpression) {
                 psiMethodCallExpressions.add((PsiMethodCallExpression) child);
             }
-            psiMethodCallExpressions.addAll(getRelevantTryStatements(child));
+            psiMethodCallExpressions.addAll(getRelevantMethodCalls(child));
         }
         return psiMethodCallExpressions;
     }
