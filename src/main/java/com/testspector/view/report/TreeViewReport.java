@@ -38,7 +38,7 @@ public class TreeViewReport extends JTree {
                 for (PsiElement errorElement : bestPracticeViolation.getErrorElements()) {
                     PsiElement errorElementNavigationElement = errorElement.getNavigationElement();
                     WrapperNode errorElementWrapper = new WrapperNode(errorElementNavigationElement, errorElement.toString());
-                    errorElementWrapper.add(new ShowHideNode(errorElementNavigationElement, errorElement, bestPracticeViolation.getTextRange(), this, "Highlight error element", "Deleted highlighting of the element"));
+                    errorElementWrapper.add(new ShowHideNode(errorElementNavigationElement, errorElement, errorElement.getTextRange(), this, "Highlight error element", "Deleted highlighting of the element"));
                     errorsWrapper.add(errorElementWrapper);
                 }
                 bestPracticeViolationNode.add(errorsWrapper);
