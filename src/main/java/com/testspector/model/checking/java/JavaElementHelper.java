@@ -6,6 +6,7 @@ import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiMethod;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class JavaElementHelper {
@@ -62,5 +63,14 @@ public class JavaElementHelper {
                 .filter(elementType::isInstance)
                 .map(elementType::cast)
                 .collect(Collectors.toList());
+    }
+
+    public boolean isInTestContext(PsiMethod method) {
+        PsiJavaFile psiJavaFile = (PsiJavaFile) method.getContainingFile();
+        String absolutePath = psiJavaFile.getVirtualFile().getPath();
+        String packagePath = psiJavaFile.getPackageName();
+        String projectName = psiJavaFile.getProject().getName();
+        return Pattern.compile(String.format("%s/src/test/java/%s/%s$", projectName, packagePath.replaceAll("\\.", "/"),psiJavaFile.getName())).matcher((absolutePath)).find();
+
     }
 }
