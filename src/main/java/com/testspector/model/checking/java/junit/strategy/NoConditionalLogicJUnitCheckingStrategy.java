@@ -37,22 +37,24 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             List<PsiStatement> statements = getConditionalStatements(method);
 
             statements = statements.stream().distinct().collect(Collectors.toList());
-            List<String> hints = new ArrayList<>();
-            hints.add("Remove statements and create separate test scenario for each branch");
-            if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
-                hints.add(String.format("You are using JUnit5 so it can be solved by using %s", JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH));
-            }
-            PsiIdentifier methodIdentifier = method.getNameIdentifier();
-            bestPracticeViolations.add(new BestPracticeViolation(
-                            method,
-                            methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
-                            "Conditional logic should not be part of the test method, it makes test hard to understand and read.",
-                            hints,
-                            getCheckedBestPractice().get(0),
-                            statements.stream().map(statement -> (PsiElement) statement).collect(Collectors.toList())
-                    )
+            if (statements.size() > 0) {
+                List<String> hints = new ArrayList<>();
+                hints.add("Remove statements and create separate test scenario for each branch");
+                if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
+                    hints.add(String.format("You are using JUnit5 so it can be solved by using %s", JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH));
+                }
+                PsiIdentifier methodIdentifier = method.getNameIdentifier();
+                bestPracticeViolations.add(new BestPracticeViolation(
+                                method,
+                                methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
+                                "Conditional logic should not be part of the test method, it makes test hard to understand and read.",
+                                hints,
+                                getCheckedBestPractice().get(0),
+                                statements.stream().map(statement -> (PsiElement) statement).collect(Collectors.toList())
+                        )
 
-            );
+                );
+            }
 
         }
         return bestPracticeViolations;
