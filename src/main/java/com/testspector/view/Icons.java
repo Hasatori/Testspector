@@ -29,6 +29,7 @@ public final class Icons {
     public static  final Icon SUCCEEDED = IconLoader.getIcon("/icons/succeeded_dark.svg");
     public static  final Icon WARNING = IconLoader.getIcon( "/icons/balloonWarning_dark.svg");
     public static  final Icon INFO = IconLoader.getIcon( "/icons/balloonInformation_dark.svg");
+    public static  final Icon ERROR = IconLoader.getIcon( "/icons/balloonError_dark.svg");
     public static  final Icon PACKAGE = IconLoader.getIcon("/icons/package.svg");
     public static  final Icon FILE = IconLoader.getIcon("/icons/file.svg");
     public static  final Icon HIDE = IconLoader.getIcon("/icons/hide_dark.svg");

@@ -18,19 +18,18 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
             label.setText(wrapperNode.getName());
             label.setIcon(Icons.PACKAGE);
             return label;
-        } else if (value instanceof ProblemDescriptionNode) {
-            ProblemDescriptionNode problemDescriptionNode = (ProblemDescriptionNode) value;
-            label.setText(String.format("<html><b>%s</b></html>", problemDescriptionNode.getDescription()));
+        } else if (value instanceof WarningNode) {
+            WarningNode warningNode = (WarningNode) value;
+            label.setText(String.format("<html><b>%s</b></html>", warningNode.getDescription()));
             label.setIcon(Icons.WARNING);
             return label;
         } else if (value instanceof ViolatedRuleNode) {
             ViolatedRuleNode violatedRuleNode = (ViolatedRuleNode) value;
             label.setText("Broken rule: ");
-            label.setIcon(Icons.FILE);
+            label.setIcon(Icons.ERROR);
             JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
             panel.add(label);
-            JLabel ruleLabel = new JLabel(violatedRuleNode.getViolatedBestPractice().getDisplayName());
-            ruleLabel.setForeground(Color.RED);
+            JLabel ruleLabel = new JLabel(violatedRuleNode.getViolatedBestPractice().getDisplayName().toUpperCase());
             Font ruleFont = ruleLabel.getFont();
             Map<TextAttribute, Object> ruleAttributes = new HashMap<>(ruleFont.getAttributes());
             ruleAttributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
@@ -46,9 +45,9 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
             linkLabel.setFont(font.deriveFont(attributes));
             panel.add(linkLabel);
             return panel;
-        } else if (value instanceof HintDescriptionNode) {
-            HintDescriptionNode hintDescriptionNode = (HintDescriptionNode) value;
-            label.setText(String.format("<html><b>%s</b></html>", hintDescriptionNode.getDescription()));
+        } else if (value instanceof InfoNode) {
+            InfoNode simpleTextNode = (InfoNode) value;
+            label.setText(String.format("<html><b>%s</b></html>", simpleTextNode.getDescription()));
             label.setIcon(Icons.INFO);
             return label;
         } else if (value instanceof ShowHideNode) {
@@ -60,6 +59,8 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
                 label.setText(showHideNode.getOnShowLabel());
                 label.setIcon(Icons.SHOW);
             }
+        } else if (value instanceof SimpleTextNode) {
+            label.setText(((SimpleTextNode) value).getDescription());
 
         }
         return label;

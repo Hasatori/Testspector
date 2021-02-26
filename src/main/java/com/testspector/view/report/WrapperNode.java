@@ -2,7 +2,6 @@ package com.testspector.view.report;
 
 
 import com.intellij.psi.PsiElement;
-import com.testspector.model.checking.BestPracticeViolation;
 
 public class WrapperNode extends BestPracticeViolationNode {
 
