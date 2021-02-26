@@ -34,6 +34,7 @@ public final class Icons {
     public static  final Icon FILE = IconLoader.getIcon("/icons/file.svg");
     public static  final Icon HIDE = IconLoader.getIcon("/icons/hide_dark.svg");
     public static  final Icon DELETE = IconLoader.getIcon("/icons/deleteTag_dark.svg");
+
     private Icons() {
     }
 
