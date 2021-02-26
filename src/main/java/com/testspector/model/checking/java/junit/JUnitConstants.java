@@ -25,9 +25,11 @@ public final class JUnitConstants {
             "org.junit.Test"
     ));
 
+
+    public static final String JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH = "org.junit.jupiter.params.ParameterizedTest";
     public static final List<String> JUNIT5_TEST_QUALIFIED_NAMES = Collections.unmodifiableList(Arrays.asList(
             "org.junit.jupiter.api.Test",
-            "org.junit.jupiter.params.ParameterizedTest",
+            JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH,
             "org.junit.jupiter.api.RepeatedTest"
     ));
 

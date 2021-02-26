@@ -1,6 +1,7 @@
 package com.testspector.view.report;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.BestPracticeViolation;
 
 import javax.swing.*;
@@ -19,12 +20,28 @@ public class TreeViewReport extends JTree {
         this.project = project;
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
         for (BestPracticeViolation bestPracticeViolation : bestPracticeViolations) {
-            DefaultMutableTreeNode bestPracticeViolationNode = new BestPracticeViolationWrapperNode(bestPracticeViolation);
-            bestPracticeViolationNode.add(new ViolatedRuleNode(bestPracticeViolation));
-            bestPracticeViolationNode.add(new ShowHideNode(bestPracticeViolation, project, this));
-            bestPracticeViolationNode.add(new ProblemDescriptionNode(bestPracticeViolation));
-            if (bestPracticeViolation.getHintDescription() != null) {
-                bestPracticeViolationNode.add(new HintDescriptionNode(bestPracticeViolation));
+            PsiElement mainNavigationElement = bestPracticeViolation.getPsiElement().getNavigationElement();
+            WrapperNode bestPracticeViolationNode = new WrapperNode(mainNavigationElement, bestPracticeViolation.getPsiElement().toString());
+            bestPracticeViolationNode.add(new ViolatedRuleNode(mainNavigationElement, bestPracticeViolation.getViolatedRule()));
+            bestPracticeViolationNode.add(new ShowHideNode(mainNavigationElement, bestPracticeViolation.getPsiElement(), bestPracticeViolation.getTextRange(), this, "Highlight problematic code", "Delete highlighting of the code"));
+            bestPracticeViolationNode.add(new ProblemDescriptionNode(mainNavigationElement, bestPracticeViolation.getProblemDescription()));
+            if (bestPracticeViolation.getHints() != null && bestPracticeViolation.getHints().size() > 0) {
+                WrapperNode hintsWrapper = new WrapperNode(mainNavigationElement, "Hints");
+                for (String hint : bestPracticeViolation.getHints()) {
+                    HintDescriptionNode hintDescriptionNode = new HintDescriptionNode(mainNavigationElement, hint);
+                    hintsWrapper.add(hintDescriptionNode);
+                }
+                bestPracticeViolationNode.add(hintsWrapper);
+            }
+            if (bestPracticeViolation.getErrorElements() != null && bestPracticeViolation.getErrorElements().size() > 0) {
+                WrapperNode errorsWrapper = new WrapperNode(mainNavigationElement, "Error elements");
+                for (PsiElement errorElement : bestPracticeViolation.getErrorElements()) {
+                    PsiElement errorElementNavigationElement = errorElement.getNavigationElement();
+                    WrapperNode errorElementWrapper = new WrapperNode(errorElementNavigationElement, errorElement.toString());
+                    errorElementWrapper.add(new ShowHideNode(errorElementNavigationElement, errorElement, bestPracticeViolation.getTextRange(), this, "Highlight error element", "Deleted highlighting of the element"));
+                    errorsWrapper.add(errorElementWrapper);
+                }
+                bestPracticeViolationNode.add(errorsWrapper);
             }
 
             root.add(bestPracticeViolationNode);
@@ -57,25 +74,36 @@ public class TreeViewReport extends JTree {
 
     public void expandAll() {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getModel().getRoot();
-        for (int i = 0; i < root.getChildCount(); i++) {
-            TreeNode node = root.getChildAt(i);
-            if (node instanceof BestPracticeViolationNode) {
-                BestPracticeViolationNode bestPracticeViolationNode = (BestPracticeViolationNode) node;
-                this.expandPath(new TreePath(bestPracticeViolationNode.getPath()));
+        expandAllInNode(root);
+    }
+
+    private void expandAllInNode(DefaultMutableTreeNode node) {
+        this.expandPath(new TreePath(node.getPath()));
+        for (int i = 0; i < node.getChildCount(); i++) {
+            TreeNode child = node.getChildAt(i);
+            if (child instanceof DefaultMutableTreeNode) {
+                DefaultMutableTreeNode castedChild = (DefaultMutableTreeNode) child;
+                this.expandPath(new TreePath(castedChild.getPath()));
+                expandAllInNode(castedChild);
             }
         }
     }
 
     public void collapseAll() {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getModel().getRoot();
-        for (int i = 0; i < root.getChildCount(); i++) {
-            TreeNode node = root.getChildAt(i);
-            if (node instanceof BestPracticeViolationNode) {
-                BestPracticeViolationNode bestPracticeViolationNode = (BestPracticeViolationNode) node;
-                this.collapsePath(new TreePath(bestPracticeViolationNode.getPath()));
+        collapseAllInNode(root);
+    }
+
+    private void collapseAllInNode(DefaultMutableTreeNode node) {
+        this.collapsePath(new TreePath(node.getPath()));
+        for (int i = 0; i < node.getChildCount(); i++) {
+            TreeNode child = node.getChildAt(i);
+            if (child instanceof DefaultMutableTreeNode) {
+                DefaultMutableTreeNode castedChild = (DefaultMutableTreeNode) child;
+                this.collapsePath(new TreePath(castedChild.getPath()));
+                //collapseAllInNode(castedChild);
             }
         }
     }
-
 
 }

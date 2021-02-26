@@ -1,20 +1,28 @@
 package com.testspector.view.report;
 
 
+import com.intellij.pom.Navigatable;
+import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.BestPracticeViolation;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.Optional;
 
 public abstract class BestPracticeViolationNode extends DefaultMutableTreeNode {
 
-    private BestPracticeViolation bestPracticeViolation;
 
-    public BestPracticeViolationNode(BestPracticeViolation bestPracticeViolation) {
+    protected PsiElement navigationElement = null;
+
+    public BestPracticeViolationNode(PsiElement navigationElement) {
         super();
-        this.bestPracticeViolation = bestPracticeViolation;
+        this.navigationElement = navigationElement;
     }
 
-    public BestPracticeViolation getBestPracticeViolation() {
-        return bestPracticeViolation;
+    public BestPracticeViolationNode() {
+        this(null);
+    }
+
+    public Optional<PsiElement> getNavigationElement() {
+        return Optional.ofNullable(navigationElement);
     }
 }

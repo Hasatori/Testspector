@@ -13,14 +13,14 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
         JLabel label = new JLabel();
-        if (value instanceof BestPracticeViolationWrapperNode) {
-            BestPracticeViolationWrapperNode bestPracticeViolationWrapperNode = (BestPracticeViolationWrapperNode) value;
-            label.setText(bestPracticeViolationWrapperNode.getName());
+        if (value instanceof WrapperNode) {
+            WrapperNode wrapperNode = (WrapperNode) value;
+            label.setText(wrapperNode.getName());
             label.setIcon(Icons.PACKAGE);
             return label;
         } else if (value instanceof ProblemDescriptionNode) {
             ProblemDescriptionNode problemDescriptionNode = (ProblemDescriptionNode) value;
-            label.setText(String.format("<html><b>%s</b></html>", problemDescriptionNode.getBestPracticeViolation().getProblemDescription()));
+            label.setText(String.format("<html><b>%s</b></html>", problemDescriptionNode.getDescription()));
             label.setIcon(Icons.WARNING);
             return label;
         } else if (value instanceof ViolatedRuleNode) {
@@ -29,7 +29,7 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
             label.setIcon(Icons.FILE);
             JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
             panel.add(label);
-            JLabel ruleLabel = new JLabel(violatedRuleNode.getBestPracticeViolation().getViolatedRule().getDisplayName());
+            JLabel ruleLabel = new JLabel(violatedRuleNode.getViolatedBestPractice().getDisplayName());
             ruleLabel.setForeground(Color.RED);
             Font ruleFont = ruleLabel.getFont();
             Map<TextAttribute, Object> ruleAttributes = new HashMap<>(ruleFont.getAttributes());
@@ -48,16 +48,16 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
             return panel;
         } else if (value instanceof HintDescriptionNode) {
             HintDescriptionNode hintDescriptionNode = (HintDescriptionNode) value;
-            label.setText(String.format("<html><b>%s</b></html>", hintDescriptionNode.getBestPracticeViolation().getHintDescription()));
+            label.setText(String.format("<html><b>%s</b></html>", hintDescriptionNode.getDescription()));
             label.setIcon(Icons.INFO);
             return label;
         } else if (value instanceof ShowHideNode) {
             ShowHideNode showHideNode = (ShowHideNode) value;
             if (showHideNode.isCodeHighlighted()) {
-                label.setText("Delete highlighting of the code");
+                label.setText(showHideNode.getOnHideLabel());
                 label.setIcon(Icons.HIDE);
             } else {
-                label.setText("Highlight problematic code");
+                label.setText(showHideNode.getOnShowLabel());
                 label.setIcon(Icons.SHOW);
             }
 

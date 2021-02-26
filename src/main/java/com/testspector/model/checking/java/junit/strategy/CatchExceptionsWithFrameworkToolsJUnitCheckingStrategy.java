@@ -37,21 +37,23 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         for (PsiMethod method : methods) {
             List<PsiTryStatement> psiTryStatements = getTryStatements(method);
             if (psiTryStatements.size() > 0) {
-                StringBuilder hintMessageBuilder = new StringBuilder();
+                List<String> hints = new ArrayList<>();
                 String message = "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.";
                 if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
-                    hintMessageBuilder.append(String.format("You are using JUnit5 so it can be solved by using %s.assertThrows() method", JUNIT5_ASSERTIONS_CLASS_PATH));
+                    hints.add(String.format("You are using JUnit5 so it can be solved by using %s.assertThrows() method", JUNIT5_ASSERTIONS_CLASS_PATH));
                 }
                 if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT4_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
-                    hintMessageBuilder.append(String.format("You are using JUnit4 so it can be solved by using %s@Test(expected = Exception.class) for the test method", JUNIT4_ASSERTIONS_CLASS_PATH));
+                    hints.add(String.format("You are using JUnit4 so it can be solved by using %s@Test(expected = Exception.class) for the test method", JUNIT4_ASSERTIONS_CLASS_PATH));
                 }
+                PsiIdentifier methodIdentifier = method.getNameIdentifier();
                 bestPracticeViolations.add(new BestPracticeViolation(
                         method,
-                        method.getTextRange(),
+                        methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
                         message,
-                        hintMessageBuilder.length() > 0 ? hintMessageBuilder.toString() : null,
-                        this.getCheckedBestPractice().get(0)
-                ));
+                        hints,
+                        this.getCheckedBestPractice().get(0),
+                        psiTryStatements.stream().map(assertion -> (PsiElement) assertion).collect(Collectors.toList())))
+                ;
             }
         }
         return bestPracticeViolations;

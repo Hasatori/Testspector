@@ -10,6 +10,7 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 public class TreeReportMouseListener implements MouseListener {
     @Override
@@ -18,9 +19,9 @@ public class TreeReportMouseListener implements MouseListener {
         Object clickedNode = root.getSelectionModel().getSelectionPath().getLastPathComponent();
         if (clickedNode instanceof BestPracticeViolationNode) {
             BestPracticeViolationNode bestPracticeViolationNode = (BestPracticeViolationNode) clickedNode;
-            PsiElement navigationElement = bestPracticeViolationNode.getBestPracticeViolation().getPsiElement().getNavigationElement();
-            if (navigationElement != null && navigationElement instanceof Navigatable && ((Navigatable) navigationElement).canNavigate()) {
-                ((Navigatable) navigationElement).navigate(true);
+            Optional<PsiElement> optionalNavigationElement = bestPracticeViolationNode.getNavigationElement();
+            if (optionalNavigationElement.isPresent() && optionalNavigationElement.get() instanceof Navigatable && ((Navigatable)optionalNavigationElement.get()).canNavigate()) {
+                ((Navigatable)optionalNavigationElement.get()).navigate(true);
             }
         }
 
@@ -33,7 +34,7 @@ public class TreeReportMouseListener implements MouseListener {
         if (clickedNode instanceof ViolatedRuleNode) {
             ViolatedRuleNode violatedRuleNode = (ViolatedRuleNode) clickedNode;
             try {
-                Desktop.getDesktop().browse(new URI(violatedRuleNode.getBestPracticeViolation().getViolatedRule().getWebPageHyperlink()));
+                Desktop.getDesktop().browse(new URI(violatedRuleNode.getViolatedBestPractice().getWebPageHyperlink()));
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             } catch (URISyntaxException uriSyntaxException) {

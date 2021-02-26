@@ -36,34 +36,32 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
         List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
             List<PsiMethodCallExpression> assertionMethods = getAssertionsMethods(method);
+            PsiIdentifier methodIdentifier = method.getNameIdentifier();
             if (assertionMethods.isEmpty()) {
                 bestPracticeViolations.add(new BestPracticeViolation(
                         method,
-                        method.getTextRange(),
+                        methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
                         "Test should contain at least one assertion method!",
                         BestPractice.AT_LEAST_ONE_ASSERTION
                 ));
             }
             if (assertionMethods.size() > 1) {
-                StringBuilder hintMessageBuilder = new StringBuilder();
+                List<String> hints = new ArrayList<>();
                 String message = "Test should contain only one assertion method!";
                 if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
-                    hintMessageBuilder.append(String.format("You are using JUnit5 so it can be solved by wrapping multiple assertions into %s.assertAll() method", JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH));
+                    hints.add(String.format("You are using JUnit5 so it can be solved by wrapping multiple assertions into %s.assertAll() method", JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH));
                 }
                 if (assertionMethods.stream().anyMatch(isAssertionMethodFrom(JUnitConstants.HAMCREST_ASSERTIONS_CLASS_PATH))) {
-                    if (hintMessageBuilder.length() != 0) {
-                        hintMessageBuilder.append(" or ");
-                    }
-                    hintMessageBuilder.append("you can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers");
+                    hints.add("you can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers");
                 }
 
                 bestPracticeViolations.add(new BestPracticeViolation(
                         method,
-                        method.getTextRange(),
+                        methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
                         message,
-                        hintMessageBuilder.length() != 0 ? hintMessageBuilder.toString() : null,
-                        BestPractice.ONLY_ONE_ASSERTION
-                ));
+                        hints,
+                        BestPractice.ONLY_ONE_ASSERTION,
+                        assertionMethods.stream().map(assertion -> (PsiElement) assertion).collect(Collectors.toList())));
 
 
             }

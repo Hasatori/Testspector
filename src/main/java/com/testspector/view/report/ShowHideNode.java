@@ -12,11 +12,8 @@ import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
-import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.view.Icons;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,40 +23,46 @@ import java.awt.*;
 
 public class ShowHideNode extends BestPracticeViolationNode {
 
-    private final TextRange textRange;
-    private final PsiElement psiElement;
-    private final Project project;
     private final TreeViewReport treeViewReport;
+    private final PsiElement element;
+    private final String onHideLabel;
+    private final String onShowLabel;
+    private final TextRange textRange;
     private boolean isCodeHighlighted = false;
     private RangeHighlighter highlighter;
-    private String text = "Show highliting";
 
-    public ShowHideNode(BestPracticeViolation bestPracticeViolation, Project project, TreeViewReport treeViewReport) {
-        super(bestPracticeViolation);
-        this.textRange = bestPracticeViolation.getTextRange();
-        this.psiElement = bestPracticeViolation.getPsiElement();
+    public ShowHideNode(PsiElement navigationElement,PsiElement element,TextRange textRange, TreeViewReport treeViewReport,String onShowLabel,String onHideLabel) {
+        super(navigationElement);
         this.highlighter = null;
-        this.project = project;
         this.treeViewReport = treeViewReport;
+        this.element = element;
+        this.onShowLabel = onShowLabel;
+        this.onHideLabel = onHideLabel;
+        this.textRange = textRange;
+
+    }
+
+    public String getOnHideLabel() {
+        return onHideLabel;
+    }
+
+    public String getOnShowLabel() {
+        return onShowLabel;
     }
 
     public boolean isCodeHighlighted() {
         return isCodeHighlighted;
     }
 
-    public void setCodeHighlighted(boolean codeHighlighted) {
+    private void setCodeHighlighted(boolean codeHighlighted) {
         isCodeHighlighted = codeHighlighted;
     }
 
-    public PsiElement getPsiElement() {
-        return psiElement;
+    public PsiElement getElement() {
+        return element;
     }
 
-    public TextRange getTextRange() {
-        return textRange;
-    }
-
-    public RangeHighlighter getHighlighter() {
+    private RangeHighlighter getHighlighter() {
         return highlighter;
     }
 
@@ -68,7 +71,7 @@ public class ShowHideNode extends BestPracticeViolationNode {
     }
 
     public void highlight() {
-        FileEditor[] editors = FileEditorManager.getInstance(project).getEditors(getPsiElement().getContainingFile().getVirtualFile());
+        FileEditor[] editors = FileEditorManager.getInstance(getElement().getProject()).getEditors(getElement().getContainingFile().getVirtualFile());
         MarkupModel markupModel = null;
 
         for (FileEditor editor2 : editors) {
@@ -80,20 +83,20 @@ public class ShowHideNode extends BestPracticeViolationNode {
         if (markupModel != null) {
             if (!isCodeHighlighted()) {
                 setCodeHighlighted(true);
-                setHighlighter(markupModel.addRangeHighlighter(getTextRange().getStartOffset(), getTextRange().getEndOffset(), 9999, new TextAttributes(null, null, Color.BLUE, EffectType.BOLD_LINE_UNDERSCORE, Font.PLAIN), HighlighterTargetArea.EXACT_RANGE));
+                setHighlighter(markupModel.addRangeHighlighter(textRange.getStartOffset(), textRange.getEndOffset(), 9999, new TextAttributes(null, null, Color.BLUE, EffectType.BOLD_LINE_UNDERSCORE, Font.PLAIN), HighlighterTargetArea.EXACT_RANGE));
                 ((EditorMarkupModelImpl) markupModel).getEditor().addEditorMouseListener(new EditorMouseListener() {
                     @Override
                     public void mouseClicked(@NotNull EditorMouseEvent event) {
                         int offset = event.getEditor().getCaretModel().getCurrentCaret().getOffset();
-                        if (offset <= getTextRange().getEndOffset() && offset >= getTextRange().getStartOffset()) {
+                        if (offset <= textRange.getEndOffset() && offset >= textRange.getStartOffset()) {
                             treeViewReport.clearSelection();
                             treeViewReport.setSelectionPath(new TreePath(getPath()));
                         }
                     }
                 });
                 MarkupModel finalMarkupModel = markupModel;
-                new AnnotationHolderImpl(new AnnotationSession(getPsiElement().getContainingFile())).createAnnotation(HighlightSeverity.INFORMATION, getTextRange(), "Test");
-                com.intellij.codeInsight.daemon.DaemonCodeAnalyzer.getInstance(project).restart();
+                new AnnotationHolderImpl(new AnnotationSession(getElement().getContainingFile())).createAnnotation(HighlightSeverity.INFORMATION,textRange, "Test");
+                com.intellij.codeInsight.daemon.DaemonCodeAnalyzer.getInstance(getElement().getProject()).restart();
                 getHighlighter().setGutterIconRenderer(new GutterIconRenderer() {
                     @Override
                     public boolean equals(Object obj) {
