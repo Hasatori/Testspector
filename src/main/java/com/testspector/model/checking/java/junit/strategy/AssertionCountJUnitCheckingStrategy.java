@@ -11,10 +11,15 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.testspector.model.checking.java.junit.JUnitConstants.ASSERTION_CLASS_PATHS;
+
 public class AssertionCountJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
     private final JavaElementHelper javaElementHelper;
 
+    public static final List<String> GROUP_ASSERTION_NAMES = Collections.unmodifiableList(Arrays.asList(
+            "assertAll"
+    ));
 
     public AssertionCountJUnitCheckingStrategy(JavaElementHelper javaElementHelper) {
         this.javaElementHelper = javaElementHelper;
@@ -98,7 +103,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
     private Predicate<PsiMethodCallExpression> isAssertionMethod() {
         return psiMethodCallExpression -> Optional.ofNullable(psiMethodCallExpression.resolveMethod())
                 .map(PsiJvmMember::getContainingClass)
-                .map(psiClass -> JUnitConstants.ASSERTION_CLASS_PATHS.contains(psiClass.getQualifiedName()))
+                .map(psiClass -> ASSERTION_CLASS_PATHS.contains(psiClass.getQualifiedName()))
                 .orElse(false);
     }
 
@@ -106,10 +111,19 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
         List<PsiMethodCallExpression> psiMethodCallExpressions = new ArrayList<>();
         List<PsiElement> children = Arrays.stream(psiElement.getChildren()).collect(Collectors.toList());
         for (PsiElement child : children) {
+            boolean shouldContinue = true;
             if (child instanceof PsiMethodCallExpression) {
                 psiMethodCallExpressions.add((PsiMethodCallExpression) child);
+                PsiMethodCallExpression methodCallExpression = (PsiMethodCallExpression) child;
+                PsiMethod method = methodCallExpression.resolveMethod();
+                if (method != null && GROUP_ASSERTION_NAMES.contains(method.getName()) && method.getContainingClass() != null && ASSERTION_CLASS_PATHS.contains(method.getContainingClass().getQualifiedName())) {
+                    shouldContinue = false;
+                }
             }
-            psiMethodCallExpressions.addAll(getRelevantMethodExpression(child));
+            if (shouldContinue) {
+                psiMethodCallExpressions.addAll(getRelevantMethodExpression(child));
+            }
+
         }
         return psiMethodCallExpressions;
     }
