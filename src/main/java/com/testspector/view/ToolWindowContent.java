@@ -149,11 +149,11 @@ public class ToolWindowContent {
                 highlightAll.setEnabled(false);
                 contentWrapper.removeAll();
                 contentWrapper.add(processingWrapper);
-                panel1.validate();
-                panel1.repaint();
-                rerunToolWindowContentAction.rerun(ToolWindowContent.this);
                 stop.setEnabled(true);
                 rerun.setEnabled(false);
+                panel1.revalidate();
+                panel1.repaint();
+                rerunToolWindowContentAction.rerun(ToolWindowContent.this);
             }
         });
 
