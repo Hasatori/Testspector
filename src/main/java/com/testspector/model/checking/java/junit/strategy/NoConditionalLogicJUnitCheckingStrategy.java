@@ -33,7 +33,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         List<PsiStatement> statements = new ArrayList<>();
         for (PsiMethod method : methods) {
-            statements.addAll(getConditionalStatements(method, method.getContainingClass()));
+            statements.addAll(getConditionalStatements(method));
         }
         statements = statements.stream().distinct().collect(Collectors.toList());
         for (PsiStatement psiStatement : statements) {
@@ -46,7 +46,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         return bestPracticeViolations;
     }
 
-    private List<PsiStatement> getConditionalStatements(PsiMethod method, PsiClass psiClass) {
+    private List<PsiStatement> getConditionalStatements(PsiMethod method) {
         List<PsiStatement> conditionalStatements = new ArrayList<>();
         PsiCodeBlock methodBody = method.getBody();
         if (methodBody != null) {
@@ -57,8 +57,8 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantMethodExpression(method);
         for (PsiMethodCallExpression psiMethodCallExpression : psiMethodCallExpressions) {
             PsiMethod referencedMethod = psiMethodCallExpression.resolveMethod();
-            if (referencedMethod != null && referencedMethod.getContainingClass() == psiClass) {
-                conditionalStatements.addAll(getConditionalStatements(referencedMethod, psiClass));
+            if (referencedMethod != null && javaElementHelper.isInTestContext(referencedMethod)) {
+                conditionalStatements.addAll(getConditionalStatements(referencedMethod));
             }
         }
         return conditionalStatements;

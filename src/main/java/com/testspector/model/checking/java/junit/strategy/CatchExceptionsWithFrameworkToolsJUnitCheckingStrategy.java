@@ -35,7 +35,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
-            List<PsiTryStatement> psiTryStatements = getTryStatements(method, method.getContainingClass());
+            List<PsiTryStatement> psiTryStatements = getTryStatements(method);
             if (psiTryStatements.size() > 0) {
                 StringBuilder hintMessageBuilder = new StringBuilder();
                 String message = "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.";
@@ -57,7 +57,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         return bestPracticeViolations;
     }
 
-    private List<PsiTryStatement> getTryStatements(PsiMethod method, PsiClass psiClass) {
+    private List<PsiTryStatement> getTryStatements(PsiMethod method) {
         List<PsiTryStatement> tryStatements = new ArrayList<>();
         PsiCodeBlock psiCodeBlock = method.getBody();
         if (psiCodeBlock != null) {
@@ -66,8 +66,8 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
             List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantMethodCalls(psiCodeBlock);
             for (PsiMethodCallExpression psiMethodCallExpression : psiMethodCallExpressions) {
                 PsiMethod referencedMethod = psiMethodCallExpression.resolveMethod();
-                if (referencedMethod != null && referencedMethod.getContainingClass() == psiClass) {
-                    tryStatements.addAll(getTryStatements(referencedMethod, psiClass));
+                if (referencedMethod != null && javaElementHelper.isInTestContext(referencedMethod)) {
+                    tryStatements.addAll(getTryStatements(referencedMethod));
                 }
             }
         }

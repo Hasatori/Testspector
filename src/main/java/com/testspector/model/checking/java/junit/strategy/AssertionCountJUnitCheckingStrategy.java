@@ -35,7 +35,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
-            List<PsiMethodCallExpression> assertionMethods = getAssertionsMethods(method, method.getContainingClass());
+            List<PsiMethodCallExpression> assertionMethods = getAssertionsMethods(method);
             if (assertionMethods.isEmpty()) {
                 bestPracticeViolations.add(new BestPracticeViolation(
                         method,
@@ -71,7 +71,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
         return bestPracticeViolations;
     }
 
-    private List<PsiMethodCallExpression> getAssertionsMethods(PsiMethod psiMethod, PsiClass psiClass) {
+    private List<PsiMethodCallExpression> getAssertionsMethods(PsiMethod psiMethod) {
         List<PsiMethodCallExpression> methodCallExpressions = new ArrayList<>();
         PsiCodeBlock psiCodeBlock = psiMethod.getBody();
         if (psiCodeBlock != null) {
@@ -85,8 +85,8 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
             List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantMethodExpression(psiCodeBlock);
             for (PsiMethodCallExpression psiMethodCallExpression : psiMethodCallExpressions) {
                 PsiMethod referencedMethod = psiMethodCallExpression.resolveMethod();
-                if (referencedMethod != null && referencedMethod.getContainingClass() == psiClass) {
-                    methodCallExpressions.addAll(getAssertionsMethods(referencedMethod, psiClass));
+                if (referencedMethod != null && javaElementHelper.isInTestContext(referencedMethod)) {
+                    methodCallExpressions.addAll(getAssertionsMethods(referencedMethod));
                 }
             }
         }
