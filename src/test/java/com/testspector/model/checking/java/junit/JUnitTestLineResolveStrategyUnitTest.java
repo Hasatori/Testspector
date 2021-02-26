@@ -57,7 +57,6 @@ public class JUnitTestLineResolveStrategyUnitTest extends BasePlatformTestCase {
                 .runReadAction(((Computable<PsiElement>) () -> jUnitTestLineResolveStrategy.resolveTestLine(someJUnit5Method).get()));
 
         Assert.assertSame("Methods identifier should have been returned!", expectedTestLine, resolvedTestLine);
-        throw new AssertionError();
     }
 
     @Test

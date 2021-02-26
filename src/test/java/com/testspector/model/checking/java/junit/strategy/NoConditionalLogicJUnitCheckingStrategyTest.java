@@ -20,7 +20,6 @@ import java.util.List;
 
 import static com.testspector.model.checking.java.junit.JUnitTestUtil.getMethodFromFileByName;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 
 @RunWith(JUnitPlatform.class)
@@ -59,24 +58,22 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
             PsiMethod helperMethod = getMethodFromFileByName(javaFile, "helperMethodWithIf").get();
             PsiIfStatement helperMethodIfStatement = getConditionalStatement(helperMethod, PsiIfStatement.class);
 
-            List<BestPracticeViolation> expectedViolations = Arrays.asList(
-                    createBestPracticeViolation(helperMethodIfStatement),
-                    createBestPracticeViolation(testMethodForStatement)
+            List<BestPracticeViolation> expectedViolations = Collections.singletonList(
+                    createBestPracticeViolation(testMethod, Arrays.asList(testMethodForStatement, helperMethodIfStatement))
             );
             sortViolationsByTextRangeStartOffset(expectedViolations);
             JavaElementHelper javaElementHelper = EasyMock.mock(JavaElementHelper.class);
             EasyMock.expect(javaElementHelper.getMethodsFromElementByAnnotations(Collections.singletonList(testMethod), JUNIT_TEST_QUALIFIED_NAMES)).andReturn(Collections.singletonList(testMethod));
+            EasyMock.expect(javaElementHelper.isInTestContext(testMethod)).andReturn(true);
+            EasyMock.expect(javaElementHelper.isInTestContext(helperMethod)).andReturn(true);
             EasyMock.replay(javaElementHelper);
 
             NoConditionalLogicJUnitCheckingStrategy noConditionalLogicJUnitCheckingStrategy = new NoConditionalLogicJUnitCheckingStrategy(javaElementHelper);
             List<BestPracticeViolation> foundViolations = noConditionalLogicJUnitCheckingStrategy.checkBestPractices(testMethod);
             sortViolationsByTextRangeStartOffset(foundViolations);
 
+            assertThat(foundViolations.get(0)).isEqualToComparingFieldByField(expectedViolations.get(0));
 
-            assertAll(
-                    () -> assertThat(foundViolations.get(0)).as("Test method for statement violation").isEqualToComparingFieldByField(expectedViolations.get(0)),
-                    () -> assertThat(foundViolations.get(1)).as("Helper method if statement violation").isEqualToComparingFieldByField(expectedViolations.get(1))
-            );
         });
     }
 
@@ -88,12 +85,13 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
             PsiWhileStatement testMethodWhileStatement = getConditionalStatement(testMethod, PsiWhileStatement.class);
             PsiMethod helperMethod = getMethodFromFileByName(javaFile, "helperMethodWithSwitch").get();
             PsiSwitchStatement helperMethodSwitchStatement = getConditionalStatement(helperMethod, PsiSwitchStatement.class);
-            List<BestPracticeViolation> expectedViolations = Arrays.asList(
-                    createBestPracticeViolation(helperMethodSwitchStatement),
-                    createBestPracticeViolation(testMethodWhileStatement)
+            List<BestPracticeViolation> expectedViolations = Collections.singletonList(
+                    createBestPracticeViolation(testMethod, Arrays.asList(testMethodWhileStatement, helperMethodSwitchStatement))
             );
             sortViolationsByTextRangeStartOffset(expectedViolations);
             JavaElementHelper javaElementHelper = EasyMock.mock(JavaElementHelper.class);
+            EasyMock.expect(javaElementHelper.isInTestContext(testMethod)).andReturn(true);
+            EasyMock.expect(javaElementHelper.isInTestContext(helperMethod)).andReturn(true);
             EasyMock.expect(javaElementHelper.getMethodsFromElementByAnnotations(Collections.singletonList(testMethod), JUNIT_TEST_QUALIFIED_NAMES)).andReturn(Collections.singletonList(testMethod));
             EasyMock.replay(javaElementHelper);
 
@@ -102,11 +100,8 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
 
             sortViolationsByTextRangeStartOffset(foundViolations);
 
+            assertThat(foundViolations.get(0)).isEqualToComparingFieldByField(expectedViolations.get(0));
 
-            assertAll(
-                    () -> assertThat(foundViolations.get(0)).as("Test method while statement violation").isEqualToComparingFieldByField(expectedViolations.get(0)),
-                    () -> assertThat(foundViolations.get(1)).as("Helper method switch statement violation").isEqualToComparingFieldByField(expectedViolations.get(1))
-            );
         });
     }
 
@@ -122,12 +117,16 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
         bestPracticeViolations.sort(Comparator.comparingInt(o -> o.getTextRange().getStartOffset()));
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiStatement psiStatement) {
+    private BestPracticeViolation createBestPracticeViolation(PsiMethod method, List<PsiElement> errorElements) {
         return new BestPracticeViolation(
-                psiStatement,
-                psiStatement.getTextRange(),
-                String.format("%s statement logic should not be part of the test method, it makes test hard to understand and read. Remove if statements and create separate test scenario for each branch.", psiStatement.toString()),
-                BestPractice.NO_CONDITIONAL_LOGIC);
+                method,
+                method.getNameIdentifier().getTextRange(),
+                "Conditional logic should not be part of the test method, it makes test hard to understand and read.",
+                Collections.singletonList("Remove statements and create separate test scenario for each branch"),
+                BestPractice.NO_CONDITIONAL_LOGIC,
+                errorElements
+
+        );
 
     }
 }
