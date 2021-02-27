@@ -25,20 +25,20 @@ public class InspectTestAction extends AnAction {
         Project project = anActionEvent.getProject();
         if (psiFile == null) {
             VirtualFile virtualFile = anActionEvent.getData(CommonDataKeys.VIRTUAL_FILE);
-            TestspectorController.initializeTestspector(project, collectPsiFilesFromVirtualFile(virtualFile), virtualFile.getCanonicalPath());
+            TestspectorController.initializeTestspector(project, collectPsiFilesFromVirtualFile(project,virtualFile), virtualFile.getCanonicalPath());
         } else {
             TestspectorController.initializeTestspector(project, psiFile);
         }
     }
 
-    private List<PsiFile> collectPsiFilesFromVirtualFile(VirtualFile virtualFile) {
+    private List<PsiFile> collectPsiFilesFromVirtualFile(Project project,VirtualFile virtualFile) {
         ArrayList<PsiFile> collectedPsiFiles = new ArrayList<>();
         Arrays.stream(virtualFile.getChildren()).forEach(virtualFile1 -> {
-            PsiFile file = PsiManager.getInstance(ProjectManager.getInstance().getOpenProjects()[0]).findFile(virtualFile1);
+            PsiFile file = PsiManager.getInstance(project).findFile(virtualFile1);
             if (file != null) {
                 collectedPsiFiles.add(file);
             }
-            collectedPsiFiles.addAll(collectPsiFilesFromVirtualFile(virtualFile1));
+            collectedPsiFiles.addAll(collectPsiFilesFromVirtualFile(project,virtualFile1));
         });
         return collectedPsiFiles;
     }
