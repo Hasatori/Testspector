@@ -184,7 +184,7 @@
                           <component id="a062a" class="javax.swing.JLabel">
                             <constraints/>
                             <properties>
-                              <icon value="icons/loading_dark.gif"/>
+                              <icon value="icons/customLoading.gif"/>
                               <text value=""/>
                             </properties>
                           </component>
