@@ -2,6 +2,7 @@ package com.testspector.view;
 
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.ui.ConsoleView;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.view.report.TreeViewReport;
@@ -10,12 +11,15 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import java.awt.*;
+import java.awt.event.AWTEventListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.testspector.view.Icons.*;
+import static com.testspector.view.CustomIcon.*;
 
 public class ToolWindowContent {
 
@@ -47,7 +51,6 @@ public class ToolWindowContent {
 
     private TreeViewReport reportContent = null;
 
-
     public ToolWindowContent(Project project) {
         this.project = project;
         consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
@@ -57,37 +60,36 @@ public class ToolWindowContent {
         splitPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
         rightNav.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
-        setupActionLabel(expand, EXPAND_ALL, EXPAND_ALL_HOVER, EXPAND_ALL_DISABLED, false, () -> this.reportContent.expandAll());
-        setupActionLabel(clearConsole, CLEAR_CONSOLE, CLEAR_CONSOLE_HOVER, null, false, () -> this.consoleView.clear());
-        setupActionLabel(collapse, COLLAPSE_ALL, COLLAPSE_ALL_HOVER, COLLAPSE_ALL_DISABLED, false, () -> this.reportContent.collapseAll());
-        setupActionLabel(highlightAll, SHOW, SHOW_HOVER, SHOW_DISABLED, false, () -> {
+        setupActionLabel(expand, EXPAND_ALL,  false, () -> this.reportContent.expandAll());
+        setupActionLabel(clearConsole,CLEAR, false, () -> this.consoleView.clear());
+        setupActionLabel(collapse, COLLAPSE_ALL, false, () -> this.reportContent.collapseAll());
+        setupActionLabel(highlightAll, SHOW, false, () -> {
             this.reportContent.highlightAll();
             this.contentWrapper.repaint();
         });
-        setupActionLabel(stop, STOP, STOP_HOVER, STOP_DISABLED, false);
-        setupActionLabel(rerun, RERUN, RERUN_HOVER, RERUN_DISABLED, false);
+        setupActionLabel(stop, STOP,  false);
+        setupActionLabel(rerun, RERUN,  false);
         Arrays.stream(lefNavElementsWrapper.getComponents()).filter(component -> component instanceof JLabel).forEach(leftNavComp -> {
             ((JLabel) leftNavComp).setBorder(new EmptyBorder(2, 0, 2, 0));
         });
-        setupActionLabel(clearConsole, CLEAR_CONSOLE, CLEAR_CONSOLE_HOVER, null, true);
         splitPane.setDividerLocation(panel1.getPreferredSize().width / 2);
     }
 
-    private void setupActionLabel(JLabel label, Icon icon, Icon hoverIcon, Icon disabledIcon, boolean enabled) {
-        setupActionLabel(label, icon, hoverIcon, disabledIcon, enabled, () -> {
+    private void setupActionLabel(JLabel label, CustomIcon customIcon, boolean enabled) {
+        setupActionLabel(label,customIcon, enabled, () -> {
         });
     }
 
-    private void setupActionLabel(JLabel label, Icon icon, Icon hoverIcon, Icon disabledIcon, boolean enabled, Runnable onClick) {
-        label.setIcon(icon);
-        label.setDisabledIcon(disabledIcon);
+    private void setupActionLabel(JLabel label, CustomIcon customIcon, boolean enabled, Runnable onClick) {
+        label.setIcon(customIcon.getBasic());
+        label.setDisabledIcon(customIcon.getDisabled());
         label.setEnabled(enabled);
         label.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
                 super.mouseEntered(e);
                 label.setCursor(CURSOR_HAND);
-                label.setIcon(hoverIcon);
+                label.setIcon(customIcon.getHover());
             }
         });
 
@@ -95,7 +97,7 @@ public class ToolWindowContent {
             @Override
             public void mouseExited(MouseEvent e) {
                 super.mouseExited(e);
-                label.setIcon(icon);
+                label.setIcon(customIcon.getBasic());
                 label.setCursor(CURSOR_DEFAULT);
             }
         });
@@ -169,7 +171,7 @@ public class ToolWindowContent {
                 highlightAll.setEnabled(false);
                 contentWrapper.removeAll();
                 JLabel interruptedLabel = new JLabel("Interrupted");
-                interruptedLabel.setIcon(WARNING);
+                interruptedLabel.setIcon(WARNING.getBasic());
                 contentWrapper.add(interruptedLabel);
                 panel1.revalidate();
                 panel1.repaint();
@@ -185,7 +187,7 @@ public class ToolWindowContent {
             expand.setEnabled(false);
             highlightAll.setEnabled(false);
             JLabel noErrorsLabel = new JLabel("Not best practice violations found. Great job!");
-            noErrorsLabel.setIcon(SUCCEEDED);
+            noErrorsLabel.setIcon(SUCCEEDED.getBasic());
             this.contentWrapper.add(noErrorsLabel);
         } else {
             collapse.setEnabled(true);

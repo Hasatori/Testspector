@@ -42,6 +42,7 @@
                 </constraints>
                 <properties>
                   <text value=""/>
+                  <toolTipText value="highlight all"/>
                 </properties>
               </component>
               <component id="ad48e" class="javax.swing.JLabel" binding="expand">

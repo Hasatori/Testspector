@@ -1,6 +1,6 @@
 package com.testspector.view.report;
 
-import com.testspector.view.Icons;
+import com.testspector.view.CustomIcon;
 
 import javax.swing.*;
 import javax.swing.tree.TreeCellRenderer;
@@ -16,17 +16,17 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
         if (value instanceof WrapperNode) {
             WrapperNode wrapperNode = (WrapperNode) value;
             label.setText(wrapperNode.getName());
-            label.setIcon(Icons.PACKAGE);
+            label.setIcon(CustomIcon.PACKAGE.getBasic());
             return label;
         } else if (value instanceof WarningNode) {
             WarningNode warningNode = (WarningNode) value;
             label.setText(String.format("<html><b>%s</b></html>", warningNode.getDescription()));
-            label.setIcon(Icons.WARNING);
+            label.setIcon(CustomIcon.WARNING.getBasic());
             return label;
         } else if (value instanceof ViolatedRuleNode) {
             ViolatedRuleNode violatedRuleNode = (ViolatedRuleNode) value;
             label.setText("Broken rule: ");
-            label.setIcon(Icons.ERROR);
+            label.setIcon(CustomIcon.ERROR.getBasic());
             JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
             panel.add(label);
             JLabel ruleLabel = new JLabel(violatedRuleNode.getViolatedBestPractice().getDisplayName().toUpperCase());
@@ -48,16 +48,16 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
         } else if (value instanceof InfoNode) {
             InfoNode simpleTextNode = (InfoNode) value;
             label.setText(String.format("<html><b>%s</b></html>", simpleTextNode.getDescription()));
-            label.setIcon(Icons.INFO);
+            label.setIcon(CustomIcon.INFO.getBasic());
             return label;
         } else if (value instanceof ShowHideNode) {
             ShowHideNode showHideNode = (ShowHideNode) value;
             if (showHideNode.isCodeHighlighted()) {
                 label.setText(showHideNode.getOnHideLabel());
-                label.setIcon(Icons.HIDE);
+                label.setIcon(CustomIcon.HIDE.getBasic());
             } else {
                 label.setText(showHideNode.getOnShowLabel());
-                label.setIcon(Icons.SHOW);
+                label.setIcon(CustomIcon.SHOW.getBasic());
             }
         } else if (value instanceof SimpleTextNode) {
             label.setText(((SimpleTextNode) value).getDescription());

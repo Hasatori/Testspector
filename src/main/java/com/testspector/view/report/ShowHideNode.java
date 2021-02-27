@@ -14,7 +14,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
-import com.testspector.view.Icons;
+import com.testspector.view.CustomIcon;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -31,7 +31,7 @@ public class ShowHideNode extends BestPracticeViolationNode {
     private boolean isCodeHighlighted = false;
     private RangeHighlighter highlighter;
 
-    public ShowHideNode(PsiElement navigationElement,PsiElement element,TextRange textRange, TreeViewReport treeViewReport,String onShowLabel,String onHideLabel) {
+    public ShowHideNode(PsiElement navigationElement, PsiElement element, TextRange textRange, TreeViewReport treeViewReport, String onShowLabel, String onHideLabel) {
         super(navigationElement);
         this.highlighter = null;
         this.treeViewReport = treeViewReport;
@@ -95,7 +95,7 @@ public class ShowHideNode extends BestPracticeViolationNode {
                     }
                 });
                 MarkupModel finalMarkupModel = markupModel;
-                new AnnotationHolderImpl(new AnnotationSession(getElement().getContainingFile())).createAnnotation(HighlightSeverity.INFORMATION,textRange, "Test");
+                new AnnotationHolderImpl(new AnnotationSession(getElement().getContainingFile())).createAnnotation(HighlightSeverity.INFORMATION, textRange, "Test");
                 com.intellij.codeInsight.daemon.DaemonCodeAnalyzer.getInstance(getElement().getProject()).restart();
                 getHighlighter().setGutterIconRenderer(new GutterIconRenderer() {
                     @Override
@@ -111,7 +111,7 @@ public class ShowHideNode extends BestPracticeViolationNode {
                     @NotNull
                     @Override
                     public Icon getIcon() {
-                        return Icons.DELETE;
+                        return CustomIcon.DELETE.getBasic();
                     }
 
                     @Override
