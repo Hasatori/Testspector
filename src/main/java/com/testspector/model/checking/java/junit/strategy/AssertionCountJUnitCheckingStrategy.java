@@ -74,9 +74,9 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
         PsiCodeBlock psiCodeBlock = psiMethod.getBody();
         if (psiCodeBlock != null) {
 
-            methodCallExpressions.addAll(javaElementHelper.getElementsByType(psiCodeBlock, PsiExpressionStatement.class)
+            methodCallExpressions.addAll(javaElementHelper.getImmediateChildrenOfType(psiCodeBlock, PsiExpressionStatement.class)
                     .stream()
-                    .map(psiExpression -> javaElementHelper.getElementsByType(psiExpression, PsiMethodCallExpression.class))
+                    .map(psiExpression -> javaElementHelper.getImmediateChildrenOfType(psiExpression, PsiMethodCallExpression.class))
                     .flatMap(Collection::stream)
                     .filter(isAssertionMethod())
                     .collect(Collectors.toList()));

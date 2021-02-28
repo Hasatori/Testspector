@@ -14,7 +14,9 @@ public final class JUnitConstants {
     public static final List<String> ASSERTION_CLASS_PATHS = Collections.unmodifiableList(Arrays.asList(
             JUNIT5_ASSERTIONS_CLASS_PATH,
             HAMCREST_ASSERTIONS_CLASS_PATH,
-            JUNIT4_ASSERTIONS_CLASS_PATH
+            JUNIT4_ASSERTIONS_CLASS_PATH,
+            "junit.framework.TestCase",
+            "org.assertj.core.api.AssertionsForClassTypes"
     ));
 
     private JUnitConstants() {

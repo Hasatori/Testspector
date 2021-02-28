@@ -6,6 +6,7 @@ import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiMethod;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -58,19 +59,89 @@ public class JavaElementHelper {
     }
 
 
-    public <T extends PsiElement> List<T> getElementsByType(PsiElement psiElement, Class<T> elementType) {
+    public <T extends PsiElement> List<T> getImmediateChildrenOfType(PsiElement psiElement, Class<T> elementType) {
         return Arrays.stream(psiElement.getChildren())
                 .filter(elementType::isInstance)
                 .map(elementType::cast)
                 .collect(Collectors.toList());
     }
 
-    public boolean isInTestContext(PsiMethod method) {
-        PsiJavaFile psiJavaFile = (PsiJavaFile) method.getContainingFile();
+    public boolean isInTestContext(PsiElement element) {
+        PsiJavaFile psiJavaFile = (PsiJavaFile) element.getContainingFile();
         String absolutePath = psiJavaFile.getVirtualFile().getPath();
         String packagePath = psiJavaFile.getPackageName();
-        String projectName = psiJavaFile.getProject().getName();
-        return Pattern.compile(String.format("%s/src/test/java/%s/%s$", projectName, packagePath.replaceAll("\\.", "/"),psiJavaFile.getName())).matcher((absolutePath)).find();
+        return Pattern.compile(String.format("src/test/java/%s/%s$", packagePath.replaceAll("\\.", "/"), psiJavaFile.getName())).matcher((absolutePath)).find();
 
     }
+
+    public boolean isInProductionCodeContext(PsiElement element) {
+        PsiJavaFile psiJavaFile = (PsiJavaFile) element.getContainingFile();
+        String absolutePath = psiJavaFile.getVirtualFile().getPath();
+        String packagePath = psiJavaFile.getPackageName();
+        return Pattern.compile(String.format("src/main/java/%s/%s$", packagePath.replaceAll("\\.", "/"), psiJavaFile.getName())).matcher((absolutePath)).find();
+
+    }
+
+    public <T extends PsiElement> List<T> getAllChildrenOfType(PsiElement psiElement, Class<T> elementType) {
+        List<T> result = new ArrayList<>();
+        for (PsiElement child : psiElement.getChildren()) {
+            if (elementType.isInstance(child)) {
+                result.add(elementType.cast(child));
+            }
+            result.addAll(getAllChildrenOfType(child, elementType));
+        }
+        return result;
+    }
+
+    public <T extends PsiElement> Optional<T> getLastChildOfType(PsiElement psiElement, Class<T> elementType) {
+        Optional<T> result = Optional.empty();
+
+        for (PsiElement child : psiElement.getChildren()) {
+            if (elementType.isInstance(child)) {
+                result = Optional.of(elementType.cast(child));
+            }
+            Optional<T> candidate = getLastChildOfType(child, elementType);
+            if (candidate.isPresent()) {
+                result = candidate;
+            }
+        }
+        return result;
+    }
+
+    public <T extends PsiElement> Optional<T> getLastLeftChildOfType(PsiElement psiElement, Class<T> elementType) {
+        Optional<T> result = Optional.empty();
+
+        for (PsiElement child : psiElement.getChildren()) {
+            if (elementType.isInstance(child)) {
+                result = Optional.of(elementType.cast(child));
+            }
+            Optional<T> candidate = getLastLeftChildOfType(child, elementType);
+            if (candidate.isPresent()) {
+                result = candidate;
+                break;
+            }
+        }
+        return result;
+    }
+
+    public <T extends PsiElement> List<T> getAllChildrenOfType(PsiElement psiElement, Class<T> elementType, Predicate<T> conditionToMeet) {
+        List<T> result = new ArrayList<>();
+        for (PsiElement child : psiElement.getChildren()) {
+            if (elementType.isInstance(child) && conditionToMeet.test(elementType.cast(child))) {
+                result.add(elementType.cast(child));
+            }
+            result.addAll(getAllChildrenOfType(child, elementType));
+        }
+        return result;
+    }
+
+    public Optional<PsiElement> getFirstChildIgnoring(PsiElement psiElement, List<Class<? extends PsiElement>> ignoredList) {
+        for (PsiElement child : psiElement.getChildren()) {
+            if (ignoredList.stream().noneMatch(ignored -> ignored.isInstance(child))) {
+                return Optional.of(child);
+            }
+        }
+        return Optional.empty();
+    }
+
 }

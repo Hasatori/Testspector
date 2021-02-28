@@ -64,7 +64,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         PsiCodeBlock psiCodeBlock = method.getBody();
         if (psiCodeBlock != null) {
 
-            tryStatements.addAll(new ArrayList<>(javaElementHelper.getElementsByType(psiCodeBlock, PsiTryStatement.class)));
+            tryStatements.addAll(new ArrayList<>(javaElementHelper.getImmediateChildrenOfType(psiCodeBlock, PsiTryStatement.class)));
             List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantMethodCalls(psiCodeBlock);
             for (PsiMethodCallExpression psiMethodCallExpression : psiMethodCallExpressions) {
                 PsiMethod referencedMethod = psiMethodCallExpression.resolveMethod();
