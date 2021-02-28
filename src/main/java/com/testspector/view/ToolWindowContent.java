@@ -2,7 +2,6 @@ package com.testspector.view;
 
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.ui.ConsoleView;
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.view.report.TreeViewReport;
@@ -11,13 +10,11 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import java.awt.*;
-import java.awt.event.AWTEventListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static com.testspector.view.CustomIcon.*;
 
@@ -47,7 +44,9 @@ public class ToolWindowContent {
     private JPanel rightNav;
     private JLabel stop;
     private JPanel lefNavElementsWrapper;
+    private JComboBox<TreeViewReport.GroupBy> groupByComboBox;
     private ConsoleView consoleView;
+    private TreeViewReport treeViewReport;
 
     private TreeViewReport reportContent = null;
 
@@ -60,23 +59,34 @@ public class ToolWindowContent {
         splitPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
         rightNav.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
-        setupActionLabel(expand, EXPAND_ALL,  false, () -> this.reportContent.expandAll());
-        setupActionLabel(clearConsole,CLEAR, false, () -> this.consoleView.clear());
+        setupActionLabel(expand, EXPAND_ALL, false, () -> this.reportContent.expandAll());
+        setupActionLabel(clearConsole, CLEAR, false, () -> this.consoleView.clear());
         setupActionLabel(collapse, COLLAPSE_ALL, false, () -> this.reportContent.collapseAll());
         setupActionLabel(highlightAll, SHOW, false, () -> {
             this.reportContent.highlightAll();
             this.contentWrapper.repaint();
         });
-        setupActionLabel(stop, STOP,  false);
-        setupActionLabel(rerun, RERUN,  false);
+        setupActionLabel(stop, STOP, false);
+        setupActionLabel(rerun, RERUN, false);
         Arrays.stream(lefNavElementsWrapper.getComponents()).filter(component -> component instanceof JLabel).forEach(leftNavComp -> {
             ((JLabel) leftNavComp).setBorder(new EmptyBorder(2, 0, 2, 0));
         });
         splitPane.setDividerLocation(panel1.getPreferredSize().width / 2);
+        groupByComboBox.setEnabled(false);
+        groupByComboBox.removeAllItems();
+        Arrays.stream(TreeViewReport.GroupBy.values()).forEach(groupBy -> {
+            groupByComboBox.addItem(groupBy);
+        });
+        groupByComboBox.addActionListener(e -> {
+            reportContent.groupBy((TreeViewReport.GroupBy) Objects.requireNonNull(groupByComboBox.getSelectedItem()));
+            panel1.revalidate();
+            panel1.repaint();
+        });
+
     }
 
     private void setupActionLabel(JLabel label, CustomIcon customIcon, boolean enabled) {
-        setupActionLabel(label,customIcon, enabled, () -> {
+        setupActionLabel(label, customIcon, enabled, () -> {
         });
     }
 
@@ -146,6 +156,7 @@ public class ToolWindowContent {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                groupByComboBox.setEnabled(false);
                 collapse.setEnabled(false);
                 expand.setEnabled(false);
                 highlightAll.setEnabled(false);
@@ -164,6 +175,7 @@ public class ToolWindowContent {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                groupByComboBox.setEnabled(false);
                 stop.setEnabled(false);
                 rerun.setEnabled(true);
                 collapse.setEnabled(false);
@@ -193,13 +205,13 @@ public class ToolWindowContent {
             collapse.setEnabled(true);
             expand.setEnabled(true);
             highlightAll.setEnabled(true);
-            TreeViewReport treeViewReport = new TreeViewReport(bestPracticeViolations, this.project);
+            this.treeViewReport = new TreeViewReport(bestPracticeViolations, this.project, TreeViewReport.GroupBy.FILES);
             this.reportContent = treeViewReport;
             this.contentWrapper.add(treeViewReport);
-            treeViewReport.expandAll();
         }
         stop.setEnabled(false);
         rerun.setEnabled(true);
+        groupByComboBox.setEnabled(true);
         this.panel1.revalidate();
         this.panel1.repaint();
     }

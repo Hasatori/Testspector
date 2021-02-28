@@ -15,6 +15,11 @@ public class ViolatedRuleNode extends BestPracticeViolationNode {
        this.violatedBestPractice = violatedBestPractice;
     }
 
+    public ViolatedRuleNode(BestPractice violatedBestPractice) {
+        super();
+        this.violatedBestPractice = violatedBestPractice;
+    }
+
     public BestPractice getViolatedBestPractice() {
         return violatedBestPractice;
     }

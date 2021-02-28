@@ -12,6 +12,11 @@ public class WrapperNode extends BestPracticeViolationNode {
         this.name = name;
     }
 
+    public WrapperNode(String name) {
+        super();
+        this.name = name;
+    }
+
     public String getName() {
         return this.name;
     }

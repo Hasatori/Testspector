@@ -3,6 +3,7 @@ package com.testspector.view.report;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.enums.BestPractice;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -10,90 +11,25 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class TreeViewReport extends JTree {
 
+    public static final List<String> groupBy = Arrays.asList("Files", "Best practice");
     private final Project project;
+    private final List<BestPracticeViolation> bestPracticeViolations;
 
-    public TreeViewReport(List<BestPracticeViolation> bestPracticeViolations, Project project) {
+    public TreeViewReport(List<BestPracticeViolation> bestPracticeViolations, Project project, GroupBy groupBy) {
         super();
         this.project = project;
-        HashMap<PsiElement, List<BestPracticeViolation>> psiElementBestPracticeViolationHashMap = new HashMap<>();
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
-        for (BestPracticeViolation bestPracticeViolation : bestPracticeViolations) {
-            List<BestPracticeViolation> foundGroup = psiElementBestPracticeViolationHashMap.get(bestPracticeViolation.getPsiElement());
-            if (foundGroup == null) {
-                foundGroup = new ArrayList<>();
-            }
-            foundGroup.add(bestPracticeViolation);
-            psiElementBestPracticeViolationHashMap.put(bestPracticeViolation.getPsiElement(), foundGroup);
-        }
-        psiElementBestPracticeViolationHashMap.forEach((element, group) -> {
-            if (group.size() == 1) {
-                BestPracticeViolation bestPracticeViolation = group.get(0);
-                PsiElement mainNavigationElement = bestPracticeViolation.getPsiElement().getNavigationElement();
-                WrapperNode bestPracticeViolationNode = new WrapperNode(mainNavigationElement, bestPracticeViolation.getPsiElement().toString());
-                bestPracticeViolationNode.add(new ViolatedRuleNode(mainNavigationElement, bestPracticeViolation.getViolatedRule()));
-                bestPracticeViolationNode.add(new ShowHideNode(mainNavigationElement, bestPracticeViolation.getPsiElement(), bestPracticeViolation.getTextRange(), this, "Highlight problematic code", "Delete highlighting of the code"));
-                bestPracticeViolationNode.add(new WarningNode(mainNavigationElement, bestPracticeViolation.getProblemDescription()));
-                if (bestPracticeViolation.getHints() != null && bestPracticeViolation.getHints().size() > 0) {
-                    InfoNode hintsWrapper = new InfoNode(mainNavigationElement, "Hints");
-                    for (String hint : bestPracticeViolation.getHints()) {
-                        SimpleTextNode simpleTextNode = new SimpleTextNode(mainNavigationElement, hint);
-                        hintsWrapper.add(simpleTextNode);
-                    }
-                    bestPracticeViolationNode.add(hintsWrapper);
-                }
-                if (bestPracticeViolation.getErrorElements() != null && bestPracticeViolation.getErrorElements().size() > 0) {
-                   WarningNode errorsWrapper = new WarningNode(mainNavigationElement, "Error elements");
-                    for (PsiElement errorElement : bestPracticeViolation.getErrorElements()) {
-                        PsiElement errorElementNavigationElement = errorElement.getNavigationElement();
-                        WrapperNode errorElementWrapper = new WrapperNode(errorElementNavigationElement, errorElement.toString());
-                        errorElementWrapper.add(new ShowHideNode(errorElementNavigationElement, errorElement, errorElement.getTextRange(), this, "Highlight error element", "Deleted highlighting of the element"));
-                        errorsWrapper.add(errorElementWrapper);
-                    }
-                    bestPracticeViolationNode.add(errorsWrapper);
-                }
-                root.add(bestPracticeViolationNode);
-            }else{
-                PsiElement mainNavigationElement = element.getNavigationElement();
-                WrapperNode groupNode = new WrapperNode(mainNavigationElement,element.toString());
-                for (BestPracticeViolation bestPracticeViolation : group) {
-                    WrapperNode bestPracticeViolationNode = new WrapperNode(mainNavigationElement,bestPracticeViolation.getViolatedRule().getDisplayName());
-                    bestPracticeViolationNode.add(new ViolatedRuleNode(mainNavigationElement, bestPracticeViolation.getViolatedRule()));
-                    bestPracticeViolationNode.add(new ShowHideNode(mainNavigationElement, bestPracticeViolation.getPsiElement(), bestPracticeViolation.getTextRange(), this, "Highlight problematic code", "Delete highlighting of the code"));
-                    bestPracticeViolationNode.add(new WarningNode(mainNavigationElement, bestPracticeViolation.getProblemDescription()));
-                    if (bestPracticeViolation.getHints() != null && bestPracticeViolation.getHints().size() > 0) {
-                        InfoNode hintsWrapper = new InfoNode(mainNavigationElement, "Hints");
-                        for (String hint : bestPracticeViolation.getHints()) {
-                            SimpleTextNode simpleTextNode = new SimpleTextNode(mainNavigationElement, hint);
-                            hintsWrapper.add(simpleTextNode);
-                        }
-                        bestPracticeViolationNode.add(hintsWrapper);
-                    }
-                    if (bestPracticeViolation.getErrorElements() != null && bestPracticeViolation.getErrorElements().size() > 0) {
-                       WarningNode errorsWrapper = new WarningNode(mainNavigationElement, "Error elements");
-                        for (PsiElement errorElement : bestPracticeViolation.getErrorElements()) {
-                            PsiElement errorElementNavigationElement = errorElement.getNavigationElement();
-                            WrapperNode errorElementWrapper = new WrapperNode(errorElementNavigationElement, errorElement.toString());
-                            errorElementWrapper.add(new ShowHideNode(errorElementNavigationElement, errorElement, errorElement.getTextRange(), this, "Highlight error element", "Deleted highlighting of the element"));
-                            errorsWrapper.add(errorElementWrapper);
-                        }
-                        bestPracticeViolationNode.add(errorsWrapper);
-                    }
-                    groupNode.add(bestPracticeViolationNode);
-                }
+        this.bestPracticeViolations = bestPracticeViolations;
+        this.groupBy(groupBy);
 
-                root.add(groupNode);
-            }
-
-
-        });
         this.setAlignmentX(LEFT_ALIGNMENT);
         this.setAlignmentY(TOP_ALIGNMENT);
-        this.setModel(new DefaultTreeModel(root));
+
         this.setRootVisible(false);
         this.setCellRenderer(new TreeReportCellRenderer());
         this.addMouseListener(new TreeReportMouseListener());
@@ -151,4 +87,122 @@ public class TreeViewReport extends JTree {
         }
     }
 
+    public void groupBy(GroupBy groupBy) {
+        switch (groupBy) {
+            case FILES:
+                this.groupByFiles();
+                break;
+            case BEST_PRACTICE:
+                this.groupByBestPractice();
+                break;
+        }
+    }
+
+    private void groupByBestPractice() {
+        HashMap<BestPractice, List<BestPracticeViolation>> psiElementBestPracticeViolationHashMap = new HashMap<>();
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+        for (BestPracticeViolation bestPracticeViolation : bestPracticeViolations) {
+            List<BestPracticeViolation> foundGroup = psiElementBestPracticeViolationHashMap.get(bestPracticeViolation.getViolatedRule());
+            if (foundGroup == null) {
+                foundGroup = new ArrayList<>();
+            }
+            foundGroup.add(bestPracticeViolation);
+            psiElementBestPracticeViolationHashMap.put(bestPracticeViolation.getViolatedRule(), foundGroup);
+        }
+
+        psiElementBestPracticeViolationHashMap.forEach((bestPractice, group) -> {
+            ViolatedRuleNode groupNode = new ViolatedRuleNode(bestPractice);
+            for (BestPracticeViolation bestPracticeViolation : group) {
+                PsiElement mainNavigationElement = bestPracticeViolation.getPsiElement().getNavigationElement();
+                WrapperNode bestPracticeViolationNode = new WrapperNode(mainNavigationElement, bestPracticeViolation.getPsiElement().toString());
+                bestPracticeViolationNode.add(new ShowHideNode(mainNavigationElement, bestPracticeViolation.getPsiElement(), bestPracticeViolation.getTextRange(), this, "Highlight problematic code", "Delete highlighting of the code"));
+                bestPracticeViolationNode.add(new WarningNode(mainNavigationElement, bestPracticeViolation.getProblemDescription()));
+                if (bestPracticeViolation.getHints() != null && bestPracticeViolation.getHints().size() > 0) {
+                    InfoNode hintsWrapper = new InfoNode(mainNavigationElement, "Hints");
+                    for (String hint : bestPracticeViolation.getHints()) {
+                        SimpleTextNode simpleTextNode = new SimpleTextNode(mainNavigationElement, hint);
+                        hintsWrapper.add(simpleTextNode);
+                    }
+                    bestPracticeViolationNode.add(hintsWrapper);
+                }
+                if (bestPracticeViolation.getErrorElements() != null && bestPracticeViolation.getErrorElements().size() > 0) {
+                    WarningNode errorsWrapper = new WarningNode(mainNavigationElement, "Error elements");
+                    for (PsiElement errorElement : bestPracticeViolation.getErrorElements()) {
+                        PsiElement errorElementNavigationElement = errorElement.getNavigationElement();
+                        WrapperNode errorElementWrapper = new WrapperNode(errorElementNavigationElement, errorElement.toString());
+                        errorElementWrapper.add(new ShowHideNode(errorElementNavigationElement, errorElement, errorElement.getTextRange(), this, "Highlight error element", "Deleted highlighting of the element"));
+                        errorsWrapper.add(errorElementWrapper);
+                    }
+                    bestPracticeViolationNode.add(errorsWrapper);
+                }
+                groupNode.add(bestPracticeViolationNode);
+            }
+
+            root.add(groupNode);
+        });
+        this.setModel(new DefaultTreeModel(root));
+    }
+
+    private void groupByFiles() {
+        HashMap<PsiElement, List<BestPracticeViolation>> psiElementBestPracticeViolationHashMap = new HashMap<>();
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+        for (BestPracticeViolation bestPracticeViolation : bestPracticeViolations) {
+            List<BestPracticeViolation> foundGroup = psiElementBestPracticeViolationHashMap.get(bestPracticeViolation.getPsiElement());
+            if (foundGroup == null) {
+                foundGroup = new ArrayList<>();
+            }
+            foundGroup.add(bestPracticeViolation);
+            psiElementBestPracticeViolationHashMap.put(bestPracticeViolation.getPsiElement(), foundGroup);
+        }
+        psiElementBestPracticeViolationHashMap.forEach((element, group) -> {
+            PsiElement mainNavigationElement = element.getNavigationElement();
+            WrapperNode groupNode = new WrapperNode(mainNavigationElement, element.toString());
+            for (BestPracticeViolation bestPracticeViolation : group) {
+                ViolatedRuleNode bestPracticeViolationNode = new ViolatedRuleNode(mainNavigationElement, bestPracticeViolation.getViolatedRule());
+                bestPracticeViolationNode.add(new ShowHideNode(mainNavigationElement, bestPracticeViolation.getPsiElement(), bestPracticeViolation.getTextRange(), this, "Highlight problematic code", "Delete highlighting of the code"));
+                bestPracticeViolationNode.add(new WarningNode(mainNavigationElement, bestPracticeViolation.getProblemDescription()));
+                if (bestPracticeViolation.getHints() != null && bestPracticeViolation.getHints().size() > 0) {
+                    InfoNode hintsWrapper = new InfoNode(mainNavigationElement, "Hints");
+                    for (String hint : bestPracticeViolation.getHints()) {
+                        SimpleTextNode simpleTextNode = new SimpleTextNode(mainNavigationElement, hint);
+                        hintsWrapper.add(simpleTextNode);
+                    }
+                    bestPracticeViolationNode.add(hintsWrapper);
+                }
+                if (bestPracticeViolation.getErrorElements() != null && bestPracticeViolation.getErrorElements().size() > 0) {
+                    WarningNode errorsWrapper = new WarningNode(mainNavigationElement, "Error elements");
+                    for (PsiElement errorElement : bestPracticeViolation.getErrorElements()) {
+                        PsiElement errorElementNavigationElement = errorElement.getNavigationElement();
+                        WrapperNode errorElementWrapper = new WrapperNode(errorElementNavigationElement, errorElement.toString());
+                        errorElementWrapper.add(new ShowHideNode(errorElementNavigationElement, errorElement, errorElement.getTextRange(), this, "Highlight error element", "Deleted highlighting of the element"));
+                        errorsWrapper.add(errorElementWrapper);
+                    }
+                    bestPracticeViolationNode.add(errorsWrapper);
+                }
+                groupNode.add(bestPracticeViolationNode);
+            }
+            root.add(groupNode);
+        });
+        this.setModel(new DefaultTreeModel(root));
+    }
+
+    public enum GroupBy {
+        FILES("Files"),
+        BEST_PRACTICE("Best practice");
+
+        private final String displayName;
+
+        GroupBy(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        @Override
+        public String toString() {
+            return this.displayName;
+        }
+    }
 }
