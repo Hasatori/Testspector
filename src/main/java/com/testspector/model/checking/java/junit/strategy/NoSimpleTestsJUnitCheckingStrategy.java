@@ -47,8 +47,8 @@ public class NoSimpleTestsJUnitCheckingStrategy implements BestPracticeCheckingS
                 bestPracticeViolations.add(new BestPracticeViolation(
                         method,
                         methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
-                        "No simple tests",
-                        Collections.singletonList("Do not tests this"),
+                        "Simple tests for getter and setters are redundant and can be deleted. These methods do not represent complex logic and therefore does not need to be tested.",
+                        Collections.singletonList("Deleted simple tests"),
                         this.getCheckedBestPractice().get(0),
                         simpleMethods.stream().map(assertion -> (PsiElement) assertion).collect(Collectors.toList())));
             }
