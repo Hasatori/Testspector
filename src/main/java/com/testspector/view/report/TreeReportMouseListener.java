@@ -9,8 +9,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Optional;
 
 public class TreeReportMouseListener implements MouseListener {
@@ -34,14 +32,12 @@ public class TreeReportMouseListener implements MouseListener {
                 root.getSelectionModel().clearSelection();
             }
 
-            if (clickedNode instanceof ViolatedRuleNode) {
-                ViolatedRuleNode violatedRuleNode = (ViolatedRuleNode) clickedNode;
+            if (clickedNode instanceof LinkNode) {
+                LinkNode linkNode = (LinkNode) clickedNode;
                 try {
-                    Desktop.getDesktop().browse(new URI(violatedRuleNode.getViolatedBestPractice().getWebPageHyperlink()));
+                    Desktop.getDesktop().browse(linkNode.getUri());
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
-                } catch (URISyntaxException uriSyntaxException) {
-                    uriSyntaxException.printStackTrace();
                 }
 
             }

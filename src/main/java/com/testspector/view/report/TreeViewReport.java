@@ -10,6 +10,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -112,6 +114,11 @@ public class TreeViewReport extends JTree {
 
         psiElementBestPracticeViolationHashMap.forEach((bestPractice, group) -> {
             ViolatedRuleNode groupNode = new ViolatedRuleNode(bestPractice);
+            try {
+                groupNode.add(new LinkNode(new URI(bestPractice.getWebPageHyperlink()),"get more information about the rule"));
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
             for (BestPracticeViolation bestPracticeViolation : group) {
                 PsiElement mainNavigationElement = bestPracticeViolation.getPsiElement().getNavigationElement();
                 WrapperNode bestPracticeViolationNode = new WrapperNode(mainNavigationElement, bestPracticeViolation.getPsiElement().toString());
@@ -159,6 +166,11 @@ public class TreeViewReport extends JTree {
             WrapperNode groupNode = new WrapperNode(mainNavigationElement, element.toString());
             for (BestPracticeViolation bestPracticeViolation : group) {
                 ViolatedRuleNode bestPracticeViolationNode = new ViolatedRuleNode(mainNavigationElement, bestPracticeViolation.getViolatedRule());
+                try {
+                    bestPracticeViolationNode.add(new LinkNode(new URI(bestPracticeViolation.getViolatedRule().getWebPageHyperlink()),"get more information about the rule"));
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
                 bestPracticeViolationNode.add(new ShowHideNode(mainNavigationElement, bestPracticeViolation.getPsiElement(), bestPracticeViolation.getTextRange(), this, "Highlight problematic code", "Delete highlighting of the code"));
                 bestPracticeViolationNode.add(new WarningNode(mainNavigationElement, bestPracticeViolation.getProblemDescription()));
                 if (bestPracticeViolation.getHints() != null && bestPracticeViolation.getHints().size() > 0) {

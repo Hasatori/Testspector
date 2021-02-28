@@ -33,18 +33,18 @@ public class TreeReportCellRenderer implements TreeCellRenderer {
             Font ruleFont = ruleLabel.getFont();
             Map<TextAttribute, Object> ruleAttributes = new HashMap<>(ruleFont.getAttributes());
             ruleAttributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
-            ruleLabel.setFont(ruleFont.deriveFont(ruleAttributes));
+            ruleLabel.setFont(ruleFont.deriveFont(ruleAttributes));;
             panel.add(ruleLabel);
-            panel.add(new JLabel(" - "));
-            JLabel linkLabel = new JLabel();
-            linkLabel.setText("get more information");
-            linkLabel.setForeground(Color.CYAN);
-            Font font = linkLabel.getFont();
+            return panel;
+        }else if (value instanceof LinkNode){
+            LinkNode linkNode = (LinkNode)value;
+            label.setText(linkNode.getLinkText());
+            label.setForeground(Color.CYAN);
+            Font font = label.getFont();
             Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
             attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-            linkLabel.setFont(font.deriveFont(attributes));
-            panel.add(linkLabel);
-            return panel;
+            label.setFont(font.deriveFont(attributes));
+            return label;
         } else if (value instanceof InfoNode) {
             InfoNode simpleTextNode = (InfoNode) value;
             label.setText(String.format("<html><b>%s</b></html>", simpleTextNode.getDescription()));
