@@ -24,7 +24,7 @@ public class BestPracticeCheckingStrategyFactory {
                     new NoConditionalLogicJUnitCheckingStrategy(javaElementHelper),
                     new NoGlobalStaticPropertiesJUnitCheckingStrategy(),
                     new TestNamingStrategyJUnitCheckingStrategy(),
-                    new TestOnlyPublicBehaviourJUnitCheckingStrategy(),
+                    new TestOnlyPublicBehaviourJUnitCheckingStrategy(javaElementHelper),
                     new ThreePhaseTestStructureJUnitCheckingStrategy()
             )
             ));

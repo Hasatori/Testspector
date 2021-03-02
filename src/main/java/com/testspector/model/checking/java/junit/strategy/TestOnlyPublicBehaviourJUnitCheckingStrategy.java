@@ -1,23 +1,67 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.PsiElement;
-import com.testspector.model.checking.BestPracticeViolation;
+import com.intellij.psi.PsiIdentifier;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiModifierList;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
+import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.java.JavaElementHelper;
+import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
+
+    private final JavaElementHelper javaElementHelper;
+
+    public TestOnlyPublicBehaviourJUnitCheckingStrategy(JavaElementHelper javaElementHelper) {
+        this.javaElementHelper = javaElementHelper;
+    }
+
     @Override
     public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
-        return null;
+        return checkBestPractices(Collections.singletonList(psiElement));
     }
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
-        return null;
+        List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        for (PsiMethod method : methods) {
+            List<PsiMethod> notPublicMethods = javaElementHelper.getTestedMethods(method)
+                    .stream()
+                    .filter(testedMethod -> methodHasModifier(testedMethod, "protected") || isMethodPackagePrivate(testedMethod) || methodHasModifier(testedMethod, "private"))
+                    .collect(Collectors.toList());
+            PsiIdentifier methodIdentifier = method.getNameIdentifier();
+            if (notPublicMethods.size() > 0) {
+                bestPracticeViolations.add(new BestPracticeViolation(
+                        method,
+                        methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
+                        "Only public behaviour should be tested",
+                        getCheckedBestPractice().get(0),
+                        notPublicMethods.stream().map(method1 -> (PsiElement) method1).collect(Collectors.toList())
+                ));
+            }
+        }
+
+        return bestPracticeViolations;
+    }
+
+    private boolean methodHasModifier(PsiMethod method, String modifier) {
+        return method.getModifierList().hasModifierProperty(modifier);
+    }
+
+    private boolean isMethodPackagePrivate(PsiMethod method) {
+        PsiModifierList modifierList = method.getModifierList();
+        return !modifierList.hasModifierProperty("public") &&
+                !modifierList.hasModifierProperty("private") &&
+                !modifierList.hasModifierProperty("protected");
     }
 
     @Override

@@ -1,14 +1,14 @@
 package com.testspector.model.checking.java;
 
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
+import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.testspector.model.checking.java.junit.JUnitConstants.ASSERTION_CLASS_PATHS;
 
 public class JavaElementHelper {
 
@@ -93,48 +93,6 @@ public class JavaElementHelper {
         return result;
     }
 
-    public <T extends PsiElement> Optional<T> getLastChildOfType(PsiElement psiElement, Class<T> elementType) {
-        Optional<T> result = Optional.empty();
-
-        for (PsiElement child : psiElement.getChildren()) {
-            if (elementType.isInstance(child)) {
-                result = Optional.of(elementType.cast(child));
-            }
-            Optional<T> candidate = getLastChildOfType(child, elementType);
-            if (candidate.isPresent()) {
-                result = candidate;
-            }
-        }
-        return result;
-    }
-
-    public <T extends PsiElement> Optional<T> getLastLeftChildOfType(PsiElement psiElement, Class<T> elementType) {
-        Optional<T> result = Optional.empty();
-
-        for (PsiElement child : psiElement.getChildren()) {
-            if (elementType.isInstance(child)) {
-                result = Optional.of(elementType.cast(child));
-            }
-            Optional<T> candidate = getLastLeftChildOfType(child, elementType);
-            if (candidate.isPresent()) {
-                result = candidate;
-                break;
-            }
-        }
-        return result;
-    }
-
-    public <T extends PsiElement> List<T> getAllChildrenOfType(PsiElement psiElement, Class<T> elementType, Predicate<T> conditionToMeet) {
-        List<T> result = new ArrayList<>();
-        for (PsiElement child : psiElement.getChildren()) {
-            if (elementType.isInstance(child) && conditionToMeet.test(elementType.cast(child))) {
-                result.add(elementType.cast(child));
-            }
-            result.addAll(getAllChildrenOfType(child, elementType));
-        }
-        return result;
-    }
-
     public Optional<PsiElement> getFirstChildIgnoring(PsiElement psiElement, List<Class<? extends PsiElement>> ignoredList) {
         for (PsiElement child : psiElement.getChildren()) {
             if (ignoredList.stream().noneMatch(ignored -> ignored.isInstance(child))) {
@@ -142,6 +100,81 @@ public class JavaElementHelper {
             }
         }
         return Optional.empty();
+    }
+
+
+    public List<PsiMethod> getTestedMethods(PsiMethod testMethod) {
+        List<PsiMethod> result = new ArrayList<>();
+        List<PsiMethodCallExpression> assertionMethods = getAssertionsMethods(testMethod);
+        result.addAll(assertionMethods.stream()
+                .map(element -> getAllChildrenOfTypeWithReferencesMeetingCondition(element, PsiMethodCallExpression.class,this::isInTestContext))
+                .flatMap(Collection::stream)
+                .map(PsiCall::resolveMethod)
+                .filter(Objects::nonNull)
+                .filter(this::isInProductionCodeContext)
+                .collect(Collectors.toList()));
+
+        result.addAll(assertionMethods
+                .stream()
+                .map(assertionMethod -> getAllChildrenOfTypeWithReferencesMeetingCondition(assertionMethod, PsiLiteralExpression.class, this::isInTestContext))
+                .flatMap(Collection::stream)
+                .map(ReferenceProvidersRegistry::getReferencesFromProviders)
+                .flatMap(Arrays::stream)
+                .map(PsiReference::resolve)
+                .filter(Objects::nonNull)
+                .filter(referencedElement -> referencedElement instanceof PsiMethod)
+                .filter(this::isInProductionCodeContext)
+                .map(element -> (PsiMethod) element)
+                .collect(Collectors.toList()));
+        return result;
+    }
+
+    public <T extends PsiElement> List<T> getAllChildrenOfTypeWithReferencesMeetingCondition(PsiElement psiElement, Class<T> elementType, Predicate<PsiElement> referencedElementCondition) {
+        List<T> result = new ArrayList<>();
+        for (PsiElement child : psiElement.getChildren()) {
+            if (elementType.isInstance(child)) {
+                result.add(elementType.cast(child));
+            }
+            if (child instanceof PsiReferenceExpression) {
+                PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
+                if (referencedElement != null) {
+                     if (referencedElementCondition.test(referencedElement)) {
+                        result.addAll(getAllChildrenOfTypeWithReferencesMeetingCondition(referencedElement, elementType, referencedElementCondition));
+                    }
+
+                }
+            }
+            result.addAll(getAllChildrenOfTypeWithReferencesMeetingCondition(child, elementType, referencedElementCondition));
+        }
+        return result;
+    }
+
+    public List<PsiMethodCallExpression> getAssertionsMethods(PsiElement psiElement) {
+        List<PsiMethodCallExpression> assertionMethods = new ArrayList<>();
+        for (PsiElement child : psiElement.getChildren()) {
+            if (child instanceof PsiMethodCallExpression) {
+                PsiMethodCallExpression methodCallExpression = (PsiMethodCallExpression) child;
+                if (isAssertionMethod().test(methodCallExpression)) {
+                    assertionMethods.add(methodCallExpression);
+                } else {
+                    PsiMethod referencedMethod = methodCallExpression.resolveMethod();
+                    if (referencedMethod != null && this.isInTestContext(referencedMethod)) {
+                        assertionMethods.addAll(getAssertionsMethods(referencedMethod));
+                    }
+                }
+
+            }
+            assertionMethods.addAll(getAssertionsMethods(child));
+        }
+        return assertionMethods;
+    }
+
+
+    private Predicate<PsiMethodCallExpression> isAssertionMethod() {
+        return psiMethodCallExpression -> Optional.ofNullable(psiMethodCallExpression.resolveMethod())
+                .map(PsiJvmMember::getContainingClass)
+                .map(psiClass -> ASSERTION_CLASS_PATHS.contains(psiClass.getQualifiedName()))
+                .orElse(false);
     }
 
 }

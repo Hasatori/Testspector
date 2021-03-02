@@ -33,6 +33,10 @@ public class BestPracticeViolation {
         this.errorElements = errorElements;
     }
 
+    public BestPracticeViolation(PsiElement psiElement, TextRange textRange, String problemDescription, BestPractice violatedRule, List<PsiElement> errorElements) {
+        this(psiElement,textRange,problemDescription,null, violatedRule,errorElements);
+    }
+
     public PsiElement getPsiElement() {
         return psiElement;
     }
