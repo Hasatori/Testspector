@@ -107,7 +107,7 @@ public class JavaElementHelper {
         List<PsiMethod> result = new ArrayList<>();
         List<PsiMethodCallExpression> assertionMethods = getAssertionsMethods(testMethod);
         result.addAll(assertionMethods.stream()
-                .map(element -> getAllChildrenOfTypeWithReferencesMeetingCondition(element, PsiMethodCallExpression.class,this::isInTestContext))
+                .map(element -> getAllChildrenOfTypeWithReferencesMeetingCondition(element, PsiMethodCallExpression.class, this::isInTestContext))
                 .flatMap(Collection::stream)
                 .map(PsiCall::resolveMethod)
                 .filter(Objects::nonNull)
@@ -138,7 +138,10 @@ public class JavaElementHelper {
             if (child instanceof PsiReferenceExpression) {
                 PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
                 if (referencedElement != null) {
-                     if (referencedElementCondition.test(referencedElement)) {
+                    if (referencedElementCondition.test(referencedElement)) {
+                        if (elementType.isInstance(referencedElement)) {
+                            result.add(elementType.cast(referencedElement));
+                        }
                         result.addAll(getAllChildrenOfTypeWithReferencesMeetingCondition(referencedElement, elementType, referencedElementCondition));
                     }
 

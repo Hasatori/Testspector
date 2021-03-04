@@ -22,7 +22,7 @@ public class BestPracticeCheckingStrategyFactory {
                     new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(javaElementHelper),
                     new CreateCustomDataSourcesJUnitCheckingStrategy(),
                     new NoConditionalLogicJUnitCheckingStrategy(javaElementHelper),
-                    new NoGlobalStaticPropertiesJUnitCheckingStrategy(),
+                    new NoGlobalStaticPropertiesJUnitCheckingStrategy(javaElementHelper),
                     new TestNamingStrategyJUnitCheckingStrategy(),
                     new TestOnlyPublicBehaviourJUnitCheckingStrategy(javaElementHelper),
                     new ThreePhaseTestStructureJUnitCheckingStrategy()
