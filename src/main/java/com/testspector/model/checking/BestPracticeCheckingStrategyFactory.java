@@ -23,7 +23,7 @@ public class BestPracticeCheckingStrategyFactory {
                     new CreateCustomDataSourcesJUnitCheckingStrategy(),
                     new NoConditionalLogicJUnitCheckingStrategy(javaElementHelper),
                     new NoGlobalStaticPropertiesJUnitCheckingStrategy(javaElementHelper),
-                    new TestNamingStrategyJUnitCheckingStrategy(),
+                    new TestNamingStrategyJUnitCheckingStrategy(javaElementHelper),
                     new TestOnlyPublicBehaviourJUnitCheckingStrategy(javaElementHelper),
                     new ThreePhaseTestStructureJUnitCheckingStrategy()
             )
