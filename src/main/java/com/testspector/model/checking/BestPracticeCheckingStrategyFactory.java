@@ -20,12 +20,10 @@ public class BestPracticeCheckingStrategyFactory {
                     new NoSimpleTestsJUnitCheckingStrategy(javaElementHelper),
                     new AssertionCountJUnitCheckingStrategy(javaElementHelper),
                     new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(javaElementHelper),
-                    new CreateCustomDataSourcesJUnitCheckingStrategy(),
                     new NoConditionalLogicJUnitCheckingStrategy(javaElementHelper),
                     new NoGlobalStaticPropertiesJUnitCheckingStrategy(javaElementHelper),
                     new TestNamingStrategyJUnitCheckingStrategy(javaElementHelper),
-                    new TestOnlyPublicBehaviourJUnitCheckingStrategy(javaElementHelper),
-                    new ThreePhaseTestStructureJUnitCheckingStrategy()
+                    new TestOnlyPublicBehaviourJUnitCheckingStrategy(javaElementHelper)
             )
             ));
         }
