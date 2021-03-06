@@ -3,6 +3,7 @@ package com.testspector.view.report;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.enums.BestPractice;
 
 import javax.swing.*;
@@ -12,10 +13,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class TreeViewReport extends JTree {
 
@@ -115,14 +113,14 @@ public class TreeViewReport extends JTree {
         psiElementBestPracticeViolationHashMap.forEach((bestPractice, group) -> {
             ViolatedRuleNode groupNode = new ViolatedRuleNode(bestPractice);
             try {
-                groupNode.add(new LinkNode(new URI(bestPractice.getWebPageHyperlink()),"get more information about the rule"));
+                groupNode.add(new LinkNode(new URI(bestPractice.getWebPageHyperlink()), "get more information about the rule"));
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
             for (BestPracticeViolation bestPracticeViolation : group) {
-                PsiElement mainNavigationElement = bestPracticeViolation.getPsiElement().getNavigationElement();
-                WrapperNode bestPracticeViolationNode = new WrapperNode(mainNavigationElement, bestPracticeViolation.getPsiElement().toString());
-                bestPracticeViolationNode.add(new ShowHideNode(mainNavigationElement, bestPracticeViolation.getPsiElement(), bestPracticeViolation.getTextRange(), this, "Highlight problematic code", "Delete highlighting of the code"));
+                PsiElement mainNavigationElement = bestPracticeViolation.getTestMethodElement().getNavigationElement();
+                WrapperNode bestPracticeViolationNode = new WrapperNode(mainNavigationElement, bestPracticeViolation.getName());
+                bestPracticeViolationNode.add(new ShowHideNode(mainNavigationElement, bestPracticeViolation.getTestMethodElement(), bestPracticeViolation.getTestMethodTextRange(), this, "Highlight", "Delete highlighting"));
                 bestPracticeViolationNode.add(new WarningNode(mainNavigationElement, bestPracticeViolation.getProblemDescription()));
                 if (bestPracticeViolation.getHints() != null && bestPracticeViolation.getHints().size() > 0) {
                     InfoNode hintsWrapper = new InfoNode(mainNavigationElement, "Hints");
@@ -132,13 +130,14 @@ public class TreeViewReport extends JTree {
                     }
                     bestPracticeViolationNode.add(hintsWrapper);
                 }
-                if (bestPracticeViolation.getErrorElements() != null && bestPracticeViolation.getErrorElements().size() > 0) {
-                    WarningNode errorsWrapper = new WarningNode(mainNavigationElement, "Error elements");
-                    for (PsiElement errorElement : bestPracticeViolation.getErrorElements()) {
-                        PsiElement errorElementNavigationElement = errorElement.getNavigationElement();
-                        WrapperNode errorElementWrapper = new WrapperNode(errorElementNavigationElement, errorElement.toString());
-                        errorElementWrapper.add(new ShowHideNode(errorElementNavigationElement, errorElement, errorElement.getTextRange(), this, "Highlight error element", "Deleted highlighting of the element"));
-                        errorsWrapper.add(errorElementWrapper);
+                if (bestPracticeViolation.getRelatedElements() != null && bestPracticeViolation.getRelatedElements().size() > 0) {
+                    WarningNode errorsWrapper = new WarningNode(mainNavigationElement, "Related elements");
+                    for (RelatedElementWrapper relatedElementWrapper : bestPracticeViolation.getRelatedElements()) {
+                        WrapperNode errorElementWrapper = new WrapperNode(mainNavigationElement, relatedElementWrapper.getName());
+                        for (Map.Entry<PsiElement, String> entry : relatedElementWrapper.getRelatedElementNameHashMap().entrySet()) {
+                            errorElementWrapper.add(new ShowHideNode(entry.getKey().getNavigationElement(),entry.getKey(), entry.getKey().getTextRange(), this, entry.getValue() +" - highlight", entry.getValue() +" - delete highlight"));
+                        }
+                       errorsWrapper.add(errorElementWrapper);
                     }
                     bestPracticeViolationNode.add(errorsWrapper);
                 }
@@ -150,16 +149,17 @@ public class TreeViewReport extends JTree {
         this.setModel(new DefaultTreeModel(root));
     }
 
+
     private void groupByFiles() {
         HashMap<PsiElement, List<BestPracticeViolation>> psiElementBestPracticeViolationHashMap = new HashMap<>();
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
         for (BestPracticeViolation bestPracticeViolation : bestPracticeViolations) {
-            List<BestPracticeViolation> foundGroup = psiElementBestPracticeViolationHashMap.get(bestPracticeViolation.getPsiElement());
+            List<BestPracticeViolation> foundGroup = psiElementBestPracticeViolationHashMap.get(bestPracticeViolation.getTestMethodElement());
             if (foundGroup == null) {
                 foundGroup = new ArrayList<>();
             }
             foundGroup.add(bestPracticeViolation);
-            psiElementBestPracticeViolationHashMap.put(bestPracticeViolation.getPsiElement(), foundGroup);
+            psiElementBestPracticeViolationHashMap.put(bestPracticeViolation.getTestMethodElement(), foundGroup);
         }
         psiElementBestPracticeViolationHashMap.forEach((element, group) -> {
             PsiElement mainNavigationElement = element.getNavigationElement();
@@ -167,11 +167,11 @@ public class TreeViewReport extends JTree {
             for (BestPracticeViolation bestPracticeViolation : group) {
                 ViolatedRuleNode bestPracticeViolationNode = new ViolatedRuleNode(mainNavigationElement, bestPracticeViolation.getViolatedRule());
                 try {
-                    bestPracticeViolationNode.add(new LinkNode(new URI(bestPracticeViolation.getViolatedRule().getWebPageHyperlink()),"get more information about the rule"));
+                    bestPracticeViolationNode.add(new LinkNode(new URI(bestPracticeViolation.getViolatedRule().getWebPageHyperlink()), "get more information about the rule"));
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                 }
-                bestPracticeViolationNode.add(new ShowHideNode(mainNavigationElement, bestPracticeViolation.getPsiElement(), bestPracticeViolation.getTextRange(), this, "Highlight problematic code", "Delete highlighting of the code"));
+                bestPracticeViolationNode.add(new ShowHideNode(mainNavigationElement, bestPracticeViolation.getTestMethodElement(), bestPracticeViolation.getTestMethodTextRange(), this, "Highlight", "Delete highlighting"));
                 bestPracticeViolationNode.add(new WarningNode(mainNavigationElement, bestPracticeViolation.getProblemDescription()));
                 if (bestPracticeViolation.getHints() != null && bestPracticeViolation.getHints().size() > 0) {
                     InfoNode hintsWrapper = new InfoNode(mainNavigationElement, "Hints");
@@ -181,12 +181,13 @@ public class TreeViewReport extends JTree {
                     }
                     bestPracticeViolationNode.add(hintsWrapper);
                 }
-                if (bestPracticeViolation.getErrorElements() != null && bestPracticeViolation.getErrorElements().size() > 0) {
-                    WarningNode errorsWrapper = new WarningNode(mainNavigationElement, "Error elements");
-                    for (PsiElement errorElement : bestPracticeViolation.getErrorElements()) {
-                        PsiElement errorElementNavigationElement = errorElement.getNavigationElement();
-                        WrapperNode errorElementWrapper = new WrapperNode(errorElementNavigationElement, errorElement.toString());
-                        errorElementWrapper.add(new ShowHideNode(errorElementNavigationElement, errorElement, errorElement.getTextRange(), this, "Highlight error element", "Deleted highlighting of the element"));
+                if (bestPracticeViolation.getRelatedElements() != null && bestPracticeViolation.getRelatedElements().size() > 0) {
+                    WarningNode errorsWrapper = new WarningNode(mainNavigationElement, "Related elements");
+                    for (RelatedElementWrapper relatedElementWrapper : bestPracticeViolation.getRelatedElements()) {
+                        WrapperNode errorElementWrapper = new WrapperNode(mainNavigationElement, relatedElementWrapper.getName());
+                        for (Map.Entry<PsiElement, String> entry : relatedElementWrapper.getRelatedElementNameHashMap().entrySet()) {
+                            errorElementWrapper.add(new ShowHideNode(entry.getKey().getNavigationElement(),entry.getKey(), entry.getKey().getTextRange(), this, entry.getValue() +" - highlight", entry.getValue() +" - delete highlight"));
+                        }
                         errorsWrapper.add(errorElementWrapper);
                     }
                     bestPracticeViolationNode.add(errorsWrapper);

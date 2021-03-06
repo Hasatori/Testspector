@@ -36,7 +36,7 @@ public class BestPracticeCheckingStrategyFactory {
             JavaElementResolver javaElementResolver = new JavaElementResolver();
             JavaMethodResolver methodResolver = new JavaMethodResolver(javaElementResolver, contextIndicator);
             return Optional.of(new GroupBestPracticeCheckingStrategyDecorator(Arrays.asList(
-                    new NoSimpleTestsJUnitCheckingStrategy(javaElementResolver, methodResolver),
+                    new NoSimpleTestsJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator),
                     new AssertionCountJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
                     new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
                     new NoConditionalLogicJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),

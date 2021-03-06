@@ -3,6 +3,7 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -11,7 +12,6 @@ import com.testspector.model.enums.BestPractice;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class AssertionCountJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
@@ -39,10 +39,11 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
-            List<PsiMethodCallExpression> assertionMethods = elementResolver.allChildrenOfType(method,PsiMethodCallExpression.class,(psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent()),contextResolver.isInTestContext());
+            List<PsiMethodCallExpression> assertionMethods = elementResolver.allChildrenOfType(method, PsiMethodCallExpression.class, (psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent()), contextResolver.isInTestContext());
             PsiIdentifier methodIdentifier = method.getNameIdentifier();
             if (assertionMethods.isEmpty()) {
                 bestPracticeViolations.add(new BestPracticeViolation(
+                        String.format("%s#%s", method.getContainingClass().getQualifiedName(), method.getName()),
                         method,
                         methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
                         "Test should contain at least one assertion method!",
@@ -60,14 +61,13 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
                 }
 
                 bestPracticeViolations.add(new BestPracticeViolation(
+                        String.format("%s#%s", method.getContainingClass().getQualifiedName(), method.getName()),
                         method,
                         methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
                         message,
                         hints,
                         BestPractice.ONLY_ONE_ASSERTION,
-                        assertionMethods.stream().map(assertion -> (PsiElement) assertion).collect(Collectors.toList())));
-
-
+                        createRelatedElements(method, assertionMethods)));
             }
         }
         return bestPracticeViolations;
@@ -78,6 +78,34 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
                 .map(PsiJvmMember::getContainingClass)
                 .map(psiClass -> qualifiedName.equals(psiClass.getQualifiedName()))
                 .orElse(false);
+    }
+
+    private List<RelatedElementWrapper> createRelatedElements(PsiMethod method, List<PsiMethodCallExpression> assertionMethods) {
+        List<RelatedElementWrapper> result = new ArrayList<>();
+        for (PsiMethodCallExpression assertionMethod : assertionMethods) {
+            HashMap<PsiElement, String> elementNameHashMap = new HashMap<PsiElement, String>();
+            Optional<PsiReferenceExpression> optionalPsiReferenceExpression = firstReferenceToAssertionMethod(method, assertionMethod);
+            if (optionalPsiReferenceExpression.isPresent()) {
+                elementNameHashMap.put(optionalPsiReferenceExpression.get(), "reference from test method");
+                elementNameHashMap.put(assertionMethod, "final assertion call");
+            } else {
+                elementNameHashMap.put(assertionMethod, "reference in the test method");
+            }
+            result.add(new RelatedElementWrapper(assertionMethod.resolveMethod().getName(), elementNameHashMap));
+        }
+
+        return result;
+    }
+
+
+    private Optional<PsiReferenceExpression> firstReferenceToAssertionMethod(PsiElement element, PsiMethodCallExpression psiMethodCallExpression) {
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfType(element, PsiReferenceExpression.class);
+        for (PsiReferenceExpression reference : references) {
+            if (!elementResolver.allChildrenOfType(reference.getParent(), PsiMethodCallExpression.class, psiMethodCallExpression1 -> psiMethodCallExpression == psiMethodCallExpression1, contextResolver.isInTestContext()).isEmpty()) {
+                return Optional.of(reference);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override

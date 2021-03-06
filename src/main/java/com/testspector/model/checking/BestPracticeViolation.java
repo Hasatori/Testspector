@@ -8,9 +8,9 @@ import java.util.List;
 
 public class BestPracticeViolation {
 
-    private final PsiElement psiElement;
+    private final PsiElement testMethodElement;
 
-    private final TextRange textRange;
+    private final TextRange testMethodTextRange;
 
     private final String problemDescription;
 
@@ -18,31 +18,39 @@ public class BestPracticeViolation {
 
     private final BestPractice violatedRule;
 
-    private final List<PsiElement> errorElements;
+    private final List<RelatedElementWrapper> relatedElementWrappers;
 
-    public BestPracticeViolation(PsiElement psiElement, TextRange textRange, String problemDescription, BestPractice violatedRule) {
-        this(psiElement,textRange,problemDescription,null, violatedRule,null);
+    private final String name;
+
+    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, BestPractice violatedRule) {
+        this(name, testMethodElement, testMethodTextRange,problemDescription,null, violatedRule,null);
+
     }
 
-    public BestPracticeViolation(PsiElement psiElement, TextRange textRange, String problemDescription, List<String> hints, BestPractice violatedRule, List<PsiElement> errorElements) {
-        this.psiElement = psiElement;
-        this.textRange = textRange;
+    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, List<String> hints, BestPractice violatedRule, List<RelatedElementWrapper> relatedElementWrappers) {
+        this.testMethodElement = testMethodElement;
+        this.testMethodTextRange = testMethodTextRange;
         this.problemDescription = problemDescription;
         this.hints = hints;
         this.violatedRule = violatedRule;
-        this.errorElements = errorElements;
+        this.relatedElementWrappers = relatedElementWrappers;
+        this.name = name;
     }
 
-    public BestPracticeViolation(PsiElement psiElement, TextRange textRange, String problemDescription, BestPractice violatedRule, List<PsiElement> errorElements) {
-        this(psiElement,textRange,problemDescription,null, violatedRule,errorElements);
+    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, BestPractice violatedRule, List<RelatedElementWrapper> relatedElementWrappers) {
+        this(name, testMethodElement, testMethodTextRange,problemDescription,null, violatedRule, relatedElementWrappers);
     }
 
-    public PsiElement getPsiElement() {
-        return psiElement;
+    public String getName() {
+        return name;
     }
 
-    public TextRange getTextRange() {
-        return textRange;
+    public PsiElement getTestMethodElement() {
+        return testMethodElement;
+    }
+
+    public TextRange getTestMethodTextRange() {
+        return testMethodTextRange;
     }
 
     public String getProblemDescription() {
@@ -57,7 +65,7 @@ public class BestPracticeViolation {
         return violatedRule;
     }
 
-    public List<PsiElement> getErrorElements() {
-        return errorElements;
+    public List<RelatedElementWrapper> getRelatedElements() {
+        return relatedElementWrappers;
     }
 }
