@@ -39,14 +39,12 @@ public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeChec
             PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();
             if (nameIdentifier != null) {
                 String testMethodName = nameIdentifier.getText();
-                List<PsiMethod> methodsWithAlmostSameName = javaElementResolver
-                        .allChildrenOfType(testMethod, PsiMethodCallExpression.class, contextIndicator.isInTestContext())
+                List<PsiMethod> methodsWithAlmostSameName = methodResolver
+                        .allTestedMethods(testMethod)
                         .stream()
-                        .map(PsiCall::resolveMethod)
-                        .filter(Objects::nonNull)
                         .filter(method -> FuzzySearch.ratio(testMethodName.toLowerCase(), method.getName().toLowerCase()) > 75)
                         .collect(Collectors.toList());
-                if (methodsWithAlmostSameName.size() > 1) {
+                if (methodsWithAlmostSameName.size() >= 1) {
                     bestPracticeViolations.add(new BestPracticeViolation(
                             testMethod,
                             nameIdentifier.getTextRange(),
