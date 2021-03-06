@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH;
@@ -37,9 +38,9 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
-            List<PsiStatement> statements = getConditionalStatements(method);
+            List<PsiStatement> statements = elementResolver.allChildrenOfType(method, PsiStatement.class, isConditionalStatement(), contextResolver.isInTestContext());
 
             statements = statements.stream().distinct().collect(Collectors.toList());
             if (statements.size() > 0) {
@@ -65,34 +66,11 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         return bestPracticeViolations;
     }
 
-    private List<PsiStatement> getConditionalStatements(PsiMethod method) {
-        List<PsiStatement> conditionalStatements = new ArrayList<>();
-        PsiCodeBlock methodBody = method.getBody();
-        if (methodBody != null) {
-            conditionalStatements.addAll(Arrays.stream(methodBody.getStatements()).filter(psiStatement ->
-                    psiStatement instanceof PsiIfStatement || psiStatement instanceof PsiForStatement || psiStatement instanceof PsiWhileStatement || psiStatement instanceof PsiSwitchStatement
-            ).collect(Collectors.toList()));
-        }
-        List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantMethodExpression(method);
-        for (PsiMethodCallExpression psiMethodCallExpression : psiMethodCallExpressions) {
-            PsiMethod referencedMethod = psiMethodCallExpression.resolveMethod();
-            if (referencedMethod != null && contextResolver.isInTestContext(referencedMethod)) {
-                conditionalStatements.addAll(getConditionalStatements(referencedMethod));
-            }
-        }
-        return conditionalStatements;
-    }
-
-    private List<PsiMethodCallExpression> getRelevantMethodExpression(PsiElement psiElement) {
-        List<PsiMethodCallExpression> psiMethodCallExpressions = new ArrayList<>();
-        List<PsiElement> children = Arrays.stream(psiElement.getChildren()).collect(Collectors.toList());
-        for (PsiElement child : children) {
-            if (child instanceof PsiMethodCallExpression) {
-                psiMethodCallExpressions.add((PsiMethodCallExpression) child);
-            }
-            psiMethodCallExpressions.addAll(getRelevantMethodExpression(child));
-        }
-        return psiMethodCallExpressions;
+    Predicate<PsiStatement> isConditionalStatement() {
+        return psiStatement -> psiStatement instanceof PsiIfStatement
+                || psiStatement instanceof PsiForStatement
+                || psiStatement instanceof PsiWhileStatement
+                || psiStatement instanceof PsiSwitchStatement;
     }
 
     @Override

@@ -33,14 +33,14 @@ public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeChec
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
 
         for (PsiMethod testMethod : methods) {
             PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();
             if (nameIdentifier != null) {
                 String testMethodName = nameIdentifier.getText();
                 List<PsiMethod> methodsWithAlmostSameName = javaElementResolver
-                        .allChildrenOfTypeWithReferencesThatMeetCondition(testMethod, PsiMethodCallExpression.class, contextIndicator::isInTestContext)
+                        .allChildrenOfType(testMethod, PsiMethodCallExpression.class, contextIndicator.isInTestContext())
                         .stream()
                         .map(PsiCall::resolveMethod)
                         .filter(Objects::nonNull)

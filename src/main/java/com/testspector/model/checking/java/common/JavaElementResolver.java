@@ -1,8 +1,12 @@
 package com.testspector.model.checking.java.common;
 
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReferenceExpression;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -17,14 +21,7 @@ public class JavaElementResolver {
 
 
     public <T extends PsiElement> List<T> allChildrenOfType(PsiElement psiElement, Class<T> elementType) {
-        List<T> result = new ArrayList<>();
-        for (PsiElement child : psiElement.getChildren()) {
-            if (elementType.isInstance(child)) {
-                result.add(elementType.cast(child));
-            }
-            result.addAll(allChildrenOfType(child, elementType));
-        }
-        return result;
+        return allChildrenOfType(psiElement, elementType, t -> true, t -> false);
     }
 
     public Optional<PsiElement> firstChildIgnoring(PsiElement psiElement, List<Class<? extends PsiElement>> ignoredList) {
@@ -36,24 +33,29 @@ public class JavaElementResolver {
         return Optional.empty();
     }
 
-    public <T extends PsiElement> List<T> allChildrenOfTypeWithReferencesThatMeetCondition(PsiElement psiElement, Class<T> elementType, Predicate<PsiElement> referencedElementCondition) {
+
+    public <T extends PsiElement> List<T> allChildrenOfType(PsiElement psiElement, Class<T> elementType, Predicate<PsiElement> fromReferencesMeetingCondition) {
+        return allChildrenOfType(psiElement, elementType, t -> true, fromReferencesMeetingCondition);
+    }
+
+    public <T extends PsiElement> List<T> allChildrenOfType(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
         List<T> result = new ArrayList<>();
         for (PsiElement child : psiElement.getChildren()) {
-            if (elementType.isInstance(child)) {
+            if (elementType.isInstance(child) && typeCondition.test(elementType.cast(child))) {
                 result.add(elementType.cast(child));
             }
             if (child instanceof PsiReferenceExpression) {
                 PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
                 if (referencedElement != null) {
-                    if (referencedElementCondition.test(referencedElement)) {
+                    if (fromReferencesMeetingCondition.test(referencedElement)) {
                         if (elementType.isInstance(referencedElement)) {
                             result.add(elementType.cast(referencedElement));
                         }
-                        result.addAll(allChildrenOfTypeWithReferencesThatMeetCondition(referencedElement, elementType, referencedElementCondition));
+                        result.addAll(allChildrenOfType(referencedElement, elementType, typeCondition, fromReferencesMeetingCondition));
                     }
                 }
             }
-            result.addAll(allChildrenOfTypeWithReferencesThatMeetCondition(child, elementType, referencedElementCondition));
+            result.addAll(allChildrenOfType(child, elementType, typeCondition, fromReferencesMeetingCondition));
         }
         return result;
     }

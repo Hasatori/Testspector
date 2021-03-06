@@ -39,9 +39,9 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
-            List<PsiTryStatement> psiTryStatements = elementResolver.allChildrenOfTypeWithReferencesThatMeetCondition(method, PsiTryStatement.class, (contextResolver::isInTestContext));
+            List<PsiTryStatement> psiTryStatements = elementResolver.allChildrenOfType(method, PsiTryStatement.class,contextResolver.isInTestContext());
             if (psiTryStatements.size() > 0) {
                 List<String> hints = new ArrayList<>();
                 String message = "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.";

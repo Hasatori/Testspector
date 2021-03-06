@@ -32,7 +32,7 @@ public class NoSimpleTestsJUnitCheckingStrategy implements BestPracticeCheckingS
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
            List<PsiMethod> simpleMethods = methodResolver.allTestedMethods(method)
                     .stream()

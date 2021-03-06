@@ -35,11 +35,11 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
 
         for (PsiMethod method : methods) {
             List<PsiField> staticProperties = javaElementResolver
-                    .allChildrenOfTypeWithReferencesThatMeetCondition(method, PsiField.class, (contextIndicator::isInTestContext))
+                    .allChildrenOfType(method, PsiField.class, contextIndicator.isInTestContext())
                     .stream()
                     .filter(isStaticAndNotFinal())
                     .collect(Collectors.toList());

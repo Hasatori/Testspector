@@ -3,7 +3,6 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.common.JavaMethodCallExpressionResolver;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -18,17 +17,15 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
 
     private final JavaElementResolver elementResolver;
     private final JavaContextIndicator contextResolver;
-    private final JavaMethodCallExpressionResolver methodCallExpressionResolver;
     private final JavaMethodResolver methodResolver;
 
     public static final List<String> GROUP_ASSERTION_NAMES = Collections.unmodifiableList(Arrays.asList(
             "assertAll"
     ));
 
-    public AssertionCountJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextResolver, JavaMethodCallExpressionResolver methodCallExpressionResolver, JavaMethodResolver methodResolver) {
+    public AssertionCountJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
         this.elementResolver = elementResolver;
         this.contextResolver = contextResolver;
-        this.methodCallExpressionResolver = methodCallExpressionResolver;
         this.methodResolver = methodResolver;
     }
 
@@ -40,9 +37,9 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
-            List<PsiMethodCallExpression> assertionMethods = methodCallExpressionResolver.assertionCallExpressions(method);
+            List<PsiMethodCallExpression> assertionMethods = elementResolver.allChildrenOfType(method,PsiMethodCallExpression.class,(psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent()),contextResolver.isInTestContext());
             PsiIdentifier methodIdentifier = method.getNameIdentifier();
             if (assertionMethods.isEmpty()) {
                 bestPracticeViolations.add(new BestPracticeViolation(

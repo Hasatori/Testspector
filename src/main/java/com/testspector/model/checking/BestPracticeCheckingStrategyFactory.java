@@ -2,7 +2,6 @@ package com.testspector.model.checking;
 
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
-import com.testspector.model.checking.java.common.JavaMethodCallExpressionResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.checking.java.junit.strategy.*;
 import com.testspector.model.enums.ProgrammingLanguage;
@@ -34,12 +33,11 @@ public class BestPracticeCheckingStrategyFactory {
     private Optional<BestPracticeCheckingStrategy> getJavaBestPracticeCheckingStrategy(UnitTestFramework unitTestFramework) {
         if (unitTestFramework == UnitTestFramework.JUNIT) {
             JavaContextIndicator contextIndicator = new JavaContextIndicator();
-            JavaMethodCallExpressionResolver assertionResolver = new JavaMethodCallExpressionResolver(contextIndicator);
             JavaElementResolver javaElementResolver = new JavaElementResolver();
-            JavaMethodResolver methodResolver = new JavaMethodResolver(javaElementResolver, contextIndicator, assertionResolver);
+            JavaMethodResolver methodResolver = new JavaMethodResolver(javaElementResolver, contextIndicator);
             return Optional.of(new GroupBestPracticeCheckingStrategyDecorator(Arrays.asList(
                     new NoSimpleTestsJUnitCheckingStrategy(javaElementResolver, methodResolver),
-                    new AssertionCountJUnitCheckingStrategy(javaElementResolver, contextIndicator, assertionResolver, methodResolver),
+                    new AssertionCountJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
                     new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
                     new NoConditionalLogicJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
                     new NoGlobalStaticPropertiesJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator),
