@@ -3,7 +3,9 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.JavaElementHelper;
+import com.testspector.model.checking.java.common.JavaContextIndicator;
+import com.testspector.model.checking.java.common.JavaElementResolver;
+import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
@@ -16,10 +18,13 @@ import java.util.stream.Collectors;
 
 public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
-    private final JavaElementHelper javaElementHelper;
-
-    public NoGlobalStaticPropertiesJUnitCheckingStrategy(JavaElementHelper javaElementHelper) {
-        this.javaElementHelper = javaElementHelper;
+    private final JavaElementResolver javaElementResolver;
+    private final JavaMethodResolver methodResolver;
+    private final JavaContextIndicator contextIndicator;
+    public NoGlobalStaticPropertiesJUnitCheckingStrategy(JavaElementResolver javaElementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
+        this.javaElementResolver = javaElementResolver;
+        this.methodResolver = methodResolver;
+        this.contextIndicator = contextIndicator;
     }
 
     @Override
@@ -30,11 +35,11 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
 
         for (PsiMethod method : methods) {
-            List<PsiField> staticProperties = javaElementHelper
-                    .getAllChildrenOfTypeWithReferencesMeetingCondition(method, PsiField.class, (javaElementHelper::isInTestContext))
+            List<PsiField> staticProperties = javaElementResolver
+                    .allChildrenOfTypeWithReferencesThatMeetCondition(method, PsiField.class, (contextIndicator::isInTestContext))
                     .stream()
                     .filter(isStaticAndNotFinal())
                     .collect(Collectors.toList());

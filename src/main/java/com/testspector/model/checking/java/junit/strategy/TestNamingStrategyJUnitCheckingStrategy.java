@@ -3,7 +3,9 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.JavaElementHelper;
+import com.testspector.model.checking.java.common.JavaContextIndicator;
+import com.testspector.model.checking.java.common.JavaElementResolver;
+import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
@@ -13,10 +15,14 @@ import java.util.stream.Collectors;
 
 public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
-    private final JavaElementHelper javaElementHelper;
+    private final JavaElementResolver javaElementResolver;
+    private final JavaMethodResolver methodResolver;
+    private final JavaContextIndicator contextIndicator;
 
-    public TestNamingStrategyJUnitCheckingStrategy(JavaElementHelper javaElementHelper) {
-        this.javaElementHelper = javaElementHelper;
+    public TestNamingStrategyJUnitCheckingStrategy(JavaElementResolver javaElementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
+        this.javaElementResolver = javaElementResolver;
+        this.methodResolver = methodResolver;
+        this.contextIndicator = contextIndicator;
     }
 
     @Override
@@ -27,14 +33,14 @@ public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeChec
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
 
         for (PsiMethod testMethod : methods) {
             PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();
             if (nameIdentifier != null) {
                 String testMethodName = nameIdentifier.getText();
-                List<PsiMethod> methodsWithAlmostSameName = javaElementHelper
-                        .getAllChildrenOfTypeWithReferencesMeetingCondition(testMethod, PsiMethodCallExpression.class, javaElementHelper::isInTestContext)
+                List<PsiMethod> methodsWithAlmostSameName = javaElementResolver
+                        .allChildrenOfTypeWithReferencesThatMeetCondition(testMethod, PsiMethodCallExpression.class, contextIndicator::isInTestContext)
                         .stream()
                         .map(PsiCall::resolveMethod)
                         .filter(Objects::nonNull)

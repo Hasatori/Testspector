@@ -3,7 +3,9 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.JavaElementHelper;
+import com.testspector.model.checking.java.common.JavaContextIndicator;
+import com.testspector.model.checking.java.common.JavaElementResolver;
+import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
@@ -17,11 +19,14 @@ import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_PA
 
 public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
-    private final JavaElementHelper javaElementHelper;
+    private final JavaElementResolver elementResolver;
+    private final JavaContextIndicator contextResolver;
+    private final JavaMethodResolver methodResolver;
 
-
-    public NoConditionalLogicJUnitCheckingStrategy(JavaElementHelper javaElementHelper) {
-        this.javaElementHelper = javaElementHelper;
+    public NoConditionalLogicJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
+        this.elementResolver = elementResolver;
+        this.contextResolver = contextResolver;
+        this.methodResolver = methodResolver;
     }
 
     @Override
@@ -32,7 +37,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
             List<PsiStatement> statements = getConditionalStatements(method);
 
@@ -71,7 +76,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantMethodExpression(method);
         for (PsiMethodCallExpression psiMethodCallExpression : psiMethodCallExpressions) {
             PsiMethod referencedMethod = psiMethodCallExpression.resolveMethod();
-            if (referencedMethod != null && javaElementHelper.isInTestContext(referencedMethod)) {
+            if (referencedMethod != null && contextResolver.isInTestContext(referencedMethod)) {
                 conditionalStatements.addAll(getConditionalStatements(referencedMethod));
             }
         }

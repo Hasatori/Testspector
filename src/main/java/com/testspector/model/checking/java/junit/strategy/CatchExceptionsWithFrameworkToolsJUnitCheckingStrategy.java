@@ -3,7 +3,9 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.JavaElementHelper;
+import com.testspector.model.checking.java.common.JavaContextIndicator;
+import com.testspector.model.checking.java.common.JavaElementResolver;
+import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
@@ -18,10 +20,14 @@ import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_AS
 
 public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
-    private final JavaElementHelper javaElementHelper;
+    private final JavaElementResolver elementResolver;
+    private final JavaContextIndicator contextResolver;
+    private final JavaMethodResolver methodResolver;
 
-    public CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(JavaElementHelper javaElementHelper) {
-        this.javaElementHelper = javaElementHelper;
+    public CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
+        this.elementResolver = elementResolver;
+        this.contextResolver = contextResolver;
+        this.methodResolver = methodResolver;
     }
 
 
@@ -33,9 +39,9 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
-            List<PsiTryStatement> psiTryStatements = getTryStatements(method);
+            List<PsiTryStatement> psiTryStatements = elementResolver.allChildrenOfTypeWithReferencesThatMeetCondition(method, PsiTryStatement.class, (contextResolver::isInTestContext));
             if (psiTryStatements.size() > 0) {
                 List<String> hints = new ArrayList<>();
                 String message = "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.";
@@ -57,35 +63,6 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
             }
         }
         return bestPracticeViolations;
-    }
-
-    private List<PsiTryStatement> getTryStatements(PsiMethod method) {
-        List<PsiTryStatement> tryStatements = new ArrayList<>();
-        PsiCodeBlock psiCodeBlock = method.getBody();
-        if (psiCodeBlock != null) {
-
-            tryStatements.addAll(new ArrayList<>(javaElementHelper.getImmediateChildrenOfType(psiCodeBlock, PsiTryStatement.class)));
-            List<PsiMethodCallExpression> psiMethodCallExpressions = getRelevantMethodCalls(psiCodeBlock);
-            for (PsiMethodCallExpression psiMethodCallExpression : psiMethodCallExpressions) {
-                PsiMethod referencedMethod = psiMethodCallExpression.resolveMethod();
-                if (referencedMethod != null && javaElementHelper.isInTestContext(referencedMethod)) {
-                    tryStatements.addAll(getTryStatements(referencedMethod));
-                }
-            }
-        }
-        return tryStatements;
-    }
-
-    private List<PsiMethodCallExpression> getRelevantMethodCalls(PsiElement psiElement) {
-        List<PsiMethodCallExpression> psiMethodCallExpressions = new ArrayList<>();
-        List<PsiElement> children = Arrays.stream(psiElement.getChildren()).collect(Collectors.toList());
-        for (PsiElement child : children) {
-            if (child instanceof PsiMethodCallExpression) {
-                psiMethodCallExpressions.add((PsiMethodCallExpression) child);
-            }
-            psiMethodCallExpressions.addAll(getRelevantMethodCalls(child));
-        }
-        return psiMethodCallExpressions;
     }
 
     @Override

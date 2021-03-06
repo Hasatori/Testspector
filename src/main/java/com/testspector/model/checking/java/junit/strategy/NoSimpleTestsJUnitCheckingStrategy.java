@@ -1,11 +1,11 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.*;
-import com.intellij.psi.impl.search.PsiSearchHelperImpl;
 import com.intellij.psi.util.PsiTypesUtil;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.JavaElementHelper;
+import com.testspector.model.checking.java.common.JavaElementResolver;
+import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
@@ -16,10 +16,12 @@ import java.util.stream.Collectors;
 public class NoSimpleTestsJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
 
-    private final JavaElementHelper javaElementHelper;
+    private final JavaElementResolver javaElementResolver;
+    private final JavaMethodResolver methodResolver;
 
-    public NoSimpleTestsJUnitCheckingStrategy(JavaElementHelper javaElementHelper) {
-        this.javaElementHelper = javaElementHelper;
+    public NoSimpleTestsJUnitCheckingStrategy(JavaElementResolver javaElementResolver, JavaMethodResolver methodResolver) {
+        this.javaElementResolver = javaElementResolver;
+        this.methodResolver = methodResolver;
     }
 
     @Override
@@ -30,9 +32,9 @@ public class NoSimpleTestsJUnitCheckingStrategy implements BestPracticeCheckingS
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
-           List<PsiMethod> simpleMethods = javaElementHelper.getTestedMethods(method)
+           List<PsiMethod> simpleMethods = methodResolver.allTestedMethods(method)
                     .stream()
                     .filter(isMethodSimple(method))
                     .collect(Collectors.toList());
@@ -53,10 +55,10 @@ public class NoSimpleTestsJUnitCheckingStrategy implements BestPracticeCheckingS
     private Predicate<PsiMethod> isMethodSimple(PsiMethod testingMethod) {
         return method -> {
             if (isSimpleGetter().test(method)) {
-                PsiClass getterReferenceClass = PsiTypesUtil.getPsiClass(javaElementHelper.getAllChildrenOfType(testingMethod, PsiReferenceExpression.class)
+                PsiClass getterReferenceClass = PsiTypesUtil.getPsiClass(javaElementResolver.allChildrenOfType(testingMethod, PsiReferenceExpression.class)
                         .stream()
                         .filter(psiReferenceExpression -> psiReferenceExpression.resolve() == method).findFirst()
-                        .map(psiReferenceExpression -> javaElementHelper.getImmediateChildrenOfType(psiReferenceExpression, PsiReferenceExpression.class))
+                        .map(psiReferenceExpression -> javaElementResolver.immediateChildrenOfType(psiReferenceExpression, PsiReferenceExpression.class))
                         .map(psiReferenceExpressions -> psiReferenceExpressions.size() >= 1 ? psiReferenceExpressions.get(0) : null)
                         .map(PsiReference::resolve)
                         .filter(element -> element instanceof PsiLocalVariable)
@@ -70,9 +72,9 @@ public class NoSimpleTestsJUnitCheckingStrategy implements BestPracticeCheckingS
 
     private Predicate<PsiMethod> isSimpleGetter() {
         return method -> {
-            Optional<PsiElement> returnCandidate = javaElementHelper.getFirstChildIgnoring(Objects.requireNonNull(method.getBody()), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class));
+            Optional<PsiElement> returnCandidate = javaElementResolver.firstChildIgnoring(Objects.requireNonNull(method.getBody()), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class));
             if (returnCandidate.isPresent() && returnCandidate.get() instanceof PsiReturnStatement) {
-                return javaElementHelper.getImmediateChildrenOfType(returnCandidate.get(), PsiReferenceExpression.class)
+                return javaElementResolver.immediateChildrenOfType(returnCandidate.get(), PsiReferenceExpression.class)
                         .stream()
                         .map(PsiReference::resolve)
                         .anyMatch(element -> element instanceof PsiField);

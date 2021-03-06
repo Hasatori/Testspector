@@ -6,7 +6,9 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifierList;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.JavaElementHelper;
+import com.testspector.model.checking.java.common.JavaContextIndicator;
+import com.testspector.model.checking.java.common.JavaElementResolver;
+import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
@@ -18,10 +20,14 @@ import java.util.stream.Collectors;
 public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
 
 
-    private final JavaElementHelper javaElementHelper;
+    private final JavaElementResolver javaElementResolver;
+    private final JavaMethodResolver methodResolver;
+    private final JavaContextIndicator contextIndicator;
 
-    public TestOnlyPublicBehaviourJUnitCheckingStrategy(JavaElementHelper javaElementHelper) {
-        this.javaElementHelper = javaElementHelper;
+    public TestOnlyPublicBehaviourJUnitCheckingStrategy(JavaElementResolver javaElementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
+        this.javaElementResolver = javaElementResolver;
+        this.methodResolver = methodResolver;
+        this.contextIndicator = contextIndicator;
     }
 
     @Override
@@ -32,9 +38,9 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = javaElementHelper.getMethodsFromElementByAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.immediateMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
-            List<PsiMethod> notPublicMethods = javaElementHelper.getTestedMethods(method)
+            List<PsiMethod> notPublicMethods = methodResolver.allTestedMethods(method)
                     .stream()
                     .filter(testedMethod -> methodHasModifier(testedMethod, "protected") || isMethodPackagePrivate(testedMethod) || methodHasModifier(testedMethod, "private"))
                     .collect(Collectors.toList());
