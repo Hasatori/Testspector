@@ -16,7 +16,7 @@ import com.intellij.ui.content.ContentFactory;
 import com.testspector.model.TestLineCrate;
 import com.testspector.model.checking.*;
 import com.testspector.model.checking.java.junit.JUnitUnitTestFrameworkResolveIndicationStrategy;
-import com.testspector.model.checking.java.junit.JUnitUnitTestLineResolveStrategy;
+import com.testspector.model.checking.java.junit.JUnitInspectionInvocationLineResolveStrategy;
 import com.testspector.model.enums.BestPractice;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
@@ -38,8 +38,8 @@ import static com.testspector.model.utils.Constants.WEB_PAGE_BEST_PRACTICES_ULR;
 
 public final class TestspectorController {
 
-    private static final Map<ProgrammingLanguage, List<UnitTestLineResolveStrategy>> PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<ProgrammingLanguage, List<UnitTestLineResolveStrategy>>() {{
-        put(JAVA, Arrays.asList(new JUnitUnitTestLineResolveStrategy()));
+    private static final Map<ProgrammingLanguage, List<InspectionInvocationLineResolveStrategy>> PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<ProgrammingLanguage, List<InspectionInvocationLineResolveStrategy>>() {{
+        put(JAVA, Arrays.asList(new JUnitInspectionInvocationLineResolveStrategy()));
     }});
     private static final Map<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> PROGRAMMING_LANGUAGE_UNIT_TEST_FRAMEWORK_RESOLVE_INDICATION_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>>() {{
         put(JAVA, Arrays.asList(new JUnitUnitTestFrameworkResolveIndicationStrategy()));
@@ -139,9 +139,9 @@ public final class TestspectorController {
             List<UnitTestFramework> unitTestFrameworks = UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY.getUnitTestFrameworks(optionalProgrammingLanguage.get(), element);
             if (!unitTestFrameworks.isEmpty()) {
                 UnitTestFramework unitTestFramework = unitTestFrameworks.get(0);
-                Optional<UnitTestLineResolveStrategy> optionalUnitTestLineResolveStrategy = selectTestLineResolveStrategy(optionalProgrammingLanguage.get(), unitTestFramework);
+                Optional<InspectionInvocationLineResolveStrategy> optionalUnitTestLineResolveStrategy = selectTestLineResolveStrategy(optionalProgrammingLanguage.get(), unitTestFramework);
                 if (optionalUnitTestLineResolveStrategy.isPresent()) {
-                    Optional<PsiElement> optionalLineElement = optionalUnitTestLineResolveStrategy.get().resolveTestLine(element);
+                    Optional<PsiElement> optionalLineElement = optionalUnitTestLineResolveStrategy.get().resolveInspectionInvocationLine(element);
                     if (optionalLineElement.isPresent()) {
                         return Optional.of(new TestLineCrate(optionalLineElement.get(), optionalProgrammingLanguage.get(), unitTestFramework));
                     }
@@ -245,12 +245,12 @@ public final class TestspectorController {
     }
 
 
-    private static Optional<UnitTestLineResolveStrategy> selectTestLineResolveStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
-        List<UnitTestLineResolveStrategy> unitTestLineResolveStrategies = PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP.get(programmingLanguage);
+    private static Optional<InspectionInvocationLineResolveStrategy> selectTestLineResolveStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
+        List<InspectionInvocationLineResolveStrategy> unitTestLineResolveStrategies = PROGRAMMING_LANGUAGE_TEST_LINE_RESOLVE_STRATEGY_HASH_MAP.get(programmingLanguage);
         if (unitTestLineResolveStrategies != null) {
             return unitTestLineResolveStrategies
                     .stream()
-                    .filter(unitTestLineResolveStrategy -> unitTestLineResolveStrategy.getUnitTestFramework() == unitTestFramework)
+                    .filter(inspectionInvocationLineResolveStrategy -> inspectionInvocationLineResolveStrategy.getUnitTestFramework() == unitTestFramework)
                     .findFirst();
         }
         return Optional.empty();

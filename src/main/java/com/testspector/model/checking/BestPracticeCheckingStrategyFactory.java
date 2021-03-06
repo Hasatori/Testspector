@@ -48,6 +48,7 @@ public class BestPracticeCheckingStrategyFactory {
             )
             ));
         }
+
         return Optional.empty();
     }
 }
