@@ -68,7 +68,7 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
 
     @ParameterizedTest
     @MethodSource(value = "provideAllSupportedStatementStringDefinitions")
-    public void checkBestPractices_CheckingAllConditionalStatementsOneIsInTheTestMethodAndSecondInTheHelperMethod_TwoViolationsReportingAboutConditionalLogicShouldBeReturned(String statementName, String statementStringDefinition) {
+    public void checkBestPractices_CheckingAllConditionalStatementsOneIsInTheTestMethodAndSecondInTheHelperMethod_OneViolationReportingAboutConditionalLogicShouldBeReturned(String statementName, String statementStringDefinition) {
         WriteCommandAction.runWriteCommandAction(getProject(), () -> {
             // Given
             String packageName = "com.testspector";
