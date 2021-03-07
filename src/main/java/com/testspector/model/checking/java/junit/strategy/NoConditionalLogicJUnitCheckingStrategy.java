@@ -81,20 +81,16 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         for (PsiStatement conditionalStatement : conditionalStatements) {
             HashMap<PsiElement, String> elementNameHashMap = new HashMap<>();
             Optional<PsiReferenceExpression> optionalPsiReferenceExpression = firstReferenceToConditionalStatement(method, conditionalStatement);
-            if (optionalPsiReferenceExpression.isPresent()) {
-                elementNameHashMap.put(optionalPsiReferenceExpression.get(), "reference from test method");
-                elementNameHashMap.put(conditionalStatement, "statement position");
-            } else {
-                elementNameHashMap.put(conditionalStatement, "statement");
-            }
-            result.add(new RelatedElementWrapper(String.format("%s ...%d - %d...",statementString(conditionalStatement), conditionalStatement.getTextRange().getStartOffset(), conditionalStatement.getTextRange().getEndOffset()), elementNameHashMap));
+            optionalPsiReferenceExpression.ifPresent(psiReferenceExpression -> elementNameHashMap.put(psiReferenceExpression, "reference from test method"));
+            elementNameHashMap.put(conditionalStatement, "statement");
+            result.add(new RelatedElementWrapper(String.format("%s ...%d - %d...", statementString(conditionalStatement), conditionalStatement.getTextRange().getStartOffset(), conditionalStatement.getTextRange().getEndOffset()), elementNameHashMap));
         }
 
         return result;
     }
 
-    private Optional<PsiReferenceExpression> firstReferenceToConditionalStatement(PsiElement element, PsiStatement statement) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfType(element, PsiReferenceExpression.class);
+    private Optional<PsiReferenceExpression> firstReferenceToConditionalStatement(PsiMethod method, PsiStatement statement) {
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfType(method, PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
             if (!elementResolver.allChildrenOfType(reference.getParent(), PsiStatement.class, psiStatement -> statement == psiStatement, contextResolver.isInTestContext()).isEmpty()) {
                 return Optional.of(reference);
