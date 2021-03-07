@@ -31,7 +31,7 @@ public class AssertionCountJUnitCheckingStrategyTest extends BasePlatformTestCas
     private PsiFileFactory psiFileFactory;
     private AssertionCountJUnitCheckingStrategy strategy;
     private JavaElementResolver elementResolver;
-    private JavaContextIndicator contextResolver;
+    private JavaContextIndicator contextIndicator;
     private JavaMethodResolver methodResolver;
     private PsiJavaFile testJavaFile;
     private PsiClass testClass;
@@ -43,9 +43,9 @@ public class AssertionCountJUnitCheckingStrategyTest extends BasePlatformTestCas
         this.psiElementFactory = PsiElementFactory.getInstance(getProject());
         this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
         this.elementResolver = EasyMock.mock(JavaElementResolver.class);
-        this.contextResolver = EasyMock.mock(JavaContextIndicator.class);
+        this.contextIndicator = EasyMock.mock(JavaContextIndicator.class);
         this.methodResolver = EasyMock.mock(JavaMethodResolver.class);
-        this.strategy = new AssertionCountJUnitCheckingStrategy(elementResolver, contextResolver, methodResolver);
+        this.strategy = new AssertionCountJUnitCheckingStrategy(elementResolver, contextIndicator, methodResolver);
         String fileName = "Test";
         WriteCommandAction.runWriteCommandAction(getProject(), () -> {
             this.testJavaFile = this.javaTestElementUtil.createFile(fileName, "com.testspector", Collections.singletonList("import org.junit.jupiter.api.Test;"), Collections.emptyList());
@@ -68,9 +68,9 @@ public class AssertionCountJUnitCheckingStrategyTest extends BasePlatformTestCas
             String testMethodName = "testWithNoAssertions";
             PsiMethod testMethodWithoutAssertions = this.javaTestElementUtil.createTestMethod(testMethodName, Collections.singletonList("@Test"));
             testMethodWithoutAssertions = (PsiMethod) testClass.add(testMethodWithoutAssertions);
-            EasyMock.expect(contextResolver.isInTestContext()).andReturn((element) -> true).anyTimes();
-            EasyMock.replay(contextResolver);
-            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethodWithoutAssertions), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextResolver.isInTestContext())))
+            EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
+            EasyMock.replay(contextIndicator);
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethodWithoutAssertions), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                     .andReturn(new ArrayList<>()).times(1);
             EasyMock.replay(elementResolver);
             List<BestPracticeViolation> expectedViolations = Collections.singletonList(
@@ -100,11 +100,11 @@ public class AssertionCountJUnitCheckingStrategyTest extends BasePlatformTestCas
             PsiMethod testWithOneAssertion = this.javaTestElementUtil.createTestMethod(testMethodName, Collections.singletonList("@Test"));
             PsiMethodCallExpression assertionMethodCall = (PsiMethodCallExpression) testWithOneAssertion.getBody().add(this.psiElementFactory.createExpressionFromText("Assert.assertTrue(true)", null));
             testWithOneAssertion = (PsiMethod) testClass.add(testWithOneAssertion);
-            EasyMock.expect(contextResolver.isInTestContext()).andReturn((element) -> true).anyTimes();
-            EasyMock.replay(contextResolver);
-            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testWithOneAssertion), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextResolver.isInTestContext())))
+            EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
+            EasyMock.replay(contextIndicator);
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testWithOneAssertion), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                     .andReturn(Collections.singletonList(assertionMethodCall)).times(1);
-            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextResolver.isInTestContext())))
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                     .andReturn(Collections.emptyList()).times(1);
             EasyMock.replay(elementResolver);
             // When
@@ -126,13 +126,13 @@ public class AssertionCountJUnitCheckingStrategyTest extends BasePlatformTestCas
             PsiMethodCallExpression firstAssertionMethodCall = (PsiMethodCallExpression) testWithTwoNonGroupedAssertions.getBody().add(this.psiElementFactory.createExpressionFromText(assertMethodText,null));
             PsiMethodCallExpression secondAssertionMethodCall = (PsiMethodCallExpression) testWithTwoNonGroupedAssertions.getBody().add(this.psiElementFactory.createExpressionFromText(assertMethodText, null));
             testWithTwoNonGroupedAssertions = (PsiMethod) testClass.add(testWithTwoNonGroupedAssertions);
-            EasyMock.expect(contextResolver.isInTestContext()).andReturn((element) -> true).anyTimes();
-            EasyMock.replay(contextResolver);
-            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testWithTwoNonGroupedAssertions), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextResolver.isInTestContext())))
+            EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
+            EasyMock.replay(contextIndicator);
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testWithTwoNonGroupedAssertions), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                     .andReturn(Arrays.asList(firstAssertionMethodCall, secondAssertionMethodCall)).times(1);
-            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(firstAssertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextResolver.isInTestContext())))
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(firstAssertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                     .andReturn(Collections.emptyList()).times(1);
-            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(secondAssertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextResolver.isInTestContext())))
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(secondAssertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                     .andReturn(Collections.emptyList()).times(1);
             EasyMock.expect(elementResolver.allChildrenOfType(testWithTwoNonGroupedAssertions,PsiReferenceExpression.class))
                     .andReturn(Collections.emptyList()).times(2);
