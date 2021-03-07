@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH;
 
-public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
+public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
     private static final List<Class<? extends PsiStatement>> SUPPORTED_STATEMENT_CLASSES = Collections.unmodifiableList(Arrays.asList(
             PsiIfStatement.class,
@@ -36,14 +36,14 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
-        return checkBestPractices(Collections.singletonList(psiElement));
+    public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {
+        return checkBestPractices(Collections.singletonList(method));
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
+    public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+
         for (PsiMethod method : methods) {
             List<PsiStatement> statements = elementResolver.allChildrenOfType(method, PsiStatement.class, isConditionalStatement(), contextResolver.isInTestContext());
 

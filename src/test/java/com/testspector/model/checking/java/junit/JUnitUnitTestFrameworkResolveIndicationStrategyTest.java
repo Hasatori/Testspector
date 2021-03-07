@@ -15,8 +15,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
-import static com.testspector.model.checking.java.junit.JUnitTestUtil.getFirstMethodWithAnnotationQualifiedName;
-import static com.testspector.model.checking.java.junit.JUnitTestUtil.getMethodFromFileByName;
+import static com.testspector.model.checking.java.junit.Util.getFirstMethodWithAnnotationQualifiedName;
+import static com.testspector.model.checking.java.junit.Util.getMethodFromFileByName;
 
 @RunWith(JUnitPlatform.class)
 public class JUnitUnitTestFrameworkResolveIndicationStrategyTest extends BasePlatformTestCase {

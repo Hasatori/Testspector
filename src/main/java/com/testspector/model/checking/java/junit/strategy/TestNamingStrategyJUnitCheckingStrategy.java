@@ -15,7 +15,7 @@ import me.xdrop.fuzzywuzzy.FuzzySearch;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
+public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
     private final JavaElementResolver elementResolver;
     private final JavaMethodResolver methodResolver;
@@ -28,14 +28,14 @@ public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeChec
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
-        return checkBestPractices(Collections.singletonList(psiElement));
+    public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {
+        return checkBestPractices(Collections.singletonList(method));
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
+    public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+
 
         for (PsiMethod testMethod : methods) {
             PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();

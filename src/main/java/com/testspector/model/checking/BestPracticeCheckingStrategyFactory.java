@@ -1,8 +1,10 @@
 package com.testspector.model.checking;
 
+import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.junit.JUnitGroupMethodBestPracticeCheckingStrategyAdapter;
 import com.testspector.model.checking.java.junit.strategy.*;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
@@ -14,7 +16,7 @@ import java.util.Optional;
 
 public class BestPracticeCheckingStrategyFactory {
 
-    public Optional<BestPracticeCheckingStrategy> getBestPracticeCheckingStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
+    public Optional<BestPracticeCheckingStrategy<PsiElement>> getBestPracticeCheckingStrategy(ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
         if (programmingLanguage == ProgrammingLanguage.JAVA) {
             return getJavaBestPracticeCheckingStrategy(unitTestFramework);
         }
@@ -30,12 +32,12 @@ public class BestPracticeCheckingStrategyFactory {
     }
 
 
-    private Optional<BestPracticeCheckingStrategy> getJavaBestPracticeCheckingStrategy(UnitTestFramework unitTestFramework) {
+    private Optional<BestPracticeCheckingStrategy<PsiElement>> getJavaBestPracticeCheckingStrategy(UnitTestFramework unitTestFramework) {
         if (unitTestFramework == UnitTestFramework.JUNIT) {
             JavaContextIndicator contextIndicator = new JavaContextIndicator();
             JavaElementResolver javaElementResolver = new JavaElementResolver();
             JavaMethodResolver methodResolver = new JavaMethodResolver(javaElementResolver, contextIndicator);
-            return Optional.of(new GroupBestPracticeCheckingStrategyDecorator(Arrays.asList(
+            return Optional.of(new JUnitGroupMethodBestPracticeCheckingStrategyAdapter(Arrays.asList(
                     new NoSimpleTestsJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator),
                     new AssertionCountJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
                     new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
@@ -43,8 +45,7 @@ public class BestPracticeCheckingStrategyFactory {
                     new NoGlobalStaticPropertiesJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator),
                     new TestNamingStrategyJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator),
                     new TestOnlyPublicBehaviourJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator)
-            )
-            ));
+            ), methodResolver));
         }
 
         return Optional.empty();

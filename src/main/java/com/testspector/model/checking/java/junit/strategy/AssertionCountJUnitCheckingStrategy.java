@@ -13,7 +13,7 @@ import com.testspector.model.enums.BestPractice;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class AssertionCountJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
+public class AssertionCountJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
     private final JavaElementResolver elementResolver;
     private final JavaContextIndicator contextResolver;
@@ -30,14 +30,13 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
-        return checkBestPractices(Collections.singletonList(psiElement));
+    public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {
+        return checkBestPractices(Collections.singletonList(method));
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
+    public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
             List<PsiMethodCallExpression> assertionMethods = elementResolver.allChildrenOfType(method, PsiMethodCallExpression.class, (psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent()), contextResolver.isInTestContext());
             PsiIdentifier methodIdentifier = method.getNameIdentifier();

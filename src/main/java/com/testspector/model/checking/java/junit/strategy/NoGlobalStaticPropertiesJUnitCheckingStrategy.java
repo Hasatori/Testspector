@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
+public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
     private final JavaElementResolver elementResolver;
     private final JavaMethodResolver methodResolver;
@@ -27,14 +27,14 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
-        return checkBestPractices(Collections.singletonList(psiElement));
+    public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {
+        return checkBestPractices(Collections.singletonList(method));
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
+    public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+
 
         for (PsiMethod method : methods) {
             List<PsiField> staticProperties = elementResolver

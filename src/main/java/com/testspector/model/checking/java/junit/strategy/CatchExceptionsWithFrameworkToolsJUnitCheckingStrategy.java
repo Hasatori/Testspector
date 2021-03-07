@@ -15,7 +15,7 @@ import java.util.*;
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT4_ASSERTIONS_CLASS_PATH;
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH;
 
-public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
+public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
     private final JavaElementResolver elementResolver;
     private final JavaContextIndicator contextResolver;
@@ -29,14 +29,13 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
 
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
-        return this.checkBestPractices(Collections.singletonList(psiElement));
+    public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {
+        return this.checkBestPractices(Collections.singletonList(method));
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
+    public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         for (PsiMethod method : methods) {
             List<PsiTryStatement> psiTryStatements = elementResolver.allChildrenOfType(method, PsiTryStatement.class,contextResolver.isInTestContext());
             if (psiTryStatements.size() > 0) {

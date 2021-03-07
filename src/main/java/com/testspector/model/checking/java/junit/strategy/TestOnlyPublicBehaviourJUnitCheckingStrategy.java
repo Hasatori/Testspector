@@ -14,7 +14,7 @@ import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
+public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
 
     private final JavaElementResolver elementResolver;
@@ -28,14 +28,14 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
-        return checkBestPractices(Collections.singletonList(psiElement));
+    public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {
+        return checkBestPractices(Collections.singletonList(method));
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
+    public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+
         for (PsiMethod method : methods) {
             List<PsiMethod> notPublicMethods = methodResolver.allTestedMethods(method)
                     .stream()

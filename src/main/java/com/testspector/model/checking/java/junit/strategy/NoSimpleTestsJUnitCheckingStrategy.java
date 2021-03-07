@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class NoSimpleTestsJUnitCheckingStrategy implements BestPracticeCheckingStrategy {
+public class NoSimpleTestsJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
 
     private final JavaElementResolver elementResolver;
@@ -29,14 +29,14 @@ public class NoSimpleTestsJUnitCheckingStrategy implements BestPracticeCheckingS
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(PsiElement psiElement) {
-        return checkBestPractices(Collections.singletonList(psiElement));
+    public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {
+        return checkBestPractices(Collections.singletonList(method));
     }
 
     @Override
-    public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
+    public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+
         for (PsiMethod method : methods) {
             List<PsiMethod> simpleMethods = methodResolver.allTestedMethods(method)
                     .stream()

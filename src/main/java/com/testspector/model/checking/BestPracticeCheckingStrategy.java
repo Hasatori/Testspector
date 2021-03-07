@@ -8,11 +8,11 @@ import com.testspector.model.enums.UnitTestFramework;
 
 import java.util.List;
 
-public interface  BestPracticeCheckingStrategy {
+public interface  BestPracticeCheckingStrategy<T> {
 
-  List<BestPracticeViolation> checkBestPractices(PsiElement psiElement);
+  List<BestPracticeViolation> checkBestPractices(T checkedElement);
 
-  List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements);
+  List<BestPracticeViolation> checkBestPractices(List<T> checkedElements);
 
   List<BestPractice> getCheckedBestPractice();
 
