@@ -135,9 +135,9 @@ public class TreeViewReport extends JTree {
                     for (RelatedElementWrapper relatedElementWrapper : bestPracticeViolation.getRelatedElements()) {
                         WrapperNode errorElementWrapper = new WrapperNode(mainNavigationElement, relatedElementWrapper.getName());
                         for (Map.Entry<PsiElement, String> entry : relatedElementWrapper.getRelatedElementNameHashMap().entrySet()) {
-                            errorElementWrapper.add(new ShowHideNode(entry.getKey().getNavigationElement(),entry.getKey(), entry.getKey().getTextRange(), this, entry.getValue() +" - highlight", entry.getValue() +" - delete highlight"));
+                            errorElementWrapper.add(new ShowHideNode(entry.getKey().getNavigationElement(), entry.getKey(), entry.getKey().getTextRange(), this, entry.getValue() + " - highlight", entry.getValue() + " - delete highlight"));
                         }
-                       errorsWrapper.add(errorElementWrapper);
+                        errorsWrapper.add(errorElementWrapper);
                     }
                     bestPracticeViolationNode.add(errorsWrapper);
                 }
@@ -163,7 +163,7 @@ public class TreeViewReport extends JTree {
         }
         psiElementBestPracticeViolationHashMap.forEach((element, group) -> {
             PsiElement mainNavigationElement = element.getNavigationElement();
-            WrapperNode groupNode = new WrapperNode(mainNavigationElement, element.toString());
+            WrapperNode groupNode = new WrapperNode(mainNavigationElement, group.get(0).getName());
             for (BestPracticeViolation bestPracticeViolation : group) {
                 ViolatedRuleNode bestPracticeViolationNode = new ViolatedRuleNode(mainNavigationElement, bestPracticeViolation.getViolatedRule());
                 try {
@@ -186,7 +186,7 @@ public class TreeViewReport extends JTree {
                     for (RelatedElementWrapper relatedElementWrapper : bestPracticeViolation.getRelatedElements()) {
                         WrapperNode errorElementWrapper = new WrapperNode(mainNavigationElement, relatedElementWrapper.getName());
                         for (Map.Entry<PsiElement, String> entry : relatedElementWrapper.getRelatedElementNameHashMap().entrySet()) {
-                            errorElementWrapper.add(new ShowHideNode(entry.getKey().getNavigationElement(),entry.getKey(), entry.getKey().getTextRange(), this, entry.getValue() +" - highlight", entry.getValue() +" - delete highlight"));
+                            errorElementWrapper.add(new ShowHideNode(entry.getKey().getNavigationElement(), entry.getKey(), entry.getKey().getTextRange(), this, entry.getValue() + " - highlight", entry.getValue() + " - delete highlight"));
                         }
                         errorsWrapper.add(errorElementWrapper);
                     }

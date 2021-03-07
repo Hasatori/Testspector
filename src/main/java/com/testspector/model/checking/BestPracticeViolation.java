@@ -18,7 +18,7 @@ public class BestPracticeViolation {
 
     private final BestPractice violatedRule;
 
-    private final List<RelatedElementWrapper> relatedElementWrappers;
+    private final List<RelatedElementWrapper> relatedElementsWrapper;
 
     private final String name;
 
@@ -27,18 +27,18 @@ public class BestPracticeViolation {
 
     }
 
-    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, List<String> hints, BestPractice violatedRule, List<RelatedElementWrapper> relatedElementWrappers) {
+    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, List<String> hints, BestPractice violatedRule, List<RelatedElementWrapper> relatedElementsWrapper) {
         this.testMethodElement = testMethodElement;
         this.testMethodTextRange = testMethodTextRange;
         this.problemDescription = problemDescription;
         this.hints = hints;
         this.violatedRule = violatedRule;
-        this.relatedElementWrappers = relatedElementWrappers;
+        this.relatedElementsWrapper = relatedElementsWrapper;
         this.name = name;
     }
 
-    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, BestPractice violatedRule, List<RelatedElementWrapper> relatedElementWrappers) {
-        this(name, testMethodElement, testMethodTextRange,problemDescription,null, violatedRule, relatedElementWrappers);
+    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, BestPractice violatedRule, List<RelatedElementWrapper> relatedElementsWrapper) {
+        this(name, testMethodElement, testMethodTextRange,problemDescription,null, violatedRule, relatedElementsWrapper);
     }
 
     public String getName() {
@@ -66,6 +66,6 @@ public class BestPracticeViolation {
     }
 
     public List<RelatedElementWrapper> getRelatedElements() {
-        return relatedElementWrappers;
+        return relatedElementsWrapper;
     }
 }
