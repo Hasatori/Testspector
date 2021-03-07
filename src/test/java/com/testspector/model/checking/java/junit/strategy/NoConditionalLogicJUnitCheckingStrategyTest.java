@@ -15,6 +15,7 @@ import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -33,13 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(JUnitPlatform.class)
 public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTestCase {
-
-    private static final List<String> JUNIT_TEST_QUALIFIED_NAMES = Collections.unmodifiableList(Arrays.asList(
-            "org.junit.Test",
-            "org.junit.jupiter.api.Test",
-            "org.junit.jupiter.params.ParameterizedTest",
-            "org.junit.jupiter.api.RepeatedTest"
-    ));
 
     private JavaTestElementUtil javaTestElementUtil;
     private PsiElementFactory psiElementFactory;
@@ -100,13 +94,12 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
             helperMethodWithStatement = (PsiMethod) testClass.add(helperMethodWithStatement);
             testMethodWithStatement = (PsiMethod) testClass.add(testMethodWithStatement);
             EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
-            EasyMock.expect(methodResolver.testMethodsWithAnnotations(Collections.singletonList(testMethodWithStatement), JUNIT_TEST_QUALIFIED_NAMES)).andReturn(Collections.singletonList(testMethodWithStatement)).times(1);
             EasyMock.replay(contextIndicator);
             EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethodWithStatement), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Arrays.asList(testMethodStatement, helperMethodStatement)).times(1);
             EasyMock.expect(elementResolver.allChildrenOfType(testMethodWithStatement, PsiReferenceExpression.class)).andReturn(Collections.singletonList(helperMethodCall.getMethodExpression())).times(2);
             EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Collections.emptyList()).times(1);
             EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Collections.singletonList(helperMethodStatement)).times(1);
-            EasyMock.replay(elementResolver, methodResolver);
+            EasyMock.replay(elementResolver);
             List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                     createBestPracticeViolation(
                             String.format("%s#%s", testMethodWithStatement.getContainingClass().getQualifiedName(), testMethodWithStatement.getName()),
@@ -136,6 +129,26 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
             );
         });
     }
+
+    @Test
+    public void checkBestPractices_TestWithNoConditionalLogic_NoViolationsShouldBeFound() {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+
+            PsiMethod testWithNoConditionalLogic = this.javaTestElementUtil.createTestMethod("testWithNoConditionalLogic", Collections.singletonList("@Test"));
+            testWithNoConditionalLogic = (PsiMethod) testClass.add(testWithNoConditionalLogic);
+            EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
+            EasyMock.replay(contextIndicator);
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testWithNoConditionalLogic), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
+                    .andReturn(Collections.emptyList()).times(1);
+            EasyMock.replay(elementResolver);
+
+            List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testWithNoConditionalLogic);
+
+            Assert.assertSame("Incorrect number of found violations", 0, foundViolations.size());
+        });
+    }
+
+
 
     private BestPracticeViolation createBestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, List<String> hints, List<RelatedElementWrapper> relatedElementsWrapper) {
         return new BestPracticeViolation(
