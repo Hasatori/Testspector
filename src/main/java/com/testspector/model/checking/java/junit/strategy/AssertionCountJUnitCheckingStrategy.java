@@ -58,7 +58,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
                     hints.add(String.format("You are using JUnit5 so it can be solved by wrapping multiple assertions into %s.assertAll() method", JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH));
                 }
                 if (allAssertionMethods.stream().anyMatch(isAssertionMethodFrom(JUnitConstants.HAMCREST_ASSERTIONS_CLASS_PATH))) {
-                    hints.add("you can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers");
+                    hints.add("You can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers");
                 }
 
                 bestPracticeViolations.add(new BestPracticeViolation(
@@ -75,17 +75,17 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
     }
 
     private List<PsiMethodCallExpression> removeGroupedAssertions(List<PsiMethodCallExpression> allAssertions) {
-        List<PsiMethodCallExpression> filteredAssertions = new ArrayList<>(allAssertions);
+        List<PsiMethodCallExpression> toRemove = new ArrayList<>();
         for (PsiMethodCallExpression assertion : allAssertions) {
-            filteredAssertions.removeAll(elementResolver.allChildrenOfType(assertion, PsiMethodCallExpression.class, psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent(), contextResolver.isInTestContext()));
+            toRemove.addAll(elementResolver.allChildrenOfType(assertion, PsiMethodCallExpression.class, psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent(), contextResolver.isInTestContext()));
         }
-        return filteredAssertions;
+        allAssertions.removeAll(toRemove);
+        return allAssertions;
     }
 
     private Predicate<PsiMethodCallExpression> isAssertionMethodFrom(String qualifiedName) {
-        return psiMethodCallExpression -> Optional.ofNullable(psiMethodCallExpression.resolveMethod())
-                .map(PsiJvmMember::getContainingClass)
-                .map(psiClass -> qualifiedName.equals(psiClass.getQualifiedName()))
+        return psiMethodCallExpression -> Optional.of(psiMethodCallExpression.getMethodExpression())
+                .map(psiClass -> psiClass.getQualifiedName().contains(qualifiedName))
                 .orElse(false);
     }
 
@@ -100,7 +100,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
             } else {
                 elementNameHashMap.put(assertionMethod, "reference in the test method");
             }
-            result.add(new RelatedElementWrapper(assertionMethod.resolveMethod().getName(), elementNameHashMap));
+            result.add(new RelatedElementWrapper(assertionMethod.getText(), elementNameHashMap));
         }
 
         return result;

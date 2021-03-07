@@ -44,7 +44,7 @@ public class JavaTestElementUtil {
 
     public PsiMethod createTestMethod(String name, List<String> annotations) {
         return psiElementFactory.createMethodFromText(String.format("" +
-                        "%s" +
+                        "%s\n" +
                         "public void %s(){}", String.join("\n", annotations), name)
                 , null);
 
