@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -45,6 +44,12 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
     private JavaTestElementUtil javaTestElementUtil;
     private PsiElementFactory psiElementFactory;
     private PsiFileFactory psiFileFactory;
+    private NoConditionalLogicJUnitCheckingStrategy strategy;
+    private JavaElementResolver elementResolver;
+    private JavaContextIndicator contextIndicator;
+    private JavaMethodResolver methodResolver;
+    private PsiJavaFile testJavaFile;
+    private PsiClass testClass;
 
     @BeforeEach
     public void beforeEach() throws Exception {
@@ -52,6 +57,19 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
         this.psiFileFactory = PsiFileFactory.getInstance(getProject());
         this.psiElementFactory = PsiElementFactory.getInstance(getProject());
         this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
+        this.psiFileFactory = PsiFileFactory.getInstance(getProject());
+        this.psiElementFactory = PsiElementFactory.getInstance(getProject());
+        this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
+        this.elementResolver = EasyMock.mock(JavaElementResolver.class);
+        this.contextIndicator = EasyMock.mock(JavaContextIndicator.class);
+        this.methodResolver = EasyMock.mock(JavaMethodResolver.class);
+        this.strategy = new NoConditionalLogicJUnitCheckingStrategy(elementResolver, contextIndicator, methodResolver);
+        String fileName = "Test";
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+            this.testJavaFile = this.javaTestElementUtil.createFile(fileName, "com.testspector", Collections.singletonList("import org.junit.jupiter.api.Test;"), Collections.emptyList());
+            this.testClass = this.psiElementFactory.createClass(fileName);
+            this.testClass = (PsiClass) testJavaFile.add(testClass);
+        });
     }
 
     @AfterEach
@@ -72,11 +90,6 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
     public void checkBestPractices_CheckingAllConditionalStatementsOneIsInTheTestMethodAndSecondInTheHelperMethod_OneViolationReportingAboutConditionalLogicShouldBeReturned(String statementName, String statementStringDefinition) {
         WriteCommandAction.runWriteCommandAction(getProject(), () -> {
             // Given
-            String packageName = "com.testspector";
-            String fileName = "Test";
-            PsiJavaFile javaFile = this.javaTestElementUtil.createFile(fileName, packageName, Collections.singletonList("import org.junit.jupiter.api.Test;"), Collections.emptyList());
-            PsiClass psiClass = this.psiElementFactory.createClass(fileName);
-            psiClass = (PsiClass) javaFile.add(psiClass);
             String helperMethodName = "helperMethod";
             PsiMethod helperMethodWithStatement = this.javaTestElementUtil.createMethod(helperMethodName, "Object", Collections.singletonList(PsiKeyword.PUBLIC));
             PsiStatement helperMethodStatement = (PsiStatement) helperMethodWithStatement.getBody().add(this.psiElementFactory.createStatementFromText(statementStringDefinition, null));
@@ -84,22 +97,19 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
             PsiMethod testMethodWithStatement = this.javaTestElementUtil.createTestMethod(testMethodName, Collections.singletonList("@Test"));
             PsiStatement testMethodStatement = (PsiStatement) testMethodWithStatement.getBody().add(this.psiElementFactory.createStatementFromText(statementStringDefinition, null));
             PsiMethodCallExpression helperMethodCall = (PsiMethodCallExpression) testMethodWithStatement.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", helperMethodName), null));
-            helperMethodWithStatement = (PsiMethod) psiClass.add(helperMethodWithStatement);
-            testMethodWithStatement = (PsiMethod) psiClass.add(testMethodWithStatement);
-            JavaElementResolver javaElementHelper = EasyMock.mock(JavaElementResolver.class);
-            JavaContextIndicator javaContextIndicator = EasyMock.mock(JavaContextIndicator.class);
-            JavaMethodResolver methodResolver = EasyMock.mock(JavaMethodResolver.class);
-            EasyMock.expect(javaContextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
+            helperMethodWithStatement = (PsiMethod) testClass.add(helperMethodWithStatement);
+            testMethodWithStatement = (PsiMethod) testClass.add(testMethodWithStatement);
+            EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
             EasyMock.expect(methodResolver.testMethodsWithAnnotations(Collections.singletonList(testMethodWithStatement), JUNIT_TEST_QUALIFIED_NAMES)).andReturn(Collections.singletonList(testMethodWithStatement)).times(1);
-            EasyMock.replay(javaContextIndicator);
-            EasyMock.expect(javaElementHelper.allChildrenOfType(EasyMock.eq(testMethodWithStatement), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(javaContextIndicator.isInTestContext()))).andReturn(Arrays.asList(testMethodStatement, helperMethodStatement)).times(1);
-            EasyMock.expect(javaElementHelper.allChildrenOfType(testMethodWithStatement, PsiReferenceExpression.class)).andReturn(Collections.singletonList(helperMethodCall.getMethodExpression())).times(2);
-            EasyMock.expect(javaElementHelper.allChildrenOfType(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(javaContextIndicator.isInTestContext()))).andReturn(Collections.emptyList()).times(1);
-            EasyMock.expect(javaElementHelper.allChildrenOfType(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(javaContextIndicator.isInTestContext()))).andReturn(Collections.singletonList(helperMethodStatement)).times(1);
-            EasyMock.replay(javaElementHelper, methodResolver);
+            EasyMock.replay(contextIndicator);
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethodWithStatement), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Arrays.asList(testMethodStatement, helperMethodStatement)).times(1);
+            EasyMock.expect(elementResolver.allChildrenOfType(testMethodWithStatement, PsiReferenceExpression.class)).andReturn(Collections.singletonList(helperMethodCall.getMethodExpression())).times(2);
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Collections.emptyList()).times(1);
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Collections.singletonList(helperMethodStatement)).times(1);
+            EasyMock.replay(elementResolver, methodResolver);
             List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                     createBestPracticeViolation(
-                            String.format("%s.%s#%s", packageName, fileName, testMethodName),
+                            String.format("%s#%s", testMethodWithStatement.getContainingClass().getQualifiedName(), testMethodWithStatement.getName()),
                             testMethodWithStatement,
                             testMethodWithStatement.getNameIdentifier().getTextRange(),
                             "Conditional logic should not be part of the test method, it makes test hard to understand and read.",
@@ -114,8 +124,7 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
                                     }}))));
 
             // When
-            NoConditionalLogicJUnitCheckingStrategy noConditionalLogicJUnitCheckingStrategy = new NoConditionalLogicJUnitCheckingStrategy(javaElementHelper, javaContextIndicator, methodResolver);
-            List<BestPracticeViolation> foundViolations = noConditionalLogicJUnitCheckingStrategy.checkBestPractices(testMethodWithStatement);
+            List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethodWithStatement);
 
             //Then
             assertAll(
