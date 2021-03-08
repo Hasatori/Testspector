@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 
 @RunWith(JUnitPlatform.class)
-public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest  extends StrategyTest {
+public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest extends StrategyTest {
 
     private CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy strategy;
 
@@ -114,7 +114,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest  extends
             // Given
             PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
             String helperMethodName = "helperMethod";
-            PsiMethod helperMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createMethod(helperMethodName,"void",Arrays.asList("public")));
+            PsiMethod helperMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createMethod(helperMethodName, "void", Arrays.asList("public")));
             PsiMethodCallExpression helperMethodCall = (PsiMethodCallExpression) testMethod.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", helperMethodName), null));
             PsiTryStatement tryStatement = (PsiTryStatement) helperMethod.getBody().add(this.psiElementFactory.createStatementFromText("try {} catch (Exception e){}", null));
             EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
@@ -122,7 +122,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest  extends
             EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethod), EasyMock.eq(PsiTryStatement.class), EasyMock.eq(contextIndicator.isInTestContext())))
                     .andReturn(Arrays.asList(tryStatement)).times(1);
             EasyMock.expect(elementResolver.allChildrenOfType(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(helperMethodCall.getMethodExpression())).times(1);
-            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class),EasyMock.anyObject(),EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Collections.singletonList(tryStatement)).times(1);
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Collections.singletonList(tryStatement)).times(1);
             EasyMock.replay(elementResolver);
             List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                     createBestPracticeViolation(
@@ -146,6 +146,23 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest  extends
                     () -> Assert.assertSame("Incorrect number of related elements for first violation", 1, foundViolations.get(0).getRelatedElements().size()),
                     () -> assertThat(foundViolations.get(0).getRelatedElements().get(0)).as("Checking first related element in the first violation").isEqualToComparingFieldByField(expectedViolations.get(0).getRelatedElements().get(0))
             );
+        });
+    }
+
+    @Test
+    public void checkBestPractices_TestMethodDoesNotContainTryCatchStatement_NoViolationShouldBeFound() {
+        WriteCommandAction.runWriteCommandAction(null, () -> {
+            // Given
+            PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
+            EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
+            EasyMock.replay(contextIndicator);
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethod), EasyMock.eq(PsiTryStatement.class), EasyMock.eq(contextIndicator.isInTestContext())))
+                    .andReturn(Collections.emptyList()).times(1);
+            EasyMock.replay(elementResolver);
+            // When
+            List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);
+            //Then
+            Assert.assertSame("Incorrect number of found violations", 0, foundViolations.size());
         });
     }
 
