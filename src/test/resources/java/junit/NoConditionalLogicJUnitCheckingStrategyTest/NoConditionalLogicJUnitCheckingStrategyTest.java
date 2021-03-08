@@ -39,6 +39,8 @@ public class NoConditionalLogicJUnitCheckingStrategyTest {
             i++;
         }
         Assert.assertTrue(true);
+
+        try { } catch (Exception e){ }
     }
 
     private Object helperMethodWithSwitch(Integer integer) {

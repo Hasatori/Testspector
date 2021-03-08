@@ -45,7 +45,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                     hints.add(String.format("You are using JUnit5 so it can be solved by using %s.assertThrows() method", JUNIT5_ASSERTIONS_CLASS_PATH));
                 }
                 if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT4_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
-                    hints.add(String.format("You are using JUnit4 so it can be solved by using %s@Test(expected = Exception.class) for the test method", JUNIT4_ASSERTIONS_CLASS_PATH));
+                    hints.add(String.format("You are using JUnit4 so it can be solved by using @%s.Test(expected = Exception.class) for the test method", JUNIT4_ASSERTIONS_CLASS_PATH));
                 }
                 PsiIdentifier methodIdentifier = method.getNameIdentifier();
                 bestPracticeViolations.add(new BestPracticeViolation(
