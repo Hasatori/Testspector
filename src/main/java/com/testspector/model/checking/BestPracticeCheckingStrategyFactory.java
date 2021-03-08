@@ -43,7 +43,7 @@ public class BestPracticeCheckingStrategyFactory {
                     new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
                     new NoConditionalLogicJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
                     new NoGlobalStaticPropertiesJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator),
-                    new TestNamingStrategyJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator),
+                    new SetupTestNamingStrategyJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator),
                     new TestOnlyPublicBehaviourJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator)
             ), methodResolver));
         }

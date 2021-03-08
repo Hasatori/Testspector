@@ -15,13 +15,13 @@ import me.xdrop.fuzzywuzzy.FuzzySearch;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
+public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
     private final JavaElementResolver elementResolver;
     private final JavaMethodResolver methodResolver;
     private final JavaContextIndicator contextIndicator;
 
-    public TestNamingStrategyJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
+    public SetupTestNamingStrategyJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
         this.elementResolver = elementResolver;
         this.methodResolver = methodResolver;
         this.contextIndicator = contextIndicator;
@@ -41,10 +41,14 @@ public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeChec
             PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();
             if (nameIdentifier != null) {
                 String testMethodName = nameIdentifier.getText();
-                List<PsiMethod> methodsWithAlmostSameName = methodResolver
-                        .allTestedMethods(testMethod)
+                List<PsiMethod> allTestedMethod = methodResolver.allTestedMethods(testMethod);
+                List<PsiMethod> methodsWithAlmostSameName = allTestedMethod
                         .stream()
-                        .filter(method -> FuzzySearch.ratio(testMethodName.toLowerCase(), method.getName().toLowerCase()) > 75)
+                        .filter(method -> FuzzySearch.ratio(testMethodName.toLowerCase(), method.getName().toLowerCase()) > 70)
+                        .collect(Collectors.toList());
+                List<PsiMethod> methodsWithTooDifferentName = allTestedMethod
+                        .stream()
+                        .filter(method -> FuzzySearch.weightedRatio(testMethodName, method.getName()) < 55)
                         .collect(Collectors.toList());
                 if (methodsWithAlmostSameName.size() >= 1) {
                     bestPracticeViolations.add(new BestPracticeViolation(
@@ -63,6 +67,23 @@ public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeChec
                             createRelatedElements(testMethod, methodsWithAlmostSameName)
                     ));
                 }
+                if (methodsWithTooDifferentName.size() >= 1) {
+                    bestPracticeViolations.add(new BestPracticeViolation(
+                            String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                            testMethod,
+                            nameIdentifier.getTextRange(),
+                            "The test name has nothing to do with testedMethod. This says nothing about tests scenarion. You should setup a clear strategy for naming your tests so that the person reading then knows what is tests",
+                            Arrays.asList(
+                                    "Possible strategy: 'doingSomeOperationGeneratesSomeResult'",
+                                    "Possible strategy: 'someResultOccursUnderSomeCondition'",
+                                    "Possible strategy: 'given-when-then'",
+                                    "Possible strategy: 'givenSomeContextWhenDoingSomeBehaviorThenSomeResultOccurs'",
+                                    "Chosen naming strategy is subjective. The key thing to remember is that name of the test should say: What is tests, What are the conditions, What is expected result"
+                            ),
+                            getCheckedBestPractice().get(0),
+                            createRelatedElements(testMethod, methodsWithTooDifferentName)
+                    ));
+                }
             }
 
 
@@ -70,7 +91,6 @@ public class TestNamingStrategyJUnitCheckingStrategy implements BestPracticeChec
 
         return bestPracticeViolations;
     }
-
     private List<RelatedElementWrapper> createRelatedElements(PsiMethod method, List<PsiMethod> methodsWithAlmostSameName) {
         List<RelatedElementWrapper> result = new ArrayList<>();
         for (PsiMethod methodWithAlmostSameName : methodsWithAlmostSameName) {
