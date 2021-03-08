@@ -3,24 +3,17 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.RelatedElementWrapper;
-import com.testspector.model.checking.java.JavaTestElementUtil;
-import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.JavaElementResolver;
-import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
-import sun.reflect.generics.tree.ReturnType;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,48 +25,20 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 
 @RunWith(JUnitPlatform.class)
-public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest extends BasePlatformTestCase {
+public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest  extends StrategyTest {
 
-    private JavaTestElementUtil javaTestElementUtil;
-    private PsiElementFactory psiElementFactory;
-    private PsiFileFactory psiFileFactory;
     private CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy strategy;
-    private JavaElementResolver elementResolver;
-    private JavaContextIndicator contextIndicator;
-    private JavaMethodResolver methodResolver;
-    private PsiJavaFile testJavaFile;
-    private PsiClass testClass;
 
     @BeforeEach
-    public void beforeEach() throws Exception {
-        this.setUp();
-        this.psiFileFactory = PsiFileFactory.getInstance(getProject());
-        this.psiElementFactory = PsiElementFactory.getInstance(getProject());
-        this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
-        this.psiFileFactory = PsiFileFactory.getInstance(getProject());
-        this.psiElementFactory = PsiElementFactory.getInstance(getProject());
-        this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
-        this.elementResolver = EasyMock.mock(JavaElementResolver.class);
-        this.contextIndicator = EasyMock.mock(JavaContextIndicator.class);
-        this.methodResolver = EasyMock.mock(JavaMethodResolver.class);
+    public void beforeEach() {
+        super.beforeEach();
         this.strategy = new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(elementResolver, contextIndicator, methodResolver);
-        String fileName = "Test";
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
-            this.testJavaFile = this.javaTestElementUtil.createFile(fileName, "com.testspector", Collections.singletonList("import org.junit.jupiter.api.Test;"), Collections.emptyList());
-            this.testClass = this.psiElementFactory.createClass(fileName);
-            this.testClass = (PsiClass) testJavaFile.add(testClass);
-        });
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        this.tearDown();
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
     public void checkBestPractices_JUnit5TestMethodContainsTryCatchStatement_OneViolationReportingAboutCatchingTheExceptionUsingJUnit5AssertionShouldBeReturned(String jUnit5TestAnnotationQualifiedName) {
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+        WriteCommandAction.runWriteCommandAction(null, () -> {
             // Given
             PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@" + jUnit5TestAnnotationQualifiedName)));
             PsiTryStatement tryStatement = (PsiTryStatement) testMethod.getBody().add(this.psiElementFactory.createStatementFromText("try {} catch (Exception e){}", null));
@@ -109,7 +74,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest extends 
 
     @Test
     public void checkBestPractices_JUnit4TestMethodContainsTryCatchStatement_OneViolationReportingAboutCatchingTheExceptionUsingJUnit4AnnotationShouldBeReturned() {
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+        WriteCommandAction.runWriteCommandAction(null, () -> {
             // Given
             PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
             PsiTryStatement tryStatement = (PsiTryStatement) testMethod.getBody().add(this.psiElementFactory.createStatementFromText("try {} catch (Exception e){}", null));
@@ -145,7 +110,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest extends 
 
     @Test
     public void checkBestPractices_JUnit4TestMethodCallsMethodWithTryCatchStatement_OneViolationReportingContainingRelatedElementWithRefenceFromTestMethodAndReferenceToTheStatement() {
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+        WriteCommandAction.runWriteCommandAction(null, () -> {
             // Given
             PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
             String helperMethodName = "helperMethod";

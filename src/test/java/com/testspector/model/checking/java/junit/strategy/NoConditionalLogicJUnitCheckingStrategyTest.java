@@ -3,17 +3,11 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.RelatedElementWrapper;
-import com.testspector.model.checking.java.JavaTestElementUtil;
-import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.JavaElementResolver;
-import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,42 +27,15 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 
 @RunWith(JUnitPlatform.class)
-public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTestCase {
+public class NoConditionalLogicJUnitCheckingStrategyTest extends StrategyTest {
 
-    private JavaTestElementUtil javaTestElementUtil;
-    private PsiElementFactory psiElementFactory;
-    private PsiFileFactory psiFileFactory;
     private NoConditionalLogicJUnitCheckingStrategy strategy;
-    private JavaElementResolver elementResolver;
-    private JavaContextIndicator contextIndicator;
-    private JavaMethodResolver methodResolver;
-    private PsiJavaFile testJavaFile;
-    private PsiClass testClass;
+
 
     @BeforeEach
-    public void beforeEach() throws Exception {
-        this.setUp();
-        this.psiFileFactory = PsiFileFactory.getInstance(getProject());
-        this.psiElementFactory = PsiElementFactory.getInstance(getProject());
-        this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
-        this.psiFileFactory = PsiFileFactory.getInstance(getProject());
-        this.psiElementFactory = PsiElementFactory.getInstance(getProject());
-        this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
-        this.elementResolver = EasyMock.mock(JavaElementResolver.class);
-        this.contextIndicator = EasyMock.mock(JavaContextIndicator.class);
-        this.methodResolver = EasyMock.mock(JavaMethodResolver.class);
+    public void beforeEach() {
+        super.beforeEach();
         this.strategy = new NoConditionalLogicJUnitCheckingStrategy(elementResolver, contextIndicator, methodResolver);
-        String fileName = "Test";
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
-            this.testJavaFile = this.javaTestElementUtil.createFile(fileName, "com.testspector", Collections.singletonList("import org.junit.jupiter.api.Test;"), Collections.emptyList());
-            this.testClass = this.psiElementFactory.createClass(fileName);
-            this.testClass = (PsiClass) testJavaFile.add(testClass);
-        });
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        this.tearDown();
     }
 
     private static Stream<Arguments> provideAllSupportedStatementStringDefinitions() {
@@ -82,7 +49,7 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
     @ParameterizedTest
     @MethodSource(value = "provideAllSupportedStatementStringDefinitions")
     public void checkBestPractices_CheckingAllConditionalStatementsOneIsInTheTestMethodAndSecondInTheHelperMethod_OneViolationReportingAboutConditionalLogicShouldBeReturned(String statementName, String statementStringDefinition) {
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+        WriteCommandAction.runWriteCommandAction(null, () -> {
             // Given
             String helperMethodName = "helperMethod";
             PsiMethod helperMethodWithStatement = this.javaTestElementUtil.createMethod(helperMethodName, "Object", Collections.singletonList(PsiKeyword.PUBLIC));
@@ -132,7 +99,7 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
 
     @Test
     public void checkBestPractices_TestWithNoConditionalLogic_NoViolationsShouldBeFound() {
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+        WriteCommandAction.runWriteCommandAction(null, () -> {
 
             PsiMethod testWithNoConditionalLogic = this.javaTestElementUtil.createTestMethod("testWithNoConditionalLogic", Collections.singletonList("@Test"));
             testWithNoConditionalLogic = (PsiMethod) testClass.add(testWithNoConditionalLogic);
@@ -147,7 +114,6 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends BasePlatformTes
             Assert.assertSame("Incorrect number of found violations", 0, foundViolations.size());
         });
     }
-
 
 
     private BestPracticeViolation createBestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, List<String> hints, List<RelatedElementWrapper> relatedElementsWrapper) {

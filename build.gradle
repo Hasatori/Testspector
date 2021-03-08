@@ -38,3 +38,7 @@ patchPluginXml {
 publishPlugin {
     token = System.getenv("ORG_GRADLE_PROJECT_intellijPublishToken")
 }
+
+test{
+    maxHeapSize = "1024m"
+}

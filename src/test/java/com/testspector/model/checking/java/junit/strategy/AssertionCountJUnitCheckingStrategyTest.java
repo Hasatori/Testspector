@@ -1,19 +1,17 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.psi.*;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.psi.PsiReferenceExpression;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.RelatedElementWrapper;
-import com.testspector.model.checking.java.JavaTestElementUtil;
-import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.JavaElementResolver;
-import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
@@ -24,46 +22,22 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(JUnitPlatform.class)
-public class AssertionCountJUnitCheckingStrategyTest extends BasePlatformTestCase {
+public class AssertionCountJUnitCheckingStrategyTest extends StrategyTest {
 
-    private JavaTestElementUtil javaTestElementUtil;
-    private PsiElementFactory psiElementFactory;
-    private PsiFileFactory psiFileFactory;
+
     private AssertionCountJUnitCheckingStrategy strategy;
-    private JavaElementResolver elementResolver;
-    private JavaContextIndicator contextIndicator;
-    private JavaMethodResolver methodResolver;
-    private PsiJavaFile testJavaFile;
-    private PsiClass testClass;
+
 
     @BeforeEach
-    public void beforeEach() throws Exception {
-        this.setUp();
-        this.psiFileFactory = PsiFileFactory.getInstance(getProject());
-        this.psiElementFactory = PsiElementFactory.getInstance(getProject());
-        this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
-        this.elementResolver = EasyMock.mock(JavaElementResolver.class);
-        this.contextIndicator = EasyMock.mock(JavaContextIndicator.class);
-        this.methodResolver = EasyMock.mock(JavaMethodResolver.class);
+    public void beforeEach() {
+        super.beforeEach();
         this.strategy = new AssertionCountJUnitCheckingStrategy(elementResolver, contextIndicator, methodResolver);
-        String fileName = "Test";
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
-            this.testJavaFile = this.javaTestElementUtil.createFile(fileName, "com.testspector", Collections.singletonList("import org.junit.jupiter.api.Test;"), Collections.emptyList());
-            this.testClass = this.psiElementFactory.createClass(fileName);
-            this.testClass = (PsiClass) testJavaFile.add(testClass);
-        });
-
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        this.tearDown();
     }
 
 
     @Test
     public void checkBestPractices_TestMethodWithoutAnyAssertions_OneViolationReportingAboutThatAtLeastOneAssertionShouldBeInTheTestShouldBeReturned() {
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+        WriteCommandAction.runWriteCommandAction(null, () -> {
             // Given
             String testMethodName = "testWithNoAssertions";
             PsiMethod testMethodWithoutAssertions = this.javaTestElementUtil.createTestMethod(testMethodName, Collections.singletonList("@Test"));
@@ -93,7 +67,7 @@ public class AssertionCountJUnitCheckingStrategyTest extends BasePlatformTestCas
 
     @Test
     public void checkBestPractices_TestMethodWithOneAssertion_NoViolationShouldBeReturned() {
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+        WriteCommandAction.runWriteCommandAction(null, () -> {
             // Given
             this.testJavaFile.getImportList().add(this.psiElementFactory.createImportStatementOnDemand("org.junit.Assert"));
             String testMethodName = "testWithOneAssertion";
@@ -117,7 +91,7 @@ public class AssertionCountJUnitCheckingStrategyTest extends BasePlatformTestCas
 
     @Test
     public void checkBestPractices_Junit5TestMethodWithTwoHamcrestAssertionsWhichAreNotGrouped_OneViolationReportingAboutThatOnlyOneAssertionShouldBeInTheTestShouldBeReturnedAndShouldContainHintRecommendingUsingJUnit5GroupAssertionOrHamcrest() {
-        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+        WriteCommandAction.runWriteCommandAction(null, () -> {
             // Given
             String testMethodName = "testWithOneAssertion";
             String assertMethodText = "org.hamcrest.MatcherAssert.assertThat(null,null )";
