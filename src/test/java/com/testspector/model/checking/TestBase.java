@@ -9,16 +9,17 @@ public abstract class TestBase {
 
     private static Fixture fixture =  new Fixture();
 
-    protected static PsiElementFactory psiElementFactory;
-    protected static PsiFileFactory psiFileFactory;
+    protected static final PsiElementFactory psiElementFactory;
+    protected static final PsiFileFactory psiFileFactory;
     static {
         try {
             fixture.init();
-            psiFileFactory = PsiFileFactory.getInstance(fixture.provideProject());
-            psiElementFactory = PsiElementFactory.getInstance(fixture.provideProject());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+        psiFileFactory = PsiFileFactory.getInstance(fixture.provideProject());
+        psiElementFactory = PsiElementFactory.getInstance(fixture.provideProject());
     }
 
    private static class Fixture extends BasePlatformTestCase {
