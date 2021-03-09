@@ -47,7 +47,13 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                         String.format("%s#%s", method.getContainingClass().getQualifiedName(), method.getName()),
                         method,
                         methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
-                        "Only public behaviour should be tested",
+                        "Only public behaviour should be tested. Testing 'private','protected' or 'package private' methods leads to problems with maintenance of tests because this private behaviour is likely to be changed very often. " +
+                                "In many cases we are refactoring private behaviour without influencing public behaviour of the class, yet this changes will change behaviour of the private method and cause tests to fail.",
+                        Arrays.asList(
+                                "There is an exception to this rule and that is in case when private 'method' is part of the observed behaviour of the system under test. For example we can have private constructor for class which is part of ORM and its initialization should not be permitted.",
+                                "Remove tests testing private behaviour",
+                                "If you really feel that private behaviour is complex enough that there should be separate test for it, then it is very probable that the system under test is breaking 'Single Responsibility Principle' and this private behaviour should be extracted to a separate system"
+                                ),
                         getCheckedBestPractice().get(0),
                         createRelatedElements(method, notPublicMethods)
                 ));
@@ -74,7 +80,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
         for (PsiMethod notPublicMethod : notPublicMethods) {
             HashMap<PsiElement, String> elementNameHashMap = new HashMap<>();
             Optional<PsiReferenceExpression> optionalPsiReferenceExpression = firstReferenceToMethod(method, notPublicMethod);
-            String methodAccessQualifier = getMethodAccessQualifier(method);
+            String methodAccessQualifier = getMethodAccessQualifier(notPublicMethod);
             if (optionalPsiReferenceExpression.isPresent()) {
                 elementNameHashMap.put(optionalPsiReferenceExpression.get(), methodAccessQualifier + " method call from test");
             }

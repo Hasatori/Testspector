@@ -39,7 +39,7 @@ public class JavaTestElementUtil {
     }
 
     public PsiMethod createMethod(String name, String returnType, List<String> accessModifiers) {
-        return psiElementFactory.createMethodFromText(String.format("%s %s %s(){}", String.join(" ", accessModifiers), returnType, name), null);
+        return psiElementFactory.createMethodFromText(String.format("%s %s %s(){}", String.join(" ", accessModifiers), returnType, name).trim(), null);
     }
 
     public PsiMethod createTestMethod(String name, List<String> annotations) {
