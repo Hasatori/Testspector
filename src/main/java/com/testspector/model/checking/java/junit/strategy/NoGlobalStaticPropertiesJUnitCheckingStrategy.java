@@ -7,7 +7,6 @@ import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
-import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
 import java.util.*;
@@ -79,10 +78,8 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
             Optional<PsiReferenceExpression> optionalPsiReferenceExpression = firstReferenceToGlobalStaticProperty(method, staticProperty);
             if (optionalPsiReferenceExpression.isPresent()) {
                 elementNameHashMap.put(optionalPsiReferenceExpression.get(), "property reference from test method");
-                elementNameHashMap.put(staticProperty, "property");
-            } else {
-                elementNameHashMap.put(staticProperty, "property");
             }
+            elementNameHashMap.put(staticProperty, "property");
             result.add(new RelatedElementWrapper(staticProperty.getName(), elementNameHashMap));
         }
 
