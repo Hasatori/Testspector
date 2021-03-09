@@ -1,6 +1,7 @@
 package com.testspector.model.checking.java.junit;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
@@ -42,52 +43,61 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategyTest extends BasePla
     @ParameterizedTest
     @ValueSource(strings = {"JavaWithJunit4.java", "JavaWithJunit5.java"})
     public void canResolveFromPsiElement_PsiFilesWithDifferentJUnitVersions_ShoudIndicateThatCanResolve(String fileName) {
-        PsiFile psiFile = myFixture.configureByFile(fileName);
+        WriteCommandAction.runWriteCommandAction(null, () -> {
+            PsiFile psiFile = myFixture.configureByFile(fileName);
 
-        boolean canResolveJUnitFramework = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<Boolean>) () ->
-                        new JUnitUnitTestFrameworkResolveIndicationStrategy().canResolveFromPsiElement(psiFile)));
+            boolean canResolveJUnitFramework = ApplicationManager
+                    .getApplication()
+                    .runReadAction(((Computable<Boolean>) () ->
+                            new JUnitUnitTestFrameworkResolveIndicationStrategy().canResolveFromPsiElement(psiFile)));
 
-        assertTrue(canResolveJUnitFramework);
+            assertTrue(canResolveJUnitFramework);
+        });
     }
 
     @Test
     public void canResolveFromPsiElement_JUnit4MethodTest_ShoudIndicateThatCanResolve() {
-        PsiMethod psiMethod = this.getSomeJUnit4PsiMethod();
+        WriteCommandAction.runWriteCommandAction(null, () -> {
+            PsiMethod psiMethod = this.getSomeJUnit4PsiMethod();
 
-        boolean canResolveJUnitFramework = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<Boolean>) () ->
-                        new JUnitUnitTestFrameworkResolveIndicationStrategy().canResolveFromPsiElement(psiMethod)));
+            boolean canResolveJUnitFramework = ApplicationManager
+                    .getApplication()
+                    .runReadAction(((Computable<Boolean>) () ->
+                            new JUnitUnitTestFrameworkResolveIndicationStrategy().canResolveFromPsiElement(psiMethod)));
 
-        assertTrue(canResolveJUnitFramework);
+            assertTrue(canResolveJUnitFramework);
+        });
     }
 
     @DisplayName("Test method qualified name:{0}")
     @ParameterizedTest
-    @ValueSource(strings = {"org.junit.jupiter.api.Test","org.junit.jupiter.params.ParameterizedTest","org.junit.jupiter.api.RepeatedTest"})
+    @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
     public void canResolveFromPsiElement_AllJUnit5Methods_ShoudIndicateThatCanResolve(String testMethodQualifiedName) {
-        PsiMethod psiMethod = this.getSomeJUnit5PsiMethodByAnnotationQualifiedName(testMethodQualifiedName);
+        WriteCommandAction.runWriteCommandAction(null, () -> {
+            PsiMethod psiMethod = this.getSomeJUnit5PsiMethodByAnnotationQualifiedName(testMethodQualifiedName);
 
-        boolean canResolveJUnitFramework = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<Boolean>) () ->
-                        new JUnitUnitTestFrameworkResolveIndicationStrategy().canResolveFromPsiElement(psiMethod)));
+            boolean canResolveJUnitFramework = ApplicationManager
+                    .getApplication()
+                    .runReadAction(((Computable<Boolean>) () ->
+                            new JUnitUnitTestFrameworkResolveIndicationStrategy().canResolveFromPsiElement(psiMethod)));
 
-        assertTrue(canResolveJUnitFramework);
+            assertTrue(canResolveJUnitFramework);
+        });
     }
 
     @Test
     public void canResolveFromPsiElement_TypescriptFileWithJestTests_ShoudIndicateThatCanNotResolve() {
-        PsiFile psiFile = myFixture.configureByFile("TypeScriptWithJest.tsx");
+        WriteCommandAction.runWriteCommandAction(null, () -> {
 
-        boolean canResolveJUnitFramework = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<Boolean>) () ->
-                        new JUnitUnitTestFrameworkResolveIndicationStrategy().canResolveFromPsiElement(psiFile)));
+            PsiFile psiFile = myFixture.configureByFile("TypeScriptWithJest.tsx");
 
-        assertFalse(canResolveJUnitFramework);
+            boolean canResolveJUnitFramework = ApplicationManager
+                    .getApplication()
+                    .runReadAction(((Computable<Boolean>) () ->
+                            new JUnitUnitTestFrameworkResolveIndicationStrategy().canResolveFromPsiElement(psiFile)));
+
+            assertFalse(canResolveJUnitFramework);
+        });
     }
 
     private PsiMethod getSomeJUnit4PsiMethod() {

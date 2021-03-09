@@ -1,13 +1,17 @@
 package com.testspector.model.checking.java.junit;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.junit.Assert;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.runner.JUnitPlatform;
@@ -42,57 +46,65 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends BasePlatfo
     @ParameterizedTest
     @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
     public void resolveTest(String testMethodQualifiedName) {
-        PsiMethod someJUnit5Method = getSomeJUnit5PsiMethodByAnnotationQualifiedName(testMethodQualifiedName);
-        PsiElement expectedTestLine = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<PsiElement>) someJUnit5Method::getNameIdentifier
-                ));
-        JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
+        WriteCommandAction.runWriteCommandAction(null, () -> {
+            PsiMethod someJUnit5Method = getSomeJUnit5PsiMethodByAnnotationQualifiedName(testMethodQualifiedName);
+            PsiElement expectedTestLine = ApplicationManager
+                    .getApplication()
+                    .runReadAction(((Computable<PsiElement>) someJUnit5Method::getNameIdentifier
+                    ));
+            JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
-        PsiElement resolvedTestLine = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<PsiElement>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someJUnit5Method).get()));
+            PsiElement resolvedTestLine = ApplicationManager
+                    .getApplication()
+                    .runReadAction(((Computable<PsiElement>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someJUnit5Method).get()));
 
-        Assert.assertSame("Methods identifier should have been returned!", expectedTestLine, resolvedTestLine);
+            Assert.assertSame("Methods identifier should have been returned!", expectedTestLine, resolvedTestLine);
+        });
     }
 
     @Test
     public void resolveTest_JUnit4Test_ShouldReturnMethodsIdentifier() {
-        PsiMethod someJUnit5Method = getSomeJUnit4PsiMethod();
-        PsiElement expectedTestLine = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<PsiElement>) someJUnit5Method::getNameIdentifier
-                ));
-        JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
+        WriteCommandAction.runWriteCommandAction(null, () -> {
+            PsiMethod someJUnit5Method = getSomeJUnit4PsiMethod();
+            PsiElement expectedTestLine = ApplicationManager
+                    .getApplication()
+                    .runReadAction(((Computable<PsiElement>) someJUnit5Method::getNameIdentifier
+                    ));
+            JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
-        PsiElement resolvedTestLine = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<PsiElement>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someJUnit5Method).get()));
+            PsiElement resolvedTestLine = ApplicationManager
+                    .getApplication()
+                    .runReadAction(((Computable<PsiElement>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someJUnit5Method).get()));
 
-        Assert.assertSame("Methods identifier should have been returned!", expectedTestLine, resolvedTestLine);
+            Assert.assertSame("Methods identifier should have been returned!", expectedTestLine, resolvedTestLine);
+        });
     }
 
     @Test
     public void resolveTest_NullElement_ShouldReturnEmpty() {
-        JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
+        WriteCommandAction.runWriteCommandAction(null, () -> {
+            JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
-        Optional<PsiElement> optionalPsiElement = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<Optional<PsiElement>>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(null)));
+            Optional<PsiElement> optionalPsiElement = ApplicationManager
+                    .getApplication()
+                    .runReadAction(((Computable<Optional<PsiElement>>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(null)));
 
-        Assert.assertFalse(optionalPsiElement.isPresent());
+            Assert.assertFalse(optionalPsiElement.isPresent());
+        });
     }
 
     @Test
     public void resolveTest_TestNGTestMethod_ShouldReturnEmpty() {
-        PsiMethod someTestNgMethod = getSomeTestNGPsiMethod();
-        JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
+        WriteCommandAction.runWriteCommandAction(null, () -> {
+            PsiMethod someTestNgMethod = getSomeTestNGPsiMethod();
+            JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
-        Optional<PsiElement> optionalPsiElement = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<Optional<PsiElement>>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someTestNgMethod)));
+            Optional<PsiElement> optionalPsiElement = ApplicationManager
+                    .getApplication()
+                    .runReadAction(((Computable<Optional<PsiElement>>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someTestNgMethod)));
 
-        Assert.assertFalse(optionalPsiElement.isPresent());
+            Assert.assertFalse(optionalPsiElement.isPresent());
+        });
     }
 
     private PsiMethod getSomeTestNGPsiMethod() {
