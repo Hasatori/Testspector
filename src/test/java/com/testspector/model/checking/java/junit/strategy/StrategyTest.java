@@ -4,6 +4,7 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiJavaFile;
 import com.testspector.model.checking.TestBase;
+import com.testspector.model.checking.java.JavaTest;
 import com.testspector.model.checking.java.JavaTestElementUtil;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
@@ -13,9 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Collections;
 
-public abstract class StrategyTest extends TestBase {
+public abstract class StrategyTest extends JavaTest {
 
-    protected JavaTestElementUtil javaTestElementUtil;
     protected JavaElementResolver elementResolver;
     protected JavaContextIndicator contextIndicator;
     protected JavaMethodResolver methodResolver;
@@ -24,7 +24,7 @@ public abstract class StrategyTest extends TestBase {
 
     @BeforeEach
     public void beforeEach(){
-        this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
+        super.beforeEach();
         this.elementResolver = EasyMock.mock(JavaElementResolver.class);
         this.contextIndicator = EasyMock.mock(JavaContextIndicator.class);
         this.methodResolver = EasyMock.mock(JavaMethodResolver.class);

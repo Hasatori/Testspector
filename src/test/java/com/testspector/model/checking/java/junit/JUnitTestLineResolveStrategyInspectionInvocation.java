@@ -4,12 +4,9 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiMethod;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.testspector.model.checking.java.JavaTest;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,66 +14,37 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
+import java.util.Collections;
 import java.util.Optional;
 
-import static com.testspector.model.checking.java.junit.Util.getFirstMethodWithAnnotationQualifiedName;
-import static com.testspector.model.checking.java.junit.Util.getMethodFromFileByName;
-
 @RunWith(JUnitPlatform.class)
-public class JUnitTestLineResolveStrategyInspectionInvocation extends BasePlatformTestCase {
-
-
-    @BeforeEach
-    public void beforeEach() throws Exception {
-        this.setUp();
-    }
-
-    @AfterEach
-    public void afterEach() throws Exception {
-        this.tearDown();
-    }
-
-    @Override
-    protected String getTestDataPath() {
-        return "src/test/resources/jUnitTestLineResolveStrategyTest";
-    }
-
+public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
 
     @DisplayName(value = "Test method qualified name:{0}")
     @ParameterizedTest
     @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
     public void resolveTest(String testMethodQualifiedName) {
         WriteCommandAction.runWriteCommandAction(null, () -> {
-            PsiMethod someJUnit5Method = getSomeJUnit5PsiMethodByAnnotationQualifiedName(testMethodQualifiedName);
-            PsiElement expectedTestLine = ApplicationManager
-                    .getApplication()
-                    .runReadAction(((Computable<PsiElement>) someJUnit5Method::getNameIdentifier
-                    ));
+            PsiMethod someJUnit5Method = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList(String.format("@%s", testMethodQualifiedName)));
+            PsiElement expectedTestLine = someJUnit5Method.getNameIdentifier();
             JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
-            PsiElement resolvedTestLine = ApplicationManager
-                    .getApplication()
-                    .runReadAction(((Computable<PsiElement>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someJUnit5Method).get()));
+            PsiElement resolvedTestLine = jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someJUnit5Method).get();
 
-            Assert.assertSame("Methods identifier should have been returned!", expectedTestLine, resolvedTestLine);
+            Assertions.assertSame(expectedTestLine, resolvedTestLine, "Methods identifier should have been returned!");
         });
     }
 
     @Test
     public void resolveTest_JUnit4Test_ShouldReturnMethodsIdentifier() {
         WriteCommandAction.runWriteCommandAction(null, () -> {
-            PsiMethod someJUnit5Method = getSomeJUnit4PsiMethod();
-            PsiElement expectedTestLine = ApplicationManager
-                    .getApplication()
-                    .runReadAction(((Computable<PsiElement>) someJUnit5Method::getNameIdentifier
-                    ));
+            PsiMethod someJUnit4Method = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList("@org.junit.Test"));
+            PsiElement expectedTestLine = someJUnit4Method.getNameIdentifier();
             JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
-            PsiElement resolvedTestLine = ApplicationManager
-                    .getApplication()
-                    .runReadAction(((Computable<PsiElement>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someJUnit5Method).get()));
+            PsiElement resolvedTestLine = jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someJUnit4Method).get();
 
-            Assert.assertSame("Methods identifier should have been returned!", expectedTestLine, resolvedTestLine);
+            Assertions.assertSame(expectedTestLine, resolvedTestLine, "Methods identifier should have been returned!");
         });
     }
 
@@ -85,41 +53,25 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends BasePlatfo
         WriteCommandAction.runWriteCommandAction(null, () -> {
             JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
-            Optional<PsiElement> optionalPsiElement = ApplicationManager
-                    .getApplication()
-                    .runReadAction(((Computable<Optional<PsiElement>>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(null)));
+            Optional<PsiElement> optionalPsiElement = jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(null);
 
-            Assert.assertFalse(optionalPsiElement.isPresent());
+            Assertions.assertFalse(optionalPsiElement.isPresent());
         });
     }
 
     @Test
     public void resolveTest_TestNGTestMethod_ShouldReturnEmpty() {
         WriteCommandAction.runWriteCommandAction(null, () -> {
-            PsiMethod someTestNgMethod = getSomeTestNGPsiMethod();
+            PsiMethod someTestNgMethod = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList("@org.testng.annotations.Test(groups = { \"fast\" })"));
+
             JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
             Optional<PsiElement> optionalPsiElement = ApplicationManager
                     .getApplication()
                     .runReadAction(((Computable<Optional<PsiElement>>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someTestNgMethod)));
 
-            Assert.assertFalse(optionalPsiElement.isPresent());
+            Assertions.assertFalse(optionalPsiElement.isPresent());
         });
-    }
-
-    private PsiMethod getSomeTestNGPsiMethod() {
-        PsiJavaFile file = (PsiJavaFile) myFixture.configureByFile("JavaWithTestNG.java");
-        return getMethodFromFileByName(file, "aFastTest").get();
-    }
-
-    private PsiMethod getSomeJUnit4PsiMethod() {
-        PsiJavaFile file = (PsiJavaFile) myFixture.configureByFile("JavaWithJunit4.java");
-        return getMethodFromFileByName(file, "substraction").get();
-    }
-
-    private PsiMethod getSomeJUnit5PsiMethodByAnnotationQualifiedName(String qualifiedName) {
-        PsiJavaFile file = (PsiJavaFile) myFixture.configureByFile("JavaWithJunit5.java");
-        return getFirstMethodWithAnnotationQualifiedName(file, qualifiedName).get();
     }
 
 }
