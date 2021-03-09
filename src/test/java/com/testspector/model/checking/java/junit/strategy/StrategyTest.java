@@ -13,15 +13,15 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Collections;
 
-public class StrategyTest extends TestBase {
-    
+public abstract class StrategyTest extends TestBase {
+
     protected JavaTestElementUtil javaTestElementUtil;
     protected JavaElementResolver elementResolver;
     protected JavaContextIndicator contextIndicator;
     protected JavaMethodResolver methodResolver;
     protected PsiJavaFile testJavaFile;
     protected PsiClass testClass;
-    
+
     @BeforeEach
     public void beforeEach(){
         this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
