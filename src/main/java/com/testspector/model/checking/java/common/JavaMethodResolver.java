@@ -80,4 +80,15 @@ public class JavaMethodResolver {
         return Optional.empty();
     }
 
+    public boolean isGetter(PsiMethod method) {
+        Optional<PsiElement> returnCandidate = elementResolver.firstChildIgnoring(Objects.requireNonNull(method.getBody()), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class));
+        if (returnCandidate.isPresent() && returnCandidate.get() instanceof PsiReturnStatement) {
+            return elementResolver.immediateChildrenOfType(returnCandidate.get(), PsiReferenceExpression.class)
+                    .stream()
+                    .map(PsiReference::resolve)
+                    .anyMatch(element -> element instanceof PsiField);
+        }
+        return false;
+    }
+
 }
