@@ -174,20 +174,21 @@ public class ToolWindowContent {
         this.stop.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                JLabel interruptedLabel = new JLabel("Interrupted");
+                interruptedLabel.setIcon(WARNING.getBasic());
                 super.mouseClicked(e);
                 groupByComboBox.setEnabled(false);
                 stop.setEnabled(false);
-                rerun.setEnabled(true);
                 collapse.setEnabled(false);
                 expand.setEnabled(false);
                 highlightAll.setEnabled(false);
                 contentWrapper.removeAll();
-                JLabel interruptedLabel = new JLabel("Interrupted");
-                interruptedLabel.setIcon(WARNING.getBasic());
                 contentWrapper.add(interruptedLabel);
                 panel1.revalidate();
                 panel1.repaint();
                 onStop.run();
+                rerun.setEnabled(true);
+
             }
         });
     }

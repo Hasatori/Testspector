@@ -15,8 +15,8 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.testspector.model.TestLineCrate;
 import com.testspector.model.checking.*;
-import com.testspector.model.checking.java.junit.JUnitUnitTestFrameworkResolveIndicationStrategy;
 import com.testspector.model.checking.java.junit.JUnitInspectionInvocationLineResolveStrategy;
+import com.testspector.model.checking.java.junit.JUnitUnitTestFrameworkResolveIndicationStrategy;
 import com.testspector.model.enums.BestPractice;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
@@ -29,8 +29,11 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static com.testspector.model.enums.ProgrammingLanguage.JAVA;
@@ -44,7 +47,7 @@ public final class TestspectorController {
     private static final Map<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> PROGRAMMING_LANGUAGE_UNIT_TEST_FRAMEWORK_RESOLVE_INDICATION_STRATEGY_HASH_MAP = Collections.unmodifiableMap(new HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>>() {{
         put(JAVA, Arrays.asList(new JUnitUnitTestFrameworkResolveIndicationStrategy()));
     }});
-   private static final SimpleDateFormat LOG_MESSAGE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final SimpleDateFormat LOG_MESSAGE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     private static final UnitTestFrameworkFactory UNIT_TEST_FRAMEWORK_RESOLVE_STRATEGY_FACTORY = new UnitTestFrameworkFactory(PROGRAMMING_LANGUAGE_UNIT_TEST_FRAMEWORK_RESOLVE_INDICATION_STRATEGY_HASH_MAP);
     private static final ProgrammingLanguageFactory PROGRAMMING_LANGUAGE_FACTORY = new ProgrammingLanguageFactory();
@@ -52,7 +55,6 @@ public final class TestspectorController {
 
     private static final String TOOL_WINDOW_NAME = "Testspector";
     private static final HashMap<Project, ToolWindow> PROJECT_TOOL_WINDOW_HASH_MAP = new HashMap<>();
-
     private TestspectorController() {
     }
 
@@ -61,48 +63,54 @@ public final class TestspectorController {
     }
 
     public static void initializeTestspector(Project project, List<PsiFile> files, String name) {
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        AtomicReference<ScheduledExecutorService> executorService = new AtomicReference<>(Executors.newSingleThreadScheduledExecutor());
         ToolWindow toolWindow = getToolWindow(project);
         ToolWindowContent toolWindowContent = new ToolWindowContent(project);
         addTabToToolWindow(toolWindow, toolWindowContent, name);
-        executorService.submit(() -> {
+        executorService.get().submit(() -> {
             ApplicationManager.getApplication().runReadAction(() -> {
                 toolWindowContent.start(newToolWindowContent -> {
-                    toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Rerunning test inspection on " + name), ConsoleViewContentType.SYSTEM_OUTPUT);
-                    List<BestPracticeViolation> bestPracticeViolations = ApplicationManager
-                            .getApplication()
-                            .runReadAction((Computable<List<BestPracticeViolation>>) () -> gatherBestPracticeViolations(toolWindowContent.getConsoleView(), files));
-                    toolWindowContent.showReport(bestPracticeViolations);
-                }, executorService::shutdownNow);
+                    executorService.set(Executors.newSingleThreadScheduledExecutor());
+                    executorService.get().submit(() -> {
+                        toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Rerunning test inspection on " + name), ConsoleViewContentType.SYSTEM_OUTPUT);
+                        List<BestPracticeViolation> bestPracticeViolations = ApplicationManager
+                                .getApplication()
+                                .runReadAction((Computable<List<BestPracticeViolation>>) () -> gatherBestPracticeViolations(toolWindowContent.getConsoleView(), files));
+                        toolWindowContent.showReport(bestPracticeViolations);
+                    });
+                },executorService.get()::shutdownNow);
                 toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Inspecting tests in "), ConsoleViewContentType.SYSTEM_OUTPUT);
                 toolWindowContent.getConsoleView().print(name, ConsoleViewContentType.LOG_INFO_OUTPUT);
                 List<BestPracticeViolation> bestPracticeViolations = gatherBestPracticeViolations(toolWindowContent.getConsoleView(), files);
                 toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Inspection done"), ConsoleViewContentType.LOG_INFO_OUTPUT);
                 toolWindowContent.showReport(bestPracticeViolations);
-
             });
         });
     }
 
+
     public static void initializeTestspector(Project project, PsiElement element, ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
         String name = element.toString();
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        AtomicReference<ScheduledExecutorService> executorService = new AtomicReference<>(Executors.newSingleThreadScheduledExecutor());
         ToolWindow toolWindow = getToolWindow(project);
         ToolWindowContent toolWindowContent = new ToolWindowContent(project);
         addTabToToolWindow(toolWindow, toolWindowContent, name);
 
-        executorService.submit(() -> {
+        executorService.get().submit(() -> {
             ApplicationManager.getApplication().runReadAction(() -> {
                 toolWindowContent.start(newToolWindowContent -> {
-                    toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Rerunning test inspection on " + name), ConsoleViewContentType.SYSTEM_OUTPUT);
-                    Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = BEST_PRACTICE_CHECKING_STRATEGY_FACTORY.getBestPracticeCheckingStrategy(programmingLanguage, unitTestFramework);
-                    if (optionalBestPracticeCheckingStrategy.isPresent()) {
-                        List<BestPracticeViolation> bestPracticeViolations = optionalBestPracticeCheckingStrategy.get().checkBestPractices(element);
-                        toolWindowContent.showReport(bestPracticeViolations);
-                    } else {
-                        logNoBestPracticeCheckingStrategyFound(toolWindowContent.getConsoleView(), programmingLanguage, unitTestFramework);
-                    }
-                }, executorService::shutdownNow);
+                    executorService.set(Executors.newSingleThreadScheduledExecutor());
+                    executorService.get().submit(() -> {
+                        toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Rerunning test inspection on " + name), ConsoleViewContentType.SYSTEM_OUTPUT);
+                        Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = BEST_PRACTICE_CHECKING_STRATEGY_FACTORY.getBestPracticeCheckingStrategy(programmingLanguage, unitTestFramework);
+                        if (optionalBestPracticeCheckingStrategy.isPresent()) {
+                            List<BestPracticeViolation> bestPracticeViolations = optionalBestPracticeCheckingStrategy.get().checkBestPractices(element);
+                            toolWindowContent.showReport(bestPracticeViolations);
+                        } else {
+                            logNoBestPracticeCheckingStrategyFound(toolWindowContent.getConsoleView(), programmingLanguage, unitTestFramework);
+                        }
+                    });
+                },executorService.get()::shutdownNow);
 
                 toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Inspecting tests in "), ConsoleViewContentType.SYSTEM_OUTPUT);
                 toolWindowContent.getConsoleView().print(name, ConsoleViewContentType.LOG_INFO_OUTPUT);
@@ -120,7 +128,7 @@ public final class TestspectorController {
                             .getCheckedBestPractice()
                             .stream()
                             .map(BestPractice::getDisplayName)
-                            .collect(Collectors.joining(",","[","]")))), ConsoleViewContentType.SYSTEM_OUTPUT);
+                            .collect(Collectors.joining(",", "[", "]")))), ConsoleViewContentType.SYSTEM_OUTPUT);
                     foundViolations.addAll(optionalBestPracticeCheckingStrategy.get().checkBestPractices(element));
                     toolWindowContent.showReport(foundViolations);
                 } else {
@@ -131,7 +139,6 @@ public final class TestspectorController {
             });
         });
     }
-
 
     public static Optional<TestLineCrate> resolveTestLineCrate(PsiElement element) {
         Optional<ProgrammingLanguage> optionalProgrammingLanguage = PROGRAMMING_LANGUAGE_FACTORY.resolveProgrammingLanguage(element);
@@ -177,7 +184,7 @@ public final class TestspectorController {
                                     .getCheckedBestPractice()
                                     .stream()
                                     .map(BestPractice::getDisplayName)
-                                    .collect(Collectors.joining(",","[","]")))), ConsoleViewContentType.SYSTEM_OUTPUT);
+                                    .collect(Collectors.joining(",", "[", "]")))), ConsoleViewContentType.SYSTEM_OUTPUT);
                             bestPracticeViolations.addAll(foundViolations);
                         } else {
                             logNoBestPracticeCheckingStrategyFound(consoleView, optionalProgrammingLanguage.get(), unitTestFramework);
@@ -256,7 +263,7 @@ public final class TestspectorController {
         return Optional.empty();
     }
 
-    private static String getLoggingFormatMessage(String message){
-        return String.format("\n[ %s ] %s",LOG_MESSAGE_FORMAT.format(new Date()),message);
+    private static String getLoggingFormatMessage(String message) {
+        return String.format("\n[ %s ] %s", LOG_MESSAGE_FORMAT.format(new Date()), message);
     }
 }
