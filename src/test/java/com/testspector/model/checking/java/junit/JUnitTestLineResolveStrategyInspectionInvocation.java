@@ -23,7 +23,7 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
     @DisplayName(value = "Test method qualified name:{0}")
     @ParameterizedTest
     @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
-    public void resolveTest(String testMethodQualifiedName) {
+    public void resolveInspectionInvocationLine_AllJunit5Annotations_shouldResolve(String testMethodQualifiedName) {
         WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiMethod someJUnit5Method = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList(String.format("@%s", testMethodQualifiedName)));
             PsiElement expectedTestLine = someJUnit5Method.getNameIdentifier();
@@ -36,7 +36,7 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
     }
 
     @Test
-    public void resolveTest_JUnit4Test_ShouldReturnMethodsIdentifier() {
+    public void resolveInspectionInvocationLine_JUnit4Test_ShouldReturnMethodsIdentifier() {
         WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiMethod someJUnit4Method = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList("@org.junit.Test"));
             PsiElement expectedTestLine = someJUnit4Method.getNameIdentifier();
@@ -49,7 +49,7 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
     }
 
     @Test
-    public void resolveTest_NullElement_ShouldReturnEmpty() {
+    public void resolveInspectionInvocationLine_NullElement_ShouldReturnEmpty() {
         WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
@@ -60,7 +60,7 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
     }
 
     @Test
-    public void resolveTest_TestNGTestMethod_ShouldReturnEmpty() {
+    public void resolveInspectionInvocationLine_TestNGTestMethod_ShouldReturnEmpty() {
         WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiMethod someTestNgMethod = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList("@org.testng.annotations.Test(groups = { \"fast\" })"));
 
