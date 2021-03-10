@@ -3,12 +3,12 @@ package com.testspector.model.checking.java;
 import com.testspector.model.checking.TestBase;
 import org.junit.jupiter.api.BeforeEach;
 
-public class JavaTest extends TestBase {
+public abstract class JavaTest extends TestBase {
 
     protected JavaTestElementUtil javaTestElementUtil;
 
     @BeforeEach
-    public void beforeEach() {
+    public final  void javaTestSetup() {
         this.javaTestElementUtil = new JavaTestElementUtil(psiFileFactory, psiElementFactory);
     }
 

@@ -1,6 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeViolation;
@@ -31,14 +31,13 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest extends 
 
     @BeforeEach
     public void beforeEach() {
-        super.beforeEach();
         this.strategy = new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(elementResolver, contextIndicator, methodResolver);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
     public void checkBestPractices_JUnit5TestMethodContainsTryCatchStatement_OneViolationReportingAboutCatchingTheExceptionUsingJUnit5AssertionShouldBeReturned(String jUnit5TestAnnotationQualifiedName) {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@" + jUnit5TestAnnotationQualifiedName)));
             PsiTryStatement tryStatement = (PsiTryStatement) testMethod.getBody().add(this.psiElementFactory.createStatementFromText("try {} catch (Exception e){}", null));
@@ -74,7 +73,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest extends 
 
     @Test
     public void checkBestPractices_JUnit4TestMethodContainsTryCatchStatement_OneViolationReportingAboutCatchingTheExceptionUsingJUnit4AnnotationShouldBeReturned() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
             PsiTryStatement tryStatement = (PsiTryStatement) testMethod.getBody().add(this.psiElementFactory.createStatementFromText("try {} catch (Exception e){}", null));
@@ -110,7 +109,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest extends 
 
     @Test
     public void checkBestPractices_JUnit4TestMethodCallsMethodWithTryCatchStatement_OneViolationReportingContainingRelatedElementWithRefenceFromTestMethodAndReferenceToTheStatement() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
             String helperMethodName = "helperMethod";
@@ -151,7 +150,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategyTest extends 
 
     @Test
     public void checkBestPractices_TestMethodDoesNotContainTryCatchStatement_NoViolationShouldBeFound() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
             EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();

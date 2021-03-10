@@ -1,6 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeViolation;
@@ -31,13 +31,6 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends StrategyTest {
 
     private NoConditionalLogicJUnitCheckingStrategy strategy;
 
-
-    @BeforeEach
-    public void beforeEach() {
-        super.beforeEach();
-        this.strategy = new NoConditionalLogicJUnitCheckingStrategy(elementResolver, contextIndicator, methodResolver);
-    }
-
     private static Stream<Arguments> provideAllSupportedStatementStringDefinitions() {
         return Stream.of(
                 Arguments.of("if", "if(true){}else if(false){}"),
@@ -46,10 +39,15 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends StrategyTest {
                 Arguments.of("switch", "switch (integer) {case 1:\"Test1\"; default:\"Test2\";}"));
     }
 
+    @BeforeEach
+    public void beforeEach() {
+        this.strategy = new NoConditionalLogicJUnitCheckingStrategy(elementResolver, contextIndicator, methodResolver);
+    }
+
     @ParameterizedTest
     @MethodSource(value = "provideAllSupportedStatementStringDefinitions")
     public void checkBestPractices_CheckingAllConditionalStatementsOneIsInTheTestMethodAndSecondInTheHelperMethod_OneViolationReportingAboutConditionalLogicShouldBeReturned(String statementName, String statementStringDefinition) {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             String helperMethodName = "helperMethod";
             PsiMethod helperMethodWithStatement = this.javaTestElementUtil.createMethod(helperMethodName, "Object", Collections.singletonList(PsiKeyword.PUBLIC));
@@ -99,7 +97,7 @@ public class NoConditionalLogicJUnitCheckingStrategyTest extends StrategyTest {
 
     @Test
     public void checkBestPractices_TestWithNoConditionalLogic_NoViolationsShouldBeFound() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
 
             PsiMethod testWithNoConditionalLogic = this.javaTestElementUtil.createTestMethod("testWithNoConditionalLogic", Collections.singletonList("@Test"));
             testWithNoConditionalLogic = (PsiMethod) testClass.add(testWithNoConditionalLogic);

@@ -1,6 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeViolation;
@@ -26,31 +26,31 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @RunWith(JUnitPlatform.class)
 public class SetupTestNamingStrategyJUnitCheckingStrategyTest extends StrategyTest {
 
-    private SetupTestNamingStrategyJUnitCheckingStrategy strategy;
     private static final String ALMOST_SAME_NAME_PROBLEM_DESCRIPTION = "The test name is more or less that same as a tested method. This says nothing about tests scenarion. You should setup a clear strategy for naming your tests so that the person reading then knows what is tests";
     private static final String TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION = "The test name has nothing to do with testedMethod. This says nothing about tests scenarion. You should setup a clear strategy for naming your tests so that the person reading then knows what is tests";
+    private SetupTestNamingStrategyJUnitCheckingStrategy strategy;
+
     @BeforeEach
     public void beforeEach() {
-        super.beforeEach();
         this.strategy = new SetupTestNamingStrategyJUnitCheckingStrategy(elementResolver, methodResolver, contextIndicator);
     }
 
     @ParameterizedTest
     @CsvSource(value = {
-            "'getName' | 'getName'            | '"+ALMOST_SAME_NAME_PROBLEM_DESCRIPTION+"'",
-            "'getName' | 'testGetName'        | '"+ALMOST_SAME_NAME_PROBLEM_DESCRIPTION+"'",
-            "'getName' | 'getNameTest'        | '"+ALMOST_SAME_NAME_PROBLEM_DESCRIPTION+"'",
-            "'getName' | 'test_GetName'       | '"+ALMOST_SAME_NAME_PROBLEM_DESCRIPTION+"'",
-            "'getName' | 'GetName_test'       | '"+ALMOST_SAME_NAME_PROBLEM_DESCRIPTION+"'",
-            "'setName' | 'somethingElse'      | '"+TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION+"'",
-            "'getTest' | 'checkBestPractices' | '"+TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION+"'",
-            "'getTest' | 'getAllocation'      | '"+TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION+"'",
-    },delimiter = '|')
-    public void checkBestPractices_TestNameTooSimilarOrTooDifferent_OneViolationReportingAboutTestNamingStrategyShouldBeReturned(String testName,String testedMethodName,String problemDescription) {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+            "'getName' | 'getName'            | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
+            "'getName' | 'testGetName'        | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
+            "'getName' | 'getNameTest'        | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
+            "'getName' | 'test_GetName'       | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
+            "'getName' | 'GetName_test'       | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
+            "'setName' | 'somethingElse'      | '" + TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION + "'",
+            "'getTest' | 'checkBestPractices' | '" + TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION + "'",
+            "'getTest' | 'getAllocation'      | '" + TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION + "'",
+    }, delimiter = '|')
+    public void checkBestPractices_TestNameTooSimilarOrTooDifferent_OneViolationReportingAboutTestNamingStrategyShouldBeReturned(String testName, String testedMethodName, String problemDescription) {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             PsiMethod testedMethod = this.javaTestElementUtil.createMethod(testedMethodName, "String", Collections.singletonList(PsiKeyword.PUBLIC));
-            PsiMethodCallExpression testedMethodCall= (PsiMethodCallExpression)this.psiElementFactory.createExpressionFromText(String.format("%s()", testedMethodName), null);
+            PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) this.psiElementFactory.createExpressionFromText(String.format("%s()", testedMethodName), null);
             PsiMethod testMethod = this.javaTestElementUtil.createTestMethod(testName, Collections.singletonList("@org.junit.Test"));
             testMethod = (PsiMethod) testClass.add(testMethod);
             EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
@@ -59,7 +59,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategyTest extends StrategyTe
             EasyMock.expect(elementResolver.allChildrenOfType(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
             EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                     .andReturn(Collections.singletonList(testedMethodCall)).times(1);
-            EasyMock.replay(elementResolver,methodResolver);
+            EasyMock.replay(elementResolver, methodResolver);
             List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                     createBestPracticeViolation(
                             String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
@@ -98,15 +98,15 @@ public class SetupTestNamingStrategyJUnitCheckingStrategyTest extends StrategyTe
             "'canResolveFromPsiElement' | 'canResolveFromPsiElement_PsiFilesWithDifferentJUnitVersions_ShoudIndicateThatCanResolve'",
             "'resolveTest'              | 'resolveTest_NullElement_ShouldReturnEmpty'",
     }, delimiter = '|')
-    public void checkBestPractices_TestNameIsUsingStrategy_NoViolationShouldBeReturned(String testName,String testedMethodName) {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+    public void checkBestPractices_TestNameIsUsingStrategy_NoViolationShouldBeReturned(String testName, String testedMethodName) {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             PsiMethod testedMethod = this.javaTestElementUtil.createMethod(testedMethodName, "String", Collections.singletonList(PsiKeyword.PUBLIC));
             PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) this.psiElementFactory.createExpressionFromText(String.format("%s()", testedMethodName), null);
             PsiMethod testMethod = this.javaTestElementUtil.createTestMethod(testName, Collections.singletonList("@org.junit.Test"));
             testMethod = (PsiMethod) testClass.add(testMethod);
             EasyMock.expect(methodResolver.allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
-            EasyMock.replay( methodResolver);
+            EasyMock.replay(methodResolver);
             // When
             List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);
             //Then

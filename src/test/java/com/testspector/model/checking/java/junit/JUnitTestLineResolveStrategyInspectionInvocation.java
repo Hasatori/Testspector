@@ -1,6 +1,6 @@
 package com.testspector.model.checking.java.junit;
 
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
@@ -24,7 +24,7 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
     @ParameterizedTest
     @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
     public void resolveTest(String testMethodQualifiedName) {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiMethod someJUnit5Method = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList(String.format("@%s", testMethodQualifiedName)));
             PsiElement expectedTestLine = someJUnit5Method.getNameIdentifier();
             JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
@@ -37,7 +37,7 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
 
     @Test
     public void resolveTest_JUnit4Test_ShouldReturnMethodsIdentifier() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiMethod someJUnit4Method = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList("@org.junit.Test"));
             PsiElement expectedTestLine = someJUnit4Method.getNameIdentifier();
             JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
@@ -50,7 +50,7 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
 
     @Test
     public void resolveTest_NullElement_ShouldReturnEmpty() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
             Optional<PsiElement> optionalPsiElement = jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(null);
@@ -61,7 +61,7 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
 
     @Test
     public void resolveTest_TestNGTestMethod_ShouldReturnEmpty() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiMethod someTestNgMethod = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList("@org.testng.annotations.Test(groups = { \"fast\" })"));
 
             JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();

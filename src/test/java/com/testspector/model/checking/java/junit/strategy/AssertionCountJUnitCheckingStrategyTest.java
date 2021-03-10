@@ -1,6 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
@@ -11,7 +11,6 @@ import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
@@ -30,14 +29,13 @@ public class AssertionCountJUnitCheckingStrategyTest extends StrategyTest {
 
     @BeforeEach
     public void beforeEach() {
-        super.beforeEach();
         this.strategy = new AssertionCountJUnitCheckingStrategy(elementResolver, contextIndicator, methodResolver);
     }
 
 
     @Test
     public void checkBestPractices_TestMethodWithoutAnyAssertions_OneViolationReportingAboutThatAtLeastOneAssertionShouldBeInTheTestShouldBeReturned() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             String testMethodName = "testWithNoAssertions";
             PsiMethod testMethodWithoutAssertions = this.javaTestElementUtil.createTestMethod(testMethodName, Collections.singletonList("@Test"));
@@ -67,7 +65,7 @@ public class AssertionCountJUnitCheckingStrategyTest extends StrategyTest {
 
     @Test
     public void checkBestPractices_TestMethodWithOneAssertion_NoViolationShouldBeReturned() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             this.testJavaFile.getImportList().add(this.psiElementFactory.createImportStatementOnDemand("org.junit.Assert"));
             String testMethodName = "testWithOneAssertion";
@@ -91,13 +89,13 @@ public class AssertionCountJUnitCheckingStrategyTest extends StrategyTest {
 
     @Test
     public void checkBestPractices_Junit5TestMethodWithTwoHamcrestAssertionsWhichAreNotGrouped_OneViolationReportingAboutThatOnlyOneAssertionShouldBeInTheTestShouldBeReturnedAndShouldContainHintRecommendingUsingJUnit5GroupAssertionOrHamcrest() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             String testMethodName = "testWithOneAssertion";
             String assertMethodText = "org.hamcrest.MatcherAssert.assertThat(null,null )";
             PsiMethod testWithTwoNonGroupedAssertions = this.javaTestElementUtil.createTestMethod(testMethodName, Collections.singletonList("@org.junit.jupiter.api.Test"));
 
-            PsiMethodCallExpression firstAssertionMethodCall = (PsiMethodCallExpression) testWithTwoNonGroupedAssertions.getBody().add(this.psiElementFactory.createExpressionFromText(assertMethodText,null));
+            PsiMethodCallExpression firstAssertionMethodCall = (PsiMethodCallExpression) testWithTwoNonGroupedAssertions.getBody().add(this.psiElementFactory.createExpressionFromText(assertMethodText, null));
             PsiMethodCallExpression secondAssertionMethodCall = (PsiMethodCallExpression) testWithTwoNonGroupedAssertions.getBody().add(this.psiElementFactory.createExpressionFromText(assertMethodText, null));
             testWithTwoNonGroupedAssertions = (PsiMethod) testClass.add(testWithTwoNonGroupedAssertions);
             EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
@@ -108,7 +106,7 @@ public class AssertionCountJUnitCheckingStrategyTest extends StrategyTest {
                     .andReturn(Collections.emptyList()).times(1);
             EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(secondAssertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                     .andReturn(Collections.emptyList()).times(1);
-            EasyMock.expect(elementResolver.allChildrenOfType(testWithTwoNonGroupedAssertions,PsiReferenceExpression.class))
+            EasyMock.expect(elementResolver.allChildrenOfType(testWithTwoNonGroupedAssertions, PsiReferenceExpression.class))
                     .andReturn(Collections.emptyList()).times(2);
             EasyMock.replay(elementResolver);
             List<BestPracticeViolation> expectedViolations = Collections.singletonList(
@@ -122,7 +120,7 @@ public class AssertionCountJUnitCheckingStrategyTest extends StrategyTest {
                             BestPractice.ONLY_ONE_ASSERTION,
                             Arrays.asList(
                                     new RelatedElementWrapper(
-                                           firstAssertionMethodCall.getText(), new HashMap<PsiElement, String>() {{
+                                            firstAssertionMethodCall.getText(), new HashMap<PsiElement, String>() {{
                                         put(firstAssertionMethodCall, "reference in the test method");
                                     }}),
                                     new RelatedElementWrapper(

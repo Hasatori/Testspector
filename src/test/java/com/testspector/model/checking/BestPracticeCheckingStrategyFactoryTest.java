@@ -6,7 +6,6 @@ import com.testspector.model.checking.java.junit.JUnitGroupMethodBestPracticeChe
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;

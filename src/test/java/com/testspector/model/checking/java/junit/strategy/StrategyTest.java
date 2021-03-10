@@ -1,11 +1,9 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiJavaFile;
-import com.testspector.model.checking.TestBase;
 import com.testspector.model.checking.java.JavaTest;
-import com.testspector.model.checking.java.JavaTestElementUtil;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -23,14 +21,13 @@ public abstract class StrategyTest extends JavaTest {
     protected PsiClass testClass;
 
     @BeforeEach
-    public void beforeEach(){
-        super.beforeEach();
+    public final void strategyTestSetup() {
         this.elementResolver = EasyMock.mock(JavaElementResolver.class);
         this.contextIndicator = EasyMock.mock(JavaContextIndicator.class);
         this.methodResolver = EasyMock.mock(JavaMethodResolver.class);
         String fileName = "Test";
-        WriteCommandAction.runWriteCommandAction(null, () -> {
-            this.testJavaFile = this.javaTestElementUtil.createFile(fileName, "com.testspector", Collections.singletonList("import org.junit.jupiter.api.Test;"), Collections.emptyList());
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
+            this.testJavaFile = this.javaTestElementUtil.createFile(fileName, "com.testspector", Collections.singletonList("import org.junit.jupiter.api.Test;import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;"), Collections.emptyList());
             this.testClass = this.psiElementFactory.createClass(fileName);
             this.testClass = (PsiClass) testJavaFile.add(testClass);
         });

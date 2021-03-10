@@ -1,21 +1,17 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
@@ -23,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -37,7 +32,6 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategyTest extends StrategyTe
 
     @BeforeEach
     public void beforeEach() {
-        super.beforeEach();
         this.strategy = new TestOnlyPublicBehaviourJUnitCheckingStrategy(elementResolver, methodResolver, contextIndicator);
     }
 
@@ -46,9 +40,9 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategyTest extends StrategyTe
             "'private'         | 'private'",
             "'protected'       | 'protected'",
             "'package private' | ''"
-    },delimiter = '|')
+    }, delimiter = '|')
     public void checkBestPractices_TestTestsPrivateBehaviourViaMethodCall_OneViolationReportingAboutTestingPrivateBehaviourShouldBeReturned(String expectedRelatedElementQualifierName, String testedMethodAccessQualifier) {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             PsiMethod testMethod = this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@Test"));
             String testedMethodName = "testedMethod";
@@ -58,10 +52,10 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategyTest extends StrategyTe
             EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).times(2);
             EasyMock.replay(contextIndicator);
             EasyMock.expect(methodResolver.allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
-            EasyMock.expect(elementResolver.allChildrenOfType(testMethod,PsiReferenceExpression.class)).andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
-            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testedMethodCall),EasyMock.eq(PsiMethodCallExpression.class),EasyMock.anyObject(),EasyMock.eq(contextIndicator.isInTestContext())))
+            EasyMock.expect(elementResolver.allChildrenOfType(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
+            EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                     .andReturn(Collections.singletonList(testedMethodCall)).times(1);
-            EasyMock.replay(methodResolver,elementResolver);
+            EasyMock.replay(methodResolver, elementResolver);
 
             List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                     createBestPracticeViolation(
@@ -77,8 +71,8 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategyTest extends StrategyTe
                             ),
                             Arrays.asList(
                                     new RelatedElementWrapper(testedMethod.getName(), new HashMap<PsiElement, String>() {{
-                                        put(testedMethodCall.getMethodExpression(), String.format("%s method call from test",expectedRelatedElementQualifierName));
-                                        put(testedMethod, String.format("%s method call in production code",expectedRelatedElementQualifierName));
+                                        put(testedMethodCall.getMethodExpression(), String.format("%s method call from test", expectedRelatedElementQualifierName));
+                                        put(testedMethod, String.format("%s method call in production code", expectedRelatedElementQualifierName));
                                     }}))));
 
             // When
@@ -96,7 +90,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategyTest extends StrategyTe
 
     @Test
     public void checkBestPractices_TestTestsJustPublicMethods_NoViolationsShouldBeFound() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiMethod testMethod = this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@Test"));
             PsiMethod testedMethod = this.javaTestElementUtil.createMethod("testedMethod", "String", Collections.singletonList(PsiKeyword.PUBLIC));
             testMethod = (PsiMethod) testClass.add(testMethod);

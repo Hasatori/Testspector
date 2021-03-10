@@ -1,8 +1,7 @@
 package com.testspector.model.checking.java.junit;
 
 import com.intellij.lang.java.JavaLanguage;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
@@ -18,9 +17,6 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @RunWith(JUnitPlatform.class)
 public class JUnitUnitTestFrameworkResolveIndicationStrategyTest extends JavaTest {
 
@@ -30,7 +26,7 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategyTest extends JavaTes
     @ValueSource(strings = {"JavaWithJunit4.java", "JavaWithJunit5.java"})
     public void canResolveFromPsiElement_PsiFilesWithDifferentJUnitVersions_ShoudIndicateThatCanResolve(String fileName) throws Exception {
         String fileText = FileUtils.readFileToString(new File(getClass().getClassLoader().getResource("jUnitUnitTestFrameworkResolveIndicationStrategyTest/" + fileName).getFile()), "UTF-8");
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiFile psiFile = psiFileFactory.createFileFromText(JavaLanguage.INSTANCE, fileText);
 
             boolean canResolveJUnitFramework = ApplicationManager
@@ -44,7 +40,7 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategyTest extends JavaTes
 
     @Test
     public void canResolveFromPsiElement_JUnit4MethodTest_ShoudIndicateThatCanResolve() {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiMethod psiMethod = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList("@org.junit.Test"));
             ;
 
@@ -61,7 +57,7 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategyTest extends JavaTes
     @ParameterizedTest
     @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
     public void canResolveFromPsiElement_AllJUnit5Methods_ShoudIndicateThatCanResolve(String testMethodQualifiedName) {
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiMethod psiMethod = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList(String.format("@%s", testMethodQualifiedName)));
 
             boolean canResolveJUnitFramework = ApplicationManager
@@ -76,7 +72,7 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategyTest extends JavaTes
     @Test
     public void canResolveFromPsiElement_TypescriptFileWithJestTests_ShoudIndicateThatCanNotResolve() throws Exception {
         String typescriptFileText = FileUtils.readFileToString(new File(getClass().getClassLoader().getResource("jUnitUnitTestFrameworkResolveIndicationStrategyTest/TypeScriptWithJest.tsx").getFile()), "UTF-8");
-        WriteCommandAction.runWriteCommandAction(null, () -> {
+        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
 
             PsiFile psiFile = psiFileFactory.createFileFromText(JavaLanguage.INSTANCE, typescriptFileText);
 

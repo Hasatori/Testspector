@@ -2,35 +2,25 @@ package com.testspector.model.checking;
 
 import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiFileFactory;
-import com.intellij.testFramework.fixtures.*;
-import com.intellij.testFramework.fixtures.impl.LightTempDirTestFixtureImpl;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
-public abstract class TestBase {
+public abstract class TestBase extends BasePlatformTestCase {
 
-    protected static final PsiElementFactory psiElementFactory;
-    protected static final PsiFileFactory psiFileFactory;
+    protected PsiElementFactory psiElementFactory;
+    protected PsiFileFactory psiFileFactory;
 
-    static {
-        IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder(null);
-        IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
 
-        TempDirTestFixture tempDirFixture = createTempDirTestFixture();
-        CodeInsightTestFixture myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture, tempDirFixture);
-
-        try {
-            myFixture.setUp();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @BeforeEach
+    public final void platformSetup() throws Exception {
+        setUp();
         psiFileFactory = PsiFileFactory.getInstance(myFixture.getProject());
         psiElementFactory = PsiElementFactory.getInstance(myFixture.getProject());
     }
 
-    private static TempDirTestFixture createTempDirTestFixture() {
-        IdeaTestExecutionPolicy policy = IdeaTestExecutionPolicy.current();
-        return policy != null
-                ? policy.createTempDirTestFixture()
-                : new LightTempDirTestFixtureImpl(true);
+    @AfterEach
+    public final void platformTeardown() throws Exception {
+        tearDown();
     }
 }

@@ -3,7 +3,6 @@ package com.testspector.model.checking;
 import com.intellij.psi.PsiElement;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
@@ -24,7 +23,7 @@ public class UnitTestFrameworkFactoryTest {
         PsiElement mockedPsiElement = createNiceMock(PsiElement.class);
         expect(mockedUnitTestIndicationStrategy.canResolveFromPsiElement(anyObject())).andReturn(true).times(1);
         expect(mockedUnitTestIndicationStrategy.getUnitTestFramework()).andReturn(UnitTestFramework.JUNIT);
-        replay(mockedUnitTestIndicationStrategy,mockedPsiElement);
+        replay(mockedUnitTestIndicationStrategy, mockedPsiElement);
         HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>>() {{
             put(ProgrammingLanguage.JAVA, Arrays.asList(mockedUnitTestIndicationStrategy));
         }};
@@ -42,7 +41,7 @@ public class UnitTestFrameworkFactoryTest {
         PsiElement mockedPsiElement = createNiceMock(PsiElement.class);
         expect(mockedUnitTestIndicationStrategy.canResolveFromPsiElement(anyObject())).andReturn(false).times(1);
         expect(mockedUnitTestIndicationStrategy.getUnitTestFramework()).andReturn(UnitTestFramework.JUNIT);
-        replay(mockedUnitTestIndicationStrategy,mockedPsiElement);
+        replay(mockedUnitTestIndicationStrategy, mockedPsiElement);
         HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>>() {{
             put(ProgrammingLanguage.JAVA, Arrays.asList(mockedUnitTestIndicationStrategy));
         }};
@@ -60,7 +59,7 @@ public class UnitTestFrameworkFactoryTest {
         PsiElement mockedPsiElement = createNiceMock(PsiElement.class);
         expect(mockedUnitTestIndicationStrategy.canResolveFromPsiElement(anyObject())).andReturn(true).times(1);
         expect(mockedUnitTestIndicationStrategy.getUnitTestFramework()).andReturn(UnitTestFramework.PHP_UNIT);
-        replay(mockedUnitTestIndicationStrategy,mockedPsiElement);
+        replay(mockedUnitTestIndicationStrategy, mockedPsiElement);
         HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>> programmingLanguageListHashMap = new HashMap<ProgrammingLanguage, List<UnitTestFrameworkResolveIndicationStrategy>>() {{
             put(ProgrammingLanguage.PHP, Arrays.asList(mockedUnitTestIndicationStrategy));
         }};
