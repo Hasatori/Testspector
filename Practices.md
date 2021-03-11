@@ -1,156 +1,156 @@
-Obsah
+#Obsah
 
-[1	Vytváření testů	5](#_Toc66385764)
+[1	Vytváření testů](#vytváření-testů)
 
->   [1.1	Práce s duplicitami	5](#_Toc66385765)
+>   [1.1	Práce s duplicitami](#_Toc66385765)
 
->       [1.1.1	Extrakce opakujících se částí testovacího kódu	5](#_Toc66385766)
+>>[1.1.1	Extrakce opakujících se částí testovacího kódu](#_Toc66385766)
 
->       [1.1.2	Extrakce opakujících se testovacích metod	6](#_Toc66385767)
+>> [1.1.2	Extrakce opakujících se testovacích metod](#_Toc66385767)
 
->   [1.2	Rychlost	6](#_Toc66385768)
+>   [1.2	Rychlost](#_Toc66385768)
 
->       [1.2.1	Používání „In memory“ prostředků a mockování	6](#_Toc66385769)
+>> [1.2.1	Používání „In memory“ prostředků a mockování](#_Toc66385769)
 
->       [1.2.2	Vyhýbat se akcím, které uspávají hlavní vlákno	6](#_Toc66385770)
+>> [1.2.2	Vyhýbat se akcím, které uspávají hlavní vlákno](#_Toc66385770)
 
->   [1.3	Ověřování (kontrola)	7](#_Toc66385771)
+>   [1.3	Ověřování (kontrola)](#_Toc66385771)
 
->       [1.3.1	Minimálně jedna ověřovací metoda na test	7](#_Toc66385772)
+>> [1.3.1	Minimálně jedna ověřovací metoda na test](#_Toc66385772)
 
->       [1.3.2	Právě jedna ověřovací metoda na test	7](#_Toc66385773)
+>> [1.3.2	Právě jedna ověřovací metoda na test](#_Toc66385773)
 
->       [1.3.3	Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)	8](#_Toc66385774)
+>> [1.3.3	Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)](#_Toc66385774)
 
->       [1.3.4	Dodržovat správné pořadí parametrů ověřovací metody	8](#_Toc66385775)
+>> [1.3.4	Dodržovat správné pořadí parametrů ověřovací metody](#_Toc66385775)
 
->       [1.3.5	Přikládat zprávy o popisu chyby	8](#_Toc66385776)
+>> [1.3.5	Přikládat zprávy o popisu chyby](#_Toc66385776)
 
->   [1.4	Struktura testovací metody	9](#_Toc66385777)
+>   [1.4	Struktura testovací metody](#_Toc66385777)
 
->       [1.4.1	3-fázový design testů	9](#_Toc66385778)
+>> [1.4.1	3-fázový design testů](#_Toc66385778)
 
->       [1.4.2	4-fázový design testů	9](#_Toc66385779)
+>> [1.4.2	4-fázový design testů](#_Toc66385779)
 
->       [1.4.3	Neopakovat fáze testů	10](#_Toc66385780)
+>> [1.4.3	Neopakovat fáze testů](#_Toc66385780)
 
->       [1.4.4	Oddělovat části testu	10](#_Toc66385781)
+>> [1.4.4	Oddělovat části testu](#_Toc66385781)
 
->   [1.5	Proměnné	10](#_Toc66385782)
+>   [1.5	Proměnné](#_Toc66385782)
 
->       [1.5.1	Nahrazovat pevné hodnoty konstantami	11](#_Toc66385783)
+>> [1.5.1	Nahrazovat pevné hodnoty konstantami](#_Toc66385783)
 
->       [1.5.2	Nepoužívat magická čísla	11](#_Toc66385784)
+>> [1.5.2	Nepoužívat magická čísla](#_Toc66385784)
 
->   [1.6	Ostatní doporučení	11](#_Toc66385785)
+>   [1.6	Ostatní doporučení](#_Toc66385785)
 
->       [1.6.1	Zachovávat spolehlivost testů	12](#_Toc66385786)
+>> [1.6.1	Zachovávat spolehlivost testů](#_Toc66385786)
 
->       [1.6.2	Odstraňovat mrtvý kód	12](#_Toc66385787)
+>> [1.6.2	Odstraňovat mrtvý kód](#_Toc66385787)
 
->       [1.6.3	Oddělovat generování dat od jejich verifikace	12](#_Toc66385788)
+>> [1.6.3	Oddělovat generování dat od jejich verifikace](#_Toc66385788)
 
->   [1.7	Testování výjimek	13](#_Toc66385789)
+>   [1.7	Testování výjimek](#_Toc66385789)
 
->       [1.7.1	Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích frameworků	13](#_Toc66385790)
+>> [1.7.1	Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích frameworků](#_Toc66385790)
 
->       [1.7.2	Stanovovat obecnou úroveň pro výjimky testovací metody	13](#_Toc66385791)
+>> [1.7.2	Stanovovat obecnou úroveň pro výjimky testovací metody](#_Toc66385791)
 
->   [1.8	Podmíněná logika	13](#_Toc66385792)
+>   [1.8	Podmíněná logika](#_Toc66385792)
 
->       [1.8.1	Nepoužívat bloky if, else, switch, for či while v rámci testu	14](#_Toc66385793)
+>> [1.8.1	Nepoužívat bloky if, else, switch, for či while v rámci testu](#_Toc66385793)
 
->   [1.9	Pojmenování	14](#_Toc66385794)
+>   [1.9	Pojmenování](#_Toc66385794)
 
->       [1.9.1	Určit strategii pojmenování testů	14](#_Toc66385795)
+>> [1.9.1	Určit strategii pojmenování testů](#_Toc66385795)
 
->       [1.9.2	Zachovat konzistentní pojmenování testů	15](#_Toc66385796)
+>> [1.9.2	Zachovat konzistentní pojmenování testů](#_Toc66385796)
 
->       [1.9.3	Zachovávat jeden styl pojmenování pro koncept	15](#_Toc66385797)
+>> [1.9.3	Zachovávat jeden styl pojmenování pro koncept](#_Toc66385797)
 
->       [1.9.4	Používat jména pro známá řešení	15](#_Toc66385798)
+>> [1.9.4	Používat jména pro známá řešení](#_Toc66385798)
 
->       [1.9.5	Používat vhodné pojmenování pro testovací třídy	15](#_Toc66385799)
+>> [1.9.5	Používat vhodné pojmenování pro testovací třídy](#_Toc66385799)
 
->       [1.9.6	Používat vyslovitelné a vyhledatelné názvy	15](#_Toc66385800)
+>> [1.9.6	Používat vyslovitelné a vyhledatelné názvy](#_Toc66385800)
 
->       [1.9.7	Zamezovat dezinformaci	16](#_Toc66385801)
+>> [1.9.7	Zamezovat dezinformaci](#_Toc66385801)
 
->       [1.9.8	Dělat dostatečné rozdíly mezi jmény	16](#_Toc66385802)
+>> [1.9.8	Dělat dostatečné rozdíly mezi jmény](#_Toc66385802)
 
->       [1.9.9	Vynechávat nadbytečné součásti názvů	16](#_Toc66385803)
+>> [1.9.9	Vynechávat nadbytečné součásti názvů](#_Toc66385803)
 
->       [1.9.10	Používat jména vyjadřující záměr	16](#_Toc66385804)
+>> [1.9.10	Používat jména vyjadřující záměr](#_Toc66385804)
 
->   [1.10	Uložení testovací souboru a seskupování testů	16](#_Toc66385805)
+>   [1.10	Uložení testovací souboru a seskupování testů](#_Toc66385805)
 
->       [1.10.1	Ukládat testy mimo produkční kód	17](#_Toc66385806)
+>> [1.10.1	Ukládat testy mimo produkční kód](#_Toc66385806)
 
->       [1.10.2	Ukládat testy pro jeden testovaný systém na jedno místo	19](#_Toc66385807)
+>> [1.10.2	Ukládat testy pro jeden testovaný systém na jedno místo](#_Toc66385807)
 
->   [1.11	Nezávislost	19](#_Toc66385808)
+>   [1.11	Nezávislost](#_Toc66385808)
 
->       [1.11.1	Nepoužívat globální statické proměnné	19](#_Toc66385809)
+>> [1.11.1	Nepoužívat globální statické proměnné](#_Toc66385809)
 
->       [1.11.2	Nepoužívat znalost domény	20](#_Toc66385810)
+>> [1.11.2	Nepoužívat znalost domény](#_Toc66385810)
 
->       [1.11.3	Používat relativní cesty	20](#_Toc66385811)
+>> [1.11.3	Používat relativní cesty](#_Toc66385811)
 
->       [1.11.4	Nezávislost na platformě	20](#_Toc66385812)
+>> [1.11.4	Nezávislost na platformě](#_Toc66385812)
 
->       [1.11.5	Dodržovat nezávislost na produkčním kódu	21](#_Toc66385813)
+>> [1.11.5	Dodržovat nezávislost na produkčním kódu](#_Toc66385813)
 
->       [1.11.6	Tvořit vlastní data a zdroje	21](#_Toc66385814)
+>> [1.11.6	Tvořit vlastní data a zdroje](#_Toc66385814)
 
->   [1.12	Izolovanost	22](#_Toc66385815)
+>   [1.12	Izolovanost](#_Toc66385815)
 
->       [1.12.1	Používat správného testovacího dvojníka	22](#_Toc66385816)
+>> [1.12.1	Používat správného testovacího dvojníka](#_Toc66385816)
 
->       [1.12.2	Nepoužívat testovací dvojníky na testovaný systém	23](#_Toc66385817)
+>> [1.12.2	Nepoužívat testovací dvojníky na testovaný systém](#_Toc66385817)
 
->       [1.12.3	Nepoužívat návrhový vzor Singleton	23](#_Toc66385818)
+>> [1.12.3	Nepoužívat návrhový vzor Singleton](#_Toc66385818)
 
-[2	Vymezení testů	24](#_Toc66385819)
+[2	Vymezení testů](#_Toc66385819)
 
->   [2.1	Pokrytí kódu (Code coverage)	24](#_Toc66385820)
+>   [2.1	Pokrytí kódu (Code coverage)](#_Toc66385820)
 
->       [2.1.1	Neimplementovat jednoduché testy	24](#_Toc66385821)
+>> [2.1.1	Neimplementovat jednoduché testy](#_Toc66385821)
 
->       [2.1.2	Implementovat jak happy, tak sad testy	24](#_Toc66385822)
+>> [2.1.2	Implementovat jak happy, tak sad testy](#_Toc66385822)
 
->       [2.1.3	Implementovat testy pro každý netriviální systém	24](#_Toc66385823)
+>> [2.1.3	Implementovat testy pro každý netriviální systém](#_Toc66385823)
 
->       [2.1.4	Netestovat abstraktní systémy	25](#_Toc66385824)
+>> [2.1.4	Netestovat abstraktní systémy](#_Toc66385824)
 
->       [2.1.5	Testovat pouze veřejné chování testovaného systému	25](#_Toc66385825)
+>> [2.1.5	Testovat pouze veřejné chování testovaného systému](#_Toc66385825)
 
->       [2.1.6	Testovat chování, ne metody systému	25](#_Toc66385826)
+>> [2.1.6	Testovat chování, ne metody systému](#_Toc66385826)
 
->       [2.1.7	Zachovávat princip jedné odpovědnosti testu	25](#_Toc66385827)
+>> [2.1.7	Zachovávat princip jedné odpovědnosti testu](#_Toc66385827)
 
->   [2.2	Datové pokrytí (Data coverage)	25](#_Toc66385828)
+>   [2.2	Datové pokrytí (Data coverage)](#_Toc66385828)
 
->       [2.2.1	Testovat hraniční podmínky	26](#_Toc66385829)
+>> [2.2.1	Testovat hraniční podmínky](#_Toc66385829)
 
->       [2.2.2	Kontrolovat inverzní vztahy	28](#_Toc66385830)
+>> [2.2.2	Kontrolovat inverzní vztahy](#_Toc66385830)
 
->       [2.2.3	Provádět křížovou kontrolu s pomocí jiných prostředků	28](#_Toc66385831)
+>> [2.2.3	Provádět křížovou kontrolu s pomocí jiných prostředků](#_Toc66385831)
 
->       [2.2.4	Vynucovat chybné podmínky	28](#_Toc66385832)
+>> [2.2.4	Vynucovat chybné podmínky](#_Toc66385832)
 
->       [2.2.5	Používat jednotkové testy pro měření výkonových charakteristik testovaného systému	28](#_Toc66385833)
+>> [2.2.5	Používat jednotkové testy pro měření výkonových charakteristik testovaného systému](#_Toc66385833)
 
->       [2.2.6	Vymezovat třídy ekvivalence	29](#_Toc66385834)
+>> [2.2.6	Vymezovat třídy ekvivalence](#_Toc66385834)
 
->       [2.2.7	Testovat krajní hodnoty	29](#_Toc66385835)
+>> [2.2.7	Testovat krajní hodnoty](#_Toc66385835)
 
->       [2.2.8	Testovat změny stavu	29](#_Toc66385836)
+>> [2.2.8	Testovat změny stavu](#_Toc66385836)
 
->       [2.2.9	Testovat pomocí rozhodovacích tabulek	30](#_Toc66385837)
+>> [2.2.9	Testovat pomocí rozhodovacích tabulek](#_Toc66385837)
 
 **![](Dropbox/Vysoka_skola/Magisterske_studium/Diplomova_prace/media/e75f34a382eac9c11065578930414b8b.jpeg)**
 
-# Vytváření testů
+#Vytvareni testu
 
 Tato podkapitola obsahuje nejlepší postupy zabývající se tvorbou jednotkových
 testů. Pomyslně odpovídá na otázku „Jak by měli testy a testovací kód vypadat?“,
