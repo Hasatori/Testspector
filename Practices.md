@@ -28,9 +28,9 @@
 
 >   [1.4	Struktura testovací metody](#struktura-testovací-metody)
 
->> [1.4.1	3-fázový design testů](#-fázový-design-testů)
+>> [1.4.1	3-fázový design testů](#3-fázový-design-testů)
 
->> [1.4.2	4-fázový design testů](#-fázový-design-testů)
+>> [1.4.2	4-fázový design testů](#4-fázový-design-testů)
 
 >> [1.4.3	Neopakovat fáze testů](#neopakovat-fáze-testů)
 

@@ -35,7 +35,7 @@ public class TreeReportMouseListener implements MouseListener {
             if (clickedNode instanceof LinkNode) {
                 LinkNode linkNode = (LinkNode) clickedNode;
                 try {
-                    Desktop.getDesktop().browse(linkNode.getUri());
+                    Desktop.getDesktop().browse(linkNode.getUri().normalize());
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
