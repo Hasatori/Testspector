@@ -150,7 +150,7 @@
 
 **![](Dropbox/Vysoka_skola/Magisterske_studium/Diplomova_prace/media/e75f34a382eac9c11065578930414b8b.jpeg)**
 
-# Vytvareni testu
+# Vytvářeni testů
 
 Tato podkapitola obsahuje nejlepší postupy zabývající se tvorbou jednotkových
 testů. Pomyslně odpovídá na otázku „Jak by měli testy a testovací kód vypadat?“,
