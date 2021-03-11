@@ -204,7 +204,7 @@ metody musí platit stejná pravidla, jako pro zbytek testovacího kódu, tedy a
 mezi nimi by se neměly vyskytovat duplicity a měly by být čtenáři srozumitelné.
 Samozřejmě srozumitelnost testovacího kódu není pouze otázkou minimalizace
 duplicit, ale také například jejich pojmenování, které je detailně rozebíráno v
-sekci *3.3.9 Pojmenování*
+sekci *[Pojmenování](#pojmenování)*
 
 Mimo typické strukturální a literární duplicity, je také nutné dávat pozor na
 tzv. sémantické duplicity, tedy části kódu, které nevypadají stejně, ale dělají
@@ -342,7 +342,7 @@ K ověřovacím metodám je doporučeno přidávat zprávy, jež vysvětlují na
 chybu. Napomáhá to rychlejšímu pochopení fungování testů a opravě chyby (Hamill
 2004).
 
-#### Tvořit vlastní ověřovací metody
+### Tvořit vlastní ověřovací metody
 
 Pro specifické případy je vhodné tvořit vlastní ověřovací metody. Tento přístup
 napomáhá lepší čitelnosti testů a zabraňuje duplicitě kódu. (Hamill 2004). Tento
@@ -350,7 +350,7 @@ přístup je vhodné volit, pokud se opakuje stejná sekvence ověřovacích met
 napříč několika testy. Tuto sekvence je pak vhodné vyextrahovat do samostatné či
 třídy, která ověření provede.
 
-#### Zachovávat jednoduchost ověřovací metody
+### Zachovávat jednoduchost ověřovací metody
 
 Doporučením je vyhnout se přehnaně komplikovaným ověřovacím metodám, které
 jednoznačně neoznačují, co vlastně ověřují. Takovým ověřovacím metodám se jednak
@@ -358,11 +358,10 @@ dá jen velmi obtížně rozumět a jednak jsou velmi nestabilní a byť malá z
 může vést k jejich selhání. Tyto metody označuje (Koskela 2013) za tzv.
 Hyperasserce a jako příklad uvádí ověřovací metodu, jež porovnává očekávaný
 obsah souboru s obsahem vyprodukovaným po transformaci vstupního souboru (viz
-obr. 1 )
+obr. 0 )
+![0.png](0.png)
 
-![alt text](Dropbox/Vysoka_skola/Magisterske_studium/Diplomova_prace/Plugin/Testspector/doc/1.png "Title")
-
-obr. 1 Příklad tzv. Hyperasserce (Koskela 2013)
+obr. 0 Příklad tzv. Hyperasserce (Koskela 2013)
 
 ## Struktura testovací metody
 
