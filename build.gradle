@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'org.testspector'
-version = getVersion();
+version = project.property("version").toString();
 
 
 repositories {
@@ -45,12 +45,4 @@ test {
 
 buildPlugin {
 
-}
-
-String  getVersion() {
-    if (project.property("snapshot")?.toString()?.toBoolean()) {
-        return "${project.property("version")}-SNAPSHOT"
-    } else {
-        return project.property("version").toString()
-    }
 }
