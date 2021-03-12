@@ -25,7 +25,7 @@ Install the plugin by going to ``Settings -> Plugins -> Browse repositories`` an
 
 
 # Usage
-1. Invoke inspection by one of the following 
+1. Invoke inspection:
    * Using side navigation window and selecting any file or folder:
 ![usage_side_window.png](./doc/usage_side_window.png)
    * Based on unit testing framework and programming language inspection can be invoked on a single test or object that contains them. For example for JUnit by clicking on a icon next to the test class or test method declaration
