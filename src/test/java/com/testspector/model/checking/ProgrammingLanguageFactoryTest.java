@@ -6,7 +6,6 @@ import com.intellij.lang.javascript.dialects.ECMA6LanguageDialect;
 import com.intellij.lang.javascript.dialects.TypeScriptLanguageDialect;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.jetbrains.php.lang.PhpLanguage;
 import com.testspector.model.enums.ProgrammingLanguage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +29,6 @@ public class ProgrammingLanguageFactoryTest {
         return Stream.of(
                 // Expected language | file name
                 Arguments.of(JavaLanguage.INSTANCE, ProgrammingLanguage.JAVA),
-                Arguments.of(PhpLanguage.INSTANCE, ProgrammingLanguage.PHP),
                 Arguments.of(TypeScriptLanguageDialect.findLanguageByID("TypeScript"), ProgrammingLanguage.TYPESCRIPT)
         );
     }

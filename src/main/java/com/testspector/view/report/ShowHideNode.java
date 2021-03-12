@@ -1,8 +1,5 @@
 package com.testspector.view.report;
 
-import com.intellij.codeInsight.daemon.impl.AnnotationHolderImpl;
-import com.intellij.lang.annotation.AnnotationSession;
-import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
@@ -95,7 +92,6 @@ public class ShowHideNode extends BestPracticeViolationNode {
                     }
                 });
                 MarkupModel finalMarkupModel = markupModel;
-                new AnnotationHolderImpl(new AnnotationSession(getElement().getContainingFile())).createAnnotation(HighlightSeverity.INFORMATION, textRange, "Test");
                 com.intellij.codeInsight.daemon.DaemonCodeAnalyzer.getInstance(getElement().getProject()).restart();
                 getHighlighter().setGutterIconRenderer(new GutterIconRenderer() {
                     @Override
