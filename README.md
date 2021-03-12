@@ -31,4 +31,5 @@ Install the plugin by going to ``Settings -> Plugins -> Browse repositories`` an
    * Based on unit testing framework and programming language inspection can be invoked on a single test or object that contains them. For example for JUnit by clicking on a icon next to the test class or test method declaration
 ![usage from file.png](./doc/usage_from_file.png)
 2. Report showing broken best practices is generated. In some cases there are hints suggesting how the problem can be solved. In case when you need more information about the best practice there is also a link to the documentation.
+
 ![usage_report.png](Dropbox/Vysoka_skola/Magisterske_studium/Diplomova_prace/Plugin/Testspector/doc/usage_report.png)
