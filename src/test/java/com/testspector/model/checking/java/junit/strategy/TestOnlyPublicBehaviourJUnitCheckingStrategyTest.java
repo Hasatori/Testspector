@@ -1,6 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeViolation;
@@ -12,8 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +22,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 
-@RunWith(JUnitPlatform.class)
 public class TestOnlyPublicBehaviourJUnitCheckingStrategyTest extends StrategyTest {
 
     private TestOnlyPublicBehaviourJUnitCheckingStrategy strategy;
@@ -42,7 +39,6 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategyTest extends StrategyTe
             "'package private' | ''"
     }, delimiter = '|')
     public void checkBestPractices_TestTestsPrivateBehaviourViaMethodCall_OneViolationReportingAboutTestingPrivateBehaviourShouldBeReturned(String expectedRelatedElementQualifierName, String testedMethodAccessQualifier) {
-        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             // Given
             PsiMethod testMethod = this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@Test"));
             String testedMethodName = "testedMethod";
@@ -85,12 +81,10 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategyTest extends StrategyTe
                     () -> Assertions.assertSame(1, foundViolations.get(0).getRelatedElements().size(), "Incorrect number of related elements for first violation"),
                     () -> assertThat(foundViolations.get(0).getRelatedElements().get(0)).as("Checking first related element in the first violation").isEqualToComparingFieldByField(expectedViolations.get(0).getRelatedElements().get(0))
             );
-        });
     }
 
     @Test
     public void checkBestPractices_TestTestsJustPublicMethods_NoViolationsShouldBeFound() {
-        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
             PsiMethod testMethod = this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@Test"));
             PsiMethod testedMethod = this.javaTestElementUtil.createMethod("testedMethod", "String", Collections.singletonList(PsiKeyword.PUBLIC));
             testMethod = (PsiMethod) testClass.add(testMethod);
@@ -100,7 +94,6 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategyTest extends StrategyTe
             List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);
 
             Assertions.assertSame(0, foundViolations.size(), "Incorrect number of found violations");
-        });
     }
 
 

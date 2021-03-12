@@ -25,7 +25,6 @@ public class BestPracticeCheckingStrategyFactoryTest {
                 .get();
 
         Assertions.assertTrue(returnedStrategy instanceof JUnitGroupMethodBestPracticeCheckingStrategyAdapter);
-
     }
 
     @Test
@@ -36,6 +35,5 @@ public class BestPracticeCheckingStrategyFactoryTest {
                 .getBestPracticeCheckingStrategy(ProgrammingLanguage.TYPESCRIPT, UnitTestFramework.JUNIT);
 
         Assertions.assertFalse(optionalBestPracticeCheckingStrategy.isPresent());
-
     }
 }

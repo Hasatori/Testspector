@@ -1,6 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiJavaFile;
 import com.testspector.model.checking.java.JavaTest;
@@ -26,7 +26,7 @@ public abstract class StrategyTest extends JavaTest {
         this.contextIndicator = EasyMock.mock(JavaContextIndicator.class);
         this.methodResolver = EasyMock.mock(JavaMethodResolver.class);
         String fileName = "Test";
-        WriteCommandAction.runWriteCommandAction(getProject(),() -> {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
             this.testJavaFile = this.javaTestElementUtil.createFile(fileName, "com.testspector", Collections.singletonList("import org.junit.jupiter.api.Test;import com.intellij.openapi.application.ApplicationManager;import com.intellij.openapi.command.WriteCommandAction;"), Collections.emptyList());
             this.testClass = this.psiElementFactory.createClass(fileName);
             this.testClass = (PsiClass) testJavaFile.add(testClass);
