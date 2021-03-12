@@ -206,7 +206,7 @@ public class ToolWindowContent {
             collapse.setEnabled(true);
             expand.setEnabled(true);
             highlightAll.setEnabled(true);
-            this.treeViewReport = new TreeViewReport(bestPracticeViolations, this.project, TreeViewReport.GroupBy.FILES);
+            this.treeViewReport = new TreeViewReport(bestPracticeViolations, this.project, (TreeViewReport.GroupBy) groupByComboBox.getSelectedItem());
             this.reportContent = treeViewReport;
             this.contentWrapper.add(treeViewReport);
         }
