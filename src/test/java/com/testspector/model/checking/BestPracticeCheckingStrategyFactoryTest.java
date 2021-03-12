@@ -44,27 +44,4 @@ public class BestPracticeCheckingStrategyFactoryTest {
 
         Assertions.assertFalse(optionalBestPracticeCheckingStrategy.isPresent());
     }
-
-
-    @Test
-    public void test() {
-        BestPracticeCheckingStrategyFactory bestPracticeCheckingStrategyFactory = new BestPracticeCheckingStrategyFactory();
-        for (ProgrammingLanguage programmingLanguage : ProgrammingLanguage.values()) {
-            for (UnitTestFramework unitTestFramework : UnitTestFramework.values()) {
-                if (programmingLanguage == ProgrammingLanguage.JAVA && unitTestFramework == UnitTestFramework.JUNIT){
-                    BestPracticeCheckingStrategy<PsiElement> returnedStrategy = bestPracticeCheckingStrategyFactory
-                            .getBestPracticeCheckingStrategy(programmingLanguage,unitTestFramework)
-                            .get();
-
-                    Assertions.assertTrue(returnedStrategy instanceof JUnitGroupMethodBestPracticeCheckingStrategyAdapter);
-                }
-                if (programmingLanguage == ProgrammingLanguage.TYPESCRIPT && unitTestFramework == UnitTestFramework.JUNIT){
-                    Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = bestPracticeCheckingStrategyFactory
-                            .getBestPracticeCheckingStrategy(programmingLanguage,unitTestFramework);
-
-                    Assertions.assertFalse(optionalBestPracticeCheckingStrategy.isPresent());
-                }
-            }
-        }
-    }
 }
