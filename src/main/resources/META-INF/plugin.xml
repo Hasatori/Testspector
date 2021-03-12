@@ -4,7 +4,7 @@
     <vendor email="hradil.o@email.cz" url="http://www.testspector.com">Testspector</vendor>
 
     <description>
-        <![CDATA[Plugin for checking the quality of unit tests. It supports implementation for multiple languages and  testing frameworks of the xUnit family.]]></description>
+        <![CDATA[Testspector is a plugin for checking quality of unit tests. It contains a dataset of 62 best practices which should be followed when writing unit tests. The unit tests are checked against the dataset and any violation is reported to the user.]]></description>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -21,8 +21,8 @@
     <actions>
         <action id="org.intellij.sdk.action.PopupDialogAction" class="com.testspector.view.InspectTestAction"
                 text="Inspect tests" description="SDK action example" icon="/icons/logo.svg">
-            <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
-            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
     </actions>
 </idea-plugin>
