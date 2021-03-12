@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 public class SetupTestNamingStrategyJUnitCheckingStrategyTest extends StrategyTest {
 
-    private static final String ALMOST_SAME_NAME_PROBLEM_DESCRIPTION = "The test name is more or less that same as a tested method. This says nothing about tests scenarion. You should setup a clear strategy for naming your tests so that the person reading then knows what is tests";
-    private static final String TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION = "The test name has nothing to do with testedMethod. This says nothing about tests scenarion. You should setup a clear strategy for naming your tests so that the person reading then knows what is tests";
+    private static final String ALMOST_SAME_NAME_PROBLEM_DESCRIPTION = "The test name is more or less that same as a tested method. This says nothing about tests scenario. You should setup a clear strategy for naming your tests so that the person reading then knows what is tested";
+    private static final String TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION = "The test name has nothing to do with tested method. This says nothing about tests scenario. You should set up a clear strategy for naming your tests so that the person reading then knows what is tested";
     private SetupTestNamingStrategyJUnitCheckingStrategy strategy;
 
     @BeforeEach

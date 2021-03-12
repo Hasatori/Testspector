@@ -59,9 +59,7 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
 
         JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
-        Optional<PsiElement> optionalPsiElement = ApplicationManager
-                .getApplication()
-                .runReadAction(((Computable<Optional<PsiElement>>) () -> jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someTestNgMethod)));
+        Optional<PsiElement> optionalPsiElement =  jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someTestNgMethod);
 
         Assertions.assertFalse(optionalPsiElement.isPresent());
     }

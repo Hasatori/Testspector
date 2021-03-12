@@ -55,7 +55,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                             String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
                             testMethod,
                             nameIdentifier.getTextRange(),
-                            "The test name is more or less that same as a tested method. This says nothing about tests scenarion. You should setup a clear strategy for naming your tests so that the person reading then knows what is tests",
+                            "The test name is more or less that same as a tested method. This says nothing about tests scenario. You should setup a clear strategy for naming your tests so that the person reading then knows what is tested",
                             Arrays.asList(
                                     "Possible strategy: 'doingSomeOperationGeneratesSomeResult'",
                                     "Possible strategy: 'someResultOccursUnderSomeCondition'",
@@ -72,7 +72,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                             String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
                             testMethod,
                             nameIdentifier.getTextRange(),
-                            "The test name has nothing to do with testedMethod. This says nothing about tests scenarion. You should setup a clear strategy for naming your tests so that the person reading then knows what is tests",
+                            "The test name has nothing to do with tested method. This says nothing about tests scenario. You should set up a clear strategy for naming your tests so that the person reading then knows what is tested",
                             Arrays.asList(
                                     "Possible strategy: 'doingSomeOperationGeneratesSomeResult'",
                                     "Possible strategy: 'someResultOccursUnderSomeCondition'",

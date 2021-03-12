@@ -91,6 +91,6 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
 
     @Override
     public List<BestPractice> getCheckedBestPractice() {
-        return Collections.singletonList(BestPractice.CATCH_EXCEPTIONS_USING_FRAMEWORK_TOOLS);
+        return Collections.singletonList(BestPractice.CATCH_TESTED_EXCEPTIONS_USING_FRAMEWORK_TOOLS);
     }
 }
