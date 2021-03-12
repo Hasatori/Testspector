@@ -23,7 +23,7 @@ public enum BestPractice {
     ONLY_ONE_ASSERTION("Only one assertion", "","právě-jedna-ověřovací-metoda-na-test"),
     NO_GLOBAL_STATIC_PROPERTIES("No global static properties", "","nepoužívat-globální-statické-proměnné"),
     SETUP_A_TEST_NAMING_STRATEGY("Setup a test naming strategy", "","určit-strategii-pojmenování-testů"),
-    CATCH_EXCEPTIONS_USING_FRAMEWORK_TOOLS("Catch exceptions using frameworks tools", "","odchytávat-testované-výjimky-pomocí-nástrojů-knihoven-či-testovacích-frameworků"),
+    CATCH_TESTED_EXCEPTIONS_USING_FRAMEWORK_TOOLS("Catch exceptions using frameworks tools", "","odchytávat-testované-výjimky-pomocí-nástrojů-knihoven-či-testovacích-frameworků"),
     NO_CONDITIONAL_LOGIC("No conditional logic", "","podmíněná-logika");
 
     static {
