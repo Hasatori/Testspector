@@ -32,12 +32,6 @@ public class JUnitInspectionInvocationLineResolveStrategy extends InspectionInvo
         return Optional.empty();
     }
 
-    @Override
-    public UnitTestFramework getUnitTestFramework() {
-        return UnitTestFramework.JUNIT;
-    }
-
-
     private Optional<PsiIdentifier> getIdentifier(PsiElement element) {
         return Arrays
                 .stream(element.getChildren())
