@@ -3,7 +3,7 @@ package com.testspector.view;
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.project.Project;
-import com.testspector.model.checking.crate.BestPracticeViolation;
+import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.view.report.GroupBy;
 import com.testspector.view.report.TreeViewReport;
 

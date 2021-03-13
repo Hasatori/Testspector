@@ -1,4 +1,4 @@
-package com.testspector.model.checking.crate;
+package com.testspector.model.checking;
 
 import com.intellij.psi.PsiElement;
 import com.testspector.model.enums.ProgrammingLanguage;

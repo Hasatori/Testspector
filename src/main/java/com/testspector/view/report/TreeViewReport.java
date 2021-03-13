@@ -1,8 +1,8 @@
 package com.testspector.view.report;
 
 import com.intellij.psi.PsiElement;
-import com.testspector.model.checking.crate.BestPracticeViolation;
-import com.testspector.model.checking.crate.RelatedElementWrapper;
+import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.enums.BestPractice;
 
 import javax.swing.*;
