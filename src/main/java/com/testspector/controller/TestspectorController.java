@@ -84,11 +84,11 @@ public final class TestspectorController {
     }
 
 
-    public static void initializeTestspector(Project project, PsiElement element, ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
+    public static void initializeTestspector(PsiElement element, ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
         String name = element.toString();
         AtomicReference<ScheduledExecutorService> executorService = new AtomicReference<>(Executors.newSingleThreadScheduledExecutor());
-        ToolWindow toolWindow = getToolWindow(project);
-        ToolWindowContent toolWindowContent = new ToolWindowContent(project);
+        ToolWindow toolWindow = getToolWindow(element.getProject());
+        ToolWindowContent toolWindowContent = new ToolWindowContent(element.getProject());
         addTabToToolWindow(toolWindow, toolWindowContent, name);
 
         executorService.get().submit(() -> {
