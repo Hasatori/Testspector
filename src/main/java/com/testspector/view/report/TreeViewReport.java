@@ -1,6 +1,5 @@
 package com.testspector.view.report;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.crate.BestPracticeViolation;
 import com.testspector.model.checking.crate.RelatedElementWrapper;
@@ -168,23 +167,4 @@ public class TreeViewReport extends JTree {
         this.setModel(new DefaultTreeModel(root));
     }
 
-    public enum GroupBy {
-        FILES("Files"),
-        BEST_PRACTICE("Best practice");
-
-        private final String displayName;
-
-        GroupBy(String displayName) {
-            this.displayName = displayName;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        @Override
-        public String toString() {
-            return this.displayName;
-        }
-    }
 }

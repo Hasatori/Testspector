@@ -4,6 +4,7 @@ import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.project.Project;
 import com.testspector.model.checking.crate.BestPracticeViolation;
+import com.testspector.view.report.GroupBy;
 import com.testspector.view.report.TreeViewReport;
 
 import javax.swing.*;
@@ -41,7 +42,7 @@ public class ToolWindowContent {
     private JPanel rightNav;
     private JLabel stop;
     private JPanel lefNavElementsWrapper;
-    private JComboBox<TreeViewReport.GroupBy> groupByComboBox;
+    private JComboBox<GroupBy> groupByComboBox;
     private ConsoleView consoleView;
     private TreeViewReport treeViewReport;
 
@@ -67,11 +68,11 @@ public class ToolWindowContent {
         splitPane.setDividerLocation(panel1.getPreferredSize().width / 2);
         groupByComboBox.setEnabled(false);
         groupByComboBox.removeAllItems();
-        Arrays.stream(TreeViewReport.GroupBy.values()).forEach(groupBy -> {
+        Arrays.stream(GroupBy.values()).forEach(groupBy -> {
             groupByComboBox.addItem(groupBy);
         });
         groupByComboBox.addActionListener(e -> {
-            reportContent.groupBy((TreeViewReport.GroupBy) Objects.requireNonNull(groupByComboBox.getSelectedItem()));
+            reportContent.groupBy((GroupBy) Objects.requireNonNull(groupByComboBox.getSelectedItem()));
             panel1.revalidate();
             panel1.repaint();
         });
@@ -190,7 +191,7 @@ public class ToolWindowContent {
             collapse.setEnabled(true);
             expand.setEnabled(true);
 
-            this.treeViewReport = new TreeViewReport(bestPracticeViolations, (TreeViewReport.GroupBy) groupByComboBox.getSelectedItem());
+            this.treeViewReport = new TreeViewReport(bestPracticeViolations, (GroupBy) groupByComboBox.getSelectedItem());
             this.reportContent = treeViewReport;
             this.contentWrapper.add(treeViewReport);
         }
