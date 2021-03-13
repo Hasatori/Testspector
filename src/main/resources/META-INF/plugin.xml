@@ -4,7 +4,7 @@
     <vendor email="hradil.o@email.cz" url="http://www.testspector.com">Oldřich Hradil</vendor>
 
     <description>
-        <![CDATA[Testspector is a plugin for checking quality of unit tests. It contains a dataset of 62 best practices which should be followed when writing unit tests. The unit tests are checked against the dataset and any violation is reported to the user. User is provided with description do the problem, hints how to solve it and also parts of code causing the problem. Architecture of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform.]]>
+        <![CDATA[Plugin for checking quality of unit tests. It contains a dataset of 62 best practices which should be followed when writing unit tests. The unit tests are checked against the dataset and any violation is reported to the user. User is provided with description do the problem, hints how to solve it and also parts of code causing the problem. Architecture of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform.]]>
 
     </description>
     <depends>com.intellij.modules.platform</depends>
