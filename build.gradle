@@ -30,6 +30,8 @@ intellij {
     plugins = ['com.intellij.java', "JavaScriptLanguage","JavaScriptDebugger"]
 }
 patchPluginXml {
+    sinceBuild="193"
+    untilBuild = "211"
 }
 
 publishPlugin {
