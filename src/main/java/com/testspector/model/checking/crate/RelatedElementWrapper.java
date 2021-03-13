@@ -1,11 +1,9 @@
-package com.testspector.model.checking;
+package com.testspector.model.checking.crate;
 
-import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class RelatedElementWrapper {

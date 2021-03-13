@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.psi.PsiElement;
 import com.sun.istack.NotNull;
 import com.testspector.controller.TestspectorController;
-import com.testspector.model.TestLineCrate;
+import com.testspector.model.checking.crate.TestLineCrate;
 
 import java.util.Optional;
 

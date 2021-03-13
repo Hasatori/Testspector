@@ -3,8 +3,8 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.RelatedElementWrapper;
+import com.testspector.model.checking.crate.BestPracticeViolation;
+import com.testspector.model.checking.crate.RelatedElementWrapper;
 import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 
-public class NoSimpleTestsJUnitCheckingStrategyTest extends StrategyTest {
+public class NoSimpleTestsJUnitCheckingJUnitStrategyTest extends JUnitStrategyTest {
 
     private NoSimpleTestsJUnitCheckingStrategy strategy;
 

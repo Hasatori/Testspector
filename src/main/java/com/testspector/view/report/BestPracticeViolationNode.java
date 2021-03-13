@@ -1,9 +1,7 @@
 package com.testspector.view.report;
 
 
-import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
-import com.testspector.model.checking.BestPracticeViolation;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.Optional;

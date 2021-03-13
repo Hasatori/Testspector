@@ -3,12 +3,11 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
-import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.RelatedElementWrapper;
+import com.testspector.model.checking.crate.BestPracticeViolation;
+import com.testspector.model.checking.crate.RelatedElementWrapper;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
-import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 

@@ -2,8 +2,8 @@ package com.testspector.view.report;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.RelatedElementWrapper;
+import com.testspector.model.checking.crate.BestPracticeViolation;
+import com.testspector.model.checking.crate.RelatedElementWrapper;
 import com.testspector.model.enums.BestPractice;
 
 import javax.swing.*;
@@ -11,8 +11,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 public class TreeViewReport extends JTree {

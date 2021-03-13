@@ -1,4 +1,4 @@
-package com.testspector.model.checking;
+package com.testspector.model.checking.factory;
 
 import com.intellij.lang.Language;
 import com.intellij.lang.java.JavaLanguage;

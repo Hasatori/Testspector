@@ -1,4 +1,4 @@
-package com.testspector.model.checking;
+package com.testspector.model.checking.crate;
 
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;

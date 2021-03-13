@@ -2,8 +2,8 @@ package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
-import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.RelatedElementWrapper;
+import com.testspector.model.checking.crate.BestPracticeViolation;
+import com.testspector.model.checking.crate.RelatedElementWrapper;
 import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -23,7 +23,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 
-public class NoConditionalLogicJUnitCheckingStrategyTest extends StrategyTest {
+public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrategyTest {
 
     private NoConditionalLogicJUnitCheckingStrategy strategy;
 

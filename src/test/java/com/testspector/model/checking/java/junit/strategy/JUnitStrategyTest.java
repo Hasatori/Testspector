@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Collections;
 
-public abstract class StrategyTest extends JavaTest {
+public abstract class JUnitStrategyTest extends JavaTest {
 
     protected JavaElementResolver elementResolver;
     protected JavaContextIndicator contextIndicator;

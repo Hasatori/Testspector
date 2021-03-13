@@ -1,7 +1,7 @@
 package com.testspector.model.checking.java.junit;
 
 import com.intellij.psi.*;
-import com.testspector.model.checking.UnitTestFrameworkResolveIndicationStrategy;
+import com.testspector.model.checking.factory.UnitTestFrameworkFactory;
 import com.testspector.model.enums.UnitTestFramework;
 
 import java.util.Arrays;
@@ -10,10 +10,11 @@ import java.util.Optional;
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT_ALL_PACKAGES_QUALIFIED_NAMES;
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES;
 
-public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFrameworkResolveIndicationStrategy {
+public class JUnitUnitTestFrameworkFactory implements UnitTestFrameworkFactory {
+
 
     @Override
-    public boolean canResolveFromPsiElement(PsiElement psiElement) {
+    public Optional<UnitTestFramework> getUnitTestFramework(PsiElement psiElement) {
         boolean resolved = false;
         if (psiElement instanceof PsiFile) {
             resolved = isFromFile((PsiFile) psiElement);
@@ -22,9 +23,11 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFra
         } else if (psiElement instanceof PsiMethod) {
             resolved = isFromMethod((PsiMethod) psiElement);
         }
-        return resolved;
+        if (resolved){
+            return Optional.of(UnitTestFramework.JUNIT);
+        }
+        return Optional.empty();
     }
-
 
     private boolean isFromFile(PsiFile psiFile) {
         Optional<PsiElement> optionalPsiElement = Arrays.stream(psiFile.getChildren())
@@ -51,8 +54,4 @@ public class JUnitUnitTestFrameworkResolveIndicationStrategy extends UnitTestFra
 
     }
 
-    @Override
-    public UnitTestFramework getUnitTestFramework() {
-        return UnitTestFramework.JUNIT;
-    }
 }

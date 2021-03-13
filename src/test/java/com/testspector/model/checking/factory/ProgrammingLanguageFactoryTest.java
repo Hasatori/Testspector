@@ -1,4 +1,4 @@
-package com.testspector.model.checking;
+package com.testspector.model.checking.factory;
 
 import com.intellij.lang.Language;
 import com.intellij.lang.java.JavaLanguage;
@@ -6,6 +6,7 @@ import com.intellij.lang.javascript.dialects.ECMA6LanguageDialect;
 import com.intellij.lang.javascript.dialects.TypeScriptLanguageDialect;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.testspector.TestBase;
 import com.testspector.model.enums.ProgrammingLanguage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -13,8 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -22,8 +21,7 @@ import java.util.stream.Stream;
 import static org.easymock.EasyMock.*;
 
 
-@RunWith(JUnitPlatform.class)
-public class ProgrammingLanguageFactoryTest {
+public class ProgrammingLanguageFactoryTest extends TestBase {
 
     private static Stream<Arguments> provideSupportedProgrammingLanguageAndCorrespondingFileCombinations() {
         return Stream.of(

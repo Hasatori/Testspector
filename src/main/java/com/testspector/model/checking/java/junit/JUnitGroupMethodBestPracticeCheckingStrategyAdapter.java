@@ -3,9 +3,8 @@ package com.testspector.model.checking.java.junit;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
-import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.crate.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
-import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
 import java.util.Collection;

@@ -1,7 +1,5 @@
 package com.testspector.model.checking.java.junit;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.testspector.model.checking.java.JavaTest;
@@ -59,7 +57,7 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
 
         JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
-        Optional<PsiElement> optionalPsiElement =  jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someTestNgMethod);
+        Optional<PsiElement> optionalPsiElement = jUnitTestLineResolveStrategy.resolveInspectionInvocationLine(someTestNgMethod);
 
         Assertions.assertFalse(optionalPsiElement.isPresent());
     }

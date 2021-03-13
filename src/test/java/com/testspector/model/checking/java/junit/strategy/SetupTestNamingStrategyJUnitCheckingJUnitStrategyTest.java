@@ -2,8 +2,8 @@ package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
-import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.RelatedElementWrapper;
+import com.testspector.model.checking.crate.BestPracticeViolation;
+import com.testspector.model.checking.crate.RelatedElementWrapper;
 import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 
-public class SetupTestNamingStrategyJUnitCheckingStrategyTest extends StrategyTest {
+public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnitStrategyTest {
 
     private static final String ALMOST_SAME_NAME_PROBLEM_DESCRIPTION = "The test name is more or less that same as a tested method. This says nothing about tests scenario. You should setup a clear strategy for naming your tests so that the person reading then knows what is tested";
     private static final String TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION = "The test name has nothing to do with tested method. This says nothing about tests scenario. You should set up a clear strategy for naming your tests so that the person reading then knows what is tested";
