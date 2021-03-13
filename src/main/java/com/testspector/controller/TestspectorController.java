@@ -142,7 +142,7 @@ public final class TestspectorController {
     }
 
     public static Optional<TestLineCrate> resolveTestLineCrate(PsiElement element) {
-        Optional<ProgrammingLanguage> optionalProgrammingLanguage = PROGRAMMING_LANGUAGE_FACTORY.resolveProgrammingLanguage(element);
+        Optional<ProgrammingLanguage> optionalProgrammingLanguage = PROGRAMMING_LANGUAGE_FACTORY.getProgrammingLanguage(element);
         if (optionalProgrammingLanguage.isPresent()) {
             List<UnitTestFramework> unitTestFrameworks = UNIT_TEST_FRAMEWORK_FACTORY_PROVIDER.geUnitTestFrameworkFactory(optionalProgrammingLanguage.get())
                     .stream()
@@ -169,7 +169,7 @@ public final class TestspectorController {
         for (PsiFile file : files) {
             consoleView.print(getLoggingFormatMessage("Entering "), ConsoleViewContentType.SYSTEM_OUTPUT);
             consoleView.print(file.getName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
-            Optional<ProgrammingLanguage> optionalProgrammingLanguage = PROGRAMMING_LANGUAGE_FACTORY.resolveProgrammingLanguage(file);
+            Optional<ProgrammingLanguage> optionalProgrammingLanguage = PROGRAMMING_LANGUAGE_FACTORY.getProgrammingLanguage(file);
             if (optionalProgrammingLanguage.isPresent()) {
                 List<UnitTestFramework> unitTestFrameworks = UNIT_TEST_FRAMEWORK_FACTORY_PROVIDER.geUnitTestFrameworkFactory(optionalProgrammingLanguage.get())
                         .stream()

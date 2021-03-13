@@ -12,7 +12,7 @@ import java.util.Optional;
 public class ProgrammingLanguageFactory {
 
 
-    public Optional<ProgrammingLanguage> resolveProgrammingLanguage(PsiElement psiElement) {
+    public Optional<ProgrammingLanguage> getProgrammingLanguage(PsiElement psiElement) {
         if (psiElement != null) {
             Language language = psiElement.getContainingFile().getLanguage();
             if (language instanceof JavaLanguage) {

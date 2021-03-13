@@ -42,7 +42,7 @@ public class ProgrammingLanguageFactoryTest extends TestBase {
         replay(psiElement, languageFile);
         ProgrammingLanguageFactory programmingLanguageFactory = new ProgrammingLanguageFactory();
 
-        ProgrammingLanguage returnedProgrammingLanguage = programmingLanguageFactory.resolveProgrammingLanguage(psiElement).get();
+        ProgrammingLanguage returnedProgrammingLanguage = programmingLanguageFactory.getProgrammingLanguage(psiElement).get();
 
         Assertions.assertSame(expectedLanguage, returnedProgrammingLanguage, "Invalid programming language returned!");
 
@@ -52,7 +52,7 @@ public class ProgrammingLanguageFactoryTest extends TestBase {
     public void resolveProgrammingLanguage_NullElement_ShouldNoReturnLanguage() {
         ProgrammingLanguageFactory programmingLanguageFactory = new ProgrammingLanguageFactory();
 
-        Optional<ProgrammingLanguage> optionalProgrammingLanguage = programmingLanguageFactory.resolveProgrammingLanguage(null);
+        Optional<ProgrammingLanguage> optionalProgrammingLanguage = programmingLanguageFactory.getProgrammingLanguage(null);
 
         Assertions.assertFalse(optionalProgrammingLanguage.isPresent(), "No programming language should be returned!");
 
@@ -67,7 +67,7 @@ public class ProgrammingLanguageFactoryTest extends TestBase {
         replay(psiElement, languageFile);
         ProgrammingLanguageFactory programmingLanguageFactory = new ProgrammingLanguageFactory();
 
-        Optional<ProgrammingLanguage> optionalProgrammingLanguage = programmingLanguageFactory.resolveProgrammingLanguage(psiElement);
+        Optional<ProgrammingLanguage> optionalProgrammingLanguage = programmingLanguageFactory.getProgrammingLanguage(psiElement);
 
         Assertions.assertFalse(optionalProgrammingLanguage.isPresent(), "No programming language should be returned!");
 
