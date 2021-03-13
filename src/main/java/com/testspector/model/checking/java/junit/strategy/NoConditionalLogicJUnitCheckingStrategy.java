@@ -23,7 +23,8 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             PsiIfStatement.class,
             PsiWhileStatement.class,
             PsiSwitchStatement.class,
-            PsiForStatement.class
+            PsiForStatement.class,
+            PsiForeachStatement.class
     ));
     private final JavaElementResolver elementResolver;
     private final JavaContextIndicator contextResolver;
@@ -104,6 +105,8 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             return "if";
         } else if (statement instanceof PsiForStatement) {
             return "for";
+        } else if (statement instanceof PsiForeachStatement) {
+            return "forEach";
         } else if (statement instanceof PsiWhileStatement) {
             return "while";
         } else if (statement instanceof PsiSwitchStatement) {

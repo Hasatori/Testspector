@@ -31,6 +31,7 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
         return Stream.of(
                 Arguments.of("if", "if(true){}else if(false){}"),
                 Arguments.of("for", "for (int i = 0; i < 50; i++) {\n}"),
+                Arguments.of("forEach","for (Object object: Object){}"),
                 Arguments.of("while", "while(true){}"),
                 Arguments.of("switch", "switch (integer) {case 1:\"Test1\"; default:\"Test2\";}"));
     }
