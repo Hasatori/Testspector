@@ -10,6 +10,7 @@ import static com.intellij.openapi.util.IconLoader.findIcon;
 public enum CustomIcon {
 
     LOGO(findIcon("/icons/logo.svg"), null, null, findIcon("/icons/logo.svg"), null, null),
+    LOGO_BOTTOM_TOOL_BOX(findIcon("/icons/logoBottomToolBox.svg"), null, null, findIcon("/icons/logoBottomToolBox.svg"), null, null),
     RERUN(findIcon("/icons/rerun_dark.svg"), findIcon("/icons/rerunHover_dark.svg"), findIcon("/icons/rerunDisabled_dark.svg"), findIcon("/icons/rerun_light.svg"), findIcon("/icons/rerunHover_light.svg"), findIcon("/icons/rerunDisabled_light.svg")),
     EXPAND_ALL(findIcon("/icons/expandAll_dark.svg"), findIcon("/icons/expandAllHover_dark.svg"), findIcon("/icons/expandAllDisabled_dark.svg"), findIcon("/icons/expandAll_light.svg"), findIcon("/icons/expandAllHover_light.svg"), findIcon("/icons/expandAllDisabled_light.svg")),
     COLLAPSE_ALL(findIcon("/icons/collapseAll_dark.svg"), findIcon("/icons/collapseAllHover_dark.svg"), findIcon("/icons/collapseAllDisabled_dark.svg"), findIcon("/icons/collapseAll_light.svg"), findIcon("/icons/collapseAllHover_light.svg"), findIcon("/icons/collapseAllDisabled_light.svg")),

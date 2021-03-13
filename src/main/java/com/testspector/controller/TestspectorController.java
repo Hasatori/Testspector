@@ -20,6 +20,7 @@ import com.testspector.model.checking.java.junit.JUnitUnitTestFrameworkResolveIn
 import com.testspector.model.enums.BestPractice;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
+import com.testspector.view.CustomIcon;
 import com.testspector.view.ToolWindowContent;
 
 import java.awt.*;
@@ -246,7 +247,7 @@ public final class TestspectorController {
         if (resultToolWindow == null) {
             resultToolWindow = ToolWindowManager.getInstance(project)
                     .registerToolWindow(TOOL_WINDOW_NAME, true, ToolWindowAnchor.BOTTOM);
-            resultToolWindow.setIcon(IconLoader.getIcon("/icons/logo.svg"));
+            resultToolWindow.setIcon(CustomIcon.LOGO_BOTTOM_TOOL_BOX.getBasic());
             PROJECT_TOOL_WINDOW_HASH_MAP.put(project, resultToolWindow);
         }
         return resultToolWindow;
