@@ -15,13 +15,10 @@ import java.util.*;
 
 public class TreeViewReport extends JTree {
 
-    public static final List<String> groupBy = Arrays.asList("Files", "Best practice");
-    private final Project project;
     private final List<BestPracticeViolation> bestPracticeViolations;
 
-    public TreeViewReport(List<BestPracticeViolation> bestPracticeViolations, Project project, GroupBy groupBy) {
+    public TreeViewReport(List<BestPracticeViolation> bestPracticeViolations, GroupBy groupBy) {
         super();
-        this.project = project;
         this.bestPracticeViolations = bestPracticeViolations;
         this.groupBy(groupBy);
 
@@ -31,24 +28,6 @@ public class TreeViewReport extends JTree {
         this.setRootVisible(false);
         this.setCellRenderer(new TreeReportCellRenderer());
         this.addMouseListener(new TreeReportMouseListener());
-    }
-
-    public void highlightAll() {
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.getModel().getRoot();
-        for (int i = 0; i < root.getChildCount(); i++) {
-            TreeNode node = root.getChildAt(i);
-            if (node instanceof BestPracticeViolationNode) {
-                BestPracticeViolationNode bestPracticeViolationNode = (BestPracticeViolationNode) node;
-                this.expandPath(new TreePath(bestPracticeViolationNode.getPath()));
-                for (int j = 0; j < bestPracticeViolationNode.getChildCount(); j++) {
-                    TreeNode child = bestPracticeViolationNode.getChildAt(j);
-                    if (child instanceof ShowHideNode) {
-                        ShowHideNode showHideNode = (ShowHideNode) child;
-                        showHideNode.highlight();
-                    }
-                }
-            }
-        }
     }
 
     public void expandAll() {

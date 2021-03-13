@@ -31,13 +31,10 @@ public class ToolWindowContent {
     private JLabel rerun;
     private JLabel expand;
     private JLabel collapse;
-    private JTree reportTree;
     private JScrollBar scrollBar1;
-
     private JPanel panel1;
     private JPanel body;
     private JSplitPane splitPane;
-    private JLabel highlightAll;
     private JPanel processingWrapper;
     private JPanel contentWrapper;
     private JLabel clearConsole;
@@ -62,10 +59,6 @@ public class ToolWindowContent {
         setupActionLabel(expand, EXPAND_ALL, false, () -> this.reportContent.expandAll());
         setupActionLabel(clearConsole, CLEAR, false, () -> this.consoleView.clear());
         setupActionLabel(collapse, COLLAPSE_ALL, false, () -> this.reportContent.collapseAll());
-        setupActionLabel(highlightAll, SHOW, false, () -> {
-            this.reportContent.highlightAll();
-            this.contentWrapper.repaint();
-        });
         setupActionLabel(stop, STOP, false);
         setupActionLabel(rerun, RERUN, false);
         Arrays.stream(lefNavElementsWrapper.getComponents()).filter(component -> component instanceof JLabel).forEach(leftNavComp -> {
@@ -124,9 +117,6 @@ public class ToolWindowContent {
         return panel1;
     }
 
-    public JTree getReportTree() {
-        return reportTree;
-    }
 
     public JSplitPane getSplitPane() {
         return splitPane;
@@ -136,9 +126,6 @@ public class ToolWindowContent {
         return consoleView;
     }
 
-    public JLabel getHighlightAll() {
-        return highlightAll;
-    }
 
     public RerunToolWindowContentAction getRerunToolWindowContentAction() {
         return rerunToolWindowContentAction;
@@ -159,7 +146,6 @@ public class ToolWindowContent {
                 groupByComboBox.setEnabled(false);
                 collapse.setEnabled(false);
                 expand.setEnabled(false);
-                highlightAll.setEnabled(false);
                 contentWrapper.removeAll();
                 contentWrapper.add(processingWrapper);
                 stop.setEnabled(true);
@@ -181,7 +167,6 @@ public class ToolWindowContent {
                 stop.setEnabled(false);
                 collapse.setEnabled(false);
                 expand.setEnabled(false);
-                highlightAll.setEnabled(false);
                 contentWrapper.removeAll();
                 contentWrapper.add(interruptedLabel);
                 panel1.revalidate();
@@ -198,15 +183,14 @@ public class ToolWindowContent {
         if (bestPracticeViolations == null || bestPracticeViolations.size() == 0) {
             collapse.setEnabled(false);
             expand.setEnabled(false);
-            highlightAll.setEnabled(false);
             JLabel noErrorsLabel = new JLabel("Not best practice violations found. Great job!");
             noErrorsLabel.setIcon(SUCCEEDED.getBasic());
             this.contentWrapper.add(noErrorsLabel);
         } else {
             collapse.setEnabled(true);
             expand.setEnabled(true);
-            highlightAll.setEnabled(true);
-            this.treeViewReport = new TreeViewReport(bestPracticeViolations, this.project, (TreeViewReport.GroupBy) groupByComboBox.getSelectedItem());
+
+            this.treeViewReport = new TreeViewReport(bestPracticeViolations, (TreeViewReport.GroupBy) groupByComboBox.getSelectedItem());
             this.reportContent = treeViewReport;
             this.contentWrapper.add(treeViewReport);
         }
