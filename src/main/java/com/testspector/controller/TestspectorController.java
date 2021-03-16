@@ -123,7 +123,7 @@ public final class TestspectorController {
                                 }
                             }));
                 }
-                List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+                List<BestPracticeViolation> bestPracticeViolations = Collections.synchronizedList(new ArrayList<>());
                 try {
                     bestPracticeViolations.addAll(executorService.invokeAll(callables, 5, TimeUnit.MINUTES)
                             .stream()
