@@ -21,7 +21,7 @@ public class JavaMethodResolver {
 
     public List<PsiMethod> allTestedMethods(PsiMethod testMethod) {
         List<PsiMethod> result = new ArrayList<>();
-        List<PsiMethodCallExpression> assertionMethods = elementResolver.allChildrenOfType(testMethod, PsiMethodCallExpression.class, (psiMethodCallExpression -> assertionMethod(psiMethodCallExpression).isPresent()), contextResolver.isInTestContext());
+        List<PsiMethodCallExpression> assertionMethods = elementResolver.allChildrenOfType(testMethod, PsiMethodCallExpression.class, (psiMethodCallExpression -> assertionMethod(psiMethodCallExpression).isPresent()), contextResolver.isInTestContext()).stream().distinct().collect(Collectors.toList());
         result.addAll(assertionMethods.stream()
                 .map(element -> elementResolver.allChildrenOfType(element, PsiMethodCallExpression.class, contextResolver.isInTestContext()))
                 .flatMap(Collection::stream)
@@ -42,7 +42,7 @@ public class JavaMethodResolver {
                 .filter(contextResolver.isInProductionCodeContext())
                 .map(element -> (PsiMethod) element)
                 .collect(Collectors.toList()));
-        return result;
+        return result.stream().distinct().collect(Collectors.toList());
     }
 
     public List<PsiMethod> testMethodsWithAnnotations(PsiClass psiClass, List<String> annotationQualifiedNames) {
@@ -81,13 +81,17 @@ public class JavaMethodResolver {
     }
 
     public boolean isGetter(PsiMethod method) {
-        Optional<PsiElement> returnCandidate = elementResolver.firstChildIgnoring(Objects.requireNonNull(method.getBody()), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class));
-        if (returnCandidate.isPresent() && returnCandidate.get() instanceof PsiReturnStatement) {
-            return elementResolver.immediateChildrenOfType(returnCandidate.get(), PsiReferenceExpression.class)
-                    .stream()
-                    .map(PsiReference::resolve)
-                    .anyMatch(element -> element instanceof PsiField);
+        PsiCodeBlock body = method.getBody();
+        if (body != null){
+            Optional<PsiElement> returnCandidate = elementResolver.firstChildIgnoring(body, Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class));
+            if (returnCandidate.isPresent() && returnCandidate.get() instanceof PsiReturnStatement) {
+                return elementResolver.immediateChildrenOfType(returnCandidate.get(), PsiReferenceExpression.class)
+                        .stream()
+                        .map(PsiReference::resolve)
+                        .anyMatch(element -> element instanceof PsiField);
+            }
         }
+
         return false;
     }
 

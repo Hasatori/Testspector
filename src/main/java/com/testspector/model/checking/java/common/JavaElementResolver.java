@@ -39,23 +39,33 @@ public class JavaElementResolver {
     }
 
     public <T extends PsiElement> List<T> allChildrenOfType(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
+        int level = 0;
+        int maxLevel = 2;
+        return allChildrenOfType(maxLevel, level, psiElement, elementType, typeCondition, fromReferencesMeetingCondition);
+    }
+
+    private <T extends PsiElement> List<T> allChildrenOfType(int maxLevel, int level, PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
         List<T> result = new ArrayList<>();
         for (PsiElement child : psiElement.getChildren()) {
             if (elementType.isInstance(child) && typeCondition.test(elementType.cast(child))) {
                 result.add(elementType.cast(child));
             }
             if (child instanceof PsiReferenceExpression) {
-                PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
-                if (referencedElement != null) {
-                    if (fromReferencesMeetingCondition.test(referencedElement)) {
-                        if (elementType.isInstance(referencedElement)) {
-                            result.add(elementType.cast(referencedElement));
+                level = ++level;
+              // if (level < maxLevel) {
+                    PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
+                    if (referencedElement != null) {
+                        if (fromReferencesMeetingCondition.test(referencedElement)) {
+                            if (elementType.isInstance(referencedElement)) {
+                                result.add(elementType.cast(referencedElement));
+                            }
+                            result.addAll(allChildrenOfType(maxLevel, level, referencedElement, elementType, typeCondition, fromReferencesMeetingCondition));
+
                         }
-                        result.addAll(allChildrenOfType(referencedElement, elementType, typeCondition, fromReferencesMeetingCondition));
                     }
-                }
+              //  }
             }
-            result.addAll(allChildrenOfType(child, elementType, typeCondition, fromReferencesMeetingCondition));
+            result.addAll(allChildrenOfType(maxLevel,level,child, elementType, typeCondition, fromReferencesMeetingCondition));
         }
         return result;
     }

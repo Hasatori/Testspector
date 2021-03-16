@@ -23,26 +23,27 @@ public class JUnitUnitTestFrameworkFactory implements UnitTestFrameworkFactory {
         } else if (psiElement instanceof PsiMethod) {
             resolved = isFromMethod((PsiMethod) psiElement);
         }
-        if (resolved){
+        if (resolved) {
             return Optional.of(UnitTestFramework.JUNIT);
         }
         return Optional.empty();
     }
 
     private boolean isFromFile(PsiFile psiFile) {
-        Optional<PsiElement> optionalPsiElement = Arrays.stream(psiFile.getChildren())
-                .filter(element -> element instanceof PsiImportList)
-                .findFirst();
-        if (optionalPsiElement.isPresent()) {
-            PsiImportList psiImportList = (PsiImportList) optionalPsiElement.get();
-            return Arrays.stream(psiImportList.getImportStatements())
-                    .anyMatch(
-                            psiImportStatement -> JUNIT_ALL_PACKAGES_QUALIFIED_NAMES
-                                    .stream()
-                                    .anyMatch(junitPackageName -> psiImportStatement.getQualifiedName() != null && psiImportStatement.getQualifiedName().startsWith(junitPackageName))
-                    );
+        if (psiFile instanceof PsiJavaFile) {
+            PsiJavaFile javaFile = (PsiJavaFile) psiFile;
+            Optional<PsiElement> optionalPsiElement = Optional.ofNullable(javaFile.getImportList());
+            if (optionalPsiElement.isPresent()) {
+                PsiImportList psiImportList = (PsiImportList) optionalPsiElement.get();
+                return Arrays.stream(psiImportList.getImportStatements())
+                        .anyMatch(
+                                psiImportStatement -> JUNIT_ALL_PACKAGES_QUALIFIED_NAMES
+                                        .stream()
+                                        .anyMatch(junitPackageName -> psiImportStatement.getQualifiedName() != null && psiImportStatement.getQualifiedName().startsWith(junitPackageName))
+                        );
 
 
+            }
         }
         return false;
     }
