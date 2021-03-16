@@ -13,6 +13,7 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.testspector.controller.TestspectorController;
@@ -39,7 +40,7 @@ public class InspectTestAction extends AnAction {
                 }
             }
         } else {
-            TestspectorController.initializeTestspector(project, psiFile);
+            TestspectorController.initializeTestspector(project, psiFile,psiFile.getName());
         }
     }
 

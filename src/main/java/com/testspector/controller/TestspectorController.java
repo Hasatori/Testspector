@@ -1,8 +1,10 @@
 package com.testspector.controller;
 
-import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.wm.ToolWindow;
@@ -13,29 +15,24 @@ import com.intellij.psi.PsiFile;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
-import com.testspector.model.checking.InspectionInvocationLineResolveStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.InspectionInvocationLineResolveStrategy;
 import com.testspector.model.checking.TestLineCrate;
 import com.testspector.model.checking.factory.*;
-import com.testspector.model.enums.BestPractice;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 import com.testspector.view.CustomIcon;
 import com.testspector.view.ToolWindowContent;
+import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
-import static com.testspector.model.utils.Constants.WEB_PAGE_BEST_PRACTICES_ULR;
 
 public final class TestspectorController {
 
@@ -44,101 +41,32 @@ public final class TestspectorController {
     private static final BestPracticeCheckingStrategyFactoryProvider BEST_PRACTICE_CHECKING_STRATEGY_PROVIDER = new BestPracticeCheckingStrategyFactoryProvider();
     private static final SimpleDateFormat LOG_MESSAGE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static final ProgrammingLanguageFactory PROGRAMMING_LANGUAGE_FACTORY = new ProgrammingLanguageFactory();
-
     private static final String TOOL_WINDOW_NAME = "Testspector";
     private static final HashMap<Project, ToolWindow> PROJECT_TOOL_WINDOW_HASH_MAP = new HashMap<>();
 
     private TestspectorController() {
     }
 
-    public static void initializeTestspector(Project project, PsiFile file) {
-        initializeTestspector(project, Collections.singletonList(file), file.getName());
+    public static void initializeTestspector(Project project, PsiElement element, String name) {
+        initializeTestspector(project, Collections.singletonList(element), name);
     }
 
-    public static void initializeTestspector(Project project, List<PsiFile> files, String name) {
-        AtomicReference<ScheduledExecutorService> executorService = new AtomicReference<>(Executors.newSingleThreadScheduledExecutor());
-        ToolWindow toolWindow = getToolWindow(project);
-        ToolWindowContent toolWindowContent = new ToolWindowContent(project);
-        addTabToToolWindow(toolWindow, toolWindowContent, name);
-        executorService.get().submit(() -> {
-            ApplicationManager.getApplication().runReadAction(() -> {
-                toolWindowContent.start(newToolWindowContent -> {
-                    executorService.set(Executors.newSingleThreadScheduledExecutor());
-                    ApplicationManager.getApplication().runReadAction(() -> {
-                        executorService.get().submit(() -> {
-                            toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Rerunning test inspection on " + name), ConsoleViewContentType.SYSTEM_OUTPUT);
-                            List<BestPracticeViolation> bestPracticeViolations = ApplicationManager
-                                    .getApplication()
-                                    .runReadAction((Computable<List<BestPracticeViolation>>) () -> gatherBestPracticeViolations(toolWindowContent.getConsoleView(), files));
-                            toolWindowContent.showReport(bestPracticeViolations);
-                        });
-                    });
-                }, executorService.get()::shutdownNow);
-                toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Inspecting tests in "), ConsoleViewContentType.SYSTEM_OUTPUT);
-                toolWindowContent.getConsoleView().print(name, ConsoleViewContentType.LOG_INFO_OUTPUT);
-                List<BestPracticeViolation> bestPracticeViolations = gatherBestPracticeViolations(toolWindowContent.getConsoleView(), files);
-                toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Inspection done"), ConsoleViewContentType.LOG_INFO_OUTPUT);
-                toolWindowContent.showReport(bestPracticeViolations);
-            });
+    public static void initializeTestspector(Project project, List<? extends PsiElement> files, String name) {
+        ToolWindowContent toolWindowContent = new ToolWindowContent(project, (toolWindowContent1) -> {
+            toolWindowContent1.getConsoleView().print("\nRerunning inspection on " + name, ConsoleViewContentType.LOG_INFO_OUTPUT);
+            initializeTestspector(project, files, name, toolWindowContent1);
         });
+        initializeTestspector(project, files, name, toolWindowContent);
     }
 
-
-    public static void initializeTestspector(PsiElement element, ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
-        String name = element.toString();
-        AtomicReference<ScheduledExecutorService> executorService = new AtomicReference<>(Executors.newSingleThreadScheduledExecutor());
-        ToolWindow toolWindow = getToolWindow(element.getProject());
-        ToolWindowContent toolWindowContent = new ToolWindowContent(element.getProject());
-        addTabToToolWindow(toolWindow, toolWindowContent, name);
-
-        executorService.get().submit(() -> {
-            ApplicationManager.getApplication().runReadAction(() -> {
-                toolWindowContent.start(newToolWindowContent -> {
-                    executorService.set(Executors.newSingleThreadScheduledExecutor());
-                    ApplicationManager.getApplication().runReadAction(() -> {
-                        executorService.get().submit(() -> {
-                            toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Rerunning test inspection on " + name), ConsoleViewContentType.SYSTEM_OUTPUT);
-                            Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = BEST_PRACTICE_CHECKING_STRATEGY_PROVIDER
-                                    .getBestPracticeCheckingStrategyFactory(programmingLanguage, unitTestFramework)
-                                    .map(BestPracticeCheckingStrategyFactory::getBestPracticeCheckingStrategy);
-                            if (optionalBestPracticeCheckingStrategy.isPresent()) {
-                                List<BestPracticeViolation> bestPracticeViolations = optionalBestPracticeCheckingStrategy.get().checkBestPractices(element);
-                                toolWindowContent.showReport(bestPracticeViolations);
-                            } else {
-                                logNoBestPracticeCheckingStrategyFound(toolWindowContent.getConsoleView(), programmingLanguage, unitTestFramework);
-                            }
-                        });
-                    });
-                }, executorService.get()::shutdownNow);
-
-                toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Inspecting tests in "), ConsoleViewContentType.SYSTEM_OUTPUT);
-                toolWindowContent.getConsoleView().print(name, ConsoleViewContentType.LOG_INFO_OUTPUT);
-                toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Programming language: "), ConsoleViewContentType.SYSTEM_OUTPUT);
-                toolWindowContent.getConsoleView().print(programmingLanguage.getDisplayName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
-                toolWindowContent.getConsoleView().print(" and unit testing framework: ", ConsoleViewContentType.SYSTEM_OUTPUT);
-                toolWindowContent.getConsoleView().print(unitTestFramework.getDisplayName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
-                toolWindowContent.getConsoleView().print(" were detected", ConsoleViewContentType.SYSTEM_OUTPUT);
-                toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Initializing inspection.... This might take a while..."), ConsoleViewContentType.SYSTEM_OUTPUT);
-                Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = BEST_PRACTICE_CHECKING_STRATEGY_PROVIDER
-                        .getBestPracticeCheckingStrategyFactory(programmingLanguage, unitTestFramework)
-                        .map(BestPracticeCheckingStrategyFactory::getBestPracticeCheckingStrategy);
-                List<BestPracticeViolation> foundViolations = new ArrayList<>();
-                if (optionalBestPracticeCheckingStrategy.isPresent()) {
-                    toolWindowContent.getConsoleView().print(getLoggingFormatMessage(String.format("checking for following best practices: %s", optionalBestPracticeCheckingStrategy
-                            .get()
-                            .getCheckedBestPractice()
-                            .stream()
-                            .map(BestPractice::getDisplayName)
-                            .collect(Collectors.joining(",", "[", "]")))), ConsoleViewContentType.SYSTEM_OUTPUT);
-                    foundViolations.addAll(optionalBestPracticeCheckingStrategy.get().checkBestPractices(element));
-                    toolWindowContent.showReport(foundViolations);
-                } else {
-                    logNoBestPracticeCheckingStrategyFound(toolWindowContent.getConsoleView(), programmingLanguage, unitTestFramework);
-                }
-                toolWindowContent.getConsoleView().print(getLoggingFormatMessage(String.format("%d best practice violations found", foundViolations.size())), ConsoleViewContentType.SYSTEM_OUTPUT);
-                toolWindowContent.getConsoleView().print(getLoggingFormatMessage("Inspection done "), ConsoleViewContentType.LOG_INFO_OUTPUT);
-            });
-        });
+    private static void initializeTestspector(Project project, List<? extends PsiElement> files, String name, ToolWindowContent toolWindowContent) {
+        try {
+            initializeInspection(project, files, toolWindowContent);
+            ToolWindow toolWindow = getToolWindow(project);
+            addTabToToolWindow(toolWindow, toolWindowContent, name);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static Optional<TestLineCrate> resolveTestLineCrate(PsiElement element) {
@@ -164,80 +92,111 @@ public final class TestspectorController {
         return Optional.empty();
     }
 
-    private static List<BestPracticeViolation> gatherBestPracticeViolations(ConsoleView consoleView, List<PsiFile> files) {
-        List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        for (PsiFile file : files) {
-            consoleView.print(getLoggingFormatMessage("Entering "), ConsoleViewContentType.SYSTEM_OUTPUT);
-            consoleView.print(file.getName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
-            Optional<ProgrammingLanguage> optionalProgrammingLanguage = PROGRAMMING_LANGUAGE_FACTORY.getProgrammingLanguage(file);
-            if (optionalProgrammingLanguage.isPresent()) {
-                List<UnitTestFramework> unitTestFrameworks = UNIT_TEST_FRAMEWORK_FACTORY_PROVIDER.geUnitTestFrameworkFactory(optionalProgrammingLanguage.get())
-                        .stream()
-                        .map(unitTestFrameworkFactory -> unitTestFrameworkFactory.getUnitTestFramework(file))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList());
-                consoleView.print(getLoggingFormatMessage("Programming language: "), ConsoleViewContentType.SYSTEM_OUTPUT);
-                consoleView.print(optionalProgrammingLanguage.get().getDisplayName(), ConsoleViewContentType.LOG_INFO_OUTPUT);
-                consoleView.print(" detected", ConsoleViewContentType.SYSTEM_OUTPUT);
-                if (unitTestFrameworks != null && unitTestFrameworks.size() > 0) {
-                    consoleView.print(getLoggingFormatMessage("Unit test frameworks: "), ConsoleViewContentType.SYSTEM_OUTPUT);
-                    consoleView.print(unitTestFrameworks.stream().map(UnitTestFramework::getDisplayName).collect(Collectors.joining(", ", "[", "]")), ConsoleViewContentType.LOG_INFO_OUTPUT);
-                    consoleView.print(" detected", ConsoleViewContentType.SYSTEM_OUTPUT);
-                    for (UnitTestFramework unitTestFramework : unitTestFrameworks) {
-                        Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = BEST_PRACTICE_CHECKING_STRATEGY_PROVIDER
-                                .getBestPracticeCheckingStrategyFactory(optionalProgrammingLanguage.get(), unitTestFramework)
-                                .map(BestPracticeCheckingStrategyFactory::getBestPracticeCheckingStrategy);
-                        if (optionalBestPracticeCheckingStrategy.isPresent()) {
-                            List<BestPracticeViolation> foundViolations = optionalBestPracticeCheckingStrategy.get().checkBestPractices(file);
-                            consoleView.print(getLoggingFormatMessage(String.format("checking for following best practices: %s", optionalBestPracticeCheckingStrategy
-                                    .get()
-                                    .getCheckedBestPractice()
-                                    .stream()
-                                    .map(BestPractice::getDisplayName)
-                                    .collect(Collectors.joining(",", "[", "]")))), ConsoleViewContentType.SYSTEM_OUTPUT);
-                            bestPracticeViolations.addAll(foundViolations);
-                        } else {
-                            logNoBestPracticeCheckingStrategyFound(consoleView, optionalProgrammingLanguage.get(), unitTestFramework);
-                        }
-                    }
-                } else {
-                    consoleView.print(getLoggingFormatMessage(String.format("No known unit test framework detected. Currently supported unit test frameworks: %s", BEST_PRACTICE_CHECKING_STRATEGY_PROVIDER.getSupportedUnitTestFrameworks()
-                            .stream()
-                            .map(UnitTestFramework::getDisplayName)
-                            .collect(Collectors.toList()))), ConsoleViewContentType.LOG_INFO_OUTPUT);
+    private static void initializeInspection(Project project, List<? extends PsiElement> elements, ToolWindowContent toolWindowContent) {
+        List<Callable<List<BestPracticeViolation>>> callables = new ArrayList();
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        ProgressManager.getInstance().run(new Task.Modal(project, "Inspecting Unit Tests", true) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                double max = elements.size();
+                AtomicReference<Double> index = new AtomicReference<>((double) 0);
+                for (PsiElement element : elements) {
+                    callables.add(() -> ApplicationManager
+                            .getApplication()
+                            .runReadAction((Computable<List<BestPracticeViolation>>) () -> {
+                                if (!indicator.isCanceled()) {
+                                    index.set(index.get() + 1);
+                                    String name = null;
+                                    if (element instanceof PsiFile) {
+                                        name = ((PsiFile) element).getName();
+                                    } else {
+                                        name = element.toString();
+                                    }
+                                    indicator.setIndeterminate(false);
+                                    indicator.setText("Inspecting " + name);
+                                    indicator.setFraction(index.get() / max);
+                                    return gatherFromElement(element, indicator);
+                                } else {
+                                    indicator.setText("Cancelling...");
+                                    indicator.setIndeterminate(true);
+                                    return null;
+                                }
+                            }));
                 }
-            } else {
-                consoleView.print(getLoggingFormatMessage(String.format("No known programming language detected. Currently supported programming languages are: %s", BEST_PRACTICE_CHECKING_STRATEGY_PROVIDER.getsupportedProgrammingLanguages()
-                        .stream()
-                        .map(ProgrammingLanguage::getDisplayName)
-                        .collect(Collectors.toList()))), ConsoleViewContentType.LOG_INFO_OUTPUT);
-            }
-        }
-        consoleView.print(getLoggingFormatMessage(String.format("%d best practice violations found", bestPracticeViolations.size())), ConsoleViewContentType.SYSTEM_OUTPUT);
-        return bestPracticeViolations;
-    }
+                List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+                try {
+                    bestPracticeViolations.addAll(executorService.invokeAll(callables, 5, TimeUnit.MINUTES)
+                            .stream()
+                            .map(listFuture -> {
+                                try {
+                                    return listFuture.get();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                return null;
+                            }).filter(Objects::nonNull)
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList()));
 
-    private static void logNoBestPracticeCheckingStrategyFound(ConsoleView consoleView, ProgrammingLanguage programmingLanguage, UnitTestFramework unitTestFramework) {
-        consoleView
-                .print(getLoggingFormatMessage(
-                        String.format("No best practice checking strategy found for programming language:%s and unit testing framework:%s found. " +
-                                        "Currently supported programming languages are:%s, currently supported unit tests frameworks are:%s." +
-                                        "It may be soon implemented. Check out ",
-                                programmingLanguage,
-                                unitTestFramework,
-                                BEST_PRACTICE_CHECKING_STRATEGY_PROVIDER.getsupportedProgrammingLanguages(),
-                                BEST_PRACTICE_CHECKING_STRATEGY_PROVIDER.getSupportedUnitTestFrameworks()
-                        )),
-                        ConsoleViewContentType.ERROR_OUTPUT);
-        consoleView.printHyperlink(WEB_PAGE_BEST_PRACTICES_ULR, project1 -> {
-            try {
-                Desktop.getDesktop().browse(new URI(WEB_PAGE_BEST_PRACTICES_ULR));
-            } catch (IOException | URISyntaxException e) {
-                e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                awaitTerminationAfterShutdown(executorService);
+                ApplicationManager.getApplication().runReadAction(()->{
+                    if (indicator.isCanceled()) {
+                        toolWindowContent.cancel();
+                    } else {
+                        toolWindowContent.addData(bestPracticeViolations);
+                    }
+                });
             }
         });
-        consoleView.print(" to get more information", ConsoleViewContentType.SYSTEM_OUTPUT);
+
+    }
+
+    private static void awaitTerminationAfterShutdown(ExecutorService threadPool) {
+        threadPool.shutdownNow();
+        try {
+            if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+                threadPool.shutdownNow();
+            }
+        } catch (InterruptedException ex) {
+            threadPool.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static List<BestPracticeViolation> gatherFromElement(PsiElement element, ProgressIndicator indicator) {
+        List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        if (!indicator.isCanceled()) {
+            ProgressManager.getInstance().runInReadActionWithWriteActionPriority(() -> {
+                Optional<ProgrammingLanguage> optionalProgrammingLanguage = PROGRAMMING_LANGUAGE_FACTORY.getProgrammingLanguage(element);
+                if (optionalProgrammingLanguage.isPresent()) {
+                    List<UnitTestFramework> unitTestFrameworks = UNIT_TEST_FRAMEWORK_FACTORY_PROVIDER.geUnitTestFrameworkFactory(optionalProgrammingLanguage.get())
+                            .stream()
+                            .map(unitTestFrameworkFactory -> unitTestFrameworkFactory.getUnitTestFramework(element))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .collect(Collectors.toList());
+                    if (unitTestFrameworks != null && unitTestFrameworks.size() > 0) {
+                        for (UnitTestFramework unitTestFramework : unitTestFrameworks) {
+                            Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = BEST_PRACTICE_CHECKING_STRATEGY_PROVIDER
+                                    .getBestPracticeCheckingStrategyFactory(optionalProgrammingLanguage.get(), unitTestFramework)
+                                    .map(BestPracticeCheckingStrategyFactory::getBestPracticeCheckingStrategy);
+                            if (optionalBestPracticeCheckingStrategy.isPresent()) {
+                                List<BestPracticeViolation> foundViolations = optionalBestPracticeCheckingStrategy.get().checkBestPractices(element);
+                                bestPracticeViolations.addAll(foundViolations);
+                            }
+                        }
+                    }
+                }
+            }, null);
+            return bestPracticeViolations;
+        } else {
+            indicator.setText("Cancelling...");
+            indicator.setIndeterminate(true);
+        }
+        return bestPracticeViolations;
     }
 
     private static void addTabToToolWindow(ToolWindow toolWindow, ToolWindowContent toolWindowContent, String tabName) {
@@ -247,8 +206,6 @@ public final class TestspectorController {
         if (toolWindow.getContentManager().getContentCount() > 1) {
             toolWindow.getContentManager().selectNextContent();
         }
-        toolWindow.show(() -> {
-        });
     }
 
     private static ToolWindow getToolWindow(Project project) {

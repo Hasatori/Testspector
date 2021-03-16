@@ -2,10 +2,15 @@ package com.testspector.view;
 
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.ui.ConsoleView;
+import com.intellij.execution.ui.ConsoleViewContentType;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.view.report.GroupBy;
 import com.testspector.view.report.TreeViewReport;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -40,7 +45,6 @@ public class ToolWindowContent {
     private JPanel contentWrapper;
     private JLabel clearConsole;
     private JPanel rightNav;
-    private JLabel stop;
     private JPanel lefNavElementsWrapper;
     private JComboBox<GroupBy> groupByComboBox;
     private ConsoleView consoleView;
@@ -48,7 +52,7 @@ public class ToolWindowContent {
 
     private TreeViewReport reportContent = null;
 
-    public ToolWindowContent(Project project) {
+    public ToolWindowContent(Project project,RerunToolWindowContentAction rerunToolWindowContentAction) {
         this.project = project;
         consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
         splitPane.setRightComponent(consoleView.getComponent());
@@ -57,10 +61,20 @@ public class ToolWindowContent {
         splitPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
         rightNav.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
-        setupActionLabel(expand, EXPAND_ALL, false, () -> this.reportContent.expandAll());
+        setupActionLabel(expand, EXPAND_ALL, false, () -> ProgressManager.getInstance().run(new Task.Backgroundable(project,"Expanding report nodes",true) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+               reportContent.expandAll();
+            }
+        }));
         setupActionLabel(clearConsole, CLEAR, false, () -> this.consoleView.clear());
-        setupActionLabel(collapse, COLLAPSE_ALL, false, () -> this.reportContent.collapseAll());
-        setupActionLabel(stop, STOP, false);
+        setupActionLabel(collapse, COLLAPSE_ALL, false, () -> ProgressManager.getInstance().run(new Task.Backgroundable(project,"Expanding report nodes",true) {
+
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                reportContent.collapseAll();
+            }
+        }));
         setupActionLabel(rerun, RERUN, false);
         Arrays.stream(lefNavElementsWrapper.getComponents()).filter(component -> component instanceof JLabel).forEach(leftNavComp -> {
             ((JLabel) leftNavComp).setBorder(new EmptyBorder(2, 0, 2, 0));
@@ -72,11 +86,11 @@ public class ToolWindowContent {
             groupByComboBox.addItem(groupBy);
         });
         groupByComboBox.addActionListener(e -> {
-            reportContent.groupBy((GroupBy) Objects.requireNonNull(groupByComboBox.getSelectedItem()));
-            panel1.revalidate();
-            panel1.repaint();
+                    reportContent.groupBy((GroupBy) Objects.requireNonNull(groupByComboBox.getSelectedItem()));
+                    panel1.revalidate();
+                    panel1.repaint();
         });
-
+        setOnRerun(rerunToolWindowContentAction);
     }
 
     private void setupActionLabel(JLabel label, CustomIcon customIcon, boolean enabled) {
@@ -132,13 +146,7 @@ public class ToolWindowContent {
         return rerunToolWindowContentAction;
     }
 
-    public void start(RerunToolWindowContentAction rerunToolWindowContentAction, Runnable onStop) {
-
-        this.contentWrapper.removeAll();
-        this.contentWrapper.add(processingWrapper);
-        this.panel1.revalidate();
-        this.panel1.repaint();
-        rerun.setEnabled(false);
+    private void setOnRerun(RerunToolWindowContentAction rerunToolWindowContentAction){
         this.rerunToolWindowContentAction = rerunToolWindowContentAction;
         this.rerun.addMouseListener(new MouseAdapter() {
             @Override
@@ -149,37 +157,29 @@ public class ToolWindowContent {
                 expand.setEnabled(false);
                 contentWrapper.removeAll();
                 contentWrapper.add(processingWrapper);
-                stop.setEnabled(true);
                 rerun.setEnabled(false);
                 panel1.revalidate();
                 panel1.repaint();
                 rerunToolWindowContentAction.rerun(ToolWindowContent.this);
             }
         });
-
-        this.stop.setEnabled(true);
-        this.stop.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                JLabel interruptedLabel = new JLabel("Interrupted");
-                interruptedLabel.setIcon(WARNING.getBasic());
-                super.mouseClicked(e);
-                groupByComboBox.setEnabled(false);
-                stop.setEnabled(false);
-                collapse.setEnabled(false);
-                expand.setEnabled(false);
-                contentWrapper.removeAll();
-                contentWrapper.add(interruptedLabel);
-                panel1.revalidate();
-                panel1.repaint();
-                onStop.run();
-                rerun.setEnabled(true);
-
-            }
-        });
     }
 
-    public void showReport(List<BestPracticeViolation> bestPracticeViolations) {
+    public void cancel(){
+        JLabel interruptedLabel = new JLabel("Cancelled");
+        interruptedLabel.setIcon(WARNING.getBasic());
+        groupByComboBox.setEnabled(false);
+        collapse.setEnabled(false);
+        expand.setEnabled(false);
+        contentWrapper.removeAll();
+        contentWrapper.add(interruptedLabel);
+        panel1.revalidate();
+        panel1.repaint();
+        rerun.setEnabled(true);
+    }
+
+    public void addData(List<BestPracticeViolation> bestPracticeViolations) {
+        getConsoleView().print(String.format("\n%d best practice violations found", bestPracticeViolations.size()), ConsoleViewContentType.SYSTEM_OUTPUT);
         this.contentWrapper.removeAll();
         if (bestPracticeViolations == null || bestPracticeViolations.size() == 0) {
             collapse.setEnabled(false);
@@ -195,7 +195,7 @@ public class ToolWindowContent {
             this.reportContent = treeViewReport;
             this.contentWrapper.add(treeViewReport);
         }
-        stop.setEnabled(false);
+
         rerun.setEnabled(true);
         groupByComboBox.setEnabled(true);
         this.panel1.revalidate();

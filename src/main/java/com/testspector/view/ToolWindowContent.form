@@ -18,7 +18,7 @@
           <size top="0" left="0" bottom="0" right="1"/>
         </border>
         <children>
-          <grid id="e290f" binding="lefNavElementsWrapper" layout-manager="GridLayoutManager" row-count="5" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="e290f" binding="lefNavElementsWrapper" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
@@ -38,7 +38,7 @@
               </component>
               <component id="ad48e" class="javax.swing.JLabel" binding="expand">
                 <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value=""/>
@@ -47,25 +47,16 @@
               </component>
               <component id="67808" class="javax.swing.JLabel" binding="collapse">
                 <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value=""/>
                   <toolTipText value="collapse all"/>
                 </properties>
               </component>
-              <component id="d3aef" class="javax.swing.JLabel" binding="stop">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value=""/>
-                  <toolTipText value="stop"/>
-                </properties>
-              </component>
               <component id="c512b" class="javax.swing.JSeparator">
                 <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <background color="-11447983"/>
@@ -175,7 +166,7 @@
                           <component id="a062a" class="javax.swing.JLabel">
                             <constraints/>
                             <properties>
-                              <icon value="icons/customLoading.gif"/>
+                              <icon value="icons/loading.gif"/>
                               <text value=""/>
                             </properties>
                           </component>
