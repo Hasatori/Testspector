@@ -36,6 +36,10 @@ import java.util.stream.Collectors;
 public final class TestspectorController {
 
     private static final String TOOL_WINDOW_NAME = "Testspector";
+    private static final String CANCELING_MESSAGE = "Cancelling...";
+    private static final String RERUNNING_MESSAGE = "Rerunning inspection on";
+    private static final String INSPECTION_LOADING_MAIN_HEADING = "Inspecting Unit Tests for";
+    private static final String CREATING_REPORT_MESSAGE = "Creating report...";
     private final Project project;
 
     public TestspectorController(Project project) {
@@ -48,15 +52,16 @@ public final class TestspectorController {
 
     public void initializeTestspector(List<? extends PsiElement> files, String name) {
         ToolWindowContent toolWindowContent = new ToolWindowContent(project, (toolWindowContent1) -> {
-            toolWindowContent1.getConsoleView().print("\nRerunning inspection on " + name, ConsoleViewContentType.LOG_INFO_OUTPUT);
-            initializeInspection(files, toolWindowContent1);
+            toolWindowContent1.getConsoleView().print(String.format("\n%s %s", RERUNNING_MESSAGE, name), ConsoleViewContentType.LOG_INFO_OUTPUT);
+            initializeInspection(files, toolWindowContent1, name);
         });
-        initializeInspection(files, toolWindowContent);
+        initializeInspection(files, toolWindowContent, name);
         addTabToToolWindow(toolWindowContent, name);
     }
 
     public Optional<TestLineCrate> resolveTestLineCrate(PsiElement element) {
-        Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getComponent(ProgrammingLanguageFactory.class).getProgrammingLanguage(element);
+        Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getComponent(ProgrammingLanguageFactory.class)
+                .getProgrammingLanguage(element);
         if (optionalProgrammingLanguage.isPresent()) {
             List<UnitTestFramework> unitTestFrameworks = project
                     .getComponent(UnitTestFrameworkFactoryProvider.class)
@@ -72,9 +77,13 @@ public final class TestspectorController {
                         .getComponent(InspectionInvocationLineResolveStrategyFactory.class)
                         .getInspectionInvocationLineResolveStrategy(unitTestFramework);
                 if (optionalUnitTestLineResolveStrategy.isPresent()) {
-                    Optional<PsiElement> optionalLineElement = optionalUnitTestLineResolveStrategy.get().resolveInspectionInvocationLine(element);
+                    Optional<PsiElement> optionalLineElement = optionalUnitTestLineResolveStrategy.get()
+                            .resolveInspectionInvocationLine(element);
                     if (optionalLineElement.isPresent()) {
-                        return Optional.of(new TestLineCrate(optionalLineElement.get(), optionalProgrammingLanguage.get(), unitTestFramework));
+                        return Optional.of(new TestLineCrate(
+                                optionalLineElement.get(),
+                                optionalProgrammingLanguage.get(),
+                                unitTestFramework));
                     }
                 }
             }
@@ -82,9 +91,9 @@ public final class TestspectorController {
         return Optional.empty();
     }
 
-    private void initializeInspection(List<? extends PsiElement> elements, ToolWindowContent toolWindowContent) {
+    private void initializeInspection(List<? extends PsiElement> elements, ToolWindowContent toolWindowContent, String name) {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
-        ProgressManager.getInstance().run(new Task.Modal(project, "Inspecting Unit Tests", true) {
+        ProgressManager.getInstance().run(new Task.Modal(project, String.format("%s %s", INSPECTION_LOADING_MAIN_HEADING, name), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 List<Callable<List<BestPracticeViolation>>> callables = prepareCallables(elements, indicator);
@@ -94,11 +103,14 @@ public final class TestspectorController {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
                 awaitTerminationAfterShutdown(executorService);
                 ApplicationManager.getApplication().runReadAction(() -> {
                     if (indicator.isCanceled()) {
+                        indicator.setText(CANCELING_MESSAGE);
                         toolWindowContent.cancel();
                     } else {
+                        indicator.setText(CREATING_REPORT_MESSAGE);
                         toolWindowContent.setData(bestPracticeViolations);
                     }
                 });
@@ -135,26 +147,30 @@ public final class TestspectorController {
                     .runReadAction((Computable<List<BestPracticeViolation>>) () -> {
                         if (!indicator.isCanceled()) {
                             index.set(index.get() + 1);
-                            String name = null;
-                            if (element instanceof PsiFile) {
-                                name = ((PsiFile) element).getName();
-                            } else {
-                                name = element.toString();
-                            }
-                            indicator.setText(String.format("%d violations found so far - Inspecting %s", violationsCount.get(),name));
+                            indicator.setText(getProgressMessage(violationsCount.get(), element));
                             indicator.setIndeterminate(false);
                             indicator.setFraction(index.get() / max);
                             List<BestPracticeViolation> foundViolations = gatherFromElement(element, indicator);
                             violationsCount.set(violationsCount.get() + foundViolations.size());
                             return foundViolations;
                         } else {
-                            indicator.setText("Cancelling...");
+                            indicator.setText(CANCELING_MESSAGE);
                             indicator.setIndeterminate(true);
                             return null;
                         }
                     }));
         }
         return callables;
+    }
+
+    private String getProgressMessage(Integer violationsCount, PsiElement element) {
+        String name = null;
+        if (element instanceof PsiFile) {
+            name = ((PsiFile) element).getName();
+        } else {
+            name = element.toString();
+        }
+        return String.format("%d violations found so far - Inspecting %s", violationsCount, name);
     }
 
     private void awaitTerminationAfterShutdown(ExecutorService threadPool) {
@@ -191,7 +207,9 @@ public final class TestspectorController {
                                     .getBestPracticeCheckingStrategyFactory(optionalProgrammingLanguage.get(), unitTestFramework)
                                     .map(BestPracticeCheckingStrategyFactory::getBestPracticeCheckingStrategy);
                             if (optionalBestPracticeCheckingStrategy.isPresent()) {
-                                List<BestPracticeViolation> foundViolations = optionalBestPracticeCheckingStrategy.get().checkBestPractices(element);
+                                List<BestPracticeViolation> foundViolations = optionalBestPracticeCheckingStrategy
+                                        .get()
+                                        .checkBestPractices(element);
                                 bestPracticeViolations.addAll(foundViolations);
                             }
                         }
@@ -200,7 +218,7 @@ public final class TestspectorController {
             }, null);
             return bestPracticeViolations;
         } else {
-            indicator.setText("Cancelling...");
+            indicator.setText(CANCELING_MESSAGE);
             indicator.setIndeterminate(true);
         }
         return bestPracticeViolations;
