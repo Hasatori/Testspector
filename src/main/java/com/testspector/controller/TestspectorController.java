@@ -168,6 +168,7 @@ public final class TestspectorController {
     private List<BestPracticeViolation> gatherFromElement(PsiElement element, ProgressIndicator indicator) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         if (!indicator.isCanceled()) {
+            ProgressManager.getInstance().runInReadActionWithWriteActionPriority(()->{
             Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getComponent(ProgrammingLanguageFactory.class)
                     .getProgrammingLanguage(element);
             if (optionalProgrammingLanguage.isPresent()) {
@@ -192,6 +193,7 @@ public final class TestspectorController {
                     }
                 }
             }
+            },null);
             return bestPracticeViolations;
         } else {
             indicator.setText("Cancelling...");
