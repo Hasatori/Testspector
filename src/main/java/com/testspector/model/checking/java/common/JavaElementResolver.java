@@ -3,10 +3,7 @@ package com.testspector.model.checking.java.common;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReferenceExpression;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -39,10 +36,10 @@ public class JavaElementResolver {
     }
 
     public <T extends PsiElement> List<T> allChildrenOfType(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
-        return allChildrenOfType(new ArrayList<>(), psiElement, elementType, typeCondition, fromReferencesMeetingCondition);
+        return allChildrenOfType(new HashSet<>(), psiElement, elementType, typeCondition, fromReferencesMeetingCondition);
     }
 
-    private <T extends PsiElement> List<T> allChildrenOfType(List<PsiElement> visited, PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
+    private <T extends PsiElement> List<T> allChildrenOfType(HashSet<PsiElement> visited, PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
         List<T> result = new ArrayList<>();
         for (PsiElement child : psiElement.getChildren()) {
                 if (elementType.isInstance(child) && typeCondition.test(elementType.cast(child))) {
