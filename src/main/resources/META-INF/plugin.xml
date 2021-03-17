@@ -15,12 +15,10 @@
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="com.testspector.view.TestLineMarkerFactory"/>
         <projectService serviceImplementation="com.testspector.controller.TestspectorController" />
-        <projectService serviceImplementation="com.testspector.controller.TestSpectorExecutorServiceFactory" />
         <projectService serviceImplementation="com.testspector.model.checking.factory.InspectionInvocationLineResolveStrategyFactory" />
         <projectService serviceImplementation="com.testspector.model.checking.factory.UnitTestFrameworkFactoryProvider" />
         <projectService serviceImplementation="com.testspector.model.checking.factory.BestPracticeCheckingStrategyFactoryProvider" />
         <projectService serviceImplementation="com.testspector.model.checking.factory.ProgrammingLanguageFactory" />
-        <projectService serviceImplementation="com.testspector.view.ToolWindowContentFactory" />
     </extensions>
 
     <actions>
