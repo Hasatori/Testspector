@@ -178,7 +178,7 @@ public class ToolWindowContent {
         rerun.setEnabled(true);
     }
 
-    public void addData(List<BestPracticeViolation> bestPracticeViolations) {
+    public void setData(List<BestPracticeViolation> bestPracticeViolations) {
         getConsoleView().print(String.format("\n%d best practice violations found", bestPracticeViolations.size()), ConsoleViewContentType.SYSTEM_OUTPUT);
         this.contentWrapper.removeAll();
         if (bestPracticeViolations == null || bestPracticeViolations.size() == 0) {

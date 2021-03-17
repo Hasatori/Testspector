@@ -4,11 +4,13 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -29,18 +31,19 @@ public class InspectTestAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
         Project project = anActionEvent.getProject();
+        TestspectorController testspectorController = project.getComponent(TestspectorController.class);
         if (psiFile == null) {
             VirtualFile virtualFile = anActionEvent.getData(CommonDataKeys.VIRTUAL_FILE);
             if (virtualFile != null) {
                 try {
                     List<PsiFile> psiFiles = collectPsiFilesFromVirtualFile(project, virtualFile);
-                    TestspectorController.initializeTestspector(project, psiFiles, virtualFile.getCanonicalPath());
+                    testspectorController.initializeTestspector(psiFiles, virtualFile.getCanonicalPath());
                 } catch (Exception ignored) {
 
                 }
             }
         } else {
-            TestspectorController.initializeTestspector(project, psiFile,psiFile.getName());
+            testspectorController.initializeTestspector(psiFile,psiFile.getName());
         }
     }
 

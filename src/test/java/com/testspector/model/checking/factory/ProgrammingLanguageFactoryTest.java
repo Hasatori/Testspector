@@ -6,7 +6,7 @@ import com.intellij.lang.javascript.dialects.ECMA6LanguageDialect;
 import com.intellij.lang.javascript.dialects.TypeScriptLanguageDialect;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.testspector.TestBase;
+import com.testspector.HeavyTestBase;
 import com.testspector.model.enums.ProgrammingLanguage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 import static org.easymock.EasyMock.*;
 
 
-public class ProgrammingLanguageFactoryTest extends TestBase {
+public class ProgrammingLanguageFactoryTest extends HeavyTestBase {
 
     private static Stream<Arguments> provideSupportedProgrammingLanguageAndCorrespondingFileCombinations() {
         return Stream.of(

@@ -15,7 +15,7 @@ import java.io.IOException;
 
 @RunWith(JUnitPlatform.class)
 @ExtendWith(WriteCommandActionTestInterceptor.class)
-public abstract class TestBase extends BasePlatformTestCase {
+public abstract class HeavyTestBase extends BasePlatformTestCase {
 
     protected PsiElementFactory psiElementFactory;
     protected PsiFileFactory psiFileFactory;
