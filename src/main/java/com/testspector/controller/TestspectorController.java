@@ -22,12 +22,12 @@ import com.testspector.model.checking.factory.*;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 import com.testspector.view.ToolWindowContent;
-import com.testspector.view.ToolWindowContentFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -46,7 +46,7 @@ public final class TestspectorController {
     }
 
     public void initializeTestspector(List<? extends PsiElement> files, String name) {
-        ToolWindowContent toolWindowContent = project.getComponent(ToolWindowContentFactory.class).getToolWindowContent((toolWindowContent1) -> {
+        ToolWindowContent toolWindowContent = new ToolWindowContent(project,(toolWindowContent1) -> {
             toolWindowContent1.getConsoleView().print("\nRerunning inspection on " + name, ConsoleViewContentType.LOG_INFO_OUTPUT);
             initializeInspection(files, toolWindowContent1);
         });
@@ -82,8 +82,7 @@ public final class TestspectorController {
     }
 
     private void initializeInspection(List<? extends PsiElement> elements, ToolWindowContent toolWindowContent) {
-        ExecutorService executorService = project.getComponent(TestSpectorExecutorServiceFactory.class)
-                .getTestSpectorExecutorService(10);
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
         ProgressManager.getInstance().run(new Task.Modal(project, "Inspecting Unit Tests", true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
