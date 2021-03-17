@@ -37,7 +37,7 @@ public class InspectTestAction extends AnAction {
             if (virtualFile != null) {
                 try {
                     List<PsiFile> psiFiles = collectPsiFilesFromVirtualFile(project, virtualFile);
-                    testspectorController.initializeTestspector(psiFiles, virtualFile.getCanonicalPath());
+                    testspectorController.initializeTestspector(psiFiles, virtualFile.getName());
                 } catch (Exception ignored) {
 
                 }
