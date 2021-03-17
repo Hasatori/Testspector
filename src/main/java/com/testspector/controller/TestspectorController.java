@@ -29,6 +29,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,7 @@ public final class TestspectorController {
     }
 
     public void initializeTestspector(List<? extends PsiElement> files, String name) {
-        ToolWindowContent toolWindowContent = new ToolWindowContent(project,(toolWindowContent1) -> {
+        ToolWindowContent toolWindowContent = new ToolWindowContent(project, (toolWindowContent1) -> {
             toolWindowContent1.getConsoleView().print("\nRerunning inspection on " + name, ConsoleViewContentType.LOG_INFO_OUTPUT);
             initializeInspection(files, toolWindowContent1);
         });
@@ -127,6 +128,7 @@ public final class TestspectorController {
         List<Callable<List<BestPracticeViolation>>> callables = new ArrayList();
         double max = elements.size();
         AtomicReference<Double> index = new AtomicReference<>((double) 0);
+        AtomicInteger violationsCount = new AtomicInteger(0);
         for (PsiElement element : elements) {
             callables.add(() -> ApplicationManager
                     .getApplication()
@@ -139,10 +141,12 @@ public final class TestspectorController {
                             } else {
                                 name = element.toString();
                             }
+                            indicator.setText(String.format("%d violations found so far - Inspecting %s", violationsCount.get(),name));
                             indicator.setIndeterminate(false);
-                            indicator.setText("Inspecting " + name);
                             indicator.setFraction(index.get() / max);
-                            return gatherFromElement(element, indicator);
+                            List<BestPracticeViolation> foundViolations = gatherFromElement(element, indicator);
+                            violationsCount.set(violationsCount.get() + foundViolations.size());
+                            return foundViolations;
                         } else {
                             indicator.setText("Cancelling...");
                             indicator.setIndeterminate(true);
@@ -168,32 +172,32 @@ public final class TestspectorController {
     private List<BestPracticeViolation> gatherFromElement(PsiElement element, ProgressIndicator indicator) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         if (!indicator.isCanceled()) {
-            ProgressManager.getInstance().runInReadActionWithWriteActionPriority(()->{
-            Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getComponent(ProgrammingLanguageFactory.class)
-                    .getProgrammingLanguage(element);
-            if (optionalProgrammingLanguage.isPresent()) {
-                List<UnitTestFramework> unitTestFrameworks = project
-                        .getComponent(UnitTestFrameworkFactoryProvider.class)
-                        .geUnitTestFrameworkFactory(optionalProgrammingLanguage.get())
-                        .stream()
-                        .map(unitTestFrameworkFactory -> unitTestFrameworkFactory.getUnitTestFramework(element))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList());
-                if (unitTestFrameworks.size() > 0) {
-                    for (UnitTestFramework unitTestFramework : unitTestFrameworks) {
-                        Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = project
-                                .getComponent(BestPracticeCheckingStrategyFactoryProvider.class)
-                                .getBestPracticeCheckingStrategyFactory(optionalProgrammingLanguage.get(), unitTestFramework)
-                                .map(BestPracticeCheckingStrategyFactory::getBestPracticeCheckingStrategy);
-                        if (optionalBestPracticeCheckingStrategy.isPresent()) {
-                            List<BestPracticeViolation> foundViolations = optionalBestPracticeCheckingStrategy.get().checkBestPractices(element);
-                            bestPracticeViolations.addAll(foundViolations);
+            ProgressManager.getInstance().runInReadActionWithWriteActionPriority(() -> {
+                Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getComponent(ProgrammingLanguageFactory.class)
+                        .getProgrammingLanguage(element);
+                if (optionalProgrammingLanguage.isPresent()) {
+                    List<UnitTestFramework> unitTestFrameworks = project
+                            .getComponent(UnitTestFrameworkFactoryProvider.class)
+                            .geUnitTestFrameworkFactory(optionalProgrammingLanguage.get())
+                            .stream()
+                            .map(unitTestFrameworkFactory -> unitTestFrameworkFactory.getUnitTestFramework(element))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .collect(Collectors.toList());
+                    if (unitTestFrameworks.size() > 0) {
+                        for (UnitTestFramework unitTestFramework : unitTestFrameworks) {
+                            Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = project
+                                    .getComponent(BestPracticeCheckingStrategyFactoryProvider.class)
+                                    .getBestPracticeCheckingStrategyFactory(optionalProgrammingLanguage.get(), unitTestFramework)
+                                    .map(BestPracticeCheckingStrategyFactory::getBestPracticeCheckingStrategy);
+                            if (optionalBestPracticeCheckingStrategy.isPresent()) {
+                                List<BestPracticeViolation> foundViolations = optionalBestPracticeCheckingStrategy.get().checkBestPractices(element);
+                                bestPracticeViolations.addAll(foundViolations);
+                            }
                         }
                     }
                 }
-            }
-            },null);
+            }, null);
             return bestPracticeViolations;
         } else {
             indicator.setText("Cancelling...");
