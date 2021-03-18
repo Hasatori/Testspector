@@ -10,17 +10,24 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TreeViewReport extends JTree {
 
     private final List<BestPracticeViolation> bestPracticeViolations;
 
+    private final DefaultTreeModel byTestsModel;
+    private final DefaultTreeModel byViolatedBestPracticesModel;
+
     public TreeViewReport(List<BestPracticeViolation> bestPracticeViolations, GroupBy groupBy) {
         super();
         this.bestPracticeViolations = bestPracticeViolations;
+        this.byTestsModel = this.groupByTests();
+        this.byViolatedBestPracticesModel = this.groupByBestPractice();
         this.groupBy(groupBy);
-
         this.setAlignmentX(LEFT_ALIGNMENT);
         this.setAlignmentY(TOP_ALIGNMENT);
 
@@ -65,15 +72,15 @@ public class TreeViewReport extends JTree {
     public void groupBy(GroupBy groupBy) {
         switch (groupBy) {
             case TESTS:
-                this.groupByFiles();
+                this.setModel(this.byTestsModel);
                 break;
             case VIOLATED_BEST_PRACTICE:
-                this.groupByBestPractice();
+                this.setModel(this.byViolatedBestPracticesModel);
                 break;
         }
     }
 
-    private void groupByBestPractice() {
+    private DefaultTreeModel groupByBestPractice() {
         HashMap<BestPractice, List<BestPracticeViolation>> psiElementBestPracticeViolationHashMap = new HashMap<>();
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
         for (BestPracticeViolation bestPracticeViolation : bestPracticeViolations) {
@@ -117,11 +124,11 @@ public class TreeViewReport extends JTree {
 
             root.add(groupNode);
         });
-        this.setModel(new DefaultTreeModel(root));
+       return new DefaultTreeModel(root);
     }
 
 
-    private void groupByFiles() {
+    private DefaultTreeModel groupByTests() {
         HashMap<PsiElement, List<BestPracticeViolation>> psiElementBestPracticeViolationHashMap = new HashMap<>();
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
         for (BestPracticeViolation bestPracticeViolation : bestPracticeViolations) {
@@ -163,7 +170,7 @@ public class TreeViewReport extends JTree {
             }
             root.add(groupNode);
         });
-        this.setModel(new DefaultTreeModel(root));
+        return new DefaultTreeModel(root);
     }
 
 }
