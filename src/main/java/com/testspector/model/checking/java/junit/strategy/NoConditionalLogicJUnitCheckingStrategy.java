@@ -46,7 +46,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
         for (PsiMethod method : methods) {
-            List<PsiStatement> statements = elementResolver.allChildrenOfType(method, PsiStatement.class, isConditionalStatement(), contextResolver.isInTestContext());
+            List<PsiStatement> statements = elementResolver.allChildrenOfType(method, PsiStatement.class, isConditionalStatement().and(partOfAssertionMethod().negate()), contextResolver.isInTestContext());
 
             statements = statements.stream().distinct().collect(Collectors.toList());
             if (statements.size() > 0) {
@@ -76,6 +76,20 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     Predicate<PsiStatement> isConditionalStatement() {
         return psiStatement -> SUPPORTED_STATEMENT_CLASSES.stream().anyMatch(supportedStatement -> supportedStatement.isInstance(psiStatement));
     }
+
+    Predicate<PsiStatement> partOfAssertionMethod() {
+        return psiStatement -> {
+            PsiElement element = psiStatement.getContext();
+            while (element instanceof PsiCodeBlock){
+                element = element.getContext();
+            }
+            if (element instanceof PsiMethod) {
+                return methodResolver.assertionMethod((PsiMethod) element).isPresent();
+            }
+            return false;
+        };
+    }
+
 
     private List<RelatedElementWrapper> createRelatedElements(PsiMethod method, List<PsiStatement> conditionalStatements) {
         List<RelatedElementWrapper> result = new ArrayList<>();
