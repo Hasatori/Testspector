@@ -155,7 +155,7 @@
                         </properties>
                         <border type="none"/>
                         <children>
-                          <component id="f5d4" class="javax.swing.JLabel">
+                          <component id="f5d4" class="javax.swing.JLabel" binding="processingLabel">
                             <constraints/>
                             <properties>
                               <horizontalAlignment value="0"/>

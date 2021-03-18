@@ -58,17 +58,16 @@ public class TreeViewReport extends JTree {
             if (child instanceof DefaultMutableTreeNode) {
                 DefaultMutableTreeNode castedChild = (DefaultMutableTreeNode) child;
                 this.collapsePath(new TreePath(castedChild.getPath()));
-                //collapseAllInNode(castedChild);
             }
         }
     }
 
     public void groupBy(GroupBy groupBy) {
         switch (groupBy) {
-            case FILES:
+            case TESTS:
                 this.groupByFiles();
                 break;
-            case BEST_PRACTICE:
+            case VIOLATED_BEST_PRACTICE:
                 this.groupByBestPractice();
                 break;
         }

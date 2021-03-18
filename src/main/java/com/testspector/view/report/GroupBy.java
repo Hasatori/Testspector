@@ -2,8 +2,8 @@ package com.testspector.view.report;
 
 
 public enum GroupBy {
-    FILES("Files"),
-    BEST_PRACTICE("Best practice");
+    TESTS("Tests"),
+    VIOLATED_BEST_PRACTICE("Violated Best practice");
 
     private final String displayName;
 
