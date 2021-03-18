@@ -2,6 +2,7 @@ package com.testspector.model.checking.java.common;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.impl.file.PsiPackageBase;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -41,7 +42,8 @@ public class JavaElementResolver {
 
     private <T extends PsiElement> List<T> allChildrenOfType(HashSet<PsiElement> visited, PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
         List<T> result = new ArrayList<>();
-        for (PsiElement child : psiElement.getChildren()) {
+        if (!(psiElement instanceof PsiPackageBase)) {
+            for (PsiElement child : psiElement.getChildren()) {
                 if (elementType.isInstance(child) && typeCondition.test(elementType.cast(child))) {
                     result.add(elementType.cast(child));
                 }
@@ -57,11 +59,11 @@ public class JavaElementResolver {
                         }
                     }
                 }
-                result.addAll(allChildrenOfType(visited,child, elementType, typeCondition, fromReferencesMeetingCondition));
+                result.addAll(allChildrenOfType(visited, child, elementType, typeCondition, fromReferencesMeetingCondition));
 
+            }
         }
         return result;
     }
-
 
 }
