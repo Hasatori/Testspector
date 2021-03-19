@@ -18,7 +18,6 @@ public class JUnitBestPracticeCheckingStrategyFactory implements BestPracticeChe
         JavaElementResolver javaElementResolver = new JavaElementResolver();
         JavaMethodResolver methodResolver = new JavaMethodResolver(javaElementResolver, contextIndicator);
         return new JUnitGroupMethodBestPracticeCheckingStrategyAdapter(Arrays.asList(
-                new NoSimpleTestsJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator),
                 new AssertionCountJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
                 new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),
                 new NoConditionalLogicJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver),

@@ -8,10 +8,9 @@ Report also contains links to the documentation where are all best practices des
 
 ![Architecture](./doc/Architecture.md) of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform.
 
-A current version of the plugin supports checking of the following 8 best practices for ![JUnit 5](https://junit.org/junit5) and ![JUnit 4](https://junit.org/junit4):
+A current version of the plugin supports checking of the following 7 best practices for ![JUnit 5](https://junit.org/junit5) and ![JUnit 4](https://junit.org/junit4):
 
 * ![Test only public behaviour](./doc/Practices.md#testovat-pouze-veřejné-chování-testovaného-systému)
-* ![No simple tests](./doc/Practices.md#neimplementovat-jednoduché-testy)
 * ![At least one assertion](./doc/Practices.md#minimálně-jedna-ověřovací-metoda-na-test)
 * ![Only one assertion](./doc/Practices.md#právě-jedna-ověřovací-metoda-na-test)
 * ![No global static constants](./doc/Practices.md#nepoužívat-globální-statické-proměnné)

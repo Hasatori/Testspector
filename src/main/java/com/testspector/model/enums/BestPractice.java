@@ -18,7 +18,6 @@ public enum BestPractice {
 
 
     TEST_ONLY_PUBLIC_BEHAVIOUR("Test only public behaviour", "","testovat-pouze-veřejné-chování-testovaného-systému"),
-    NO_SIMPLE_TESTS("No simple tests", "","neimplementovat-jednoduché-testy"),
     AT_LEAST_ONE_ASSERTION("At least one assertion", "","minimálně-jedna-ověřovací-metoda-na-test"),
     ONLY_ONE_ASSERTION("Only one assertion", "","právě-jedna-ověřovací-metoda-na-test"),
     NO_GLOBAL_STATIC_PROPERTIES("No global static properties", "","nepoužívat-globální-statické-proměnné"),
