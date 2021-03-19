@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnitStrategyTest {
 
     private static final String ALMOST_SAME_NAME_PROBLEM_DESCRIPTION = "The test name is more or less that same as a tested method. This says nothing about tests scenario. You should setup a clear strategy for naming your tests so that the person reading then knows what is tested";
-    private static final String TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION = "The test name has nothing to do with tested method. This says nothing about tests scenario. You should set up a clear strategy for naming your tests so that the person reading then knows what is tested";
     private SetupTestNamingStrategyJUnitCheckingStrategy strategy;
 
     @BeforeEach
@@ -38,9 +37,6 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
             "'getName' | 'getNameTest'        | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
             "'getName' | 'test_GetName'       | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
             "'getName' | 'GetName_test'       | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
-            "'setName' | 'somethingElse'      | '" + TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION + "'",
-            "'getTest' | 'checkBestPractices' | '" + TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION + "'",
-            "'getTest' | 'getAllocation'      | '" + TOO_DIFFERENT_NAME_PROBLEM_DESCRIPTION + "'",
     }, delimiter = '|')
     public void checkBestPractices_TestNameTooSimilarOrTooDifferent_OneViolationReportingAboutTestNamingStrategyShouldBeReturned(String testName, String testedMethodName, String problemDescription) {
         // Given
