@@ -22,7 +22,7 @@ public class JavaElementResolver {
         return allChildrenOfType(psiElement, elementType, t -> true, t -> false);
     }
 
-    public Optional<PsiElement> firstChildIgnoring(PsiElement psiElement, List<Class<? extends PsiElement>> ignoredList) {
+    public Optional<PsiElement> firstImmediateChildIgnoring(PsiElement psiElement, List<Class<? extends PsiElement>> ignoredList) {
         for (PsiElement child : psiElement.getChildren()) {
             if (ignoredList.stream().noneMatch(ignored -> ignored.isInstance(child))) {
                 return Optional.of(child);

@@ -212,7 +212,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiField field = (PsiField) psiClass.add(this.psiElementFactory.createFieldFromText(String.format("private String %s;", fieldName), psiClass));
         PsiMethod getterMethod = (PsiMethod) psiClass.add(this.javaTestElementUtil.createMethod("getName", "String", Collections.singletonList("public")));
         PsiReturnStatement returnStatement = (PsiReturnStatement) getterMethod.getBody().add(this.psiElementFactory.createStatementFromText(String.format("return %s;", fieldName), psiClass));
-        EasyMock.expect(elementResolver.firstChildIgnoring(getterMethod.getBody(), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class)))
+        EasyMock.expect(elementResolver.firstImmediateChildIgnoring(getterMethod.getBody(), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class)))
                 .andReturn(Optional.of(returnStatement)).once();
         EasyMock.replay(elementResolver);
 
@@ -226,8 +226,8 @@ class JavaMethodResolverTest extends JavaTest {
     public void isGetter_isComplexMethod_ShouldReturnFalse() {
         PsiMethod complexMethod = this.javaTestElementUtil.createMethod("getName", "String", Collections.singletonList("public"));
         PsiStatement ifStatement = (PsiStatement) complexMethod.getBody().add(this.javaTestElementUtil.createIfStatement());
-        ifStatement.add(this.psiElementFactory.createStatementFromText("String fieldName = \"name\";",complexMethod));
-        EasyMock.expect(elementResolver.firstChildIgnoring(complexMethod.getBody(), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class)))
+        ifStatement.add(this.psiElementFactory.createStatementFromText("String fieldName = \"name\";", complexMethod));
+        EasyMock.expect(elementResolver.firstImmediateChildIgnoring(complexMethod.getBody(), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class)))
                 .andReturn(Optional.of(ifStatement)).once();
         EasyMock.replay(elementResolver);
 
@@ -235,6 +235,52 @@ class JavaMethodResolverTest extends JavaTest {
         boolean result = javaMethodResolver.isGetter(complexMethod);
 
         assertFalse(result);
+    }
+
+    @Test
+    public void allTestedMethods_oneAssertionWhichCallsMethodFromProduction_ShouldResolveOneMethod() {
+        PsiJavaFile psiJavaFile = this.javaTestElementUtil.createFile("Test", "com.testspector", Collections.emptyList(), Collections.emptyList());
+        PsiClass testClass = (PsiClass) psiJavaFile.add(this.psiElementFactory.createClass("Test"));
+        String testedMethodName = "test";
+        PsiMethod testedMethod = this.javaTestElementUtil.createMethod(testedMethodName, "void", Collections.singletonList(PsiKeyword.PUBLIC));
+        PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("TestMethod", Collections.singletonList("@org.junit.Test")));
+        PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) testMethod.getBody().add(this.psiElementFactory.createExpressionFromText(testedMethodName + "()", testClass));
+        testedMethod = (PsiMethod) testClass.add(testedMethod);
+        PsiMethodCallExpression assertionMethodCall = (PsiMethodCallExpression) psiElementFactory.createExpressionFromText("assertionMethod()", null);
+        EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element -> true)).times(3);
+        EasyMock.expect(contextIndicator.isInProductionCodeContext()).andReturn((element -> true)).times(2);
+        EasyMock.replay(contextIndicator);
+        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethod), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
+                .andReturn(Collections.singletonList(assertionMethodCall)).times(1);
+        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject()))
+                .andReturn(Collections.singletonList(testedMethodCall)).times(1);
+        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiLiteralExpression.class), EasyMock.anyObject()))
+                .andReturn(Collections.emptyList()).times(1);
+        EasyMock.replay(elementResolver);
+
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        List<PsiMethod> result = javaMethodResolver.allTestedMethods(testMethod);
+
+        assertSame(testedMethod, result.get(0));
+    }
+
+    @Test
+    public void allTestedMethods_noAssertionMethods_ShouldNotResolveAnyMethods() {
+        PsiJavaFile psiJavaFile = this.javaTestElementUtil.createFile("Test", "com.testspector", Collections.emptyList(), Collections.emptyList());
+        PsiClass testClass = (PsiClass) psiJavaFile.add(this.psiElementFactory.createClass("Test"));
+        PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("TestMethod", Collections.singletonList("@org.junit.Test")));
+
+        EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element -> true)).times(1);
+        EasyMock.expect(contextIndicator.isInProductionCodeContext()).andReturn((element -> true)).times(2);
+        EasyMock.replay(contextIndicator);
+        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethod), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
+                .andReturn(Collections.emptyList()).times(1);
+        EasyMock.replay(elementResolver);
+
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        List<PsiMethod> result = javaMethodResolver.allTestedMethods(testMethod);
+
+        assertTrue(result.isEmpty());
     }
 
 

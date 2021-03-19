@@ -105,7 +105,7 @@ public class JavaMethodResolver {
     public boolean isGetter(PsiMethod method) {
         PsiCodeBlock body = method.getBody();
         if (body != null) {
-            Optional<PsiElement> returnCandidate = elementResolver.firstChildIgnoring(body, Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class));
+            Optional<PsiElement> returnCandidate = elementResolver.firstImmediateChildIgnoring(body, Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class));
             if (returnCandidate.isPresent() && returnCandidate.get() instanceof PsiReturnStatement) {
                 PsiReturnStatement returnStatement = (PsiReturnStatement) returnCandidate.get();
                 PsiExpression returnValueExpression = returnStatement.getReturnValue();
