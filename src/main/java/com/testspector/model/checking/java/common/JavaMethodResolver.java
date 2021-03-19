@@ -107,10 +107,13 @@ public class JavaMethodResolver {
         if (body != null) {
             Optional<PsiElement> returnCandidate = elementResolver.firstChildIgnoring(body, Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class));
             if (returnCandidate.isPresent() && returnCandidate.get() instanceof PsiReturnStatement) {
-                return elementResolver.immediateChildrenOfType(returnCandidate.get(), PsiReferenceExpression.class)
-                        .stream()
-                        .map(PsiReference::resolve)
-                        .anyMatch(element -> element instanceof PsiField);
+                PsiReturnStatement returnStatement = (PsiReturnStatement) returnCandidate.get();
+                PsiExpression returnValueExpression = returnStatement.getReturnValue();
+                if (returnValueExpression instanceof PsiReferenceExpression){
+                   return Optional.ofNullable(((PsiReferenceExpression)returnValueExpression).resolve())
+                           .filter(element -> element instanceof PsiField)
+                           .isPresent();
+                }
             }
         }
 

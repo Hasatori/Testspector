@@ -205,6 +205,38 @@ class JavaMethodResolverTest extends JavaTest {
         assertTrue(resolvedMethods.isEmpty());
     }
 
+    @Test
+    public void isGetter_methodIsSimpleGetterWhichReturnsFieldOfTheClass_ShouldReturnTrue() {
+        PsiClass psiClass = this.psiElementFactory.createClass("Test");
+        String fieldName = "name";
+        PsiField field = (PsiField) psiClass.add(this.psiElementFactory.createFieldFromText(String.format("private String %s;", fieldName), psiClass));
+        PsiMethod getterMethod = (PsiMethod) psiClass.add(this.javaTestElementUtil.createMethod("getName", "String", Collections.singletonList("public")));
+        PsiReturnStatement returnStatement = (PsiReturnStatement) getterMethod.getBody().add(this.psiElementFactory.createStatementFromText(String.format("return %s;", fieldName), psiClass));
+        EasyMock.expect(elementResolver.firstChildIgnoring(getterMethod.getBody(), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class)))
+                .andReturn(Optional.of(returnStatement)).once();
+        EasyMock.replay(elementResolver);
+
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        boolean result = javaMethodResolver.isGetter(getterMethod);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void isGetter_isComplexMethod_ShouldReturnFalse() {
+        PsiMethod complexMethod = this.javaTestElementUtil.createMethod("getName", "String", Collections.singletonList("public"));
+        PsiStatement ifStatement = (PsiStatement) complexMethod.getBody().add(this.javaTestElementUtil.createIfStatement());
+        ifStatement.add(this.psiElementFactory.createStatementFromText("String fieldName = \"name\";",complexMethod));
+        EasyMock.expect(elementResolver.firstChildIgnoring(complexMethod.getBody(), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class)))
+                .andReturn(Optional.of(ifStatement)).once();
+        EasyMock.replay(elementResolver);
+
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        boolean result = javaMethodResolver.isGetter(complexMethod);
+
+        assertFalse(result);
+    }
+
 
     private String createCustomAssertionMethod(String methodName, PsiThrowStatement assertionError) {
         return String.format("public static void %s(String expected,String actual) {\n" +
