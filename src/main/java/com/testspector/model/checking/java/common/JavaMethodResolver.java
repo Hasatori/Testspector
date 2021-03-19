@@ -92,7 +92,8 @@ public class JavaMethodResolver {
                         .ofNullable(psiThrowStatement.getException())
                         .map(PsiExpression::getType)
                         .map(type -> type.isAssignableFrom(PsiType.getTypeByName("AssertionError", method.getProject(), GlobalSearchScope.EMPTY_SCOPE)))
-                        .isPresent(), (element -> contextResolver.isInTestContext().test(element))).size() > 0)) {
+                        .isPresent(),
+                (element -> contextResolver.isInTestContext().test(element))).size() > 0)) {
             return Optional.of(method);
         }
         return Optional.empty();
