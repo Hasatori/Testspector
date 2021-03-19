@@ -50,26 +50,29 @@ public class JavaMethodResolver {
         return result.stream().distinct().collect(Collectors.toList());
     }
 
-    public List<PsiMethod> testMethodsWithAnnotations(PsiClass psiClass, List<String> annotationQualifiedNames) {
+    private List<PsiMethod> methodsWithAnnotations(PsiClass psiClass, List<String> annotationQualifiedNames) {
         return Arrays.stream(psiClass.getMethods())
-                .filter(psiMethod -> annotationQualifiedNames.stream().anyMatch(psiMethod::hasAnnotation))
+                .filter(psiMethod -> annotationQualifiedNames.stream().anyMatch(psiMethod::hasAnnotation) || (annotationQualifiedNames.isEmpty() && psiMethod.getAnnotations().length==0))
                 .collect(Collectors.toList());
     }
 
-    public List<PsiMethod> testMethodsWithAnnotations(List<PsiElement> fromElements, List<String> annotationQualifiedNames) {
+    public List<PsiMethod> methodsWithAnnotations(List<PsiElement> fromElements, List<String> annotationQualifiedNames) {
         List<PsiMethod> psiMethods = new ArrayList<>();
         for (PsiElement psiElement : fromElements) {
             if (psiElement instanceof PsiJavaFile) {
                 PsiJavaFile psiJavaFile = (PsiJavaFile) psiElement;
                 psiMethods.addAll(Arrays.stream(psiJavaFile.getClasses())
-                        .map(psiClass -> testMethodsWithAnnotations(psiClass, annotationQualifiedNames))
+                        .map(psiClass -> methodsWithAnnotations(psiClass, annotationQualifiedNames))
                         .flatMap(Collection::stream)
                         .collect(Collectors.toList()));
             } else if (psiElement instanceof PsiClass) {
                 PsiClass psiClass = (PsiClass) psiElement;
-                psiMethods.addAll(testMethodsWithAnnotations(psiClass, annotationQualifiedNames));
+                psiMethods.addAll(methodsWithAnnotations(psiClass, annotationQualifiedNames));
             } else if (psiElement instanceof PsiMethod) {
-                psiMethods.add((PsiMethod) psiElement);
+                PsiMethod method = (PsiMethod) psiElement;
+                if (annotationQualifiedNames.stream().anyMatch(method::hasAnnotation)  || (annotationQualifiedNames.isEmpty() && method.getAnnotations().length==0)){
+                    psiMethods.add((PsiMethod) psiElement);
+                }
             }
         }
         return psiMethods;

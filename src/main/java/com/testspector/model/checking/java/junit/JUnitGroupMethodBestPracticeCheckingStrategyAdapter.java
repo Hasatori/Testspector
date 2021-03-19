@@ -32,7 +32,7 @@ public class JUnitGroupMethodBestPracticeCheckingStrategyAdapter implements Best
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
-        List<PsiMethod> methods = methodResolver.testMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
+        List<PsiMethod> methods = methodResolver.methodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
         return decoratedMethodSpecificStrategies.stream()
                 .map(decoratedStrategy -> decoratedStrategy.checkBestPractices(methods))
                 .flatMap(Collection::stream)
