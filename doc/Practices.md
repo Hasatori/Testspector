@@ -16,9 +16,9 @@
 
 >   [1.3	Ověřování (kontrola)](#ověřování-(kontrola))
 
->> [1.3.1	Minimálně jedna ověřovací metoda na test](#minimálně-jedna-ověřovací-metoda-na-test)
+>> [1.3.1	Minimálně jedna ověřovací metoda na test](#minimalne-jedna-overovaci-metoda-na-test)
 
->> [1.3.2	Právě jedna ověřovací metoda na test](#právě-jedna-ověřovací-metoda-na-test)
+>> [1.3.2	Právě jedna ověřovací metoda na test](#prave-jedna-overovaci-metoda-na-test)
 
 >> [1.3.3	Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)](#nepoužívat-strážní-ověřovací-metody-(tzv.-guard-assertion))
 
@@ -52,17 +52,17 @@
 
 >   [1.7	Testování výjimek](#testování-výjimek)
 
->> [1.7.1	Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích frameworků](#odchytávat-testované-výjimky-pomocí-nástrojů-knihoven-či-testovacích-frameworků)
+>> [1.7.1	Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích frameworků](#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
 
 >> [1.7.2	Stanovovat obecnou úroveň pro výjimky testovací metody](#stanovovat-obecnou-úroveň-pro-výjimky-testovací-metody)
 
->   [1.8	Podmíněná logika](#podmíněná-logika)
+>   [1.8	Podmíněná logika](#podminena-logika)
 
->> [1.8.1	Nepoužívat bloky if, else, switch, for či while v rámci testu](#nepoužívat-bloky-if,-else,-switch,-for-či-while-v-rámci-testu)
+>> [1.8.1	Nepoužívat bloky if, else, switch, for či while v rámci testu](#nepouzivat-bloky-if,-else,-switch,-for-ci-while-v-ramci-testu)
 
 >   [1.9	Pojmenování](#pojmenování)
 
->> [1.9.1	Určit strategii pojmenování testů](#určit-strategii-pojmenování-testů)
+>> [1.9.1	Určit strategii pojmenování testů](#urcit-strategii-pojmenovani-testu)
 
 >> [1.9.2	Zachovat konzistentní pojmenování testů](#zachovat-konzistentní-pojmenování-testů)
 
@@ -90,7 +90,7 @@
 
 >   [1.11	Nezávislost](#nezávislost)
 
->> [1.11.1	Nepoužívat globální statické proměnné](#nepoužívat-globální-statické-proměnné)
+>> [1.11.1	Nepoužívat globální statické proměnné](#nepouzivat-globalni-staticke-promenne)
 
 >> [1.11.2	Nepoužívat znalost domény](#nepoužívat-znalost-domény)
 
@@ -122,7 +122,7 @@
 
 >> [2.1.4	Netestovat abstraktní systémy](#netestovat-abstraktní-systémy)
 
->> [2.1.5	Testovat pouze veřejné chování testovaného systému](#testovat-pouze-veřejné-chování-testovaného-systému)
+>> [2.1.5	Testovat pouze veřejné chování testovaného systému](#testovat-pouze-verejne-chovani-testovaneho-systemu)
 
 >> [2.1.6	Testovat chování, ne metody systému](#testovat-chování,-ne-metody-systému)
 
@@ -274,14 +274,14 @@ Nejlepší postupy týkající se ověřování (kontroly) jsou následující:
 
 -   Zachovávat jednoduchost ověřovací metody
 
-### Minimálně jedna ověřovací metoda na test
+<h3 id="minimalne-jedna-overovaci-metoda-na-test">Minimálně jedna ověřovací metoda na test</h3>
 
 Každý test by měl obsahovat minimálně jednu testovací metodu, tedy měli bychom
 se vyvarovat případům, kdy tělo testovací metody neobsahuje žádnou metodu
 ověřování nebo je dokonce úplně prázdné. Řada testovacích frameworků takové
 testy reportuje jako prošlé, což povede k falešnému reportování výsledků testů.
 
-### Právě jedna ověřovací metoda na test
+<h3 id="prave-jedna-overovaci-metoda-na-test">Právě jedna ověřovací metoda na test</h3>
 
 Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy
 (Turnquist a Das 2018), (Meszaros 2007), (Powerhouse 2018) a (Acharya 2014)
@@ -504,7 +504,7 @@ Nejlepší postupy týkající se testování výjimek jsou následující:
 
 -   Stanovovat obecnou úroveň pro výjimky testovací metody
 
-### Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích frameworků
+<h3 id="odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku">Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích frameworků</h3>
 
 Testování vyhození výjimky testovaným systémem je možno standartně pomocí bloků
 pro zachytávání výjimek *try* a *catch*. Tento způsob však není doporučován vede
@@ -534,7 +534,7 @@ vrcholu hierarchie, tedy například pro programovací jazyk c++ se jedná o tř
 *exception*. Tento přístup zajistí že bude zachycena jakákoliv možná výjimka,
 která by mohla být testovací metodou vyhozena.
 
-## Podmíněná logika
+<h2 id="podminena-logika">Podmíněná logika</h2>
 
 Tato podsekce řeší otázku použití podmíněné logiky uvnitř testovacího kódu.
 
@@ -582,7 +582,7 @@ Nejlepší postupy týkající se pojmenování jsou následující:
 
 -   Používat jména vyjadřující záměr
 
-### Určit strategii pojmenování testů
+<h3 id="urcit-strategii-pojmenovani-testu">Určit strategii pojmenování testů</h3>
 
 Existuje několik doporučených strategií, které lze použít pro pojmenování testů.
 Například (Langr et al. 2015) doporučuje způsoby:
@@ -779,7 +779,7 @@ Nejlepší postupy týkající se nezávislosti jsou následující:
 
 -   Tvořit vlastní data a zdroje
 
-### Nepoužívat globální statické proměnné
+<h3 id="nepouzivat-globalni-staticke-promenne">Nepoužívat globální statické proměnné</h3>
 
 Napříč jednotlivými testy bychom neměly používat a upravovat globální statické
 proměnné. Testy sdílejí referenci na stejnou proměnnou a pokud ji některý
@@ -975,7 +975,7 @@ provést další inspekce kodu. Obecně však platí že tento postup je nutné
 aplikovat v případě, že máme pouze abstraktní třídu a ta zatím nemá žádné
 potomky.
 
-### Testovat pouze veřejné chování testovaného systému
+<h3 id="testovat-pouze-verejne-chovani-testovaneho-systemu">Testovat pouze veřejné chování testovaného systému</h3>
 
 Platí doporučení, že bychom vždy měli vždy testovat pouze veřejné chování
 testovaného systému, které bývá vyjádřeno pomocí veřejných metod. Implementace
