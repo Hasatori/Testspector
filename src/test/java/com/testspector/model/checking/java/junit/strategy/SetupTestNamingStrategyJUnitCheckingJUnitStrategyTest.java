@@ -62,6 +62,7 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
                                 "Possible strategy: 'someResultOccursUnderSomeCondition'",
                                 "Possible strategy: 'given-when-then'",
                                 "Possible strategy: 'givenSomeContextWhenDoingSomeBehaviorThenSomeResultOccurs'",
+                                "Possible strategy: 'whatIsTested_conditions_expectedResult'",
                                 "Chosen naming strategy is subjective. The key thing to remember is that name of the test should say: What is tests, What are the conditions, What is expected result"
                         ),
                         Arrays.asList(
