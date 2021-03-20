@@ -1,7 +1,7 @@
 # Testspector ![Generic badge](https://img.shields.io/github/license/Hasatori/Testspector)  ![Version](https://img.shields.io/jetbrains/plugin/v/org.example.Testspector)
 
 
-Testspector is a plugin for checking quality of unit tests. It contains a dataset of 62 best practices which should be followed when writing unit tests. The unit tests are checked against the dataset and any violation is reported to the user. User is provided with description do the problem, hints how to solve it and also parts of code causing the problem. 
+Testspector is an IndelliJ IDEA plugin for checking quality of unit tests. It contains a dataset of 62 best practices which should be followed when writing unit tests. The unit tests are checked against the dataset and any violation is reported to the user. User is provided with description do the problem, hints how to solve it and also parts of code causing the problem. 
 Report also contains links to the documentation where are all best practices described with examples (the documentation can be found here: ![Best practices](./doc/Practices.md) - The documentation is only in czech. Translation is in progress) 
 
 ## Supportability
