@@ -1,19 +1,24 @@
 package com.testspector.view.report;
 
-import com.testspector.HeavyTestBase;
 import com.testspector.model.enums.BestPractice;
 import com.testspector.view.CustomIcon;
 import org.easymock.EasyMock;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.net.URI;
 
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-public class TreeReportCellRendererTest extends HeavyTestBase {
+
+@RunWith(JUnitPlatform.class)
+public class TreeReportCellRendererTest {
 
     private TreeReportCellRenderer treeReportCellRenderer;
 
@@ -32,7 +37,7 @@ public class TreeReportCellRendererTest extends HeavyTestBase {
 
         assertAll(
                 () -> assertEquals("Different wrapper node name", wrapperNodeName, renderComponent.getText()),
-                () -> assertSame("Different wrapper node icon", CustomIcon.PACKAGE.getBasic(), renderComponent.getIcon())
+                () -> Assertions.assertSame(CustomIcon.PACKAGE.getBasic(), renderComponent.getIcon(), "Different wrapper node icon")
         );
     }
 
@@ -129,13 +134,13 @@ public class TreeReportCellRendererTest extends HeavyTestBase {
 
     @Test
     public void getTreeCellRendererComponent_renderedObjectIsDefaultMutableTreeNode_ShouldReturnEmptyLabel() {
-       DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode();
+        DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode();
 
         JLabel renderComponent = (JLabel) this.treeReportCellRenderer.getTreeCellRendererComponent(null, defaultMutableTreeNode, false, false, false, 0, false);
 
         assertAll(
-                () -> assertEquals("No text should be present","", renderComponent.getText()),
-                () -> assertNull("No icon should be present",  renderComponent.getIcon())
+                () -> assertEquals("No text should be present", "", renderComponent.getText()),
+                () -> assertNull("No icon should be present", renderComponent.getIcon())
         );
     }
 }
