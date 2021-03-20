@@ -39,7 +39,7 @@ public class JavaTestElementUtil {
     }
 
     public PsiMethod createMethod(String name, String returnType, List<String> accessModifiers) {
-        return createMethod(name, returnType, null, accessModifiers);
+        return createMethod(name, returnType, "", accessModifiers);
     }
 
     public PsiMethod createMethod(String name, String returnType, String content, List<String> accessModifiers) {

@@ -10,13 +10,6 @@ import java.util.stream.Collectors;
 
 public class JavaElementResolver {
 
-    public <T extends PsiElement> List<T> immediateChildrenOfType(PsiElement psiElement, Class<T> elementType) {
-        return Arrays.stream(psiElement.getChildren())
-                .filter(elementType::isInstance)
-                .map(elementType::cast)
-                .collect(Collectors.toList());
-    }
-
 
     public <T extends PsiElement> List<T> allChildrenOfType(PsiElement psiElement, Class<T> elementType) {
         return allChildrenOfType(psiElement, elementType, t -> true, t -> false);
