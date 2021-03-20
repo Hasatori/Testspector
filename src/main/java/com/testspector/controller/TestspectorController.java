@@ -239,5 +239,6 @@ public final class TestspectorController {
         if (toolWindow.getContentManager().getContentCount() > 1) {
             toolWindow.getContentManager().selectNextContent();
         }
+        toolWindow.show(()->{});
     }
 }
