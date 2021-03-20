@@ -1,6 +1,6 @@
 # Obsah
 
-[1	Vytváření testů](#vytváření-testů)
+[1	Vytváření testů](#vytvareni-testu)
 
 >   [1.1	Práce s duplicitami](#práce-s-duplicitami)
 
@@ -150,7 +150,7 @@
 
 **![](Dropbox/Vysoka_skola/Magisterske_studium/Diplomova_prace/media/e75f34a382eac9c11065578930414b8b.jpeg)**
 
-# Vytváření testů
+<h1 id="vytvareni-testu">Vytváření testů</h1>
 
 Tato podkapitola obsahuje nejlepší postupy zabývající se tvorbou jednotkových
 testů. Pomyslně odpovídá na otázku „Jak by měli testy a testovací kód vypadat?“,
