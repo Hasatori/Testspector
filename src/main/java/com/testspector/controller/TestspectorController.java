@@ -37,8 +37,8 @@ public final class TestspectorController {
 
     private static final String TOOL_WINDOW_NAME = "Testspector";
     private static final String CANCELING_MESSAGE = "Cancelling...";
-    private static final String RERUNNING_MESSAGE = "Rerunning inspection on";
-    private static final String INSPECTION_LOADING_MAIN_HEADING = "Inspecting Unit Tests for";
+    private static final String RERUNNING_MESSAGE = "Rerunning inspection in";
+    private static final String INSPECTION_LOADING_MAIN_HEADING = "Inspecting Unit Tests in";
     private static final String CREATING_REPORT_MESSAGE = "Creating report...";
     private final Project project;
 
