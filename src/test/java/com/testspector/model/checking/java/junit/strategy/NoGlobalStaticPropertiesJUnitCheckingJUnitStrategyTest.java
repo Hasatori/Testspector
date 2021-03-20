@@ -40,7 +40,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
 
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).times(2);
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethod), EasyMock.eq(PsiField.class), EasyMock.anyObject())).andReturn(Collections.singletonList(staticNotFinalStringConstant)).times(1);
+        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethod), EasyMock.eq(PsiField.class),EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.singletonList(staticNotFinalStringConstant)).times(1);
         EasyMock.expect(elementResolver.allChildrenOfType(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(methodCallingTheConstant.getMethodExpression())).times(1);
         EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(methodCallingTheConstant), EasyMock.eq(PsiField.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.singletonList(staticNotFinalStringConstant)).times(1);
@@ -81,7 +81,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
         testMethod = (PsiMethod) testClass.add(testMethod);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).times(1);
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethod), EasyMock.eq(PsiField.class), EasyMock.anyObject())).andReturn(Collections.singletonList(staticFinalStringConstant)).times(1);
+        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethod), EasyMock.eq(PsiField.class),EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.singletonList(staticFinalStringConstant)).times(1);
         EasyMock.replay(elementResolver);
 
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);

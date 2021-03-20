@@ -44,7 +44,7 @@ public class JavaElementResolver {
                     PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
                     if (referencedElement != null && !visited.contains(referencedElement)) {
                         if (fromReferencesMeetingCondition.test(referencedElement)) {
-                            if (elementType.isInstance(referencedElement)) {
+                            if (elementType.isInstance(referencedElement) && typeCondition.test(elementType.cast(child))) {
                                 result.add(elementType.cast(referencedElement));
                             }
                             visited.add(referencedElement);
