@@ -218,14 +218,11 @@ samostatné třídy, a tu poté přidělit jako rodiče těchto testovacích tř
 ## Rychlost
 
 Vysoká rychlost je jednou z 5 základních vlastností, které by správný jednotkový
-test měl mít[^1]. Pokud vycházíme z testovací pyramidy agilního vývoje (viz 2.3
+test měl mít. Pokud vycházíme z testovací pyramidy agilního vývoje (viz 2.3
 Význam jednotkového testování pro vývoj software), tak jednotkové testy jsou na
 nejnižší úrovní, je jich největší množství a pouštějí se nejčastěji. Z těchto
 důvodů je nutné zajistit jejich co možná nejvyšší rychlost a vyhnout se akcím,
 které prodlužují dobu běhu testu.
-
-[^1]: Těchto 5 základních principů, které by správný jednotkový test měl splňovat
-    je známo pod zkratkou F.I.R.S.T (Martin 2009)
 
 Nejlepší postupy týkající se rychlosti jsou následující:
 
