@@ -36,6 +36,7 @@ public class TreeReportMouseListener implements MouseListener {
                 LinkNode linkNode = (LinkNode) clickedNode;
                 try {
                     Desktop.getDesktop().browse(linkNode.getUri().normalize());
+                    root.getSelectionModel().clearSelection();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
