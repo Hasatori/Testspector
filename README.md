@@ -32,6 +32,6 @@ Install the plugin by going to ``Settings -> Plugins -> Browse repositories`` an
 
       ![usage from file.png](./doc/usage_from_file.png)
 
-2. Report showing broken best practices is generated. In some cases there are hints suggesting how the problem can be solved. In case when you need more information about the best practice there is also a link to the documentation.
+2. Report showing violated best practices is generated. In some cases there are hints suggesting how the problem can be solved. In case when you need more information about the best practice there is also a link to the documentation.
 
       ![usage_report.png](./doc/usage_report.png)
