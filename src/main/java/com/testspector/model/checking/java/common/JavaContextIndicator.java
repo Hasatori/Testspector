@@ -18,7 +18,13 @@ public class JavaContextIndicator {
 
     public Predicate<PsiElement> isInProductionCodeContext() {
         return element -> getVirtualFileFromElement(element)
-                .map(ProjectRootManager.getInstance(element.getProject()).getFileIndex()::isInSource)
+                .map(virualFie-> ProjectRootManager
+                        .getInstance(element.getProject())
+                        .getFileIndex().isInSourceContent(virualFie) &&
+                !ProjectRootManager
+                        .getInstance(element.getProject())
+                        .getFileIndex().isInTestSourceContent(virualFie)
+                )
                 .orElse(false);
     }
 
