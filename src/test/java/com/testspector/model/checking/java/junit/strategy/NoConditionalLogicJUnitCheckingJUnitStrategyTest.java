@@ -66,8 +66,9 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
                         String.format("%s#%s", testMethodWithStatement.getContainingClass().getQualifiedName(), testMethodWithStatement.getName()),
                         testMethodWithStatement,
                         testMethodWithStatement.getNameIdentifier().getTextRange(),
-                        "Conditional logic should not be part of the test method, it makes test hard to understand and read.",
-                        Collections.singletonList("Remove statements and create separate test scenario for each branch"),
+                        "Conditional logic should not be part of the test method, it makes test hard to understand, read and maintain.",
+                       Arrays.asList("Remove statements [ if, while, switch, for, forEach ] and create separate test scenario for each branch",
+                               "Acceptable place where conditional logic can be are custom assertions, where base on inputs we decide if we throw exception or not"),
                         Arrays.asList(
                                 new RelatedElementWrapper(String.format("%s ...%d - %d...", statementName, testMethodStatement.getTextRange().getStartOffset(), testMethodStatement.getTextRange().getEndOffset()), new HashMap<PsiElement, String>() {{
                                     put(testMethodStatement, "statement");

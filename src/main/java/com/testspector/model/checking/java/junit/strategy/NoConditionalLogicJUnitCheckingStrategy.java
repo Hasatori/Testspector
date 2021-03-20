@@ -51,16 +51,19 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             statements = statements.stream().distinct().collect(Collectors.toList());
             if (statements.size() > 0) {
                 List<String> hints = new ArrayList<>();
-                hints.add("Remove statements and create separate test scenario for each branch");
+                hints.add(String.format("Remove statements [ %s ] and create separate test scenario for each branch",
+                        SUPPORTED_STATEMENT_CLASSES.stream()
+                                .map(this::statementString).collect(Collectors.joining(", "))));
+                hints.add("Acceptable place where conditional logic can be are custom assertions, where base on inputs we decide if we throw exception or not");
                 if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
-                    hints.add(String.format("You are using JUnit5 so it can be solved by using %s", JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH));
+                    hints.add(String.format("You are using JUnit5 so the problem can be solved by using data driven approach and generating each scenario using %s", JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH));
                 }
                 PsiIdentifier methodIdentifier = method.getNameIdentifier();
                 bestPracticeViolations.add(new BestPracticeViolation(
                                 String.format("%s#%s", method.getContainingClass().getQualifiedName(), method.getName()),
                                 method,
                                 methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
-                                "Conditional logic should not be part of the test method, it makes test hard to understand and read.",
+                                "Conditional logic should not be part of the test method, it makes test hard to understand, read and maintain.",
                                 hints,
                                 getCheckedBestPractice().get(0),
                                 createRelatedElements(method, statements)
@@ -80,7 +83,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     Predicate<PsiStatement> partOfAssertionMethod() {
         return psiStatement -> {
             PsiElement element = psiStatement.getContext();
-            while (element instanceof PsiCodeBlock){
+            while (element instanceof PsiCodeBlock) {
                 element = element.getContext();
             }
             if (element instanceof PsiMethod) {
@@ -127,6 +130,21 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             return "switch";
         }
         throw new InvalidParameterException(String.format("Invalid statement instance %s. Supported instances are: %s", statement.getClass(), SUPPORTED_STATEMENT_CLASSES));
+    }
+
+    private String statementString(Class<? extends PsiStatement> statementClass) {
+        if (PsiIfStatement.class == statementClass) {
+            return "if";
+        } else if (PsiForStatement.class == statementClass) {
+            return "for";
+        } else if (PsiForeachStatement.class == statementClass) {
+            return "forEach";
+        } else if (PsiWhileStatement.class == statementClass) {
+            return "while";
+        } else if (PsiSwitchStatement.class == statementClass) {
+            return "switch";
+        }
+        throw new InvalidParameterException(String.format("Invalid statement instance %s. Supported instances are: %s", statementClass, SUPPORTED_STATEMENT_CLASSES));
     }
 
     @Override
