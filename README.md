@@ -16,7 +16,7 @@ A current version of the plugin supports checking of the following 7 best practi
 * ![No global static constants](./doc/Practices.md#nepouzivat-globalni-staticke-promenne)
 * ![Set up a test naming strategy](./doc/Practices.md#urcit-strategii-pojmenovani-testu)
 * ![Catch tested exceptions using framework tools](./doc/Practices.md#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
-* ![No conditional logic](./doc/Practices.md#nepouzivat-bloky-if,-else,-switch,-for-ci-while-v-ramci-testu)
+* ![No conditional logic](./doc/Practices.md#podminena-logika)
 
 
 # Install
