@@ -26,11 +26,11 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     type 'IU'
-    version = '2019.2'
+    version = '2019.3'
     plugins = ['com.intellij.java', "JavaScriptLanguage","JavaScriptDebugger"]
 }
 patchPluginXml {
-    sinceBuild="192"
+    sinceBuild="193"
     untilBuild = "211"
 }
 
