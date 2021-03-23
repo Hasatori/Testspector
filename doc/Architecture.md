@@ -4,7 +4,7 @@
 
 ![architecture detail](./Class_diagram_global_detailed.png)
 
-Z ákladem celého řešení je softwarová architektura MVC: 
+Základem celého řešení je softwarová architektura MVC: 
  * Třídy zajišťující vykreslování výsledků informací uživateli jsou uloženy v balíčku ``com.testspector.view``
  * Veškerá logika pro kontrolu a tvorbu dat je uložena v balíčku ``com.testspector.model``
  * Obě vrstvy jsou následně řízeny a propojeny pomocí tříd uložených v balíčku ``com.testspector.controller``
