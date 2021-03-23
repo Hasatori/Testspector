@@ -2,7 +2,7 @@
 
 ## Obecný popis architektury
 
-![architecture detail](./Class diagram global detailed.png)
+![architecture detail](./Class_diagram_global_detailed.png)
 
 Z ákladem celého řešení je softwarová architektura MVC: 
  * Třídy zajišťující vykreslování výsledků informací uživateli jsou uloženy v balíčku ``com.testspector.view``
@@ -23,10 +23,10 @@ Jak je možné si všimnout, tak základem celého řešení jsou návrhové vzo
 ### Datailní návrh architektury
 
 
-![architecture detail](./Class diagram global detailed factories.png)
+![architecture detail](./Class_diagram_global_detailed_factories.png)
 
-![architecture detail](./Class diagram global detailed view.png)
+![architecture detail](./Class_diagram_global_detailed_view.png)
 
 ## Architektura implementace pro testovací framework JUnit
 
-![architecture detail](./Class diagram global detailed junit.png)
+![architecture detail](./Class_diagram_global_detailed_junit.png)
