@@ -35,17 +35,21 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
-        for (PsiMethod method : methods) {
-            List<PsiMethod> notPublicMethods = methodResolver.allTestedMethods(method)
+        for (PsiMethod testMethod : methods) {
+            List<PsiMethod> notPublicMethods = methodResolver
+                    .allTestedMethods(testMethod)
                     .stream()
-                    .filter(testedMethod -> methodHasModifier(testedMethod, "protected") || isMethodPackagePrivate(testedMethod) || methodHasModifier(testedMethod, "private"))
+                    .filter(testedMethod ->
+                            methodHasModifier(testedMethod, "protected") ||
+                                    isMethodPackagePrivate(testedMethod) ||
+                                    methodHasModifier(testedMethod, "private"))
                     .collect(Collectors.toList());
-            PsiIdentifier methodIdentifier = method.getNameIdentifier();
+            PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
             if (notPublicMethods.size() > 0) {
                 bestPracticeViolations.add(new BestPracticeViolation(
-                        String.format("%s#%s", method.getContainingClass().getQualifiedName(), method.getName()),
-                        method,
-                        methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
+                        String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                        testMethod,
+                        methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
                         "Only public behaviour should be tested. Testing 'private','protected' or 'package private' methods leads to problems with maintenance of tests because this private behaviour is likely to be changed very often. " +
                                 "In many cases we are refactoring private behaviour without influencing public behaviour of the class, yet this changes will change behaviour of the private method and cause tests to fail.",
                         Arrays.asList(
@@ -54,7 +58,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                                 "If you really feel that private behaviour is complex enough that there should be separate test for it, then it is very probable that the system under test is breaking 'Single Responsibility Principle' and this private behaviour should be extracted to a separate system"
                                 ),
                         getCheckedBestPractice().get(0),
-                        createRelatedElements(method, notPublicMethods)
+                        createRelatedElements(testMethod, notPublicMethods)
                 ));
             }
         }
@@ -93,9 +97,9 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
 
 
     private Optional<PsiReferenceExpression> firstReferenceToMethod(PsiElement element, PsiMethod notPublicMethod) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfType(element, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(element, PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfType(
+            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     reference.getParent(),
                     PsiMethodCallExpression.class,
                     psiMethodCallExpression -> psiMethodCallExpression.resolveMethod() != null && psiMethodCallExpression.resolveMethod() == notPublicMethod,

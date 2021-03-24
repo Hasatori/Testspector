@@ -47,8 +47,8 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
         EasyMock.expect(methodResolver.allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfType(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                 .andReturn(Collections.singletonList(testedMethodCall)).times(1);
         EasyMock.replay(elementResolver, methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(

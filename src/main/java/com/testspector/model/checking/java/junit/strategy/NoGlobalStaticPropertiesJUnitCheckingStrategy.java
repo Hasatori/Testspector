@@ -37,7 +37,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
 
         for (PsiMethod method : methods) {
             List<PsiField> staticProperties = elementResolver
-                    .allChildrenOfType(method, PsiField.class,(psiField -> !(psiField instanceof PsiEnumConstant)), contextIndicator.isInTestContext())
+                    .allChildrenOfTypeMeetingConditionWithReferences(method, PsiField.class,(psiField -> !(psiField instanceof PsiEnumConstant)), contextIndicator.isInTestContext())
                     .stream()
                     .filter(isStaticAndNotFinal())
                     .collect(Collectors.toList());
@@ -88,9 +88,9 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
 
 
     private Optional<PsiReferenceExpression> firstReferenceToGlobalStaticProperty(PsiElement element, PsiField psiField) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfType(element, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(element, PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfType(reference.getParent(), PsiField.class, field -> psiField == field, contextIndicator.isInTestContext()).isEmpty()) {
+            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(reference.getParent(), PsiField.class, field -> psiField == field, contextIndicator.isInTestContext()).isEmpty()) {
                 return Optional.of(reference);
             }
         }

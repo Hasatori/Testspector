@@ -46,7 +46,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
         for (PsiMethod method : methods) {
-            List<PsiStatement> statements = elementResolver.allChildrenOfType(method, PsiStatement.class, isConditionalStatement().and(partOfAssertionMethod().negate()), contextResolver.isInTestContext());
+            List<PsiStatement> statements = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(method, PsiStatement.class, isConditionalStatement().and(partOfAssertionMethod().negate()), contextResolver.isInTestContext());
 
             statements = statements.stream().distinct().collect(Collectors.toList());
             if (statements.size() > 0) {
@@ -108,9 +108,9 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     }
 
     private Optional<PsiReferenceExpression> firstReferenceToConditionalStatement(PsiMethod method, PsiStatement statement) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfType(method, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(method, PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfType(reference.getParent(), PsiStatement.class, psiStatement -> statement == psiStatement, contextResolver.isInTestContext()).isEmpty()) {
+            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(reference.getParent(), PsiStatement.class, psiStatement -> statement == psiStatement, contextResolver.isInTestContext()).isEmpty()) {
                 return Optional.of(reference);
             }
         }

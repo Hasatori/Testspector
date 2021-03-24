@@ -89,14 +89,14 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
 
 
     private Optional<PsiReferenceExpression> firstReferenceToMethodWithAlmostSameName(PsiElement element, PsiMethod methodWithAlmostSameName) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfType(element, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(element, PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfType(
+            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     reference.getParent(),
                     PsiMethodCallExpression.class,
                     psiMethodCallExpression -> psiMethodCallExpression.resolveMethod() != null && psiMethodCallExpression.resolveMethod() == methodWithAlmostSameName,
                     contextIndicator.isInTestContext()).isEmpty()
-                    || !elementResolver.allChildrenOfType(
+                    || !elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     reference.getParent(),
                     PsiLiteralExpression.class,
                     psiLiteralExpression -> Arrays.stream(ReferenceProvidersRegistry.getReferencesFromProviders(psiLiteralExpression))

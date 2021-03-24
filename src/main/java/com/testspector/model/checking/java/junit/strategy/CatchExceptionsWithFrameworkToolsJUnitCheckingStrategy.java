@@ -37,7 +37,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod method : methods) {
-            List<PsiTryStatement> psiTryStatements = elementResolver.allChildrenOfType(method, PsiTryStatement.class,contextResolver.isInTestContext());
+            List<PsiTryStatement> psiTryStatements = elementResolver.allChildrenOfTypeWithReferences(method, PsiTryStatement.class,contextResolver.isInTestContext());
             if (psiTryStatements.size() > 0) {
                 List<String> hints = new ArrayList<>();
                 String message = "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.";
@@ -80,9 +80,9 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     }
 
     private Optional<PsiReferenceExpression> firstReferenceToTryStatement(PsiElement element, PsiTryStatement statement) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfType(element, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(element, PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfType(reference.getParent(), PsiStatement.class, psiStatement -> statement == psiStatement, contextResolver.isInTestContext()).isEmpty()) {
+            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(reference.getParent(), PsiStatement.class, psiStatement -> statement == psiStatement, contextResolver.isInTestContext()).isEmpty()) {
                 return Optional.of(reference);
             }
         }
