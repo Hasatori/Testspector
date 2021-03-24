@@ -324,7 +324,7 @@ pak zvykem přidávat tyto kontroly v podobě ověřovacích metod i do testovac
 kódu. To je však zbytečné, protože pokud by kontrola nebyla přítomna, test by
 selhal a chybové hlášení by bylo součástí reportu. Je doporučeno tyto nadbytečné
 ověřovací metody vůbec nepoužívat, jelikož neposkytují žádnou přidanou hodnotu a
-pouze zbytečně nafukují tělo testovací metody (Koskela 2013).
+pouze zbytečně nafukují tělo testovací metody [(Koskela 2013)](#koskela_2013).
 
 ### Dodržovat správné pořadí parametrů ověřovací metody
 
@@ -1163,3 +1163,7 @@ obr. 16 Ukázka použití rozhodovací tabulky pro specifikaci testovacích př�
 (autor)
 
 ![16.png](16.png)
+
+# Literatura
+<p id="koskela_2013">KOSKELA, Lasse, 2013. Effective unit testing: a guide for Java developers. Shelter Island, NY: Manning. ISBN 978-1-935182-57-3</p>
+
