@@ -283,14 +283,9 @@ testy reportuje jako prošlé, což povede k falešnému reportování výsledk�
 
 <h3 id="prave-jedna-overovaci-metoda-na-test">Právě jedna ověřovací metoda na test</h3>
 
-Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy
-(Turnquist a Das 2018), (Meszaros 2007), (Powerhouse 2018) a (Acharya 2014)
-přistupuje k problematice poměrně dogmaticky a zastávají pravidlo že by test měl
-selhat pouze z jednoho důvodu. Vyžadují vždy pouze jednu ověřovací metodu na
-test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují
-rozdělit do více testovacích metod. Více testovacích metod vede k horší
-čitelnosti testu a způsobuje také jeho horší udržovatelnost. Na druhé straně
-jsou autoři [(Martin 2009)](#978-0-13-235088-4), (Khorikov a Safari 2020), (Langr a Swaine 2013) a
+Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy (Turnquist a Das 2018), (Meszaros 2007), (Powerhouse 2018) a (Acharya 2014) přistupuje k problematice poměrně dogmaticky a vyžadují vždy pouze jednu ověřovací metodu na test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují rozdělit do více testovacích metod. Více testovacích metod vede k horší čitelnosti testu a způsobuje také jeho horší udržovatelnost. 
+
+Na druhé straně jsou autoři [(Martin 2009)](#978-0-13-235088-4), (Khorikov a Safari 2020), (Langr a Swaine 2013) a
 (Tarlinder 2016), kteří pravidlo považují pravidlo za příliš drakonické a
 doporučují o celé problematice přemýšlet spíše z pohledu testování jedné
 jednotky chování testovaného systému. Testování jedné jednotky chování může vést
@@ -303,17 +298,7 @@ pro otestování jednoho chování. Obecně však i tato skupina autorů zastáv
 že bychom neměli počet ověřovacích metod bezmyšlenkovitě zvyšovat a obecně čím
 méně tím lépe.
 
-V souvislosti s více ověřovacími podmínkami je také nutné zmínit další problém,
-který je potřeba zohlednit. Řada testovacích frameworků, jako například JUnit,
-označí test jako celek za selhaný, už po selhání první ověřovací metody. To
-představuje veliký problém, protože i přes to že je test napsaný tak aby
-testoval pouze jednu jednotku chování testovaného systému, neboli více
-ověřovacích metod by se mohlo zdát na místě, tak výsledek je zavádějící a my
-nemáme přehled o všech chybových hlášeních. Problém je pak nutné řešit postupným
-zakomentováním jednotlivých ověřovacích metod a znovu opakovaným pouštěním
-testu. Pokud to daný programovací jazyk a framework nabízí, lze problému
-předejít použitím metod pro dávkové vyhodnocování ověřovacích metod. Příkladem
-je metoda assertAll(), která je dostupná pro framework JUnit verze 5.
+V souvislosti s více ověřovacími podmínkami je také nutné zmínit další problém, který je potřeba zohlednit. Řada testovacích frameworků, jako například JUnit, označí test jako celek za selhaný, už po selhání první ověřovací metody. To představuje veliký problém, protože i přes to že je test napsaný tak aby testoval pouze jednu jednotku chování testovaného systému, neboli více ověřovacích metod by se mohlo zdát na místě, tak výsledek je zavádějící a my nemáme přehled o všech chybových hlášeních. Problém je pak nutné řešit postupným zakomentováním jednotlivých ověřovacích metod a znovu opakovaným pouštěním testu. Test by měl jako celek selhat jako celek a pouze z jednoho důvodu. V takovém případě je použití více ověřovacích metod chybou. Řešením problému je použití metod pro dávkové vyhodnocování ověřovacích metod. Příkladem je metoda assertAll(), která je dostupná pro testovací framework JUnit verze 5. 
 
 ### Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)
 
