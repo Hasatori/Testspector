@@ -36,21 +36,34 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
 
 
         for (PsiMethod method : methods) {
-            List<PsiField> staticProperties = elementResolver
-                    .allChildrenOfTypeMeetingConditionWithReferences(method, PsiField.class,(psiField -> !(psiField instanceof PsiEnumConstant)), contextIndicator.isInTestContext())
-                    .stream()
-                    .filter(isStaticAndNotFinal())
-                    .collect(Collectors.toList());
+            List<PsiField> staticProperties = new ArrayList<>(elementResolver
+                    .allChildrenOfTypeMeetingConditionWithReferences(
+                            method,
+                            PsiField.class,
+                            (psiField ->
+                                    !(psiField instanceof PsiEnumConstant)
+                                    && isStaticAndNotFinal().test(psiField)
+                            ),
+                            contextIndicator.isInTestContext()));
             PsiIdentifier methodIdentifier = method.getNameIdentifier();
             if (staticProperties.size() > 0) {
                 bestPracticeViolations.add(new BestPracticeViolation(
-                        String.format("%s#%s", method.getContainingClass().getQualifiedName(), method.getName()),
+                        String.format("%s#%s",
+                                method.getContainingClass().getQualifiedName(),
+                                method.getName()),
                         method,
-                        methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
-                        "Global static properties should not be part of a test. Tests are sharing the reference and if some of them would update it it might influence behaviour of other tests.",
+                        methodIdentifier != null ?
+                                methodIdentifier.getTextRange() :
+                                method.getTextRange(),
+                        "Global static properties should not be part of a test. " +
+                                "Tests are sharing the reference and if some of them would update" +
+                                " it might influence behaviour of other tests.",
                         Arrays.asList(
-                                "If the property is immutable e.g.,String, Integer, Byte, Character etc. then you can add 'final' identifier so that tests can not change reference",
-                                "If the property is mutable then delete static modifier and make property reference unique for each test."),
+                                "If the property is immutable e.g.,String, Integer, Byte, Character" +
+                                        " etc. then you can add 'final' identifier so that tests can " +
+                                        "not change reference",
+                                "If the property is mutable then delete static modifier " +
+                                        "and make property reference unique for each test."),
                         getCheckedBestPractice().get(0),
                         createRelatedElements(method, staticProperties)
                 ));

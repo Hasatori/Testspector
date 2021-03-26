@@ -37,8 +37,10 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
             "'getName' | 'getNameTest'        | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
             "'getName' | 'test_GetName'       | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
             "'getName' | 'GetName_test'       | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
+            "'g' | 'g_test'               | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
+            "'run' | 'test_Run'                | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
     }, delimiter = '|')
-    public void checkBestPractices_TestNameTooSimilarOrTooDifferent_OneViolationReportingAboutTestNamingStrategyShouldBeReturned(String testName, String testedMethodName, String problemDescription) {
+    public void checkBestPractices_TestNameTooSimilarOrTooDifferent_OneViolationReportingAboutTestNamingStrategyShouldBeReturned(String testedMethodName, String testName, String problemDescription) {
         // Given
         PsiMethod testedMethod = this.javaTestElementUtil.createMethod(testedMethodName, "String", Collections.singletonList(PsiKeyword.PUBLIC));
         PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) this.psiElementFactory.createExpressionFromText(String.format("%s()", testedMethodName), null);
