@@ -44,10 +44,10 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                 List<PsiMethod> methodsWithAlmostSameName = allTestedMethod
                         .stream()
                         .filter(testedMethod -> {
-                            int ration = selectMinRation(testedMethod.getName());
+                            int minRatio = selectMinRatio(testedMethod.getName());
                             return FuzzySearch.ratio(
                                     testMethodName.toLowerCase(),
-                                    testedMethod.getName().toLowerCase()) > ration;
+                                    testedMethod.getName().toLowerCase()) > minRatio;
                         })
                         .collect(Collectors.toList());
                 if (methodsWithAlmostSameName.size() >= 1) {
@@ -76,7 +76,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
         return bestPracticeViolations;
     }
 
-    private int selectMinRation(String testedMethodName) {
+    private int selectMinRatio(String testedMethodName) {
         int testedMethodNameLength = testedMethodName.length();
         if (testedMethodNameLength == 1) {
             return 28;
