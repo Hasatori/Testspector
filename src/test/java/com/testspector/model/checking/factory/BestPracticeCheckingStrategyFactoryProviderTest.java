@@ -5,8 +5,11 @@ import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import java.util.Optional;
+
 
 public class BestPracticeCheckingStrategyFactoryProviderTest {
 
@@ -26,7 +29,7 @@ public class BestPracticeCheckingStrategyFactoryProviderTest {
         BestPracticeCheckingStrategyFactoryProvider bestPracticeCheckingStrategyFactoryProvider = new BestPracticeCheckingStrategyFactoryProvider();
 
         Optional<BestPracticeCheckingStrategyFactory> optionalBestPracticeCheckingStrategyFactory = bestPracticeCheckingStrategyFactoryProvider
-                .getBestPracticeCheckingStrategyFactory(ProgrammingLanguage.JAVA, UnitTestFramework.JUNIT);
+                .getBestPracticeCheckingStrategyFactory(ProgrammingLanguage.JAVA, UnitTestFramework.PHP_UNIT);
 
         Assertions.assertFalse(optionalBestPracticeCheckingStrategyFactory.isPresent());
     }
