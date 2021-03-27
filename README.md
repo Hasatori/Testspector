@@ -6,7 +6,7 @@ Report also contains links to the documentation where are all best practices des
 
 ## Supportability
 
-![Architecture](./doc/Architecture.md) of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform.
+![Architecture](./doc/Architecture.md) (Only UML class diagrams are in english, rest is in czech - translation is in progress) of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform.
 
 A current version of the plugin supports checking of the following 7 best practices for ![JUnit 5](https://junit.org/junit5) and ![JUnit 4](https://junit.org/junit4):
 
