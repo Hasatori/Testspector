@@ -1,154 +1,202 @@
 # Obsah
+[Vymezení pojmu "Best practice"](#vymezeni-pojmu-best-practice)
 
-[1	Vytváření testů](#vytvareni-testu)
+[Způsob vymezení nejlepších postupů v oblasti jednotkového testování](#zpusob-vymezeni-nejlepsich-postupu-v-oblasti-jednotkoveho-testovani)
 
->   [1.1	Práce s duplicitami](#práce-s-duplicitami)
+[Vytváření testů](#vytvareni-testu)
 
->>[1.1.1	Extrakce opakujících se částí testovacího kódu](#extrakce-opakujících-se-částí-testovacího-kódu)
+>   [Práce s duplicitami](#práce-s-duplicitami)
 
->> [1.1.2	Extrakce opakujících se testovacích metod](#extrakce-opakujících-se-testovacích-metod)
+>>[Extrakce opakujících se částí testovacího kódu](#extrakce-opakujících-se-částí-testovacího-kódu)
 
->   [1.2	Rychlost](#rychlost)
+>> [Extrakce opakujících se testovacích metod](#extrakce-opakujících-se-testovacích-metod)
 
->> [1.2.1	Používání „In memory“ prostředků a mockování](#používání-„in-memory“-prostředků-a-mockování)
+>   [Rychlost](#rychlost)
 
->> [1.2.2	Vyhýbat se akcím, které uspávají hlavní vlákno](#vyhýbat-se-akcím,-které-uspávají-hlavní-vlákno)
+>> [Používání „In memory“ prostředků a mockování](#používání-„in-memory“-prostředků-a-mockování)
 
->   [1.3	Ověřování (kontrola)](#ověřování-(kontrola))
+>> [Vyhýbat se akcím, které uspávají hlavní vlákno](#vyhýbat-se-akcím,-které-uspávají-hlavní-vlákno)
 
->> [1.3.1	Minimálně jedna ověřovací metoda na test](#minimalne-jedna-overovaci-metoda-na-test)
+>   [Ověřování (kontrola)](#ověřování-(kontrola))
 
->> [1.3.2	Právě jedna ověřovací metoda na test](#prave-jedna-overovaci-metoda-na-test)
+>> [Minimálně jedna ověřovací metoda na test](#minimalne-jedna-overovaci-metoda-na-test)
 
->> [1.3.3	Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)](#nepoužívat-strážní-ověřovací-metody-(tzv.-guard-assertion))
+>> [Právě jedna ověřovací metoda na test](#prave-jedna-overovaci-metoda-na-test)
 
->> [1.3.4	Dodržovat správné pořadí parametrů ověřovací metody](#dodržovat-správné-pořadí-parametrů-ověřovací-metody)
+>> [Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)](#nepoužívat-strážní-ověřovací-metody-(tzv.-guard-assertion))
 
->> [1.3.5	Přikládat zprávy o popisu chyby](#přikládat-zprávy-o-popisu-chyby)
+>> [Dodržovat správné pořadí parametrů ověřovací metody](#dodržovat-správné-pořadí-parametrů-ověřovací-metody)
 
->   [1.4	Struktura testovací metody](#struktura-testovací-metody)
+>> [Přikládat zprávy o popisu chyby](#přikládat-zprávy-o-popisu-chyby)
 
->> [1.4.1	3-fázový design testů](#3-fázový-design-testů)
+>   [Struktura testovací metody](#struktura-testovací-metody)
 
->> [1.4.2	4-fázový design testů](#4-fázový-design-testů)
+>> [3-fázový design testů](#3-fázový-design-testů)
 
->> [1.4.3	Neopakovat fáze testů](#neopakovat-fáze-testů)
+>> [4-fázový design testů](#4-fázový-design-testů)
 
->> [1.4.4	Oddělovat části testu](#oddělovat-části-testu)
+>> [Neopakovat fáze testů](#neopakovat-fáze-testů)
 
->   [1.5	Proměnné](#proměnné)
+>> [Oddělovat části testu](#oddělovat-části-testu)
 
->> [1.5.1	Nahrazovat pevné hodnoty konstantami](#nahrazovat-pevné-hodnoty-konstantami)
+>   [Proměnné](#proměnné)
 
->> [1.5.2	Nepoužívat magická čísla](#nepoužívat-magická-čísla)
+>> [Nahrazovat pevné hodnoty konstantami](#nahrazovat-pevné-hodnoty-konstantami)
 
->   [1.6	Ostatní doporučení](#ostatní-doporučení)
+>> [Nepoužívat magická čísla](#nepoužívat-magická-čísla)
 
->> [1.6.1	Zachovávat spolehlivost testů](#zachovávat-spolehlivost-testů)
+>   [Ostatní doporučení](#ostatní-doporučení)
 
->> [1.6.2	Odstraňovat mrtvý kód](#odstraňovat-mrtvý-kód)
+>> [Zachovávat spolehlivost testů](#zachovávat-spolehlivost-testů)
 
->> [1.6.3	Oddělovat generování dat od jejich verifikace](#oddělovat-generování-dat-od-jejich-verifikace)
+>> [Odstraňovat mrtvý kód](#odstraňovat-mrtvý-kód)
 
->   [1.7	Testování výjimek](#testování-výjimek)
+>> [Oddělovat generování dat od jejich verifikace](#oddělovat-generování-dat-od-jejich-verifikace)
 
->> [1.7.1	Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích frameworků](#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
+>   [Testování výjimek](#testování-výjimek)
 
->> [1.7.2	Stanovovat obecnou úroveň pro výjimky testovací metody](#stanovovat-obecnou-úroveň-pro-výjimky-testovací-metody)
+>> [Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích frameworků](#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
 
->   [1.8	Podmíněná logika](#podminena-logika)
+>> [Stanovovat obecnou úroveň pro výjimky testovací metody](#stanovovat-obecnou-úroveň-pro-výjimky-testovací-metody)
 
->> [1.8.1	Nepoužívat bloky if, else, switch, for či while v rámci testu](#nepouzivat-bloky-if,-else,-switch,-for-ci-while-v-ramci-testu)
+>   [Podmíněná logika](#podminena-logika)
 
->   [1.9	Pojmenování](#pojmenování)
+>> [Nepoužívat bloky if, else, switch, for či while v rámci testu](#nepouzivat-bloky-if,-else,-switch,-for-ci-while-v-ramci-testu)
 
->> [1.9.1	Určit strategii pojmenování testů](#urcit-strategii-pojmenovani-testu)
+>   [Pojmenování](#pojmenování)
 
->> [1.9.2	Zachovat konzistentní pojmenování testů](#zachovat-konzistentní-pojmenování-testů)
+>> [Určit strategii pojmenování testů](#urcit-strategii-pojmenovani-testu)
 
->> [1.9.3	Zachovávat jeden styl pojmenování pro koncept](#zachovávat-jeden-styl-pojmenování-pro-koncept)
+>> [Zachovat konzistentní pojmenování testů](#zachovat-konzistentní-pojmenování-testů)
 
->> [1.9.4	Používat jména pro známá řešení](#používat-jména-pro-známá-řešení)
+>> [Zachovávat jeden styl pojmenování pro koncept](#zachovávat-jeden-styl-pojmenování-pro-koncept)
 
->> [1.9.5	Používat vhodné pojmenování pro testovací třídy](#používat-vhodné-pojmenování-pro-testovací-třídy)
+>> [Používat jména pro známá řešení](#používat-jména-pro-známá-řešení)
 
->> [1.9.6	Používat vyslovitelné a vyhledatelné názvy](#používat-vyslovitelné-a-vyhledatelné-názvy)
+>> [Používat vhodné pojmenování pro testovací třídy](#používat-vhodné-pojmenování-pro-testovací-třídy)
 
->> [1.9.7	Zamezovat dezinformaci](#zamezovat-dezinformaci)
+>> [Používat vyslovitelné a vyhledatelné názvy](#používat-vyslovitelné-a-vyhledatelné-názvy)
 
->> [1.9.8	Dělat dostatečné rozdíly mezi jmény](#dělat-dostatečné-rozdíly-mezi-jmény)
+>> [Zamezovat dezinformaci](#zamezovat-dezinformaci)
 
->> [1.9.9	Vynechávat nadbytečné součásti názvů](#vynechávat-nadbytečné-součásti-názvů)
+>> [Dělat dostatečné rozdíly mezi jmény](#dělat-dostatečné-rozdíly-mezi-jmény)
 
->> [1.9.10	Používat jména vyjadřující záměr](#používat-jména-vyjadřující-záměr)
+>> [Vynechávat nadbytečné součásti názvů](#vynechávat-nadbytečné-součásti-názvů)
 
->   [1.10	Uložení testovací souboru a seskupování testů](#uložení-testovací-souboru-a-seskupování-testů)
+>> [Používat jména vyjadřující záměr](#používat-jména-vyjadřující-záměr)
 
->> [1.10.1	Ukládat testy mimo produkční kód](#ukládat-testy-mimo-produkční-kód)
+>   [Uložení testovací souboru a seskupování testů](#uložení-testovací-souboru-a-seskupování-testů)
 
->> [1.10.2	Ukládat testy pro jeden testovaný systém na jedno místo](#ukládat-testy-pro-jeden-testovaný-systém-na-jedno-místo)
+>> [Ukládat testy mimo produkční kód](#ukládat-testy-mimo-produkční-kód)
 
->   [1.11	Nezávislost](#nezávislost)
+>> [Ukládat testy pro jeden testovaný systém na jedno místo](#ukládat-testy-pro-jeden-testovaný-systém-na-jedno-místo)
 
->> [1.11.1	Nepoužívat globální statické proměnné](#nepouzivat-globalni-staticke-promenne)
+>   [Nezávislost](#nezávislost)
 
->> [1.11.2	Nepoužívat znalost domény](#nepoužívat-znalost-domény)
+>> [Nepoužívat globální statické proměnné](#nepouzivat-globalni-staticke-promenne)
 
->> [1.11.3	Používat relativní cesty](#používat-relativní-cesty)
+>> [Nepoužívat znalost domény](#nepoužívat-znalost-domény)
 
->> [1.11.4	Nezávislost na platformě](#nezávislost-na-platformě)
+>> [Používat relativní cesty](#používat-relativní-cesty)
 
->> [1.11.5	Dodržovat nezávislost na produkčním kódu](#dodržovat-nezávislost-na-produkčním-kódu)
+>> [Nezávislost na platformě](#nezávislost-na-platformě)
 
->> [1.11.6	Tvořit vlastní data a zdroje](#tvořit-vlastní-data-a-zdroje)
+>> [Dodržovat nezávislost na produkčním kódu](#dodržovat-nezávislost-na-produkčním-kódu)
 
->   [1.12	Izolovanost](#izolovanost)
+>> [Tvořit vlastní data a zdroje](#tvořit-vlastní-data-a-zdroje)
 
->> [1.12.1	Používat správného testovacího dvojníka](#používat-správného-testovacího-dvojníka)
+>   [Izolovanost](#izolovanost)
 
->> [1.12.2	Nepoužívat testovací dvojníky na testovaný systém](#nepoužívat-testovací-dvojníky-na-testovaný-systém)
+>> [Používat správného testovacího dvojníka](#používat-správného-testovacího-dvojníka)
 
->> [1.12.3	Nepoužívat návrhový vzor Singleton](#nepoužívat-návrhový-vzor-singleton)
+>> [Nepoužívat testovací dvojníky na testovaný systém](#nepoužívat-testovací-dvojníky-na-testovaný-systém)
 
-[2	Vymezení testů](#vymezení-testů)
+>> [Nepoužívat návrhový vzor Singleton](#nepoužívat-návrhový-vzor-singleton)
 
->   [2.1	Pokrytí kódu (Code coverage)](#pokrytí-kódu-(code-coverage))
+[Vymezení testů](#vymezení-testů)
 
->> [2.1.1	Neimplementovat jednoduché testy](#neimplementovat-jednoduché-testy)
+>   [Pokrytí kódu (Code coverage)](#pokrytí-kódu-(code-coverage))
 
->> [2.1.2	Implementovat jak happy, tak sad testy](#implementovat-jak-happy,-tak-sad-testy)
+>> [Neimplementovat jednoduché testy](#neimplementovat-jednoduché-testy)
 
->> [2.1.3	Implementovat testy pro každý netriviální systém](#implementovat-testy-pro-každý-netriviální-systém)
+>> [Implementovat jak happy, tak sad testy](#implementovat-jak-happy,-tak-sad-testy)
 
->> [2.1.4	Netestovat abstraktní systémy](#netestovat-abstraktní-systémy)
+>> [Implementovat testy pro každý netriviální systém](#implementovat-testy-pro-každý-netriviální-systém)
 
->> [2.1.5	Testovat pouze veřejné chování testovaného systému](#testovat-pouze-verejne-chovani-testovaneho-systemu)
+>> [Netestovat abstraktní systémy](#netestovat-abstraktní-systémy)
 
->> [2.1.6	Testovat chování, ne metody systému](#testovat-chování,-ne-metody-systému)
+>> [Testovat pouze veřejné chování testovaného systému](#testovat-pouze-verejne-chovani-testovaneho-systemu)
 
->> [2.1.7	Zachovávat princip jedné odpovědnosti testu](#zachovávat-princip-jedné-odpovědnosti-testu)
+>> [Testovat chování, ne metody systému](#testovat-chování,-ne-metody-systému)
 
->   [2.2	Datové pokrytí (Data coverage)](#datové-pokrytí-(data-coverage))
+>> [Zachovávat princip jedné odpovědnosti testu](#zachovávat-princip-jedné-odpovědnosti-testu)
 
->> [2.2.1	Testovat hraniční podmínky](#testovat-hraniční-podmínky)
+>   [Datové pokrytí (Data coverage)](#datové-pokrytí-(data-coverage))
 
->> [2.2.2	Kontrolovat inverzní vztahy](#kontrolovat-inverzní-vztahy)
+>> [Testovat hraniční podmínky](#testovat-hraniční-podmínky)
 
->> [2.2.3	Provádět křížovou kontrolu s pomocí jiných prostředků](#provádět-křížovou-kontrolu-s-pomocí-jiných-prostředků)
+>> [Kontrolovat inverzní vztahy](#kontrolovat-inverzní-vztahy)
 
->> [2.2.4	Vynucovat chybné podmínky](#vynucovat-chybné-podmínky)
+>> [Provádět křížovou kontrolu s pomocí jiných prostředků](#provádět-křížovou-kontrolu-s-pomocí-jiných-prostředků)
 
->> [2.2.5	Používat jednotkové testy pro měření výkonových charakteristik testovaného systému](#používat-jednotkové-testy-pro-měření-výkonových-charakteristik-testovaného-systému)
+>> [Vynucovat chybné podmínky](#vynucovat-chybné-podmínky)
 
->> [2.2.6	Vymezovat třídy ekvivalence](#vymezovat-třídy-ekvivalence)
+>> [Používat jednotkové testy pro měření výkonových charakteristik testovaného systému](#používat-jednotkové-testy-pro-měření-výkonových-charakteristik-testovaného-systému)
 
->> [2.2.7	Testovat krajní hodnoty](#testovat-krajní-hodnoty)
+>> [Vymezovat třídy ekvivalence](#vymezovat-třídy-ekvivalence)
 
->> [2.2.8	Testovat změny stavu](#testovat-změny-stavu)
+>> [Testovat krajní hodnoty](#testovat-krajní-hodnoty)
 
->> [2.2.9	Testovat pomocí rozhodovacích tabulek](#testovat-pomocí-rozhodovacích-tabulek)
+>> [Testovat změny stavu](#testovat-změny-stavu)
+
+>> [Testovat pomocí rozhodovacích tabulek](#testovat-pomocí-rozhodovacích-tabulek)
 
 **![](Dropbox/Vysoka_skola/Magisterske_studium/Diplomova_prace/media/e75f34a382eac9c11065578930414b8b.jpeg)**
+
+<h1 id="vymezeni-pojmu-best-practice">Vymezení pojmu "Best practice"</h1>
+Cambridge slovník vymezuje pojem Best practice následovně:
+
+> „A working method or set of working methods that is officially accepted as being the best to use in a particular business or industry, usually described formally and in detail.“ [(Cambridge Dictionary 2020)](#Best_practice_definition_cambridge_dictionary_2020)
+
+Autorský překlad:
+> „Fungující a obecně přijímaná metoda nebo soubor fungujících metod, které je nejvhodnější použít pro určité podnikání nebo odvětví a obvykle bývají formálně a detailně popsány.“
+
+Definice z webového portálu Merriam-Webster je trochu specifičtější a vymezuje pojem takto:
+
+> „A procedure that has been shown by research and experience to produce optimal results and that is established or proposed as a standard suitable for widespread adoption.“ [(Merriam-Webster 1927)](#Best_practice_definition_merriam_webster_1927)
+
+Autorský překlad:
+> „Postup, který skrze výzkum a zkušenost zajistil dosahování optimálních výsledků a který je stanoveným nebo navrhovaným standardem pro široké použití.“
+
+Jak můžeme vidět, tak druhá definice je o něco specifičtější a nehovoří pouze abstraktně o obecném příjímání metody, ale naznačuje že tento status si metoda získala skrze předešlý výzkum a dobrou zkušenost z její aplikací na další projekty. Velmi podobně se k tomu staví také česká definice pojmu z [(ManagementMania 2020)](#Best_practice_definition_management_mania_2020), ta ale pracuje s českým překladem pojmu, tedy pojmem „nejlepší praxe“ či „osvědčená praxe“. V rámci této práce je pojem chápán a je s ním pracováno podle druhé definice. Místo anglického pojmu „best practice“ je v rámci dokumentace nadále používán český překlad „nejlepší postup“ či „nejlepší postupy“. Záměrně není používán pojem „nejlepší praxe“ či „osvědčená praxe“, jelikož jsou tyto pojmy pro použití ve větě velmi krkolomné.
+
+<h1 id="zpusob-vymezeni-nejlepsich-postupu-v-oblasti-jednotkoveho-testovani">Způsob vymezení nejlepších postupů v oblasti jednotkového testování</h1>
+
+Jak vyplývá z definice zmíněné v kapitole [Vymezení pojmu „Best practice“](#vymezeni-pojmu-best-practice), tak nejlepší postup je velmi široký pojem a je dán zkušenostmi z působení v určitém oboru. Z tohoto důvodu je velmi těžké určit množinu nejlepších postupů, která by byla finální a zahrnovala všechny relevantní postupy.
+V rámci této práce byly pro vymezení nejlepších postupů použity tři sady informačních zdrojů. 
+
+1. Autorem vybraná literatura týkající se jednotkového testování
+2. Seznam světově neuznávanější odborné literatury týkající se tématu jednotkového testování
+3. Odborné články renomované společnosti ACM 
+
+První z výše zmíněných sad zdrojů byla vybrána prostřednictvím systému O´Reilly, kde bylo, ze seznamu zdrojů vyhledaných pod slovy „unit testing“, autorem vybráno několik zdrojů. Kritéria výběru byla subjektivní na základě názvu literatury, jejího abstraktu a obsahu. Tímto způsobem byla pro analýzu vybrána následující literatura:
+
+* xUnit Test Patterns: Refactoring Test Code [(Meszaros 2007)](#978-0-13-149505-0)
+* Mastering Software Testing with JUnit 5 [(García 2017)](#978-1-78712-439-4)
+* Modern C++ Programming with Test-Driven Development [(Langr a Swaine 2013)](#978-1-937785-48-2)
+* Developer Testing: Building Quality into Software [(Tarlinder 2016)](#978-0-13-429106-2)
+* Clean Code: A Handbook of Agile Software Craftsmanship [(Martin 2009)](#978-0-13-235088-4)
+* Unit Testing Principles, Practices, and Patterns [(Khorikov 2020)](#978-1-61729-627-7)
+* Unit test frameworks [(Hamill 2004)](#978-0-596-00689-1)
+* Pragmatic Unit Testing in Java 8  [(Langr et al. 2015)](#978-1-937785-48-2)
+* Effective Unit Testing [(Koskela 2013)](#978-1-935182-57-3)
+
+Pro získání druhé sady zdrojů byla použita webová stránka bookauthority.org, která je přední světovou stránkou pro tematické doporučování literatury. Využívá proprietární technologii, jež identifikuje a hodnotí nejlepší knihy na základě desítek různých znaků od doporučení, počtu veřejných zmínění knihy, hodnocení, popularity a historie prodejů. Zahrnuje také hodnocení předních expertů na danou problematiku [(BookAuthority 2020a)](#book_authority_about). Web připravil přehled 21 nejlepších knih všech dob týkajících se jednotkového testování [(BookAuthority 2020b)](#21_best_software_unit_testing_books_of_all_time). Knihy jsou analyzovány a nejlepší postupy a doporučení pro psaní jednotkových testů jsou z nich vyextrahovány. Jednotlivé postupy jsou následně metodou klasifikace rozděleny do skupin na základě jejich podobných charakteristik a duplicitní doporučené postupy jsou vymazány. Ke knihám MATLAB PROGRAMMING. SOFTWARE DEVELOPMENT, Java Testing and Design (Cohen 2004) a Prime Path Coverage Exploration for Automated Unit Testing (Gerritsen 2010) se však nepodařilo získat přístup a nejsou tedy předmětem analýzy a klasifikace. 
+Pro získání třetí sady byly použity odborné články vyhledané pod pojmem „unit testing best practices“, kde byly vráceny 3 výsledky, z nichž byl nalezen 1 relevantní článek: How good are my tests (Bowes et al. 2017)
+Celkem bylo tedy analyzováno 28 zdrojů. Výsledkem analýzy výše zmíněné odborné literatury, vznikl souhrn poznámek týkajících se doporučených nejlepších postupů pro různé oblasti jednotkového testování. Analýza probíhala formou přečtením kapitol knih a článků, které obsahují informace o jednotkovém testování, a děláním si výpisků o doporučovaných postupech pro danou oblast. Veškeré posbírané poznámky, byly následně vloženy do nástroje Miro a zkoumáním jejich podobnosti byly postupně uspořádávány do skupin. Výsledkem je myšlenková mapa, která zachycuje stromovou strukturu nejlepších postupů týkajících se jednotkového testování (viz). 
+
+![best_practices_mind_map.png](./best_practices_mind_map.png)
+obr.1 Myšlenková mapa zachycující rozpad nejlepších postupů do skupin a podskupin (autor)
 
 <h1 id="vytvareni-testu">Vytváření testů</h1>
 
@@ -182,7 +230,7 @@ měli aplikovat i na ně. Porušování tohoto pravidla se může zdát z krátk
 hlediska poměrně výhodné, protože umožňuje velmi rychlou tvorbu jednotlivých
 testovacích případů. Pokud implementujeme nový test, lze využít kódu některého z
 dalších testů v dané testovací třídě a následně pouze změnit části specifické
-pro test nový. Jak uvádí kniha *Effective unit testing* [(Koskela 2013)](#978-1-935182-57-3), tak z
+pro test nový. Jak uvádí kniha *Effective unit testing* [(Koskela 2013, kap. 5.1 Duplication)](#978-1-935182-57-3), tak z
 dlouhodobého hlediska má tento přístup negativní vliv jak na udržovatelnost, tak
 na srozumitelnost testovacího kódu. Samotný test by měl obsahovat pouze nezbytné
 informace, které pomohou čtenáři velmi snadno a rychle pochopit jeho fungování.
@@ -199,7 +247,7 @@ Nejlepší postupy týkající se práce s duplicitami jsou následující:
 ### Extrakce opakujících se částí testovacího kódu
 
 Části kódu opakující se mezi jednotlivými testovacími případy vyextrahovat do
-*pomocných metod*, *setup metod*, *fixture metod* a *teardown metod*. Pro tyto
+*pomocných metod*, *setup metod*, *fixture metod* a *teardown metod* [(Govindaraj 2015, kap. Making tests readable)](#978-1-78398-792-4),[(Martin 2009, kap. 9. Unit tests-Clean Tests)](#978-0-13-235088-4). Pro tyto
 metody musí platit stejná pravidla, jako pro zbytek testovacího kódu, tedy ani
 mezi nimi by se neměly vyskytovat duplicity a měly by být čtenáři srozumitelné.
 Samozřejmě srozumitelnost testovacího kódu není pouze otázkou minimalizace
@@ -208,12 +256,12 @@ sekci *[Pojmenování](#pojmenování)*
 
 Mimo typické strukturální a literární duplicity, je také nutné dávat pozor na
 tzv. sémantické duplicity, tedy části kódu, které nevypadají stejně, ale dělají
-stejnou věc.
+stejnou věc [(Koskela 2013, kap. 5.1 Duplication)](#978-1-935182-57-3).
 
 ### Extrakce opakujících se testovacích metod
 
 Metody opakující se napříč několika testovacími třídami vyextrahovat do
-samostatné třídy, a tu poté přidělit jako rodiče těchto testovacích tříd.
+samostatné třídy, a tu poté přidělit jako rodiče těchto testovacích tříd [(Govindaraj 2015, kap. Making tests readable)](#978-1-78398-792-4).
 
 ## Rychlost
 
@@ -234,7 +282,7 @@ Nejlepší postupy týkající se rychlosti jsou následující:
 
 Pokud v rámci testů pracujeme s databází, potřebujeme volat http požadavky,
 provádět soap operace, číst data ze souboru apod., je nutné tyto operace
-provádět v paměti a vyhnout se tak zpomalujícím operacím. Příkladem může být
+provádět v paměti a vyhnout se tak zpomalujícím operacím [(Acharya 2014, kap. Configuring tests)](#978-1-78398-251-6 978-1-78398-250-9). Příkladem může být
 použití in-memory databáze na místo databáze klasické. In-memory databáze data
 neukládá do skutečných souborů, ale vše si drží v paměti. Operace pro čtení či
 zápis dat jsou pak mnohem rychlejší.
@@ -249,7 +297,7 @@ a proto uspíme vlákno hlavní. Tento přístup však není efektivní, jeliko�
 prováděné na vedlejších vláknech mohou pokaždé trvat jinou dobu. V takovém
 případě je doporučeno zajistit přímé čekání hlavního vlákna na dokončení operací
 vláken vedlejších. Tímto způsobem je hlavní vlákno blokováno pouze po nejkratší
-nutnou dobu.
+nutnou dobu [(Acharya 2014, kap. Configuring tests)](#978-1-78398-251-6 978-1-78398-250-9).
 
 ## Ověřování (kontrola)
 
@@ -283,10 +331,10 @@ testy reportuje jako prošlé, což povede k falešnému reportování výsledk�
 
 <h3 id="prave-jedna-overovaci-metoda-na-test">Právě jedna ověřovací metoda na test</h3>
 
-Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy (Turnquist a Das 2018), (Meszaros 2007), (Powerhouse 2018) a (Acharya 2014) přistupuje k problematice poměrně dogmaticky a vyžadují vždy pouze jednu ověřovací metodu na test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují rozdělit do více testovacích metod. Více testovacích metod vede k horší čitelnosti testu a způsobuje také jeho horší udržovatelnost. 
+Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy [(Turnquist a Das 2018)](#978-1-78728-150-9), [(Meszaros 2007)](#978-0-13-149505-0), (Powerhouse 2018) a [(Acharya 2014)](#978-1-78398-251-6 978-1-78398-250-9) přistupuje k problematice poměrně dogmaticky a vyžadují vždy pouze jednu ověřovací metodu na test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují rozdělit do více testovacích metod. Více testovacích metod vede k horší čitelnosti testu a způsobuje také jeho horší udržovatelnost. 
 
-Na druhé straně jsou autoři [(Martin 2009)](#978-0-13-235088-4), (Khorikov a Safari 2020), (Langr a Swaine 2013) a
-(Tarlinder 2016), kteří pravidlo považují pravidlo za příliš drakonické a
+Na druhé straně jsou autoři [(Martin 2009)](#978-0-13-235088-4), [(Khorikov 2020)](#978-1-61729-627-7), [(Langr a Swaine 2013)](#978-1-937785-48-2) a
+[(Tarlinder 2016)](#978-0-13-429106-2), kteří pravidlo považují pravidlo za příliš drakonické a
 doporučují o celé problematice přemýšlet spíše z pohledu testování jedné
 jednotky chování testovaného systému. Testování jedné jednotky chování může vést
 k více různým výstupům, které je v pořádku otestovat více ověřovacími metodami v
@@ -321,13 +369,12 @@ velkým problémům.
 ### Přikládat zprávy o popisu chyby
 
 K ověřovacím metodám je doporučeno přidávat zprávy, jež vysvětlují nastalou
-chybu. Napomáhá to rychlejšímu pochopení fungování testů a opravě chyby (Hamill
-2004).
+chybu. Napomáhá to rychlejšímu pochopení fungování testů a opravě chyby [(Hamill 2004)](#978-0-596-00689-1).
 
 ### Tvořit vlastní ověřovací metody
 
 Pro specifické případy je vhodné tvořit vlastní ověřovací metody. Tento přístup
-napomáhá lepší čitelnosti testů a zabraňuje duplicitě kódu. (Hamill 2004). Tento
+napomáhá lepší čitelnosti testů a zabraňuje duplicitě kódu. [(Hamill 2004)](#978-0-596-00689-1). Tento
 přístup je vhodné volit, pokud se opakuje stejná sekvence ověřovacích metod
 napříč několika testy. Tuto sekvence je pak vhodné vyextrahovat do samostatné či
 třídy, která ověření provede.
@@ -340,10 +387,10 @@ dá jen velmi obtížně rozumět a jednak jsou velmi nestabilní a byť malá z
 může vést k jejich selhání. Tyto metody označuje [(Koskela 2013)](#978-1-935182-57-3) za tzv.
 Hyperasserce a jako příklad uvádí ověřovací metodu, jež porovnává očekávaný
 obsah souboru s obsahem vyprodukovaným po transformaci vstupního souboru (viz
-obr. 0 )
-![0.png](0.png)
+obr. 2 )
+![hyperassertion_example.png](./hyperassertion_example.png)
 
-obr. 0 Příklad tzv. Hyperasserce [(Koskela 2013)](#978-1-935182-57-3)
+obr. 2 Příklad tzv. Hyperasserce [(Koskela 2013)](#978-1-935182-57-3)
 
 ## Struktura testovací metody
 
@@ -394,13 +441,12 @@ vede ke komplikování testů a stěžování jeho snadné srozumitelnosti pro �
 
 Pro zajištění lepší čitelnosti je dobré od sebe jednotlivé fáze oddělovat. U
 malých testů je dobré oddělit pouze prázdným řádkem. U velkých testů tento
-postup tak dobře nefunguje a je lepší využít komentáře (Khorikov a Safari 2020).
-Způsob oddělení fází pomocí prázdného řádku demonstruje obr. 2
+postup tak dobře nefunguje a je lepší využít komentáře [(Khorikov 2020)](#978-1-61729-627-7).
+Způsob oddělení fází pomocí prázdného řádku demonstruje obr. 3
 
-![alt text](2.png "Title")
+![alt text](./test_part_separation_for_better_readability.png "Title")
 
-obr. 2 Ukázka oddělení částí testu pro zajištění lepší čitelnosti (Khorikov a
-Safari 2020)
+obr. 3 Ukázka oddělení částí testu pro zajištění lepší čitelnosti [(Khorikov 2020)](#978-1-61729-627-7)
 
 ## Proměnné
 
@@ -417,11 +463,11 @@ Nejlepší postupy týkající se proměnných jsou následující:
 
 Namísto pevných, nebo přímých hodnot, je doporučováno používat konstanty. Jednak
 to přispívá lepší čitelnost a snazšímu pochopení a jednak to zbavuje kód
-přebytečných duplicit, které by se jinak mezi testy opakovaly (viz. obr. 3)
+přebytečných duplicit, které by se jinak mezi testy opakovaly (viz. obr. 4)
 
-![alt text](3.png "Title")
+![alt text](./use_constant_instead_value_example.png "Title")
 
-obr. 3 Příklad použití konstant namísto pevných hodnot (Link a Fröhlich 2003)
+obr. 4 Příklad použití konstant namísto pevných hodnot [(Link a Fröhlich 2003)](#978-0-08-052017-9 978-1-55860-868-9)
 
 ### Nepoužívat magická čísla
 
@@ -431,11 +477,11 @@ nebo proměnnými. Vhodně pojmenovaná konstanta či proměnná dává číslu 
 zajišťuje snazší čitelnost kódu. Dalším způsobem je použít pomocnou metodu,
 které předáme jako parametr číslo a metoda svým jménem dává číslu význam. Tento
 postup je zejména výhodný v případě že se nám hodnoty čísel pro každý test mění
-(viz. obr. 4).
+(viz. obr. 5).
 
-![alt text](4.png "Title")
+![alt text](./use_help_method_instead_of_magic_number_example.png "Title")
 
-obr. 4 Příklad použití pomocné metody namísto magických čísel [(Koskela 2013)](#978-1-935182-57-3)
+obr. 5 Příklad použití pomocné metody namísto magických čísel [(Koskela 2013)](#978-1-935182-57-3)
 
 ## Ostatní doporučení
 
@@ -470,10 +516,10 @@ není, tak test vymazat.
 Pokud máme velkou spoustu testovacích dat, jejich generování bychom měli oddělit
 od verifikace. Testovací metoda by měla přijímat pouze parametry, ale sada dat
 by měla být generována separátně. Příkladem jsou parametrizované testy v JUnit
-verze 5 (viz obr.5)
+verze 5 (viz obr.6)
 
-obr.5 Příklad oddělení generování dat od verifikace (autor)
-![img_5.png](5.png)
+obr.6 Příklad oddělení generování dat od verifikace (autor)
+![separate_data_generating_From_verification_example.png](./separate_data_generating_from_verification_example.png)
 
 
 ## Testování výjimek
@@ -570,7 +616,7 @@ Nejlepší postupy týkající se pojmenování jsou následující:
 <h3 id="urcit-strategii-pojmenovani-testu">Určit strategii pojmenování testů</h3>
 
 Existuje několik doporučených strategií, které lze použít pro pojmenování testů.
-Například (Langr et al. 2015) doporučuje způsoby:
+Například [(Langr et al. 2015)](#978-1-937785-48-2) doporučuje způsoby:
 
 -   *doingSomeOperationGeneratesSomeResult*
 
@@ -580,7 +626,7 @@ Například (Langr et al. 2015) doporučuje způsoby:
 
 -   *givenSomeContextWhenDoingSomeBehaviorThenSomeResultOccurs*
 
-Další literatura (Tarlinder 2016) navrhuje rozdělení názvu na 3 části
+Další literatura [(Tarlinder 2016)](#978-0-13-429106-2) navrhuje rozdělení názvu na 3 části
 *whatIsTested_contitions_expectedResult.*
 
 Zvolená strategie pojmenování je subjektivní, až už si však vybereme
@@ -698,37 +744,37 @@ stejného balíčku jako testovaný kód:
 -   Nafukování velikosti výsledného balíčku při buildu aplikace
 
 Doporučeno je testy ukládat do samostatné hierarchie složek, která je zcela
-oddělena od produkčního kódu. (Govindaraj 2015) uvádí dva populární způsoby
+oddělena od produkčního kódu. [(Govindaraj 2015)](#978-1-78398-792-4) uvádí dva populární způsoby
 uložení testů. Prvním je uložení testů do samostatného balíčku, který je
-součástí hlavního balíčku kódu (viz. obr. 6).
+součástí hlavního balíčku kódu (viz. obr. 7).
 
-![img.png](6.png)
+![img.png](./save_tests_into_production_code_sub_package_example.png)
 
-obr. 6 Ukázka uložení testů jako pod balíčku produkčního kódu (Govindaraj 2015)
+obr. 7 Ukázka uložení testů jako pod balíčku produkčního kódu [(Govindaraj 2015)](#978-1-78398-792-4)
 
-Druhý způsob je znázorněn na obr. 7 a v tomto případě jsou testy uloženy v
+Druhý způsob je znázorněn na obr. 8 a v tomto případě jsou testy uloženy v
 samostatném balíčku, mimo balíček produkčního kódu.
 
-![img.png](7.png)
+![img.png](./save_tests_into_separate_package_outside_production_code_package.png)
 
-obr. 7 Uložení testů do separátního balíčku mimo balíček produkčního kódu
-(Govindaraj 2015)
+obr. 8 Uložení testů do separátního balíčku mimo balíček produkčního kódu
+[(Govindaraj 2015)](#978-1-78398-792-4)
 
 Vedle těchto dvou způsobů však existuje i třetí, který je však specifický pro
 určité systémy, jako například Java. Ten umísťuje testy a produkční kód do
 stejného balíčku, ale na rozdílná fyzická míst, tzn. nastavuje jim rozdílnou
-kořenovou složku (viz obr. 8).
+kořenovou složku (viz obr. 9).
 
-![8.png](8.png)
+![img.png](./save_tests_into_same_package_under_different_root_folder.png)
 
-obr. 8 Uložení testů a kódu do stejných balíčků s rozdílnou kořenovou složkou
-(Govindaraj 2015)
+obr. 9 Uložení testů a kódu do stejných balíčků s rozdílnou kořenovou složkou
+[(Govindaraj 2015)](#978-1-78398-792-4)
 
 ### Ukládat testy pro jeden testovaný systém na jedno místo
 
 Obecně je doporučováno všechny testy týkající se určitého testovaného systému,
 například testované třídy, bychom měli ukládat na jedno místo, do jedné
-testovací třídy. Kniha (Link a Fröhlich 2003) však představuje případy kdy je
+testovací třídy. Kniha [(Link a Fröhlich 2003)](#978-0-08-052017-9 978-1-55860-868-9) však představuje případy kdy je
 vhodné toto pravidlo porušit:
 
 -   Množství testů v testovací třídě je příliš velké a třída se stává velice
@@ -781,18 +827,18 @@ inicializovat.
 Jedná se o případ, kdy používáme doménu, na níž testy vytváříme, pro stanovení
 výsledku testu. Jednoduchým příkladem je třída, jež má metodu pro sčítání dvou
 čísel. Špatným způsobem, jak metodu testovat je sečíst vstupní parametry v testu
-a poté je očekávat jako výsledek (viz. obr. 9). Správně bychom však měly
+a poté je očekávat jako výsledek (viz. obr. 10). Správně bychom však měly
 výsledek vypočítat sami a rovnou jej dosazovat jako očekávaný výsledek (obr.
-10).
+11).
 
-![9.png](9.png)
+![img.png](./breaking_rule_using_domains_knowledge_example.png)
 
-obr. 9 Ukázka porušení pravidla a používání znalosti domény (Khorikov a Safari
+obr. 10 Ukázka porušení pravidla a používání znalosti domény (Khorikov a Safari
 2020)
 
-![10.png](10.png)
+![img.png](./correct_test_not_using_domains_knowledge_example.png)
 
-obr. 10 Ukázka správného testu, kde není použita znalost domény (Khorikov a
+obr. 11 Ukázka správného testu, kde není použita znalost domény (Khorikov a
 Safari 2020)
 
 ###  Používat relativní cesty
@@ -805,21 +851,21 @@ relativními cestami.
 
 Často se v testu vyskytuje podmíněná logika, která rozlišuje, co a jak se bude
 testovat v závislosti na použité platformě. Příklad špatného testu, který je
-závislý na platformě, je ukázán na obr. 11. Jak je možné vidět, tak podle
+závislý na platformě, je ukázán na obr. 12. Jak je možné vidět, tak podle
 operačního systému se mění ověřovací metody testu.
 
-![11.png](11.png)
+![img.png](./platform_dependent_test_example.png)
 
-obr. 11 Příklad testu závislého na platformě [(Koskela 2013)](#978-1-935182-57-3)
+obr. 12 Příklad testu závislého na platformě [(Koskela 2013)](#978-1-935182-57-3)
 
 Namísto tohoto postupu je doporučováno jednak test rozdělit na samostatné testy
 a jednak zajištění prostředků pro spouštění testu nezávisle na platformě.
 Příkladem je vytvoření vlastní třídy, jež bude představovat operační systém a na
-ní poté pouštět test (viz obr. 12).
+ní poté pouštět test (viz obr. 13).
 
-![12.png](12.png)
+![img.png](./test_not_dependent_on_operation_system_example.png)
 
-obr. 12 Příklad testu nezávislého na operačním systému [(Koskela 2013)](#978-1-935182-57-3)
+obr. 13 Příklad testu nezávislého na operačním systému [(Koskela 2013)](#978-1-935182-57-3)
 
 ### Dodržovat nezávislost na produkčním kódu
 
@@ -856,7 +902,7 @@ informacím, z nedeterministického chování udělat deterministické atd. Tvor
 dvojníků nám umožňuje izolovat testovaný systém, snížit rozsah pouze na jedno
 chování, které právě chceme testovat.
 
-Jak ukazuje obr. 13, tak existují celkem 4 typy testovacích dvojníků. Použití
+Jak ukazuje obr. 14, tak existují celkem 4 typy testovacích dvojníků. Použití
 každého z nich se hodí v závislosti na daném kontextu a obecně nelze říct, který
 by byl nejlepší. [(Koskela 2013)](#978-1-935182-57-3) specifikuje základní doporučení, kdy jednotlivé
 typy používat (viz. Tabulka 1).
@@ -870,9 +916,9 @@ Tabulka 1 Popis a použití testovacích dvojníků (autor a [(Koskela 2013)](#9
 | Stub  | Slouží k zamezení provádění funkcionality, která nás pro účely testu nezajímá nebo ještě nebyla naprogramována        | Máme zájem na přítomnosti spolupracujících objektů nebo dodávání dat testovaným systémům.                                                                                                                        |
 | Fake  | Simuluje chování testovaného sytému, ale bez vedlejších efektů a dalších dopadů, které by jeho použití mohlo způsobit | chceme pouštět komplexní scénář, který závisí na službě, nebo komponentě jež je nedostupná nebo nemožná k použití pro účely testu a mockování všech interakcí by vedlo k velmi komplexnímu a nepřehlednému kódu. |
 
-![13.png](13.png)
+![img.png](./test_double_types.png)
 
-obr. 13 Typy testovacích dvojníků [(Koskela 2013)](#978-1-935182-57-3)
+obr. 14 Typy testovacích dvojníků [(Koskela 2013)](#978-1-935182-57-3)
 
 ### Nepoužívat testovací dvojníky na testovaný systém
 
@@ -897,7 +943,7 @@ představuje dva problémy:
 exkluzivita ve specifickém kontextu. Tento kontext může být systém, uživatel
 nebo session. Místo tvorby signeltonu můžeme využít tohoto pricipu a použít
 systémový, uživatelský nebo session objekt k tomu, aby nám dal přístup k
-objektů, které by jinak byli sigletony (Link a Fröhlich 2003).
+objektů, které by jinak byli sigletony [(Link a Fröhlich 2003)](#978-0-08-052017-9 978-1-55860-868-9).
 
 # Vymezení testů
 
@@ -969,7 +1015,7 @@ jsou mazány či přidávány, a to nezávisle na chování systému jako celku.
 metody jsou pouze pomocným nástrojem pro zajištění veřejného chování testovaného
 systému. Jejich testování vytváří velké množství závislostí mezi kódem a testy a
 z dlouhodobého hlediska to vede k obtížné udržovatelnosti testů a nutnosti
-jejich časté úpravy a aktualizace. (Khorikov 2020) a (Langr et al. 2015) uvádí,
+jejich časté úpravy a aktualizace. (Khorikov 2020) a [(Langr et al. 2015)](#978-1-937785-48-2) uvádí,
 že pokud obsahují privátní metody komplexní chování a zdá se, že by mělo smysl
 pro ně samostatný test napsat, jedná se o ukázku chyby v návrhu daného systému a
 porušení principu jedné odpovědnosti (Single Responsibility Principle). Takové
@@ -1031,11 +1077,11 @@ Nejlepší postupy týkající se datového pokrytí (Data coverage) jsou násle
 
 Mnoho chyb v kódu velmi často vzniká vlivem mezních hodnot povolené podoby dat.
 Jeden obyčejný *„happy day“* scénář na takové problémy nenarazí. Je proto
-doporučováno testovat hraniční podmínky vstupních dat. (Langr et al. 2015)
+doporučováno testovat hraniční podmínky vstupních dat. [(Langr et al. 2015)](#978-1-937785-48-2)
 vymezuje akronym **CORRECT**, který napomáhá zapamatování si vhodného přemýšlení
 o hraničních podmínkách jednotkových testů (viz Tabulka 4).
 
-Tabulka 4 Popis dílčích částí akronymu CORRECT (autor a (Langr et al. 2015))
+Tabulka 4 Popis dílčích částí akronymu CORRECT (autor a [(Langr et al. 2015)](#978-1-937785-48-2))
 
 | Conformance-Shoda                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -1059,7 +1105,7 @@ V některých případech je možné a samozřejmě vhodné otestovat inverzní 
 dané funkcionality. Příkladem je, pokud máme implementovanou matematickou funkci
 pro výpočet druhé mocniny čísla. Inverzní test by poté spočíval v tom, že bychom
 spočítali kořen nějakého čísla a poté testovali že použitím funkce pro výpočet
-druhé mocniny ke stejnému číslu (Langr et al. 2015).
+druhé mocniny ke stejnému číslu [(Langr et al. 2015)](#978-1-937785-48-2).
 
 ### Provádět křížovou kontrolu s pomocí jiných prostředků
 
@@ -1081,7 +1127,7 @@ nastat. Může se například jednat o:
 
 Správný jednotkový test by neměl pouze testovat logické správné cesty, ale také
 zjišťovat, jak se kód chová za chybných podmínek, respektive jestli se chová tak
-jak očekáváme (Langr et al. 2015).
+jak očekáváme [(Langr et al. 2015)](#978-1-937785-48-2).
 
 ### Používat jednotkové testy pro měření výkonových charakteristik testovaného systému
 
@@ -1091,7 +1137,7 @@ testu a běží velmi rychlé. Samozřejmě výkonnostní testy jsou důležité
 potřeba, je ale lepší je spouštět odděleně od jednotkových testů. Jednotkové
 testy však v tomto ohledu mohou být nápomocné. Mohou být použity pro poskytnutí
 základní informace o výkonnosti nějaké funkce a tato informace bude následně
-využita pro vytvoření výkonnostních testů (Langr et al. 2015).
+využita pro vytvoření výkonnostních testů [(Langr et al. 2015)](#978-1-937785-48-2).
 
 ### Vymezovat třídy ekvivalence
 
@@ -1103,8 +1149,7 @@ pro prvky, které jsou si rovny. Příkladem může být funkce pro výpočet
 rizikovosti pojištěných řidičů. Rozdělení může být podle věku na mladé (18-24),
 střední věk (24-60) a staré (nad 60 až 100) a každý skupina představuje jiné
 riziko. Stačí pak napsat pouze 3 testy pro každou ze skupin a dále můžeme napsat
-ještě dva testy pro neplatné hodnoty tedy mladší 18 let a starší 100 (Tarlinder
-2016).
+ještě dva testy pro neplatné hodnoty tedy mladší 18 let a starší 100 [(Tarlinder 2016)](#978-0-13-429106-2).
 
 ### Testovat krajní hodnoty
 
@@ -1119,12 +1164,12 @@ testování zbytečných případů.
 
 V případě že v testovaném systému dochází ke změnám stavu, je vhodné vymezovat
 jednotlivé testovací případy na základě stavového diagramu. Příklad takového
-diagramu je zachycen na obr. 14. Zachycení jednotlivých stavů a jejich
+diagramu je zachycen na obr. 15. Zachycení jednotlivých stavů a jejich
 vzájemných přechodů nám umožňuje snadno vymezit jednotlivé testovací případy.
 
-![14.png](14.png)
+![img.png](./state_diagram_example.png)
 
-obr. 14 Ukázka stavového diagramu (Tarlinder 2016)
+obr. 15 Ukázka stavového diagramu [(Tarlinder 2016)](#978-0-13-429106-2)
 
 ### Testovat pomocí rozhodovacích tabulek
 
@@ -1133,23 +1178,40 @@ případ, je doporučováno použít rozhodovací tabulku. Tento nástroj je vel
 vhodný pro tvorbu parametrizovaných testů. Řada testovacích frameworku (např.
 Cucumber, JUnit5 či Spoc), poskytuje podporu pro tvorbu parametrizovaných testů
 s pomocí rozhodovacích tabulek. Příklad takové rozhodovací tabulky je zobrazen
-na obr. 15. Tabulka stanovuje, jaká je výše pojistného faktoru a zda bude
+na obr. 16. Tabulka stanovuje, jaká je výše pojistného faktoru a zda bude
 zahájeno vyšetřování pro podezření z podvodu, na základě věku a pohlaví klienta.
 
-![15.png](15.png)
+![img.png](./decision_table_premium_factor.png)
 
-obr. 15 Rozhodovací tabulky pro určení pojistného faktoru a vyšetření podvodu
-(Tarlinder 2016)
+obr. 16 Rozhodovací tabulky pro určení pojistného faktoru a vyšetření podvodu
+[(Tarlinder 2016)](#978-0-13-429106-2)
 
 Tabulku je poté možné použít pro vymezení jednotkových testů pro otestování
-pomocné metody, jež faktor pojistného vypočítává (viz obr.16).
+pomocné metody, jež faktor pojistného vypočítává (viz obr.17).
 
-obr. 16 Ukázka použití rozhodovací tabulky pro specifikaci testovacích případů
+obr. 17 Ukázka použití rozhodovací tabulky pro specifikaci testovacích případů
 (autor)
 
-![16.png](16.png)
+![img.png](./decision_table_usage_example.png)
 
 ## Literatura
 <p id="978-1-935182-57-3">KOSKELA, Lasse, 2013. Effective unit testing: a guide for Java developers. Shelter Island, NY: Manning. ISBN 978-1-935182-57-3</p>
 <p id="978-0-13-235088-4">MARTIN, Robert C., ed., 2009. Clean code: a handbook of agile software craftsmanship. Upper Saddle River, NJ: Prentice Hall. ISBN 978-0-13-235088-4.</p>
+<p id="978-1-78398-792-4">GOVINDARAJ, Siddharta, 2015. Test-driven python development. Place of publication not identified: Packt Publishing Limited. ISBN 978-1-78398-792-4.</p>
+<p id="978-0-13-235088-4">MARTIN, Robert C., ed., 2009. Clean code: a handbook of agile software craftsmanship. Upper Saddle River, NJ: Prentice Hall. ISBN 978-0-13-235088-4.</p>
+<p id="978-1-78398-251-6 978-1-78398-250-9">ACHARYA, Sujoy, 2014. Mastering unit testing using Mockito and JUnit: an advanced guide to mastering unit testing using Mockito and JUnit. Birmingham, England: Packt Publishing. ISBN 978-1-78398-251-6.</p>
+<p id="978-1-61729-627-7">KHORIKOV, Vladimir, 2020. Unit Testing Principles, Practices, and Patterns [online] [vid. 2020-10-18]. ISBN 978-1-61729-627-7. Dostupné z: https://go.oreilly.com/university-college-london/library/view/-/9781617296277/?ar</p>
+<p id="978-1-78728-150-9">TURNQUIST, Greg L a Bhaskar N DAS, 2018. Python testing cookbook: easy solutions to test your Python projects using test-driven development and Selenium [online]. Birmingham, England; Mumbai: Packt [vid. 2020-11-24]. ISBN 978-1-78728-150-9. Dostupné z: https://www.safaribooksonline.com/library/view//9781787122529/?ar?orpq&email=^u</p>
+<p id="978-0-13-149505-0">MESZAROS, Gerard, 2007. xUnit test patterns: refactoring test code. Upper Saddle River, NJ: Addison-Wesley. The Addison-Wesley signature series. ISBN 978-0-13-149505-0.</p>
+<p id="978-1-937785-48-2">LANGR, Jeff a Michael SWAINE, 2013. Modern C++ programming with test-driven development: code better, sleep better. Dallas, Texas: The Pragmatic Bookshelf. ISBN 978-1-937785-48-2.</p>
+<p id="978-0-596-00689-1">HAMILL, Paul, 2004. Unit test frameworks. 1st ed. Sebastopol, CA: O’Reilly. ISBN 978-0-596-00689-1.</p>
+<p id="978-0-08-052017-9 978-1-55860-868-9">LINK, Johannes a Peter FRÖHLICH, 2003. Unit testing in Java how tests drive the code. San Francisco, Calif.: Morgan Kaufmann. ISBN 978-0-08-052017-9.</p>
+<p id="978-0-13-429106-2">TARLINDER, Alexander, 2016. Developer testing: building quality into software. Boston: Addison-Wesley. The Addison-Wesley signature series. ISBN 978-0-13-429106-2.</p>
+<p id="978-1-78712-439-4">GARCÍA, Boni, 2017. Mastering software testing with JUnit 5: comprehensive guide to develop high quality Java applications [online] [vid. 2021-03-27]. ISBN 978-1-78712-439-4. Dostupné z: http://proquestcombo.safaribooksonline.com/9781787285736</p>
+<p id="978-1-5386-2807-2">BOWES, David, Tracy HALL, Jean PETRIĆ, Thomas SHIPPEY a Burak TURHAN, 2017. How good are my tests? In: Proceedings of the 8th Workshop on Emerging Trends in Software Metrics. Buenos Aires, Argentina: IEEE Press, s. 9–14. WETSoM ’17. ISBN 978-1-5386-2807-2.</p>
+<p id="Best_practice_definition_cambridge_dictionary_2020">CAMBRIDGE DICTIONARY, 2020. BEST PRACTICE | meaning in the Cambridge English Dictionary [online] [vid. 2020-08-01]. Dostupné z: https://dictionary.cambridge.org/dictionary/english/best-practice</p>
+<p id="Best_practice_definition_merriam_webster_1927">MERRIAM-WEBSTER, 1927. Definition of BEST PRACTICE [online] [vid. 2020-08-01]. Dostupné z: https://www.merriam-webster.com/dictionary/best+practice</p>
+<p id="Best_practice_definition_management_mania_2020">MANAGEMENTMANIA, 2020. Nejlepší praxe (Best Practice). ManagementMania.com [online] [vid. 2020-08-01]. Dostupné z: https://managementmania.com/cs/nejlepsi-praxe-best-practice</p>
+<p id="21_best_software_unit_testing_books_of_all_time">BOOKAUTHORITY, 2020. 21 Best Software Unit Testing Books of All Time. BookAuthority [online] [vid. 2020-10-25]. Dostupné z: https://bookauthority.org/books/best-software-unit-testing-books</p>
+<p id="book_authority_about">BOOKAUTHORITY, 2020. About BookAuthority. BookAuthority [online] [vid. 2020-10-25]. Dostupné z: https://bookauthority.org/about</p>
 
