@@ -6,13 +6,12 @@ import com.intellij.psi.impl.file.PsiPackageBase;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class JavaElementResolver {
 
 
-    public <T extends PsiElement> List<T> allChildrenOfType(PsiElement psiElement, Class<T> elementType) {
-        return allChildrenOfType(psiElement, elementType, t -> true, t -> false);
+    public <T extends PsiElement> List<T> allChildrenOfTypeMeetingConditionWithReferences(PsiElement psiElement, Class<T> elementType) {
+        return allChildrenOfTypeMeetingConditionWithReferences(psiElement, elementType, t -> true, t -> false);
     }
 
     public Optional<PsiElement> firstImmediateChildIgnoring(PsiElement psiElement, List<Class<? extends PsiElement>> ignoredList) {
@@ -25,15 +24,15 @@ public class JavaElementResolver {
     }
 
 
-    public <T extends PsiElement> List<T> allChildrenOfType(PsiElement psiElement, Class<T> elementType, Predicate<PsiElement> fromReferencesMeetingCondition) {
-        return allChildrenOfType(psiElement, elementType, t -> true, fromReferencesMeetingCondition);
+    public <T extends PsiElement> List<T> allChildrenOfTypeWithReferences(PsiElement psiElement, Class<T> elementType, Predicate<PsiElement> fromReferencesMeetingCondition) {
+        return allChildrenOfTypeMeetingConditionWithReferences(psiElement, elementType, t -> true, fromReferencesMeetingCondition);
     }
 
-    public <T extends PsiElement> List<T> allChildrenOfType(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
-        return allChildrenOfType(new HashSet<>(), psiElement, elementType, typeCondition, fromReferencesMeetingCondition);
+    public <T extends PsiElement> List<T> allChildrenOfTypeMeetingConditionWithReferences(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
+        return allChildrenOfTypeMeetingConditionWithReferences(new HashSet<>(), psiElement, elementType, typeCondition, fromReferencesMeetingCondition);
     }
 
-    private <T extends PsiElement> List<T> allChildrenOfType(HashSet<PsiElement> visited, PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
+    private <T extends PsiElement> List<T> allChildrenOfTypeMeetingConditionWithReferences(HashSet<PsiElement> visitedReferences, PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
         List<T> result = new ArrayList<>();
         if (!(psiElement instanceof PsiPackageBase)) {
             for (PsiElement child : psiElement.getChildren()) {
@@ -42,17 +41,29 @@ public class JavaElementResolver {
                 }
                 if (child instanceof PsiReferenceExpression) {
                     PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
-                    if (referencedElement != null && !visited.contains(referencedElement)) {
+                    if (referencedElement != null && !visitedReferences.contains(referencedElement)) {
                         if (fromReferencesMeetingCondition.test(referencedElement)) {
                             if (elementType.isInstance(referencedElement) && typeCondition.test(elementType.cast(referencedElement))) {
                                 result.add(elementType.cast(referencedElement));
                             }
-                            visited.add(referencedElement);
-                            result.addAll(allChildrenOfType(visited, referencedElement, elementType, typeCondition, fromReferencesMeetingCondition));
+                            visitedReferences.add(referencedElement);
+                            result.addAll(allChildrenOfTypeMeetingConditionWithReferences(
+                                    visitedReferences,
+                                    referencedElement,
+                                    elementType,
+                                    typeCondition,
+                                    fromReferencesMeetingCondition)
+                            );
                         }
                     }
                 }
-                result.addAll(allChildrenOfType(visited, child, elementType, typeCondition, fromReferencesMeetingCondition));
+                result.addAll(allChildrenOfTypeMeetingConditionWithReferences(
+                        visitedReferences,
+                        child,
+                        elementType,
+                        typeCondition,
+                        fromReferencesMeetingCondition)
+                );
 
             }
         }

@@ -37,8 +37,10 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
             "'getName' | 'getNameTest'        | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
             "'getName' | 'test_GetName'       | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
             "'getName' | 'GetName_test'       | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
+            "'g' | 'g_test'               | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
+            "'run' | 'test_Run'                | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
     }, delimiter = '|')
-    public void checkBestPractices_TestNameTooSimilarOrTooDifferent_OneViolationReportingAboutTestNamingStrategyShouldBeReturned(String testName, String testedMethodName, String problemDescription) {
+    public void checkBestPractices_TestNameTooSimilarOrTooDifferent_OneViolationReportingAboutTestNamingStrategyShouldBeReturned(String testedMethodName, String testName, String problemDescription) {
         // Given
         PsiMethod testedMethod = this.javaTestElementUtil.createMethod(testedMethodName, "String", Collections.singletonList(PsiKeyword.PUBLIC));
         PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) this.psiElementFactory.createExpressionFromText(String.format("%s()", testedMethodName), null);
@@ -47,8 +49,8 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
         EasyMock.expect(methodResolver.allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfType(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                 .andReturn(Collections.singletonList(testedMethodCall)).times(1);
         EasyMock.replay(elementResolver, methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(

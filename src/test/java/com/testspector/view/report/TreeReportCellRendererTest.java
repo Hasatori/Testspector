@@ -16,8 +16,6 @@ import java.net.URI;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-
-@RunWith(JUnitPlatform.class)
 public class TreeReportCellRendererTest {
 
     private TreeReportCellRenderer treeReportCellRenderer;

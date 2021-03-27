@@ -61,7 +61,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) psiElementFactory.createExpressionFromText(String.format("%s()", customAssertionMethodName), psiClass);
         assertMethod = (PsiMethod) psiClass.add(assertMethod);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).once();
-        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(assertMethod), EasyMock.eq(PsiThrowStatement.class), EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.singletonList(throwStatement));
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(assertMethod), EasyMock.eq(PsiThrowStatement.class), EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.singletonList(throwStatement));
         EasyMock.replay(contextIndicator, elementResolver);
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
@@ -250,11 +250,11 @@ class JavaMethodResolverTest extends JavaTest {
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element -> true)).times(3);
         EasyMock.expect(contextIndicator.isInProductionCodeContext()).andReturn((element -> true)).times(2);
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethod), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.singletonList(assertionMethodCall)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver.allChildrenOfTypeWithReferences(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject()))
                 .andReturn(Collections.singletonList(testedMethodCall)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiLiteralExpression.class), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver.allChildrenOfTypeWithReferences(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiLiteralExpression.class), EasyMock.anyObject()))
                 .andReturn(Collections.emptyList()).times(1);
         EasyMock.replay(elementResolver);
 
@@ -273,7 +273,7 @@ class JavaMethodResolverTest extends JavaTest {
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element -> true)).times(1);
         EasyMock.expect(contextIndicator.isInProductionCodeContext()).andReturn((element -> true)).times(2);
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfType(EasyMock.eq(testMethod), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.emptyList()).times(1);
         EasyMock.replay(elementResolver);
 

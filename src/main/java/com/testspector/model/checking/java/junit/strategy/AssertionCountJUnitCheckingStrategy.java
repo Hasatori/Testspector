@@ -16,16 +16,16 @@ import java.util.function.Predicate;
 public class AssertionCountJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
     private final JavaElementResolver elementResolver;
-    private final JavaContextIndicator contextResolver;
+    private final JavaContextIndicator contextIndicator;
     private final JavaMethodResolver methodResolver;
 
     public static final List<String> GROUP_ASSERTION_NAMES = Collections.unmodifiableList(Arrays.asList(
             "assertAll"
     ));
 
-    public AssertionCountJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
+    public AssertionCountJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
         this.elementResolver = elementResolver;
-        this.contextResolver = contextResolver;
+        this.contextIndicator = contextIndicator;
         this.methodResolver = methodResolver;
     }
 
@@ -37,16 +37,22 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        for (PsiMethod method : methods) {
+        for (PsiMethod testMethod : methods) {
             List<PsiMethodCallExpression> allAssertionMethods = elementResolver
-                    .allChildrenOfType(method, PsiMethodCallExpression.class, (psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent()), contextResolver.isInTestContext());
+                    .allChildrenOfTypeMeetingConditionWithReferences(
+                            testMethod,
+                            PsiMethodCallExpression.class,
+                            (psiMethodCallExpression -> methodResolver
+                                    .assertionMethod(psiMethodCallExpression)
+                                    .isPresent())
+                            , contextIndicator.isInTestContext());
             allAssertionMethods = removeGroupedAssertions(allAssertionMethods);
-            PsiIdentifier methodIdentifier = method.getNameIdentifier();
+            PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
             if (allAssertionMethods.isEmpty()) {
                 bestPracticeViolations.add(new BestPracticeViolation(
-                        String.format("%s#%s", method.getContainingClass().getQualifiedName(), method.getName()),
-                        method,
-                        methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
+                        String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                        testMethod,
+                        methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
                         "Test should contain at least one assertion method!",
                         BestPractice.AT_LEAST_ONE_ASSERTION
                 ));
@@ -54,7 +60,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
             if (allAssertionMethods.size() > 1) {
                 List<String> hints = new ArrayList<>();
                 String message = "Test should contain only one assertion method!";
-                if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
+                if (Arrays.stream(testMethod.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
                     hints.add(String.format("You are using JUnit5 so it can be solved by wrapping multiple assertions into %s.assertAll() method", JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH));
                 }
                 if (allAssertionMethods.stream().anyMatch(isAssertionMethodFrom(JUnitConstants.HAMCREST_ASSERTIONS_CLASS_PATH))) {
@@ -62,13 +68,13 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
                 }
 
                 bestPracticeViolations.add(new BestPracticeViolation(
-                        String.format("%s#%s", method.getContainingClass().getQualifiedName(), method.getName()),
-                        method,
-                        methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
+                        String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                        testMethod,
+                        methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
                         message,
                         hints,
                         BestPractice.ONLY_ONE_ASSERTION,
-                        createRelatedElements(method, allAssertionMethods)));
+                        createRelatedElements(testMethod, allAssertionMethods)));
             }
         }
         return bestPracticeViolations;
@@ -77,7 +83,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
     private List<PsiMethodCallExpression> removeGroupedAssertions(List<PsiMethodCallExpression> allAssertions) {
         List<PsiMethodCallExpression> toRemove = new ArrayList<>();
         for (PsiMethodCallExpression assertion : allAssertions) {
-            toRemove.addAll(elementResolver.allChildrenOfType(assertion, PsiMethodCallExpression.class, psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent(), contextResolver.isInTestContext()));
+            toRemove.addAll(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(assertion, PsiMethodCallExpression.class, psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent(), contextIndicator.isInTestContext()));
         }
         allAssertions.removeAll(toRemove);
         return allAssertions;
@@ -108,9 +114,9 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
 
 
     private Optional<PsiReferenceExpression> firstReferenceToAssertionMethod(PsiElement element, PsiMethodCallExpression psiMethodCallExpression) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfType(element, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(element, PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfType(reference.getParent(), PsiMethodCallExpression.class, psiMethodCallExpression1 -> psiMethodCallExpression == psiMethodCallExpression1, contextResolver.isInTestContext()).isEmpty()) {
+            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(reference.getParent(), PsiMethodCallExpression.class, psiMethodCallExpression1 -> psiMethodCallExpression == psiMethodCallExpression1, contextIndicator.isInTestContext()).isEmpty()) {
                 return Optional.of(reference);
             }
         }
