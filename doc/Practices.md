@@ -282,7 +282,7 @@ Nejlepší postupy týkající se rychlosti jsou následující:
 
 Pokud v rámci testů pracujeme s databází, potřebujeme volat http požadavky,
 provádět soap operace, číst data ze souboru apod., je nutné tyto operace
-provádět v paměti a vyhnout se tak zpomalujícím operacím [(Acharya 2014, kap. Configuring tests)](#978-1-78398-251-6 978-1-78398-250-9). Příkladem může být
+provádět v paměti a vyhnout se tak zpomalujícím operacím [(Acharya 2014, kap. Configuring tests)](#978-1-78398-251-6-978-1-78398-250-9). Příkladem může být
 použití in-memory databáze na místo databáze klasické. In-memory databáze data
 neukládá do skutečných souborů, ale vše si drží v paměti. Operace pro čtení či
 zápis dat jsou pak mnohem rychlejší.
@@ -297,7 +297,7 @@ a proto uspíme vlákno hlavní. Tento přístup však není efektivní, jeliko�
 prováděné na vedlejších vláknech mohou pokaždé trvat jinou dobu. V takovém
 případě je doporučeno zajistit přímé čekání hlavního vlákna na dokončení operací
 vláken vedlejších. Tímto způsobem je hlavní vlákno blokováno pouze po nejkratší
-nutnou dobu [(Acharya 2014, kap. Configuring tests)](#978-1-78398-251-6 978-1-78398-250-9).
+nutnou dobu [(Acharya 2014, kap. Configuring tests)](#978-1-78398-251-6-978-1-78398-250-9).
 
 ## Ověřování (kontrola)
 
@@ -331,7 +331,7 @@ testy reportuje jako prošlé, což povede k falešnému reportování výsledk�
 
 <h3 id="prave-jedna-overovaci-metoda-na-test">Právě jedna ověřovací metoda na test</h3>
 
-Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy [(Turnquist a Das 2018)](#978-1-78728-150-9), [(Meszaros 2007)](#978-0-13-149505-0), (Powerhouse 2018) a [(Acharya 2014)](#978-1-78398-251-6 978-1-78398-250-9) přistupuje k problematice poměrně dogmaticky a vyžadují vždy pouze jednu ověřovací metodu na test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují rozdělit do více testovacích metod. Více testovacích metod vede k horší čitelnosti testu a způsobuje také jeho horší udržovatelnost. 
+Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy [(Turnquist a Das 2018)](#978-1-78728-150-9), [(Meszaros 2007)](#978-0-13-149505-0), [(Powerhouse 2018)](#978-1-976900-84-6) a [(Acharya 2014)](#978-1-78398-251-6-978-1-78398-250-9) přistupuje k problematice poměrně dogmaticky a vyžadují vždy pouze jednu ověřovací metodu na test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují rozdělit do více testovacích metod. Více testovacích metod vede k horší čitelnosti testu a způsobuje také jeho horší udržovatelnost. 
 
 Na druhé straně jsou autoři [(Martin 2009)](#978-0-13-235088-4), [(Khorikov 2020)](#978-1-61729-627-7), [(Langr a Swaine 2013)](#978-1-937785-48-2) a
 [(Tarlinder 2016)](#978-0-13-429106-2), kteří pravidlo považují pravidlo za příliš drakonické a
@@ -388,6 +388,7 @@ může vést k jejich selhání. Tyto metody označuje [(Koskela 2013)](#978-1-9
 Hyperasserce a jako příklad uvádí ověřovací metodu, jež porovnává očekávaný
 obsah souboru s obsahem vyprodukovaným po transformaci vstupního souboru (viz
 obr. 2 )
+
 ![hyperassertion_example.png](./hyperassertion_example.png)
 
 obr. 2 Příklad tzv. Hyperasserce [(Koskela 2013)](#978-1-935182-57-3)
@@ -680,7 +681,7 @@ zapamatování a jednak to usnadňuje komunikaci mezi lidmi, kteří s testy pra
 
 Jméno metody či proměnné by nemělo mystifikovat a mělo by vyjadřovat co ve
 skutečnosti reprezentuje. Příkladem může být proměnná pojmenovaná
-*activationDate***,** která je ve skutečnosti typu long a reprezentuje datum v
+*activationDate*, která je ve skutečnosti typu long a reprezentuje datum v
 podobě milisekund. V tomto případě název zavádí a vhodnější by bylo pojmenovat
 proměnnou *activationDateMilis*
 
@@ -1015,7 +1016,7 @@ jsou mazány či přidávány, a to nezávisle na chování systému jako celku.
 metody jsou pouze pomocným nástrojem pro zajištění veřejného chování testovaného
 systému. Jejich testování vytváří velké množství závislostí mezi kódem a testy a
 z dlouhodobého hlediska to vede k obtížné udržovatelnosti testů a nutnosti
-jejich časté úpravy a aktualizace. (Khorikov 2020) a [(Langr et al. 2015)](#978-1-937785-48-2) uvádí,
+jejich časté úpravy a aktualizace. [(Khorikov 2020)](#978-1-61729-627-7) a [(Langr et al. 2015)](#978-1-937785-48-2) uvádí,
 že pokud obsahují privátní metody komplexní chování a zdá se, že by mělo smysl
 pro ně samostatný test napsat, jedná se o ukázku chyby v návrhu daného systému a
 porušení principu jedné odpovědnosti (Single Responsibility Principle). Takové
@@ -1026,7 +1027,7 @@ Výjimkou z tohoto principu je situace, kdy je privátní metoda součástí
 pozorovaného chování systému. Například pokud máme privátní konstruktor třídy,
 která je součástí ORM knihovny a její inicializace by neměla být povolena. V
 takovém případě je privátnost součástí pozorovaného chování a konstruktor by měl
-zůstat privátní (Khorikov 2020).
+zůstat privátní [(Khorikov 2020)](#978-1-61729-627-7).
 
 ### Testovat chování, ne metody systému
 
@@ -1040,8 +1041,7 @@ ze základních pravidel, je doporučováno toho pravidla dbát i při psaní
 jednotkových testů. I pouze jedna testovaná komponenta v sobě může zahrnovat
 více malých funkcionalit, nebo funkcí. Důležité je v rámci testu zohledňovat
 pouze jednu tuto dílčí funkcionalitu či chování, jelikož se pak testy snáze
-udržují a také se snáze odhalují problémy, pokud testy selhávají (Meszaros
-2007).
+udržují a také se snáze odhalují problémy, pokud testy selhávají [(Meszaros 2007)](#978-0-13-149505-0).
 
 ## Datové pokrytí (Data coverage)
 
@@ -1081,7 +1081,7 @@ doporučováno testovat hraniční podmínky vstupních dat. [(Langr et al. 2015
 vymezuje akronym **CORRECT**, který napomáhá zapamatování si vhodného přemýšlení
 o hraničních podmínkách jednotkových testů (viz Tabulka 4).
 
-Tabulka 4 Popis dílčích částí akronymu CORRECT (autor a [(Langr et al. 2015)](#978-1-937785-48-2))
+Tabulka 4 Popis dílčích částí akronymu CORRECT (autor a [(Langr et al. 2015)](#978-1-937785-48-2)
 
 | Conformance-Shoda                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -1111,8 +1111,7 @@ druhé mocniny ke stejnému číslu [(Langr et al. 2015)](#978-1-937785-48-2).
 
 Jedná se o podobný přístup jako v předchozím bodě, ale používáme jiné prostředky
 než vlastní. Může se jednat o nějakou externí knihovnu, nebo používání různých
-kusů dat z testované třídy proto abychom zjistili, zda vše dohromady sedí (Langr
-et al. 2015).
+kusů dat z testované třídy proto abychom zjistili, zda vše dohromady sedí [(Langr et al. 2015)](#978-1-937785-48-2).
 
 ### Vynucovat chybné podmínky
 
@@ -1199,7 +1198,7 @@ obr. 17 Ukázka použití rozhodovací tabulky pro specifikaci testovacích př�
 <p id="978-0-13-235088-4">MARTIN, Robert C., ed., 2009. Clean code: a handbook of agile software craftsmanship. Upper Saddle River, NJ: Prentice Hall. ISBN 978-0-13-235088-4.</p>
 <p id="978-1-78398-792-4">GOVINDARAJ, Siddharta, 2015. Test-driven python development. Place of publication not identified: Packt Publishing Limited. ISBN 978-1-78398-792-4.</p>
 <p id="978-0-13-235088-4">MARTIN, Robert C., ed., 2009. Clean code: a handbook of agile software craftsmanship. Upper Saddle River, NJ: Prentice Hall. ISBN 978-0-13-235088-4.</p>
-<p id="978-1-78398-251-6 978-1-78398-250-9">ACHARYA, Sujoy, 2014. Mastering unit testing using Mockito and JUnit: an advanced guide to mastering unit testing using Mockito and JUnit. Birmingham, England: Packt Publishing. ISBN 978-1-78398-251-6.</p>
+<p id="978-1-78398-251-6-978-1-78398-250-9">ACHARYA, Sujoy, 2014. Mastering unit testing using Mockito and JUnit: an advanced guide to mastering unit testing using Mockito and JUnit. Birmingham, England: Packt Publishing. ISBN 978-1-78398-251-6.</p>
 <p id="978-1-61729-627-7">KHORIKOV, Vladimir, 2020. Unit Testing Principles, Practices, and Patterns [online] [vid. 2020-10-18]. ISBN 978-1-61729-627-7. Dostupné z: https://go.oreilly.com/university-college-london/library/view/-/9781617296277/?ar</p>
 <p id="978-1-78728-150-9">TURNQUIST, Greg L a Bhaskar N DAS, 2018. Python testing cookbook: easy solutions to test your Python projects using test-driven development and Selenium [online]. Birmingham, England; Mumbai: Packt [vid. 2020-11-24]. ISBN 978-1-78728-150-9. Dostupné z: https://www.safaribooksonline.com/library/view//9781787122529/?ar?orpq&email=^u</p>
 <p id="978-0-13-149505-0">MESZAROS, Gerard, 2007. xUnit test patterns: refactoring test code. Upper Saddle River, NJ: Addison-Wesley. The Addison-Wesley signature series. ISBN 978-0-13-149505-0.</p>
@@ -1209,6 +1208,7 @@ obr. 17 Ukázka použití rozhodovací tabulky pro specifikaci testovacích př�
 <p id="978-0-13-429106-2">TARLINDER, Alexander, 2016. Developer testing: building quality into software. Boston: Addison-Wesley. The Addison-Wesley signature series. ISBN 978-0-13-429106-2.</p>
 <p id="978-1-78712-439-4">GARCÍA, Boni, 2017. Mastering software testing with JUnit 5: comprehensive guide to develop high quality Java applications [online] [vid. 2021-03-27]. ISBN 978-1-78712-439-4. Dostupné z: http://proquestcombo.safaribooksonline.com/9781787285736</p>
 <p id="978-1-5386-2807-2">BOWES, David, Tracy HALL, Jean PETRIĆ, Thomas SHIPPEY a Burak TURHAN, 2017. How good are my tests? In: Proceedings of the 8th Workshop on Emerging Trends in Software Metrics. Buenos Aires, Argentina: IEEE Press, s. 9–14. WETSoM ’17. ISBN 978-1-5386-2807-2.</p>
+<p id="978-1-976900-84-6">POWERHOUSE, Knowledge, 2018. Top 50 JUnit Unit Testing Interview Questions & Answers. B.m.: Independently published. ISBN 978-1-976900-84-6.</p>
 <p id="Best_practice_definition_cambridge_dictionary_2020">CAMBRIDGE DICTIONARY, 2020. BEST PRACTICE | meaning in the Cambridge English Dictionary [online] [vid. 2020-08-01]. Dostupné z: https://dictionary.cambridge.org/dictionary/english/best-practice</p>
 <p id="Best_practice_definition_merriam_webster_1927">MERRIAM-WEBSTER, 1927. Definition of BEST PRACTICE [online] [vid. 2020-08-01]. Dostupné z: https://www.merriam-webster.com/dictionary/best+practice</p>
 <p id="Best_practice_definition_management_mania_2020">MANAGEMENTMANIA, 2020. Nejlepší praxe (Best Practice). ManagementMania.com [online] [vid. 2020-08-01]. Dostupné z: https://managementmania.com/cs/nejlepsi-praxe-best-practice</p>
