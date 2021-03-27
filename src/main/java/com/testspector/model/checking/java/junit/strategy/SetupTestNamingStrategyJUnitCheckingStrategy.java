@@ -43,7 +43,12 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                 List<PsiMethod> allTestedMethod = methodResolver.allTestedMethods(testMethod);
                 List<PsiMethod> methodsWithAlmostSameName = allTestedMethod
                         .stream()
-                        .filter(method -> FuzzySearch.ratio(testMethodName.toLowerCase(), method.getName().toLowerCase()) > 70)
+                        .filter(testedMethod -> {
+                            int minRatio = selectMinRatio(testedMethod.getName());
+                            return FuzzySearch.ratio(
+                                    testMethodName.toLowerCase(),
+                                    testedMethod.getName().toLowerCase()) > minRatio;
+                        })
                         .collect(Collectors.toList());
                 if (methodsWithAlmostSameName.size() >= 1) {
                     bestPracticeViolations.add(new BestPracticeViolation(
@@ -70,6 +75,20 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
 
         return bestPracticeViolations;
     }
+
+    private int selectMinRatio(String testedMethodName) {
+        int testedMethodNameLength = testedMethodName.length();
+        if (testedMethodNameLength == 1) {
+            return 28;
+        } else if (testedMethodNameLength == 2) {
+            return 43;
+        } else if (testedMethodNameLength > 2 && testedMethodNameLength <= 5) {
+            return 50;
+        } else {
+            return 70;
+        }
+    }
+
     private List<RelatedElementWrapper> createRelatedElements(PsiMethod method, List<PsiMethod> methodsWithAlmostSameName) {
         List<RelatedElementWrapper> result = new ArrayList<>();
         for (PsiMethod methodWithAlmostSameName : methodsWithAlmostSameName) {
@@ -89,14 +108,14 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
 
 
     private Optional<PsiReferenceExpression> firstReferenceToMethodWithAlmostSameName(PsiElement element, PsiMethod methodWithAlmostSameName) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfType(element, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(element, PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfType(
+            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     reference.getParent(),
                     PsiMethodCallExpression.class,
                     psiMethodCallExpression -> psiMethodCallExpression.resolveMethod() != null && psiMethodCallExpression.resolveMethod() == methodWithAlmostSameName,
                     contextIndicator.isInTestContext()).isEmpty()
-                    || !elementResolver.allChildrenOfType(
+                    || !elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     reference.getParent(),
                     PsiLiteralExpression.class,
                     psiLiteralExpression -> Arrays.stream(ReferenceProvidersRegistry.getReferencesFromProviders(psiLiteralExpression))
@@ -104,8 +123,8 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                             .filter(Objects::nonNull)
                             .filter(referencedElement -> referencedElement instanceof PsiMethod)
                             .filter(contextIndicator.isInProductionCodeContext())
-                            .map(resolvedElement->(PsiMethod)resolvedElement)
-                            .anyMatch(method -> method==methodWithAlmostSameName),
+                            .map(resolvedElement -> (PsiMethod) resolvedElement)
+                            .anyMatch(method -> method == methodWithAlmostSameName),
                     contextIndicator.isInTestContext()).isEmpty()
             ) {
                 return Optional.of(reference);

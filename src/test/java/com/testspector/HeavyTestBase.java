@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 
-@RunWith(JUnitPlatform.class)
+
 @ExtendWith(WriteCommandActionTestInterceptor.class)
 public abstract class HeavyTestBase extends BasePlatformTestCase {
 

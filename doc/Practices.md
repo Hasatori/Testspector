@@ -170,7 +170,7 @@ původně formulováno v knize **The pragmatic programmer** a jeho znění v
 originále zní:
 
 „*Every piece of knowledge must have a single, unambiguous, authoritative
-representation within a systém*“(Hunt a Thomas 2000)
+representation within a systém*“(Hunt a Thomas 2000, kap. Topic 9. DRY—The Evils of Duplication)
 
 **Autorský překlad:**
 
@@ -182,7 +182,7 @@ měli aplikovat i na ně. Porušování tohoto pravidla se může zdát z krátk
 hlediska poměrně výhodné, protože umožňuje velmi rychlou tvorbu jednotlivých
 testovacích případů. Pokud implementujeme nový test, lze využít kódu některého z
 dalších testů v dané testovací třídě a následně pouze změnit části specifické
-pro test nový. Jak uvádí kniha *Effective unit testing* (Koskela 2013), tak z
+pro test nový. Jak uvádí kniha *Effective unit testing* [(Koskela 2013)](#978-1-935182-57-3), tak z
 dlouhodobého hlediska má tento přístup negativní vliv jak na udržovatelnost, tak
 na srozumitelnost testovacího kódu. Samotný test by měl obsahovat pouze nezbytné
 informace, které pomohou čtenáři velmi snadno a rychle pochopit jeho fungování.
@@ -210,7 +210,7 @@ Mimo typické strukturální a literární duplicity, je také nutné dávat poz
 tzv. sémantické duplicity, tedy části kódu, které nevypadají stejně, ale dělají
 stejnou věc.
 
-### Extrakce opakujících se testovacích metod 
+### Extrakce opakujících se testovacích metod
 
 Metody opakující se napříč několika testovacími třídami vyextrahovat do
 samostatné třídy, a tu poté přidělit jako rodiče těchto testovacích tříd.
@@ -283,14 +283,9 @@ testy reportuje jako prošlé, což povede k falešnému reportování výsledk�
 
 <h3 id="prave-jedna-overovaci-metoda-na-test">Právě jedna ověřovací metoda na test</h3>
 
-Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy
-(Turnquist a Das 2018), (Meszaros 2007), (Powerhouse 2018) a (Acharya 2014)
-přistupuje k problematice poměrně dogmaticky a zastávají pravidlo že by test měl
-selhat pouze z jednoho důvodu. Vyžadují vždy pouze jednu ověřovací metodu na
-test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují
-rozdělit do více testovacích metod. Více testovacích metod vede k horší
-čitelnosti testu a způsobuje také jeho horší udržovatelnost. Na druhé straně
-jsou autoři (Martin 2009), (Khorikov a Safari 2020), (Langr a Swaine 2013) a
+Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy (Turnquist a Das 2018), (Meszaros 2007), (Powerhouse 2018) a (Acharya 2014) přistupuje k problematice poměrně dogmaticky a vyžadují vždy pouze jednu ověřovací metodu na test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují rozdělit do více testovacích metod. Více testovacích metod vede k horší čitelnosti testu a způsobuje také jeho horší udržovatelnost. 
+
+Na druhé straně jsou autoři [(Martin 2009)](#978-0-13-235088-4), (Khorikov a Safari 2020), (Langr a Swaine 2013) a
 (Tarlinder 2016), kteří pravidlo považují pravidlo za příliš drakonické a
 doporučují o celé problematice přemýšlet spíše z pohledu testování jedné
 jednotky chování testovaného systému. Testování jedné jednotky chování může vést
@@ -303,17 +298,7 @@ pro otestování jednoho chování. Obecně však i tato skupina autorů zastáv
 že bychom neměli počet ověřovacích metod bezmyšlenkovitě zvyšovat a obecně čím
 méně tím lépe.
 
-V souvislosti s více ověřovacími podmínkami je také nutné zmínit další problém,
-který je potřeba zohlednit. Řada testovacích frameworků, jako například JUnit,
-označí test jako celek za selhaný, už po selhání první ověřovací metody. To
-představuje veliký problém, protože i přes to že je test napsaný tak aby
-testoval pouze jednu jednotku chování testovaného systému, neboli více
-ověřovacích metod by se mohlo zdát na místě, tak výsledek je zavádějící a my
-nemáme přehled o všech chybových hlášeních. Problém je pak nutné řešit postupným
-zakomentováním jednotlivých ověřovacích metod a znovu opakovaným pouštěním
-testu. Pokud to daný programovací jazyk a framework nabízí, lze problému
-předejít použitím metod pro dávkové vyhodnocování ověřovacích metod. Příkladem
-je metoda assertAll(), která je dostupná pro framework JUnit verze 5.
+V souvislosti s více ověřovacími podmínkami je také nutné zmínit další problém, který je potřeba zohlednit. Řada testovacích frameworků, jako například JUnit, označí test jako celek za selhaný, už po selhání první ověřovací metody. To představuje veliký problém, protože i přes to že je test napsaný tak aby testoval pouze jednu jednotku chování testovaného systému, neboli více ověřovacích metod by se mohlo zdát na místě, tak výsledek je zavádějící a my nemáme přehled o všech chybových hlášeních. Problém je pak nutné řešit postupným zakomentováním jednotlivých ověřovacích metod a znovu opakovaným pouštěním testu. V takovém případě je použití více ověřovacích metod chybou. Řešením problému je použití metod pro dávkové vyhodnocování ověřovacích metod. Příkladem je metoda assertAll(), která je dostupná pro testovací framework JUnit verze 5. 
 
 ### Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)
 
@@ -324,7 +309,7 @@ pak zvykem přidávat tyto kontroly v podobě ověřovacích metod i do testovac
 kódu. To je však zbytečné, protože pokud by kontrola nebyla přítomna, test by
 selhal a chybové hlášení by bylo součástí reportu. Je doporučeno tyto nadbytečné
 ověřovací metody vůbec nepoužívat, jelikož neposkytují žádnou přidanou hodnotu a
-pouze zbytečně nafukují tělo testovací metody (Koskela 2013).
+pouze zbytečně nafukují tělo testovací metody [(Koskela 2013)](#978-1-935182-57-3).
 
 ### Dodržovat správné pořadí parametrů ověřovací metody
 
@@ -352,13 +337,13 @@ třídy, která ověření provede.
 Doporučením je vyhnout se přehnaně komplikovaným ověřovacím metodám, které
 jednoznačně neoznačují, co vlastně ověřují. Takovým ověřovacím metodám se jednak
 dá jen velmi obtížně rozumět a jednak jsou velmi nestabilní a byť malá změna
-může vést k jejich selhání. Tyto metody označuje (Koskela 2013) za tzv.
+může vést k jejich selhání. Tyto metody označuje [(Koskela 2013)](#978-1-935182-57-3) za tzv.
 Hyperasserce a jako příklad uvádí ověřovací metodu, jež porovnává očekávaný
 obsah souboru s obsahem vyprodukovaným po transformaci vstupního souboru (viz
 obr. 0 )
 ![0.png](0.png)
 
-obr. 0 Příklad tzv. Hyperasserce (Koskela 2013)
+obr. 0 Příklad tzv. Hyperasserce [(Koskela 2013)](#978-1-935182-57-3)
 
 ## Struktura testovací metody
 
@@ -375,7 +360,7 @@ Nejlepší postupy týkající se struktury testovací metody jsou následujíc�
 
 -   Oddělovat části testu
 
-### 3-fázový design testů 
+### 3-fázový design testů
 
 Jedná se o jednoduchý, avšak velmi efektivní princip uspořádání kódu testu do
 tří částí. První část zahrnuje vytvoření potřebných objektů a nastavení hodnot
@@ -450,7 +435,7 @@ postup je zejména výhodný v případě že se nám hodnoty čísel pro každ�
 
 ![alt text](4.png "Title")
 
-obr. 4 Příklad použití pomocné metody namísto magických čísel (Koskela 2013)
+obr. 4 Příklad použití pomocné metody namísto magických čísel [(Koskela 2013)](#978-1-935182-57-3)
 
 ## Ostatní doporučení
 
@@ -509,7 +494,7 @@ Nejlepší postupy týkající se testování výjimek jsou následující:
 Testování vyhození výjimky testovaným systémem je možno standartně pomocí bloků
 pro zachytávání výjimek *try* a *catch*. Tento způsob však není doporučován vede
 k nafukování testovací metody a zhoršování čitelnosti testovacího kódu. Navíc
-jak uvádí (Koskela 2013), tak tento přístup může také vést k tzv. *Testům co
+jak uvádí [(Koskela 2013)](#978-1-935182-57-3), tak tento přístup může také vést k tzv. *Testům co
 nikdy neselžou* a to v případě kdy zapomeneme test nechat selhat pokud není
 výjimka vyhozena nebo naopak výjimku utajíme.
 
@@ -548,7 +533,7 @@ Podmíněná logika v podobě if, else, for, či while by neměla být součást
 testovacího kodu. Obecně zvyšuje komplexnost testovací metody, což stěžuje jeho
 srozumitelnost, čitelnost a je velmi těžké určit co je vlastně spouštěno a kdy.
 Vede k přeskakování některých ověřovacích metod a dává tak iluzi správnosti
-(Koskela 2013). Obecným řešením tohoto problému je extrakce všech podmíněných
+[(Koskela 2013)](#978-1-935182-57-3). Obecným řešením tohoto problému je extrakce všech podmíněných
 větví do samostatných testů. Další možností je využití tzv. *Parametrizovaných
 testů,* je každá možnost reprezentována jednou sadou parametrů*.*
 
@@ -659,13 +644,13 @@ Pro rozdílné koncepty bychom vždy měli používat odlišná jména. Příkla
 dva parametry reprezentující zdroj a cíl, které jsou pojmenované *a1* a *a2*.
 Takové pojmenování je zcela nevhodné, protože může velmi snadno dojít k jejich
 záměně. Pokud bychom je pojmenovali *source* a *destination,* záměna by byla
-mnohem obtížnější (Martin 2009).
+mnohem obtížnější [(Martin 2009)](#978-0-13-235088-4).
 
 S tímto tématem souvisí také informační šum ve jménech. Například pokud
 vytvoříme dvě třídy *ProductInfo* a *ProductData*. *Data* a *Info* znamená
-vlastně to samé, ale jsou to dvě separátní třídy (Martin 2009).
+vlastně to samé, ale jsou to dvě separátní třídy [(Martin 2009)](#978-0-13-235088-4).
 
-### Vynechávat nadbytečné součásti názvů 
+### Vynechávat nadbytečné součásti názvů
 
 Součástí názvů by neměly být přebytečné informace, které nepřidávají žádnou
 přidanou hodnotu a pouze prodlužují dané jméno. Jedná se o ty části, které jsou
@@ -680,7 +665,7 @@ vyhledatelné* názvy, *Zamezovat* dezinformac a hovoří o tom že názvy metod
 proměnných by vždy měly vyjadřovat záměr a mělo by být zřejmé za jakým účelem
 byly vytvořeny.
 
-## Uložení testovací souboru a seskupování testů 
+## Uložení testovací souboru a seskupování testů
 
 Tato podsekce obsahuje nejlepší postupy týkající se uložení testů a testovacích
 souborů ve vývojovém prostředí.
@@ -761,7 +746,7 @@ Tato podsekce obsahuje nejlepší postupy pro zajištění nezávislosti testů.
 Nezávislost testů je jednou ze základních vlastností jednotkového testu.
 Vyjadřuje to, že by testy neměly záviset jeden na druhém. Jeden test by neměl
 nastavovat podmínky pro následující test a každý test by měl být schopen běžet
-nezávisle a v jakémkoliv pořadí (Martin 2009). Mimo rozsah této definice pokrývá
+nezávisle a v jakémkoliv pořadí [(Martin 2009)](#978-0-13-235088-4). Mimo rozsah této definice pokrývá
 podsekce také širší aspekt nezávislosti testů z hlediska nezávislosti na
 prostředí či produkčním kódu
 
@@ -791,7 +776,7 @@ a nastavit ji buď v testu samotném nebo pomocí tzv. hook metody, která je
 spouštěna před každým testem. Pří použití hook metody je nutné proměnnou znovu
 inicializovat.
 
-### Nepoužívat znalost domény 
+### Nepoužívat znalost domény
 
 Jedná se o případ, kdy používáme doménu, na níž testy vytváříme, pro stanovení
 výsledku testu. Jednoduchým příkladem je třída, jež má metodu pro sčítání dvou
@@ -825,7 +810,7 @@ operačního systému se mění ověřovací metody testu.
 
 ![11.png](11.png)
 
-obr. 11 Příklad testu závislého na platformě (Koskela 2013)
+obr. 11 Příklad testu závislého na platformě [(Koskela 2013)](#978-1-935182-57-3)
 
 Namísto tohoto postupu je doporučováno jednak test rozdělit na samostatné testy
 a jednak zajištění prostředků pro spouštění testu nezávisle na platformě.
@@ -834,7 +819,7 @@ ní poté pouštět test (viz obr. 12).
 
 ![12.png](12.png)
 
-obr. 12 Příklad testu nezávislého na operačním systému (Koskela 2013)
+obr. 12 Příklad testu nezávislého na operačním systému [(Koskela 2013)](#978-1-935182-57-3)
 
 ### Dodržovat nezávislost na produkčním kódu
 
@@ -873,10 +858,10 @@ chování, které právě chceme testovat.
 
 Jak ukazuje obr. 13, tak existují celkem 4 typy testovacích dvojníků. Použití
 každého z nich se hodí v závislosti na daném kontextu a obecně nelze říct, který
-by byl nejlepší. (Koskela 2013) specifikuje základní doporučení, kdy jednotlivé
+by byl nejlepší. [(Koskela 2013)](#978-1-935182-57-3) specifikuje základní doporučení, kdy jednotlivé
 typy používat (viz. Tabulka 1).
 
-Tabulka 1 Popis a použití testovacích dvojníků (autor a (Koskela 2013))
+Tabulka 1 Popis a použití testovacích dvojníků (autor a [(Koskela 2013)](#978-1-935182-57-3))
 
 | Název | Popis                                                                                                                 | Kdy použít                                                                                                                                                                                                       |
 |-------|-----------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -887,7 +872,7 @@ Tabulka 1 Popis a použití testovacích dvojníků (autor a (Koskela 2013))
 
 ![13.png](13.png)
 
-obr. 13 Typy testovacích dvojníků (Koskela 2013)
+obr. 13 Typy testovacích dvojníků [(Koskela 2013)](#978-1-935182-57-3)
 
 ### Nepoužívat testovací dvojníky na testovaný systém
 
@@ -1042,7 +1027,7 @@ Nejlepší postupy týkající se datového pokrytí (Data coverage) jsou násle
 
 -   Testovat pomocí rozhodovacích tabulek
 
-### Testovat hraniční podmínky 
+### Testovat hraniční podmínky
 
 Mnoho chyb v kódu velmi často vzniká vlivem mezních hodnot povolené podoby dat.
 Jeden obyčejný *„happy day“* scénář na takové problémy nenarazí. Je proto
@@ -1163,3 +1148,8 @@ obr. 16 Ukázka použití rozhodovací tabulky pro specifikaci testovacích př�
 (autor)
 
 ![16.png](16.png)
+
+## Literatura
+<p id="978-1-935182-57-3">KOSKELA, Lasse, 2013. Effective unit testing: a guide for Java developers. Shelter Island, NY: Manning. ISBN 978-1-935182-57-3</p>
+<p id="978-0-13-235088-4">MARTIN, Robert C., ed., 2009. Clean code: a handbook of agile software craftsmanship. Upper Saddle River, NJ: Prentice Hall. ISBN 978-0-13-235088-4.</p>
+
