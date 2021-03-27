@@ -37,7 +37,6 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
         PsiMethod testMethod = this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@Test"));
         testMethod = (PsiMethod) testClass.add(testMethod);
         PsiMethodCallExpression methodCallingTheConstant = (PsiMethodCallExpression) psiElementFactory.createExpressionFromText(String.format("Assert.assertEquals(%s,\"Test\")", constantName), null);
-
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).times(2);
         EasyMock.replay(contextIndicator);
         EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiField.class),EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.singletonList(staticNotFinalStringConstant)).times(1);
@@ -45,7 +44,6 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
         EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(methodCallingTheConstant), EasyMock.eq(PsiField.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.singletonList(staticNotFinalStringConstant)).times(1);
         EasyMock.replay(elementResolver);
-
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
                         String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),

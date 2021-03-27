@@ -36,15 +36,17 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
 
 
         for (PsiMethod method : methods) {
-            List<PsiField> staticProperties = new ArrayList<>(elementResolver
+            List<PsiField> staticProperties = elementResolver
                     .allChildrenOfTypeMeetingConditionWithReferences(
                             method,
                             PsiField.class,
                             (psiField ->
                                     !(psiField instanceof PsiEnumConstant)
-                                    && isStaticAndNotFinal().test(psiField)
                             ),
-                            contextIndicator.isInTestContext()));
+                            contextIndicator.isInTestContext())
+                    .stream()
+                    .filter(isStaticAndNotFinal())
+                    .collect(Collectors.toList());
             PsiIdentifier methodIdentifier = method.getNameIdentifier();
             if (staticProperties.size() > 0) {
                 bestPracticeViolations.add(new BestPracticeViolation(
@@ -57,7 +59,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
                                 method.getTextRange(),
                         "Global static properties should not be part of a test. " +
                                 "Tests are sharing the reference and if some of them would update" +
-                                " it might influence behaviour of other tests.",
+                                " it it might influence behaviour of other tests.",
                         Arrays.asList(
                                 "If the property is immutable e.g.,String, Integer, Byte, Character" +
                                         " etc. then you can add 'final' identifier so that tests can " +

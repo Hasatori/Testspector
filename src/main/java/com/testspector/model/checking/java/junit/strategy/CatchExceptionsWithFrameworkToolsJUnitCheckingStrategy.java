@@ -12,8 +12,7 @@ import com.testspector.model.enums.BestPractice;
 
 import java.util.*;
 
-import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT4_ASSERTIONS_CLASS_PATH;
-import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH;
+import static com.testspector.model.checking.java.junit.JUnitConstants.*;
 
 public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
@@ -36,26 +35,38 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-        for (PsiMethod method : methods) {
-            List<PsiTryStatement> psiTryStatements = elementResolver.allChildrenOfTypeWithReferences(method, PsiTryStatement.class,contextResolver.isInTestContext());
+        for (PsiMethod testMethod : methods) {
+            List<PsiTryStatement> psiTryStatements = elementResolver
+                    .allChildrenOfTypeWithReferences(
+                            testMethod,
+                            PsiTryStatement.class,
+                            contextResolver.isInTestContext());
             if (psiTryStatements.size() > 0) {
                 List<String> hints = new ArrayList<>();
-                String message = "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.";
-                if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
-                    hints.add(String.format("You are using JUnit5 so it can be solved by using %s.assertThrows() method", JUNIT5_ASSERTIONS_CLASS_PATH));
+                String message = "Tests should not contain try catch block. " +
+                        "These blocks are redundant and make test harder to read and understand. " +
+                        "In some cases it might even lead to never failing tests " +
+                        "if we are not handling the exception properly.";
+                if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)) {
+                    hints.add(String.format("You are using JUnit5 so it can be solved " +
+                                    "by using %s.assertThrows() method"
+                                    , JUNIT5_ASSERTIONS_CLASS_PATH));
                 }
-                if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT4_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
-                    hints.add(String.format("You are using JUnit4 so it can be solved by using @%s.Test(expected = Exception.class) for the test method", JUNIT4_ASSERTIONS_CLASS_PATH));
+                if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)) {
+                    hints.add(String.format(
+                            "You are using JUnit4 so it can be solved by using" +
+                            " @%s.Test(expected = Exception.class) for the test method"
+                            , JUNIT4_ASSERTIONS_CLASS_PATH));
                 }
-                PsiIdentifier methodIdentifier = method.getNameIdentifier();
+                PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
                 bestPracticeViolations.add(new BestPracticeViolation(
-                        String.format("%s#%s",method.getContainingClass().getQualifiedName(),method.getName()),
-                        method,
-                        methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
+                        String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                        testMethod,
+                        methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
                         message,
                         hints,
                         this.getCheckedBestPractice().get(0),
-                        createRelatedElements(method,psiTryStatements)
+                        createRelatedElements(testMethod, psiTryStatements)
                 ));
             }
         }
@@ -73,7 +84,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
             } else {
                 elementNameHashMap.put(conditionalStatement, "statement");
             }
-            result.add(new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...",conditionalStatement.getTextRange().getStartOffset(),conditionalStatement.getTextRange().getEndOffset()), elementNameHashMap));
+            result.add(new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...", conditionalStatement.getTextRange().getStartOffset(), conditionalStatement.getTextRange().getEndOffset()), elementNameHashMap));
         }
 
         return result;

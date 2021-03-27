@@ -66,7 +66,7 @@ public class JavaMethodResolver {
 
     private List<PsiMethod> methodsWithAnnotations(PsiClass psiClass, List<String> annotationQualifiedNames) {
         return Arrays.stream(psiClass.getMethods())
-                .filter(psiMethod -> annotationQualifiedNames.stream().anyMatch(psiMethod::hasAnnotation) || (annotationQualifiedNames.isEmpty() && psiMethod.getAnnotations().length==0))
+                .filter(psiMethod -> methodHasAnyOfAnnotations(psiMethod,annotationQualifiedNames))
                 .collect(Collectors.toList());
     }
 
@@ -133,5 +133,11 @@ public class JavaMethodResolver {
 
         return false;
     }
+
+    public boolean methodHasAnyOfAnnotations(PsiMethod method, List<String> annotationQualifiedNames) {
+        return annotationQualifiedNames.stream().anyMatch(method::hasAnnotation)
+                || (annotationQualifiedNames.isEmpty() && method.getAnnotations().length==0);
+    }
+
 
 }

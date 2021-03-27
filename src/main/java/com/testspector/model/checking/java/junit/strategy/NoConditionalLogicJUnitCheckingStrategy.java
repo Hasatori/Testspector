@@ -16,6 +16,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH;
+import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES;
 
 public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
@@ -45,8 +46,13 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
-        for (PsiMethod method : methods) {
-            List<PsiStatement> statements = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(method, PsiStatement.class, isConditionalStatement().and(partOfAssertionMethod().negate()), contextResolver.isInTestContext());
+        for (PsiMethod testMethod : methods) {
+            List<PsiStatement> statements = elementResolver
+                    .allChildrenOfTypeMeetingConditionWithReferences(
+                            testMethod
+                            ,PsiStatement.class
+                            ,isConditionalStatement().and(partOfAssertionMethod().negate())
+                            ,contextResolver.isInTestContext());
 
             statements = statements.stream().distinct().collect(Collectors.toList());
             if (statements.size() > 0) {
@@ -55,18 +61,18 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                         SUPPORTED_STATEMENT_CLASSES.stream()
                                 .map(this::statementString).collect(Collectors.joining(", "))));
                 hints.add("Acceptable place where conditional logic can be are custom assertions, where base on inputs we decide if we throw exception or not");
-                if (Arrays.stream(method.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
+                if (methodResolver.methodHasAnyOfAnnotations(testMethod,JUNIT5_TEST_QUALIFIED_NAMES)) {
                     hints.add(String.format("You are using JUnit5 so the problem can be solved by using data driven approach and generating each scenario using %s", JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH));
                 }
-                PsiIdentifier methodIdentifier = method.getNameIdentifier();
+                PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
                 bestPracticeViolations.add(new BestPracticeViolation(
-                                String.format("%s#%s", method.getContainingClass().getQualifiedName(), method.getName()),
-                                method,
-                                methodIdentifier != null ? methodIdentifier.getTextRange() : method.getTextRange(),
+                                String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                                testMethod,
+                                methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
                                 "Conditional logic should not be part of the test method, it makes test hard to understand, read and maintain.",
                                 hints,
                                 getCheckedBestPractice().get(0),
-                                createRelatedElements(method, statements)
+                                createRelatedElements(testMethod, statements)
                         )
 
                 );
@@ -77,7 +83,10 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     }
 
     Predicate<PsiStatement> isConditionalStatement() {
-        return psiStatement -> SUPPORTED_STATEMENT_CLASSES.stream().anyMatch(supportedStatement -> supportedStatement.isInstance(psiStatement));
+        return psiStatement -> SUPPORTED_STATEMENT_CLASSES
+                .stream()
+                .anyMatch(supportedStatement ->
+                        supportedStatement.isInstance(psiStatement));
     }
 
     Predicate<PsiStatement> partOfAssertionMethod() {
