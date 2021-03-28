@@ -218,7 +218,7 @@ původně formulováno v knize **The pragmatic programmer** a jeho znění v
 originále zní:
 
 „*Every piece of knowledge must have a single, unambiguous, authoritative
-representation within a systém*“[(Hunt a Thomas 2000, kap. Topic 9. DRY—The Evils of Duplication)](#978-0-201-61622-4)
+representation within a system*“[(Hunt a Thomas 2000, kap. Topic 9. DRY—The Evils of Duplication)](#978-0-201-61622-4)
 
 **Autorský překlad:**
 
