@@ -222,8 +222,7 @@ representation within a systém*“[(Hunt a Thomas 2000, kap. Topic 9. DRY—The
 
 **Autorský překlad:**
 
-„*Každa informace musí mít v systému jediné, jednoznačné a autoritativní
-zastoupení*“
+„*Každa informace musí mít v systému jediné, jednoznačné a jasné zastoupení*“
 
 V tomto ohledu nejsou jednotkové testy žádnou výjimkou a stejný princip bychom
 měli aplikovat i na ně. Porušování tohoto pravidla se může zdát z krátkodobého
