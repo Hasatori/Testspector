@@ -159,7 +159,7 @@ Cambridge slovník vymezuje pojem Best practice následovně:
 > „A working method or set of working methods that is officially accepted as being the best to use in a particular business or industry, usually described formally and in detail.“ [(Cambridge Dictionary 2020)](#Best_practice_definition_cambridge_dictionary_2020)
 
 Autorský překlad:
-> „Fungující a obecně přijímaná metoda nebo soubor fungujících metod, které je nejvhodnější použít pro určité podnikání nebo odvětví a obvykle bývají formálně a detailně popsány.“
+> „Obvykle detailně a formálně popsaná metoda nebo sada fungujících metod, která je oficiálně přijímána jako nejlepší pro použití v konkrétním podnikání nebo odvětví.“
 
 Definice z webového portálu Merriam-Webster je trochu specifičtější a vymezuje pojem takto:
 
