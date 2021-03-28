@@ -331,10 +331,10 @@ testy reportuje jako prošlé, což povede k falešnému reportování výsledk�
 
 <h3 id="prave-jedna-overovaci-metoda-na-test">Právě jedna ověřovací metoda na test</h3>
 
-Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy [(Turnquist a Das 2018)](#978-1-78728-150-9), [(Meszaros 2007)](#978-0-13-149505-0), [(Powerhouse 2018)](#978-1-976900-84-6) a [(Acharya 2014)](#978-1-78398-251-6-978-1-78398-250-9) přistupuje k problematice poměrně dogmaticky a vyžadují vždy pouze jednu ověřovací metodu na test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují rozdělit do více testovacích metod. Více testovacích metod vede k horší čitelnosti testu a způsobuje také jeho horší udržovatelnost. 
+Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy [(Meszaros 2007, kap. 5. Principles of Test Automation)](#978-0-13-149505-0), [(Powerhouse 2018, kap. 6. Why JUnit does not report all the failures in a single test)](#978-1-976900-84-6) a [(Acharya 2014, kap. 10.Best  Practices-Working with assertions)](#978-1-78398-251-6-978-1-78398-250-9) přistupuje k problematice poměrně dogmaticky a vyžadují vždy pouze jednu ověřovací metodu na test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují rozdělit do více testovacích metod. Více testovacích metod vede k horší čitelnosti testu a způsobuje také jeho horší udržovatelnost. 
 
-Na druhé straně jsou autoři [(Martin 2009)](#978-0-13-235088-4), [(Khorikov 2020)](#978-1-61729-627-7), [(Langr a Swaine 2013)](#978-1-937785-48-2) a
-[(Tarlinder 2016)](#978-0-13-429106-2), kteří pravidlo považují pravidlo za příliš drakonické a
+Na druhé straně jsou autoři [(Martin 2009, kap. 9. Unit Tests)](#978-0-13-235088-4), [(Khorikov 2020, kap. 3.1.5 How many assertions should the assert section hold?)](#978-1-61729-627-7), [(Langr a Swaine 2013, kap. 7. Quality Tests-One Assert per Test) ](#978-1-937785-48-2) a
+[(Tarlinder 2016)](#978-0-13-429106-2), [(Turnquist a Das 2018, kap. What is the right size for a test method?)](#978-1-78728-150-9), kteří pravidlo považují pravidlo za příliš drakonické a
 doporučují o celé problematice přemýšlet spíše z pohledu testování jedné
 jednotky chování testovaného systému. Testování jedné jednotky chování může vést
 k více různým výstupům, které je v pořádku otestovat více ověřovacími metodami v
@@ -346,7 +346,7 @@ pro otestování jednoho chování. Obecně však i tato skupina autorů zastáv
 že bychom neměli počet ověřovacích metod bezmyšlenkovitě zvyšovat a obecně čím
 méně tím lépe.
 
-V souvislosti s více ověřovacími podmínkami je také nutné zmínit další problém, který je potřeba zohlednit. Řada testovacích frameworků, jako například JUnit, označí test jako celek za selhaný, už po selhání první ověřovací metody. To představuje veliký problém, protože i přes to že je test napsaný tak aby testoval pouze jednu jednotku chování testovaného systému, neboli více ověřovacích metod by se mohlo zdát na místě, tak výsledek je zavádějící a my nemáme přehled o všech chybových hlášeních. Problém je pak nutné řešit postupným zakomentováním jednotlivých ověřovacích metod a znovu opakovaným pouštěním testu. V takovém případě je použití více ověřovacích metod chybou. Řešením problému je použití metod pro dávkové vyhodnocování ověřovacích metod. Příkladem je metoda assertAll(), která je dostupná pro testovací framework JUnit verze 5. 
+V souvislosti s více ověřovacími podmínkami je také nutné zmínit další problém, který je potřeba zohlednit. Řada testovacích frameworků, jako například JUnit, označí test jako celek za selhaný, už po selhání první ověřovací metody. To představuje veliký problém, protože i přes to že je test napsaný tak aby testoval pouze jednu jednotku chování testovaného systému, tak výsledek je zavádějící a my nemáme přehled o všech chybových hlášeních. Problém je pak nutné řešit postupným zakomentováním jednotlivých ověřovacích metod a znovu opakovaným pouštěním testu. V takovém případě je použití více ověřovacích metod chybou. Řešením problému je použití metod pro dávkové vyhodnocování ověřovacích metod. Příkladem je metoda assertAll(), která je dostupná pro testovací framework JUnit verze 5 [(García 2017, kap. Jupiter assertions)](#978-1-78712-439-4). 
 
 ### Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)
 
@@ -357,34 +357,34 @@ pak zvykem přidávat tyto kontroly v podobě ověřovacích metod i do testovac
 kódu. To je však zbytečné, protože pokud by kontrola nebyla přítomna, test by
 selhal a chybové hlášení by bylo součástí reportu. Je doporučeno tyto nadbytečné
 ověřovací metody vůbec nepoužívat, jelikož neposkytují žádnou přidanou hodnotu a
-pouze zbytečně nafukují tělo testovací metody [(Koskela 2013)](#978-1-935182-57-3).
+pouze zbytečně nafukují tělo testovací metody [(Koskela 2013, kap. 4.9. Overprotective tests)](#978-1-935182-57-3).
 
 ### Dodržovat správné pořadí parametrů ověřovací metody
 
 Je důležité dbát na správné pořadí parametrů ověřovací metody. Očekávanou
 hodnotou vždy musí být vlastní testovací data a skutečnou hodnotou hodnota
 vrácená systémem jež testujeme. Jedná se o drobnou chybu, může však vést k
-velkým problémům.
+velkým problémům [(Acharya 2014, kap. 10. Best Practices-Working with assertions)](#978-1-78398-251-6-978-1-78398-250-9).
 
 ### Přikládat zprávy o popisu chyby
 
 K ověřovacím metodám je doporučeno přidávat zprávy, jež vysvětlují nastalou
-chybu. Napomáhá to rychlejšímu pochopení fungování testů a opravě chyby [(Hamill 2004)](#978-0-596-00689-1).
+chybu. Napomáhá to rychlejšímu pochopení fungování testů a opravě chyby [(Hamill 2004, kap. 4. Writing Unit Tests-Types of Asserts)](#978-0-596-00689-1).
 
 ### Tvořit vlastní ověřovací metody
 
 Pro specifické případy je vhodné tvořit vlastní ověřovací metody. Tento přístup
-napomáhá lepší čitelnosti testů a zabraňuje duplicitě kódu. [(Hamill 2004)](#978-0-596-00689-1). Tento
+napomáhá lepší čitelnosti testů a zabraňuje duplicitě kódu. [(Hamill 2004, kap. 4. Writing Unit Tests-Defining Custom Asserts)](#978-0-596-00689-1). Tento
 přístup je vhodné volit, pokud se opakuje stejná sekvence ověřovacích metod
 napříč několika testy. Tuto sekvence je pak vhodné vyextrahovat do samostatné či
-třídy, která ověření provede.
+třídy, která ověření provede [(Govindaraj 2015, kap. 6. Maintaining Your Test Suite-Writing tests closer to the domain)](#978-1-78398-792-4).
 
 ### Zachovávat jednoduchost ověřovací metody
 
 Doporučením je vyhnout se přehnaně komplikovaným ověřovacím metodám, které
 jednoznačně neoznačují, co vlastně ověřují. Takovým ověřovacím metodám se jednak
 dá jen velmi obtížně rozumět a jednak jsou velmi nestabilní a byť malá změna
-může vést k jejich selhání. Tyto metody označuje [(Koskela 2013)](#978-1-935182-57-3) za tzv.
+může vést k jejich selhání. Tyto metody označuje [(Koskela 2013, kap. 4.2 Hyperassertions) ](#978-1-935182-57-3) za tzv.
 Hyperasserce a jako příklad uvádí ověřovací metodu, jež porovnává očekávaný
 obsah souboru s obsahem vyprodukovaným po transformaci vstupního souboru (viz
 obr. 2 )
@@ -415,14 +415,14 @@ tří částí. První část zahrnuje vytvoření potřebných objektů a nasta
 potřebných pro test. V druhé části se provádí exekuce akce, která má vyvolat
 testovanou funkcionalitu a třetí část slouží ke kontrole očekáváného chování. V
 odborné literatuře můžeme pro tento přístup najít mnoho jmen jako například
-**Given-When–Then**, **Build–Operate–Check** či **Arrange–Act–Assert (také
-AAA)***,* princip je však pro všechny zcela stejný.
+**Given-When–Then** [(Khorikov 2020, kap. 3. The anatomy of a unit test)](#978-1-61729-627-7), **Build–Operate–Check** [(Tarlinder 2016, kap. 7. Unit Testing-Structuring Tests)](#978-0-13-429106-2) či **Arrange–Act–Assert (také
+AAA)** [(Brader et al. 2012, kap. 2. Unit Testing: Testing the Inside)](#978-1-62114-018-4), princip je však pro všechny zcela stejný.
 
 ### 4-fázový design testů
 
 V podstatě se jedná o výše zmíněný 3-fázový design testů, jenom s rozšířením o 4
 fázi, která zajišťuje úklid testovacího prostředí. Fáze jsou známy pod jmény
-**Setup-Execute-Verify-Teardown**. Tento přístup je vhodné volit zejména v
+**Setup-Execute-Verify-Teardown** [(Tarlinder 2016, kap. 7. Unit Testing-Structuring Tests)](#978-0-13-429106-2). Tento přístup je vhodné volit zejména v
 případě kdy mezi více testy sdílíme určité objekty, během testu vytváříme určité
 artefakty (například soubory, složky), nebo pokud upravujeme data v databázi.
 Pokud bychom po exekuci testu neprováděli toto uklizení, vytvářeli bychom tím
@@ -1211,6 +1211,7 @@ obr. 17 Ukázka použití rozhodovací tabulky pro specifikaci testovacích př�
 <p id="978-1-976900-84-6">POWERHOUSE, Knowledge, 2018. Top 50 JUnit Unit Testing Interview Questions & Answers. B.m.: Independently published. ISBN 978-1-976900-84-6.</p>
 <p id="978-0-13-142189-9">COHEN, Frank, 2004. Java testing and design: from unit testing to automated Web tests. Upper Saddle River, NJ: Prentice Hall PTR. ISBN 978-0-13-142189-9.</p>
 <p id="978-3-8433-6435-5">GERRITSEN, Maaike, 2010. Prime Path Coverage Exploration for Automated Unit Testing: Ensuring Accurate Code Coverage Using Aspect Oriented Programming. B.m.: LAP LAMBERT Academic Publishing. ISBN 978-3-8433-6435-5.</p>
+<p id="978-1-62114-018-4">BRADER, Larry, Howard F HILLIKER a Alan Cameron WILLS, 2012. Testing for continuous delivery with Visual Studio 2012. ISBN 978-1-62114-018-4.</p>
 <p id="Best_practice_definition_cambridge_dictionary_2020">CAMBRIDGE DICTIONARY, 2020. BEST PRACTICE | meaning in the Cambridge English Dictionary [online] [vid. 2020-08-01]. Dostupné z: https://dictionary.cambridge.org/dictionary/english/best-practice</p>
 <p id="Best_practice_definition_merriam_webster_1927">MERRIAM-WEBSTER, 1927. Definition of BEST PRACTICE [online] [vid. 2020-08-01]. Dostupné z: https://www.merriam-webster.com/dictionary/best+practice</p>
 <p id="Best_practice_definition_management_mania_2020">MANAGEMENTMANIA, 2020. Nejlepší praxe (Best Practice). ManagementMania.com [online] [vid. 2020-08-01]. Dostupné z: https://managementmania.com/cs/nejlepsi-praxe-best-practice</p>
