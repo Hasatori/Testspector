@@ -47,14 +47,15 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                         "These blocks are redundant and make test harder to read and understand. " +
                         "In some cases it might even lead to never failing tests " +
                         "if we are not handling the exception properly.";
+                hints.add("If catching an exception is not part of a test then just delete it.");
                 if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)) {
-                    hints.add(String.format("You are using JUnit5 so it can be solved " +
+                    hints.add(String.format("If catching an exception is part of a test then since you are using JUnit5 it can be solved " +
                                     "by using %s.assertThrows() method"
                                     , JUNIT5_ASSERTIONS_CLASS_PATH));
                 }
                 if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)) {
                     hints.add(String.format(
-                            "You are using JUnit4 so it can be solved by using" +
+                            "If catching an exception is part of a test then since you are using JUnit4 it can be solved by using" +
                             " @%s.Test(expected = Exception.class) for the test method"
                             , JUNIT4_ASSERTIONS_CLASS_PATH));
                 }

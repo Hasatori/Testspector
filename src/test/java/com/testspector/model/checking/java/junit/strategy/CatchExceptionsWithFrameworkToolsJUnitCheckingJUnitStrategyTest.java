@@ -24,16 +24,6 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
 
     private CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy strategy;
 
-    public static final List<String> JUNIT5_TEST_QUALIFIED_NAMES = Collections.unmodifiableList(Arrays.asList(
-            "org.junit.jupiter.api.Test",
-            "org.junit.jupiter.params.ParameterizedTest",
-            "org.junit.jupiter.api.RepeatedTest"
-    ));
-
-    public static final List<String> JUNIT4_TEST_QUALIFIED_NAMES = Collections.unmodifiableList(Arrays.asList(
-            "org.junit.Test"
-    ));
-
     @BeforeEach
     public void beforeEach() {
         this.strategy = new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(elementResolver, contextIndicator, methodResolver);
@@ -58,8 +48,12 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
                         String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
                         testMethod,
                         testMethod.getNameIdentifier().getTextRange(),
-                        "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.",
-                        Collections.singletonList("You are using JUnit5 so it can be solved by using org.junit.jupiter.api.Assertions.assertThrows() method"),
+                        "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand." +
+                                " In some cases it might even lead to never failing tests if we are not handling the exception properly.",
+                        Arrays.asList(
+                                "If catching an exception is not part of a test then just delete it.",
+                                "If catching an exception is part of a test then since you are using JUnit5 it can be solved " +
+                                        "by using org.junit.jupiter.api.Assertions.assertThrows() method"),
                         Arrays.asList(
                                 new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...", tryStatement.getTextRange().getStartOffset(), tryStatement.getTextRange().getEndOffset()), new HashMap<PsiElement, String>() {{
                                     put(tryStatement, "statement");
@@ -95,7 +89,10 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
                         testMethod,
                         testMethod.getNameIdentifier().getTextRange(),
                         "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.",
-                        Collections.singletonList("You are using JUnit4 so it can be solved by using @org.junit.Assert.Test(expected = Exception.class) for the test method"),
+                        Arrays.asList(
+                                "If catching an exception is not part of a test then just delete it.",
+                                "If catching an exception is part of a test then since you are using JUnit4 it can be solved by using" +
+                                " @org.junit.Assert.Test(expected = Exception.class) for the test method"),
                         Arrays.asList(
                                 new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...", tryStatement.getTextRange().getStartOffset(), tryStatement.getTextRange().getEndOffset()), new HashMap<PsiElement, String>() {{
                                     put(tryStatement, "statement");
@@ -135,7 +132,10 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
                         testMethod,
                         testMethod.getNameIdentifier().getTextRange(),
                         "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.",
-                        Collections.singletonList("You are using JUnit4 so it can be solved by using @org.junit.Assert.Test(expected = Exception.class) for the test method"),
+                        Arrays.asList(
+                                "If catching an exception is not part of a test then just delete it.",
+                                "If catching an exception is part of a test then since you are using JUnit4 it can be solved by using" +
+                                " @org.junit.Assert.Test(expected = Exception.class) for the test method"),
                         Arrays.asList(
                                 new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...", tryStatement.getTextRange().getStartOffset(), tryStatement.getTextRange().getEndOffset()), new HashMap<PsiElement, String>() {{
                                     put(helperMethodCall.getMethodExpression(), "reference from test method");
