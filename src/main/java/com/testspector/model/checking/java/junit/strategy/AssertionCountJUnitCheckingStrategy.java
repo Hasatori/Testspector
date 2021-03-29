@@ -45,7 +45,9 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
                             (psiMethodCallExpression -> methodResolver
                                     .assertionMethod(psiMethodCallExpression)
                                     .isPresent())
-                            ,(element) -> element instanceof PsiMethod && contextIndicator.isInTestContext().test(element));
+                            ,(element) -> element instanceof PsiMethod &&
+                                    (methodResolver.assertionMethod((PsiMethod) element).isPresent() ||
+                                            contextIndicator.isInTestContext().test(element)));
             allAssertionMethods = removeGroupedAssertions(allAssertionMethods);
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
             if (allAssertionMethods.isEmpty()) {
