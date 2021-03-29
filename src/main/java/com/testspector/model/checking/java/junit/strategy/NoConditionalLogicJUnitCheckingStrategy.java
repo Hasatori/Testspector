@@ -52,7 +52,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                             testMethod
                             ,PsiStatement.class
                             ,isConditionalStatement()
-                            ,(element) -> element instanceof PsiMethod && contextResolver.isInTestContext().test(element))
+                            ,methodInTestContext())
                     .stream()
                     .filter(partOfAssertionMethod().negate())
                     .collect(Collectors.toList());
@@ -82,6 +82,10 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
 
         }
         return bestPracticeViolations;
+    }
+
+    Predicate<PsiElement> methodInTestContext(){
+      return   (element) -> element instanceof PsiMethod && contextResolver.isInTestContext().test(element);
     }
 
     Predicate<PsiStatement> isConditionalStatement() {

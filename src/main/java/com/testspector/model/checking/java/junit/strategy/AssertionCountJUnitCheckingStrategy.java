@@ -45,7 +45,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
                             (psiMethodCallExpression -> methodResolver
                                     .assertionMethod(psiMethodCallExpression)
                                     .isPresent())
-                            ,(element) -> element instanceof PsiMethod && contextIndicator.isInTestContext().test(element));
+                            , methodWhichIsAssertionsOrInTestContext());
             allAssertionMethods = removeGroupedAssertions(allAssertionMethods);
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
             if (allAssertionMethods.isEmpty()) {
@@ -78,6 +78,15 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
             }
         }
         return bestPracticeViolations;
+    }
+
+    private Predicate<PsiElement> methodWhichIsAssertionsOrInTestContext() {
+        return (element) ->
+                element instanceof PsiMethod &&
+                        (
+                                methodResolver.assertionMethod((PsiMethod) element).isPresent() ||
+                                contextIndicator.isInTestContext().test(element)
+                        );
     }
 
     private List<PsiMethodCallExpression> removeGroupedAssertions(List<PsiMethodCallExpression> allAssertions) {
