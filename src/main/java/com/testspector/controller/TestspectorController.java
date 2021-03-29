@@ -60,11 +60,11 @@ public final class TestspectorController {
     }
 
     public Optional<TestLineCrate> resolveTestLineCrate(PsiElement element) {
-        Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getService(ProgrammingLanguageFactory.class)
+        Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getComponent(ProgrammingLanguageFactory.class)
                 .getProgrammingLanguage(element);
         if (optionalProgrammingLanguage.isPresent()) {
             List<UnitTestFramework> unitTestFrameworks = project
-                    .getService(UnitTestFrameworkFactoryProvider.class)
+                    .getComponent(UnitTestFrameworkFactoryProvider.class)
                     .geUnitTestFrameworkFactory(optionalProgrammingLanguage.get())
                     .stream()
                     .map(unitTestFrameworkFactory -> unitTestFrameworkFactory.getUnitTestFramework(element))
@@ -74,7 +74,7 @@ public final class TestspectorController {
             if (!unitTestFrameworks.isEmpty()) {
                 UnitTestFramework unitTestFramework = unitTestFrameworks.get(0);
                 Optional<InspectionInvocationLineResolveStrategy> optionalUnitTestLineResolveStrategy = project
-                        .getService(InspectionInvocationLineResolveStrategyFactory.class)
+                        .getComponent(InspectionInvocationLineResolveStrategyFactory.class)
                         .getInspectionInvocationLineResolveStrategy(unitTestFramework);
                 if (optionalUnitTestLineResolveStrategy.isPresent()) {
                     Optional<PsiElement> optionalLineElement = optionalUnitTestLineResolveStrategy.get()
@@ -189,11 +189,11 @@ public final class TestspectorController {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         if (!indicator.isCanceled()) {
             ProgressManager.getInstance().runInReadActionWithWriteActionPriority(() -> {
-                Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getService(ProgrammingLanguageFactory.class)
+                Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getComponent(ProgrammingLanguageFactory.class)
                         .getProgrammingLanguage(element);
                 if (optionalProgrammingLanguage.isPresent()) {
                     List<UnitTestFramework> unitTestFrameworks = project
-                            .getService(UnitTestFrameworkFactoryProvider.class)
+                            .getComponent(UnitTestFrameworkFactoryProvider.class)
                             .geUnitTestFrameworkFactory(optionalProgrammingLanguage.get())
                             .stream()
                             .map(unitTestFrameworkFactory -> unitTestFrameworkFactory.getUnitTestFramework(element))
@@ -203,7 +203,7 @@ public final class TestspectorController {
                     if (unitTestFrameworks.size() > 0) {
                         for (UnitTestFramework unitTestFramework : unitTestFrameworks) {
                             Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = project
-                                    .getService(BestPracticeCheckingStrategyFactoryProvider.class)
+                                    .getComponent(BestPracticeCheckingStrategyFactoryProvider.class)
                                     .getBestPracticeCheckingStrategyFactory(optionalProgrammingLanguage.get(), unitTestFramework)
                                     .map(BestPracticeCheckingStrategyFactory::getBestPracticeCheckingStrategy);
                             if (optionalBestPracticeCheckingStrategy.isPresent()) {

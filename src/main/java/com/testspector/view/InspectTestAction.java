@@ -29,7 +29,7 @@ public class InspectTestAction extends AnAction {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
         Project project = anActionEvent.getProject();
         if (project != null) {
-            TestspectorController testspectorController = project.getService(TestspectorController.class);
+            TestspectorController testspectorController = project.getComponent(TestspectorController.class);
             if (psiFile == null) {
                 VirtualFile virtualFile = anActionEvent.getData(CommonDataKeys.VIRTUAL_FILE);
                 if (virtualFile != null) {

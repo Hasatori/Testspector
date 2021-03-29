@@ -15,7 +15,7 @@ public class TestLineMarkerFactory implements LineMarkerProvider {
 
     @Override
     public LineMarkerInfo<PsiElement> getLineMarkerInfo(@NotNull PsiElement element) {
-        TestspectorController testspectorController = element.getProject().getService(TestspectorController.class);
+        TestspectorController testspectorController = element.getProject().getComponent(TestspectorController.class);
         Optional<TestLineCrate> optionalTestLineCrate = testspectorController.resolveTestLineCrate(element);
         return optionalTestLineCrate.map(testLineCrate -> new LineMarkerInfo<>(
                 testLineCrate.getLineElement(),
