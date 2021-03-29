@@ -10,7 +10,9 @@ import com.testspector.model.checking.java.common.JavaMethodResolver;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public abstract class JUnitStrategyTest extends JavaTest {
 
@@ -19,7 +21,15 @@ public abstract class JUnitStrategyTest extends JavaTest {
     protected JavaMethodResolver methodResolver;
     protected PsiJavaFile testJavaFile;
     protected PsiClass testClass;
+    protected static final List<String> JUNIT5_TEST_QUALIFIED_NAMES = Collections.unmodifiableList(Arrays.asList(
+            "org.junit.jupiter.api.Test",
+            "org.junit.jupiter.params.ParameterizedTest",
+            "org.junit.jupiter.api.RepeatedTest"
+    ));
 
+    protected static final List<String> JUNIT4_TEST_QUALIFIED_NAMES = Collections.unmodifiableList(Arrays.asList(
+            "org.junit.Test"
+    ));
     @BeforeEach
     public final void strategyTestSetup() {
         this.elementResolver = EasyMock.mock(JavaElementResolver.class);

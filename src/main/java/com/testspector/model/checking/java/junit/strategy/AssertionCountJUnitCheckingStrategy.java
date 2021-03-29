@@ -45,7 +45,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
                             (psiMethodCallExpression -> methodResolver
                                     .assertionMethod(psiMethodCallExpression)
                                     .isPresent())
-                            , contextIndicator.isInTestContext());
+                            ,(element) -> element instanceof PsiMethod && contextIndicator.isInTestContext().test(element));
             allAssertionMethods = removeGroupedAssertions(allAssertionMethods);
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
             if (allAssertionMethods.isEmpty()) {
@@ -59,7 +59,7 @@ public class AssertionCountJUnitCheckingStrategy implements BestPracticeChecking
             }
             if (allAssertionMethods.size() > 1) {
                 List<String> hints = new ArrayList<>();
-                String message = "Test should contain only one assertion method!";
+                String message = "Test should fail for only one reason. Using multiple assertions in JUnit leads to that if one assertion fails other will not be executed and therefore you will not get overview of all problems.";
                 if (Arrays.stream(testMethod.getAnnotations()).anyMatch(psiAnnotation -> JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()))) {
                     hints.add(String.format("You are using JUnit5 so it can be solved by wrapping multiple assertions into %s.assertAll() method", JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH));
                 }
