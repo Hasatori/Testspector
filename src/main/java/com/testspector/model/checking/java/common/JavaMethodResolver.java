@@ -66,7 +66,7 @@ public class JavaMethodResolver {
 
     private List<PsiMethod> methodsWithAnnotations(PsiClass psiClass, List<String> annotationQualifiedNames) {
         return Arrays.stream(psiClass.getMethods())
-                .filter(psiMethod -> methodHasAnyOfAnnotations(psiMethod,annotationQualifiedNames))
+                .filter(psiMethod -> methodHasAnyOfAnnotations(psiMethod, annotationQualifiedNames))
                 .collect(Collectors.toList());
     }
 
@@ -84,7 +84,7 @@ public class JavaMethodResolver {
                 psiMethods.addAll(methodsWithAnnotations(psiClass, annotationQualifiedNames));
             } else if (psiElement instanceof PsiMethod) {
                 PsiMethod method = (PsiMethod) psiElement;
-                if (annotationQualifiedNames.stream().anyMatch(method::hasAnnotation)  || (annotationQualifiedNames.isEmpty() && method.getAnnotations().length==0)){
+                if (annotationQualifiedNames.stream().anyMatch(method::hasAnnotation) || (annotationQualifiedNames.isEmpty() && method.getAnnotations().length == 0)) {
                     psiMethods.add((PsiMethod) psiElement);
                 }
             }
@@ -102,7 +102,7 @@ public class JavaMethodResolver {
 
     public Optional<PsiMethod> assertionMethod(PsiMethod method) {
         if ((method.getContainingClass() != null && ASSERTION_CLASSES_CLASS_PATHS.contains(method.getContainingClass().getQualifiedName()))
-                || (method.getName().toLowerCase().contains("assert") && elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                || ((method.getName().toLowerCase().contains("assert") || method.getName().toLowerCase().contains("fail")) && elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                 method,
                 PsiThrowStatement.class,
                 psiThrowStatement -> Optional
@@ -110,7 +110,13 @@ public class JavaMethodResolver {
                         .map(PsiExpression::getType)
                         .map(type -> type.isAssignableFrom(PsiType.getTypeByName("AssertionError", method.getProject(), GlobalSearchScope.EMPTY_SCOPE)))
                         .isPresent(),
-                (element -> contextResolver.isInTestContext().test(element))).size() > 0)) {
+                (referencedElement -> {
+                    if (referencedElement instanceof PsiMethod) {
+                        String methodName = ((PsiMethod) referencedElement).getName().toLowerCase();
+                        return methodName.contains("assert") || methodName.contains("fail");
+                    }
+                    return false;
+                })).size() > 0)) {
             return Optional.of(method);
         }
         return Optional.empty();
@@ -123,10 +129,10 @@ public class JavaMethodResolver {
             if (returnCandidate.isPresent() && returnCandidate.get() instanceof PsiReturnStatement) {
                 PsiReturnStatement returnStatement = (PsiReturnStatement) returnCandidate.get();
                 PsiExpression returnValueExpression = returnStatement.getReturnValue();
-                if (returnValueExpression instanceof PsiReferenceExpression){
-                   return Optional.ofNullable(((PsiReferenceExpression)returnValueExpression).resolve())
-                           .filter(element -> element instanceof PsiField)
-                           .isPresent();
+                if (returnValueExpression instanceof PsiReferenceExpression) {
+                    return Optional.ofNullable(((PsiReferenceExpression) returnValueExpression).resolve())
+                            .filter(element -> element instanceof PsiField)
+                            .isPresent();
                 }
             }
         }
@@ -136,7 +142,7 @@ public class JavaMethodResolver {
 
     public boolean methodHasAnyOfAnnotations(PsiMethod method, List<String> annotationQualifiedNames) {
         return annotationQualifiedNames.stream().anyMatch(method::hasAnnotation)
-                || (annotationQualifiedNames.isEmpty() && method.getAnnotations().length==0);
+                || (annotationQualifiedNames.isEmpty() && method.getAnnotations().length == 0);
     }
 
 

@@ -13,10 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -56,11 +53,13 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
         testMethodWithStatement = (PsiMethod) testClass.add(testMethodWithStatement);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethodWithStatement), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Arrays.asList(testMethodStatement, helperMethodStatement)).times(1);
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethodWithStatement), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Arrays.asList(testMethodStatement, helperMethodStatement)).times(1);
         EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testMethodWithStatement, PsiReferenceExpression.class)).andReturn(Collections.singletonList(helperMethodCall.getMethodExpression())).times(2);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Collections.emptyList()).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Collections.singletonList(helperMethodStatement)).times(1);
-        EasyMock.replay(elementResolver);
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.emptyList()).times(1);
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.singletonList(helperMethodStatement)).times(1);
+        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethodWithStatement,JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(true).once();
+        EasyMock.expect(methodResolver.assertionMethod(EasyMock.anyObject(PsiMethod.class))).andReturn(Optional.empty()).times(2);
+        EasyMock.replay(elementResolver,methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
                         String.format("%s#%s", testMethodWithStatement.getContainingClass().getQualifiedName(), testMethodWithStatement.getName()),
@@ -68,7 +67,8 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
                         testMethodWithStatement.getNameIdentifier().getTextRange(),
                         "Conditional logic should not be part of the test method, it makes test hard to understand, read and maintain.",
                        Arrays.asList("Remove statements [ if, while, switch, for, forEach ] and create separate test scenario for each branch",
-                               "Acceptable place where conditional logic can be are custom assertions, where base on inputs we decide if we throw exception or not"),
+                               "Acceptable place where conditional logic can be are custom assertions, where base on inputs we decide if we throw exception or not",
+                               "You are using JUnit5 so the problem can be solved by using data driven approach and generating each scenario using org.junit.jupiter.params.ParameterizedTest"),
                         Arrays.asList(
                                 new RelatedElementWrapper(String.format("%s ...%d - %d...", statementName, testMethodStatement.getTextRange().getStartOffset(), testMethodStatement.getTextRange().getEndOffset()), new HashMap<PsiElement, String>() {{
                                     put(testMethodStatement, "statement");
@@ -97,7 +97,7 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
         testWithNoConditionalLogic = (PsiMethod) testClass.add(testWithNoConditionalLogic);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testWithNoConditionalLogic), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
+        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testWithNoConditionalLogic), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.emptyList()).times(1);
         EasyMock.replay(elementResolver);
 

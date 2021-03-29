@@ -4,18 +4,15 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.testspector.controller.TestspectorController;
@@ -31,19 +28,21 @@ public class InspectTestAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
         Project project = anActionEvent.getProject();
-        TestspectorController testspectorController = project.getComponent(TestspectorController.class);
-        if (psiFile == null) {
-            VirtualFile virtualFile = anActionEvent.getData(CommonDataKeys.VIRTUAL_FILE);
-            if (virtualFile != null) {
-                try {
-                    List<PsiFile> psiFiles = collectPsiFilesFromVirtualFile(project, virtualFile);
-                    testspectorController.initializeTestspector(psiFiles, virtualFile.getName());
-                } catch (Exception ignored) {
+        if (project != null) {
+            TestspectorController testspectorController = project.getService(TestspectorController.class);
+            if (psiFile == null) {
+                VirtualFile virtualFile = anActionEvent.getData(CommonDataKeys.VIRTUAL_FILE);
+                if (virtualFile != null) {
+                    try {
+                        List<PsiFile> psiFiles = collectPsiFilesFromVirtualFile(project, virtualFile);
+                        testspectorController.initializeTestspector(psiFiles, virtualFile.getName());
+                    } catch (Exception ignored) {
 
+                    }
                 }
+            } else {
+                testspectorController.initializeTestspector(psiFile, psiFile.getName());
             }
-        } else {
-            testspectorController.initializeTestspector(psiFile,psiFile.getName());
         }
     }
 
