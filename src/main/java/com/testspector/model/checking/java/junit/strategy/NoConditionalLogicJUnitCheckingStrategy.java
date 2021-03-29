@@ -51,9 +51,11 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                     .allChildrenOfTypeMeetingConditionWithReferences(
                             testMethod
                             ,PsiStatement.class
-                            ,isConditionalStatement().and(partOfAssertionMethod().negate())
-                            ,contextResolver.isInTestContext());
-
+                            ,isConditionalStatement()
+                            ,(element) -> element instanceof PsiMethod && contextResolver.isInTestContext().test(element))
+                    .stream()
+                    .filter(partOfAssertionMethod().negate())
+                    .collect(Collectors.toList());
             statements = statements.stream().distinct().collect(Collectors.toList());
             if (statements.size() > 0) {
                 List<String> hints = new ArrayList<>();
@@ -91,12 +93,12 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
 
     Predicate<PsiStatement> partOfAssertionMethod() {
         return psiStatement -> {
-            PsiElement element = psiStatement.getContext();
-            while (element instanceof PsiCodeBlock) {
+            PsiElement element = psiStatement.getParent();
+            while (element !=  null) {
+                if(element instanceof PsiMethod){
+                    return methodResolver.assertionMethod((PsiMethod) element).isPresent();
+                }
                 element = element.getContext();
-            }
-            if (element instanceof PsiMethod) {
-                return methodResolver.assertionMethod((PsiMethod) element).isPresent();
             }
             return false;
         };
@@ -160,4 +162,5 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     public List<BestPractice> getCheckedBestPractice() {
         return Collections.singletonList(BestPractice.NO_CONDITIONAL_LOGIC);
     }
+
 }
