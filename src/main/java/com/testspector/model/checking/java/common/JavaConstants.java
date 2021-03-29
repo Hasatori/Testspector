@@ -14,6 +14,7 @@ public class JavaConstants {
             JUnitConstants.HAMCREST_ASSERTIONS_CLASS_PATH,
             JUnitConstants.JUNIT4_ASSERTIONS_CLASS_PATH,
             "junit.framework.TestCase",
-            "org.assertj.core.api.AssertionsForClassTypes"
+            "org.assertj.core.api.AssertionsForClassTypes",
+            "org.assertj.core.api.Assertions"
     ));
 }
