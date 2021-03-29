@@ -102,21 +102,7 @@ public class JavaMethodResolver {
 
     public Optional<PsiMethod> assertionMethod(PsiMethod method) {
         if ((method.getContainingClass() != null && ASSERTION_CLASSES_CLASS_PATHS.contains(method.getContainingClass().getQualifiedName()))
-                || ((method.getName().toLowerCase().contains("assert") || method.getName().toLowerCase().contains("fail")) && elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                method,
-                PsiThrowStatement.class,
-                psiThrowStatement -> Optional
-                        .ofNullable(psiThrowStatement.getException())
-                        .map(PsiExpression::getType)
-                        .map(type -> type.isAssignableFrom(PsiType.getTypeByName("AssertionError", method.getProject(), GlobalSearchScope.EMPTY_SCOPE)))
-                        .isPresent(),
-                (referencedElement -> {
-                    if (referencedElement instanceof PsiMethod) {
-                        String methodName = ((PsiMethod) referencedElement).getName().toLowerCase();
-                        return methodName.contains("assert") || methodName.contains("fail");
-                    }
-                    return false;
-                })).size() > 0)) {
+                || (method.getName().toLowerCase().contains("assert"))) {
             return Optional.of(method);
         }
         return Optional.empty();
