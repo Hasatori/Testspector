@@ -467,7 +467,7 @@ přebytečných duplicit, které by se jinak mezi testy opakovaly (viz. obr. 4)
 
 ![alt text](./use_constant_instead_value_example.png "Title")
 
-obr. 4 Příklad použití konstant namísto pevných hodnot [(Link a Fröhlich 2003)](#978-0-08-052017-9 978-1-55860-868-9)
+obr. 4 Příklad použití konstant namísto pevných hodnot [(Link a Fröhlich 2003)](#978-0-08-052017-9-978-1-55860-868-9)
 
 ### Nepoužívat magická čísla
 
@@ -774,7 +774,7 @@ obr. 9 Uložení testů a kódu do stejných balíčků s rozdílnou kořenovou 
 
 Obecně je doporučováno všechny testy týkající se určitého testovaného systému,
 například testované třídy, bychom měli ukládat na jedno místo, do jedné
-testovací třídy. Kniha [(Link a Fröhlich 2003)](#978-0-08-052017-9 978-1-55860-868-9) však představuje případy kdy je
+testovací třídy. Kniha [(Link a Fröhlich 2003)](#978-0-08-052017-9-978-1-55860-868-9) však představuje případy kdy je
 vhodné toto pravidlo porušit:
 
 -   Množství testů v testovací třídě je příliš velké a třída se stává velice
@@ -943,7 +943,7 @@ představuje dva problémy:
 exkluzivita ve specifickém kontextu. Tento kontext může být systém, uživatel
 nebo session. Místo tvorby signeltonu můžeme využít tohoto pricipu a použít
 systémový, uživatelský nebo session objekt k tomu, aby nám dal přístup k
-objektů, které by jinak byli sigletony [(Link a Fröhlich 2003)](#978-0-08-052017-9 978-1-55860-868-9).
+objektů, které by jinak byli sigletony [(Link a Fröhlich 2003)](#978-0-08-052017-9-978-1-55860-868-9).
 
 # Vymezení testů
 
@@ -1203,7 +1203,7 @@ obr. 17 Ukázka použití rozhodovací tabulky pro specifikaci testovacích př�
 <p id="978-0-13-149505-0">MESZAROS, Gerard, 2007. xUnit test patterns: refactoring test code. Upper Saddle River, NJ: Addison-Wesley. The Addison-Wesley signature series. ISBN 978-0-13-149505-0.</p>
 <p id="978-1-937785-48-2">LANGR, Jeff a Michael SWAINE, 2013. Modern C++ programming with test-driven development: code better, sleep better. Dallas, Texas: The Pragmatic Bookshelf. ISBN 978-1-937785-48-2.</p>
 <p id="978-0-596-00689-1">HAMILL, Paul, 2004. Unit test frameworks. 1st ed. Sebastopol, CA: O’Reilly. ISBN 978-0-596-00689-1.</p>
-<p id="978-0-08-052017-9 978-1-55860-868-9">LINK, Johannes a Peter FRÖHLICH, 2003. Unit testing in Java how tests drive the code. San Francisco, Calif.: Morgan Kaufmann. ISBN 978-0-08-052017-9.</p>
+<p id="978-0-08-052017-9-978-1-55860-868-9">LINK, Johannes a Peter FRÖHLICH, 2003. Unit testing in Java how tests drive the code. San Francisco, Calif.: Morgan Kaufmann. ISBN 978-0-08-052017-9.</p>
 <p id="978-0-13-429106-2">TARLINDER, Alexander, 2016. Developer testing: building quality into software. Boston: Addison-Wesley. The Addison-Wesley signature series. ISBN 978-0-13-429106-2.</p>
 <p id="978-1-78712-439-4">GARCÍA, Boni, 2017. Mastering software testing with JUnit 5: comprehensive guide to develop high quality Java applications [online] [vid. 2021-03-27]. ISBN 978-1-78712-439-4. Dostupné z: http://proquestcombo.safaribooksonline.com/9781787285736</p>
 <p id="978-1-5386-2807-2">BOWES, David, Tracy HALL, Jean PETRIĆ, Thomas SHIPPEY a Burak TURHAN, 2017. How good are my tests? In: Proceedings of the 8th Workshop on Emerging Trends in Software Metrics. Buenos Aires, Argentina: IEEE Press, s. 9–14. WETSoM ’17. ISBN 978-1-5386-2807-2.</p>
