@@ -902,7 +902,7 @@ každého z nich se hodí v závislosti na daném kontextu a obecně nelze říc
 by byl nejlepší. [(Koskela 2013)](#978-1-935182-57-3) specifikuje základní doporučení, kdy jednotlivé
 typy používat (viz. Tabulka 1).
 
-Tabulka 1 Popis a použití testovacích dvojníků (autor a [(Koskela 2013)](#978-1-935182-57-3))
+Tabulka 1 Popis a použití testovacích dvojníků (autor podle  [(Koskela 2013, kap. 3. Test doubles)](#978-1-935182-57-3), [(Acharya 2014, kap. 3. Test doubles)](#978-1-78398-251-6-978-1-78398-250-9))
 
 | Název | Popis                                                                                                                 | Kdy použít                                                                                                                                                                                                       |
 |-------|-----------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -913,13 +913,13 @@ Tabulka 1 Popis a použití testovacích dvojníků (autor a [(Koskela 2013)](#9
 
 ![img.png](./test_double_types.png)
 
-obr. 14 Typy testovacích dvojníků [(Koskela 2013)](#978-1-935182-57-3)
+obr. 14 Typy testovacích dvojníků [(Koskela 2013, kap. 3. Test doubles)](#978-1-935182-57-3)
 
 ### Nepoužívat testovací dvojníky na testovaný systém
 
-Nijak bychom neměli modifikovat či měnit systém, který testujeme. Testovací
-dvojník by nikdy neměl být použit na systém, který testujeme.
-
+Nijak bychom neměli modifikovat či měnit systém, který testujeme. Zasahujeme tím a modifikujeme jeho reálné chování. Tento princip je znázorněn na obr. 15 [(Koskela 2013, kap. 3. Test doubles)](#978-1-935182-57-3), testovaný kód by vždy měl být reálný a pouze další jednotky či systémy, se kterými spolupracuje mohou být reprezentovány dvojníky.
+![test double diagram .png](./test_double_usage_diagram.png)
+obr.15 Diagram použití dvojníků na testovaný systém [(Koskela 2013, kap. 3. Test doubles)](#978-1-935182-57-3)
 ### Nepoužívat návrhový vzor Singleton
 
 Singletony představují pro testování velký problém. Jedná se o poměrné dobrý
@@ -938,7 +938,7 @@ představuje dva problémy:
 exkluzivita ve specifickém kontextu. Tento kontext může být systém, uživatel
 nebo session. Místo tvorby signeltonu můžeme využít tohoto pricipu a použít
 systémový, uživatelský nebo session objekt k tomu, aby nám dal přístup k
-objektů, které by jinak byli sigletony [(Link a Fröhlich 2003)](#978-0-08-052017-9-978-1-55860-868-9).
+objektů, které by jinak byli sigletony [(Link a Fröhlich 2003, kap. 6.9 Evil Singletons). ](#978-0-08-052017-9-978-1-55860-868-9).
 
 # Vymezení testů
 
@@ -974,32 +974,27 @@ Nejlepší postupy týkající se pokrytí kódu (Code coverage) jsou následuj�
 
 Obecně je doporučováno nevytvářet testy pro primitivní funkcionality testovaného
 systému. Příkladem jsou get a set metody, které jsou obecně používaným principem
-pro získávání hodnot parametrů a nastavování hodnot parametrů objektů. Testování
+pro získávání hodnot parametrů a nastavování hodnot parametrů objektů [(García 2017, kap. Software testing principles)](#978-1-78712-439-4). Testování
 těchto velmi jednoduchých metod je zbytečně, protože jsou prakticky imunní vůči
 chybě. Pokud je však s nimi svázaná nějaká komplexnější logika, jež by mohla
 vést k vedlejším účinkům, je vhodné i pro tyto metody napsat jednotkový test.
+
+Obecně platí pravidlo, že pro každý netriviální systém bychom měli vytvářet
+jednotkové testy. Základní otázkou, kterou bychom si měli klást je „Má systém
+uvnitř vlastní logiku?“ [(Link a Fröhlich 2003, kap. 3. Basic Steps of the Test-First Approach)](#978-0-08-052017-9-978-1-55860-868-9).
 
 ### Implementovat jak happy, tak sad testy
 
 Při vytváření jednotkových testů pro určitý systém, bychom měli vytvářet jak
 happy testy, tedy test správného fungování testované funkcionality, tak sad
 testy, tedy testy, jež se snaží rozbít systém a očekávají adekvátní reakci na
-toto nesprávné použití funkcionality.
+toto nesprávné použití funkcionality [(García 2017, kap. Software testing principles)](#978-1-78712-439-4). Pokud bychom neimplementovali jak happy tak sad testy, tak to může vést k falešně pozitivním či falešně negativním výsledkům jednotkových testů.
 
-### Implementovat testy pro každý netriviální systém
-
-Obecně platí pravidlo, že pro každý netriviální systém bychom měli vytvářet
-jednotkové testy. Základní otázkou, kterou bychom si měli klást je „Má systém
-uvnitř vlastní logiku?“
 
 ### Netestovat abstraktní systémy
 
-Ve většině případů se testování abstraktních tříd nevyplácí. Jednou možností je
-vytvoření specifické podtřídy čistě pro účely testování. Zřídka kdy je však
-komplexita abstraktní třídy taková, aby se to vyplatilo. Doporučuje spíše
-provést další inspekce kodu. Obecně však platí že tento postup je nutné
-aplikovat v případě, že máme pouze abstraktní třídu a ta zatím nemá žádné
-potomky.
+Abstraktní systémy jako takové by neměli být testovány, jelikož pro jejich vytvoření je potřeba existence konkrétní instance. Jak popisuje  [(Link a Fröhlich 2003, kap. 7. Inheritance and Polymorphism)](#978-0-08-052017-9-978-1-55860-868-9), tak jednou možností je vytvoření instance abstraktního systému čistě pro účely testování. Tento přístup se však ve většině případů nevyplácí, jelikož abstraktní systém je zřídkakdy natolik komplexní, aby byl tento přístup obhajitelný.
+Autoři však tento postup doporučují porušit v případě kdy je vyvíjen framework. V takovém případě je nutné otestovat abstraktní systém i pokud pro něj neexistuje žádná konkrétní instance, jelikož uživatelé frameworku konkrétní instance vytvářet budou.
 
 <h3 id="testovat-pouze-verejne-chovani-testovaneho-systemu">Testovat pouze veřejné chování testovaného systému</h3>
 
@@ -1010,7 +1005,7 @@ jsou mazány či přidávány, a to nezávisle na chování systému jako celku.
 metody jsou pouze pomocným nástrojem pro zajištění veřejného chování testovaného
 systému. Jejich testování vytváří velké množství závislostí mezi kódem a testy a
 z dlouhodobého hlediska to vede k obtížné udržovatelnosti testů a nutnosti
-jejich časté úpravy a aktualizace. [(Khorikov 2020)](#978-1-61729-627-7) a [(Langr et al. 2015)](#978-1-937785-48-2) uvádí,
+jejich časté úpravy a aktualizace. [(Khorikov 2020, kap. 11. Unit testing anti-patterns)](#978-1-61729-627-7) a [(Langr et al. 2015, kap. 9. Bigger Design Issues) ](#978-1-937785-48-2) uvádí,
 že pokud obsahují privátní metody komplexní chování a zdá se, že by mělo smysl
 pro ně samostatný test napsat, jedná se o ukázku chyby v návrhu daného systému a
 porušení principu jedné odpovědnosti (Single Responsibility Principle). Takové
@@ -1021,12 +1016,11 @@ Výjimkou z tohoto principu je situace, kdy je privátní metoda součástí
 pozorovaného chování systému. Například pokud máme privátní konstruktor třídy,
 která je součástí ORM knihovny a její inicializace by neměla být povolena. V
 takovém případě je privátnost součástí pozorovaného chování a konstruktor by měl
-zůstat privátní [(Khorikov 2020)](#978-1-61729-627-7).
+zůstat privátní [(Khorikov 2020, kap. 11. Unit testing anti-patterns)](#978-1-61729-627-7).
 
 ### Testovat chování, ne metody systému
 
-Při specifikaci jednotkových testů je nutné používat holistický pohled a
-testovat chování testovaného systému, ne jeho individuální metody.
+Je důležité zaměřovat se na chování tříd, ne na testování individuálních metod. Při specifikaci jednotkových testů je nutné používat holistický pohled a testovat chování testovaného systému, ne jeho individuální metody [(Langr et al. 2015, kap. Testing Behavior Versus Testing Methods)](#978-1-937785-48-2).
 
 ### Zachovávat princip jedné odpovědnosti testu
 
@@ -1071,11 +1065,11 @@ Nejlepší postupy týkající se datového pokrytí (Data coverage) jsou násle
 
 Mnoho chyb v kódu velmi často vzniká vlivem mezních hodnot povolené podoby dat.
 Jeden obyčejný *„happy day“* scénář na takové problémy nenarazí. Je proto
-doporučováno testovat hraniční podmínky vstupních dat. [(Langr et al. 2015)](#978-1-937785-48-2)
+doporučováno testovat hraniční podmínky vstupních dat. [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2)
 vymezuje akronym **CORRECT**, který napomáhá zapamatování si vhodného přemýšlení
 o hraničních podmínkách jednotkových testů (viz Tabulka 4).
 
-Tabulka 4 Popis dílčích částí akronymu CORRECT (autor a [(Langr et al. 2015)](#978-1-937785-48-2)
+Tabulka 4 Popis dílčích částí akronymu CORRECT (autor a [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2)
 
 | Conformance-Shoda                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -1099,13 +1093,13 @@ V některých případech je možné a samozřejmě vhodné otestovat inverzní 
 dané funkcionality. Příkladem je, pokud máme implementovanou matematickou funkci
 pro výpočet druhé mocniny čísla. Inverzní test by poté spočíval v tom, že bychom
 spočítali kořen nějakého čísla a poté testovali že použitím funkce pro výpočet
-druhé mocniny ke stejnému číslu [(Langr et al. 2015)](#978-1-937785-48-2).
+druhé mocniny ke stejnému číslu [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
 
 ### Provádět křížovou kontrolu s pomocí jiných prostředků
 
 Jedná se o podobný přístup jako v předchozím bodě, ale používáme jiné prostředky
 než vlastní. Může se jednat o nějakou externí knihovnu, nebo používání různých
-kusů dat z testované třídy proto abychom zjistili, zda vše dohromady sedí [(Langr et al. 2015)](#978-1-937785-48-2).
+kusů dat z testované třídy proto abychom zjistili, zda vše dohromady sedí [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
 
 ### Vynucovat chybné podmínky
 
@@ -1120,7 +1114,7 @@ nastat. Může se například jednat o:
 
 Správný jednotkový test by neměl pouze testovat logické správné cesty, ale také
 zjišťovat, jak se kód chová za chybných podmínek, respektive jestli se chová tak
-jak očekáváme [(Langr et al. 2015)](#978-1-937785-48-2).
+jak očekáváme [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
 
 ### Používat jednotkové testy pro měření výkonových charakteristik testovaného systému
 
@@ -1130,7 +1124,7 @@ testu a běží velmi rychlé. Samozřejmě výkonnostní testy jsou důležité
 potřeba, je ale lepší je spouštět odděleně od jednotkových testů. Jednotkové
 testy však v tomto ohledu mohou být nápomocné. Mohou být použity pro poskytnutí
 základní informace o výkonnosti nějaké funkce a tato informace bude následně
-využita pro vytvoření výkonnostních testů [(Langr et al. 2015)](#978-1-937785-48-2).
+využita pro vytvoření výkonnostních testů [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
 
 ### Vymezovat třídy ekvivalence
 
@@ -1142,13 +1136,13 @@ pro prvky, které jsou si rovny. Příkladem může být funkce pro výpočet
 rizikovosti pojištěných řidičů. Rozdělení může být podle věku na mladé (18-24),
 střední věk (24-60) a staré (nad 60 až 100) a každý skupina představuje jiné
 riziko. Stačí pak napsat pouze 3 testy pro každou ze skupin a dále můžeme napsat
-ještě dva testy pro neplatné hodnoty tedy mladší 18 let a starší 100 [(Tarlinder 2016)](#978-0-13-429106-2).
+ještě dva testy pro neplatné hodnoty tedy mladší 18 let a starší 100 [(Tarlinder 2016, kap. 8. Specification-based Testing Techniques)](#978-0-13-429106-2).
 
 ### Testovat krajní hodnoty
 
 Pokud není možné v rámci rozsahu nalézt určité skupiny ekvivalence, je místo
 doporučováno specifikovat testovací případy pro krajní hodnoty povoleného
-rozsahu. Princip je velmi jednoduchý, pokud máme například povolený rozsah
+rozsahu [(Dooley 2017, kap. 16. Unit Testing)](#978-1-4842-3153-1),[(Tarlinder 2016, kap. 8. Specification-based Testing Techniques)](#978-0-13-429106-2). Princip je velmi jednoduchý, pokud máme například povolený rozsah
 **0-100** včetně, vytvoříme testy pro hodnoty **-1,0,100,101**. Tímto způsobem
 zajistíme dostatečné otestování jak pozitivních, tak negativních případů, bez
 testování zbytečných případů.
@@ -1157,12 +1151,12 @@ testování zbytečných případů.
 
 V případě že v testovaném systému dochází ke změnám stavu, je vhodné vymezovat
 jednotlivé testovací případy na základě stavového diagramu. Příklad takového
-diagramu je zachycen na obr. 15. Zachycení jednotlivých stavů a jejich
+diagramu je zachycen na obr. 16. Zachycení jednotlivých stavů a jejich
 vzájemných přechodů nám umožňuje snadno vymezit jednotlivé testovací případy.
 
 ![img.png](./state_diagram_example.png)
 
-obr. 15 Ukázka stavového diagramu [(Tarlinder 2016)](#978-0-13-429106-2)
+obr. 16 Ukázka stavového diagramu [(Tarlinder 2016, kap. 8. Specification-based Testing Techniques)](#978-0-13-429106-2)
 
 ### Testovat pomocí rozhodovacích tabulek
 
@@ -1171,18 +1165,18 @@ případ, je doporučováno použít rozhodovací tabulku. Tento nástroj je vel
 vhodný pro tvorbu parametrizovaných testů. Řada testovacích frameworku (např.
 Cucumber, JUnit5 či Spoc), poskytuje podporu pro tvorbu parametrizovaných testů
 s pomocí rozhodovacích tabulek. Příklad takové rozhodovací tabulky je zobrazen
-na obr. 16. Tabulka stanovuje, jaká je výše pojistného faktoru a zda bude
+na obr. 17. Tabulka stanovuje, jaká je výše pojistného faktoru a zda bude
 zahájeno vyšetřování pro podezření z podvodu, na základě věku a pohlaví klienta.
 
 ![img.png](./decision_table_premium_factor.png)
 
-obr. 16 Rozhodovací tabulky pro určení pojistného faktoru a vyšetření podvodu
-[(Tarlinder 2016)](#978-0-13-429106-2)
+obr. 17 Rozhodovací tabulky pro určení pojistného faktoru a vyšetření podvodu
+[(Tarlinder 2016, kap. 8. Specification-based Testing Techniques)](#978-0-13-429106-2)
 
 Tabulku je poté možné použít pro vymezení jednotkových testů pro otestování
-pomocné metody, jež faktor pojistného vypočítává (viz obr.17).
+pomocné metody, jež faktor pojistného vypočítává (viz obr.18).
 
-obr. 17 Ukázka použití rozhodovací tabulky pro specifikaci testovacích případů
+obr. 18 Ukázka použití rozhodovací tabulky pro specifikaci testovacích případů
 (autor)
 
 ![img.png](./decision_table_usage_example.png)
@@ -1207,6 +1201,7 @@ obr. 17 Ukázka použití rozhodovací tabulky pro specifikaci testovacích př�
 <p id="978-3-8433-6435-5">GERRITSEN, Maaike, 2010. Prime Path Coverage Exploration for Automated Unit Testing: Ensuring Accurate Code Coverage Using Aspect Oriented Programming. B.m.: LAP LAMBERT Academic Publishing. ISBN 978-3-8433-6435-5.</p>
 <p id="978-1-62114-018-4">BRADER, Larry, Howard F HILLIKER a Alan Cameron WILLS, 2012. Testing for continuous delivery with Visual Studio 2012. ISBN 978-1-62114-018-4.</p>
 <p id="978-0-201-61622-4">HUNT, Andrew a David THOMAS, 2000. The pragmatic programmer: from journeyman to master. Reading, Mass: Addison-Wesley. ISBN 978-0-201-61622-4.</p>
+<p id="978-1-4842-3153-1">DOOLEY, John F, 2017. Software Development, Design and Coding: With Patterns, Debugging, Unit Testing, and Refactoring, Second Edition [online] [vid. 2020-06-27]. ISBN 978-1-4842-3153-1. Dostupné z: https://ezproxy.kpu.ca:2443/login?url=http://library.books24x7.com/library.asp?^B&bookid=137913</p>
 <p id="Best_practice_definition_cambridge_dictionary_2020">CAMBRIDGE DICTIONARY, 2020. BEST PRACTICE | meaning in the Cambridge English Dictionary [online] [vid. 2020-08-01]. Dostupné z: https://dictionary.cambridge.org/dictionary/english/best-practice</p>
 <p id="Best_practice_definition_merriam_webster_1927">MERRIAM-WEBSTER, 1927. Definition of BEST PRACTICE [online] [vid. 2020-08-01]. Dostupné z: https://www.merriam-webster.com/dictionary/best+practice</p>
 <p id="Best_practice_definition_management_mania_2020">MANAGEMENTMANIA, 2020. Nejlepší praxe (Best Practice). ManagementMania.com [online] [vid. 2020-08-01]. Dostupné z: https://managementmania.com/cs/nejlepsi-praxe-best-practice</p>
