@@ -15,7 +15,7 @@ A current version of the plugin supports checking of the following 7 best practi
 * ![Test only public behaviour](./doc/Practices.md#testovat-pouze-verejne-chovani-testovaneho-systemu)
 * ![At least one assertion](./doc/Practices.md#minimalne-jedna-overovaci-metoda-na-test)
 * ![Only one assertion](./doc/Practices.md#prave-jedna-overovaci-metoda-na-test)
-* ![No global static constants](./doc/Practices.md#nepouzivat-globalni-staticke-promenne)
+* ![No global static properties](./doc/Practices.md#nepouzivat-globalni-staticke-promenne)
 * ![Set up a test naming strategy](./doc/Practices.md#urcit-strategii-pojmenovani-testu)
 * ![Catch tested exceptions using framework tools](./doc/Practices.md#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
 * ![No conditional logic](./doc/Practices.md#podminena-logika)
