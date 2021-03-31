@@ -153,6 +153,7 @@
 
 **![](Dropbox/Vysoka_skola/Magisterske_studium/Diplomova_prace/media/e75f34a382eac9c11065578930414b8b.jpeg)**
 
+<a name="vymezeni-pojmu-best-practice"></a>
 <h1 id="vymezeni-pojmu-best-practice" style="display: block;">Vymezení pojmu "Best practice"</h1>
 Cambridge slovník vymezuje pojem Best practice následovně:
 
