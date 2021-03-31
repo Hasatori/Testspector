@@ -1,4 +1,5 @@
 # Obsah
+<a name="vymezeni-pojmu-best-practice">Vymezení pojmu "Best practice"</>
 [Vymezení pojmu "Best practice"](vymezeni-pojmu-best-practice)
 
 [Způsob vymezení nejlepších postupů v oblasti jednotkového testování](#zpusob-vymezeni-nejlepsich-postupu-v-oblasti-jednotkoveho-testovani)
