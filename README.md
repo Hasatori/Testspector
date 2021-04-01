@@ -6,7 +6,7 @@ Report also contains links to the documentation where are all best practices des
 
 Plugin URL: https://plugins.jetbrains.com/plugin/16300-testspector
 
-What do you think of the plugin ? Please let me know by filling this short survey: https://www.survio.com/survey/d/R2L3F8O5P2S0F7I2C.  This would help me a lot, since it will show me if I am headed the right direction and the plugin is useful.
+**What do you think of the plugin?** Please let me know by filling this short survey: https://www.survio.com/survey/d/R2L3F8O5P2S0F7I2C .  This would help me a lot, since it will show me if I am headed the right direction and the plugin is useful.
 
 ## Documentation
 
