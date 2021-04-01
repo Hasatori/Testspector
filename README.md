@@ -6,13 +6,17 @@ Report also contains links to the documentation where are all best practices des
 
 Plugin URL: https://plugins.jetbrains.com/plugin/16300-testspector
 
-**What do you think of the plugin?** Please let me know by filling this survey: https://www.survio.com/survey/d/R2L3F8O5P2S0F7I2C  (very short 10 min max, just 8 questions where 6 mandatory) .  This would help me a lot, since it will show me if I am headed the right direction and the plugin is useful.
+### What do you think of the plugin?
+Please let me know by filling this survey: https://www.survio.com/survey/d/R2L3F8O5P2S0F7I2C (**very short 10 min max, just 8 questions where 6 mandatory**).  This would help me a lot, since it will show me if I am headed the right direction and the plugin is useful.
 
 ## Documentation
 
+### Best practices 
+The dataset of best practices was created by detailed analysis of the world’s top books and studies regarding unit testing. The documentation can be found here: ![Best practices](./doc/Practices.md) (Only in czech at the moment. Translation is in progress). There are direct references to chapters in books and studies where the best practices were derived from. 
+### Architecture
 ![Architecture](./doc/Architecture.md) (Only UML class diagrams are in english, rest is in czech - translation is in progress) of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform.
 
-A current version of the plugin supports checking of the following 7 best practices for ![JUnit 5](https://junit.org/junit5) and ![JUnit 4](https://junit.org/junit4):
+Current version of the plugin supports checking of the following 7 best practices for ![JUnit 5](https://junit.org/junit5) and ![JUnit 4](https://junit.org/junit4):
 
 * ![Test only public behaviour](./doc/Practices.md#testovat-pouze-verejne-chovani-testovaneho-systemu)
 * ![At least one assertion](./doc/Practices.md#minimalne-jedna-overovaci-metoda-na-test)
