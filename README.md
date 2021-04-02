@@ -21,13 +21,13 @@ I am currently working on translation. In the meantime please use the translatio
 
 Current version of the plugin supports checking of the following 7 best practices for ![JUnit 5](https://junit.org/junit5) and ![JUnit 4](https://junit.org/junit4):
 
-* [Test only public behaviour](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md#testovat-pouze-verejne-chovani-testovaneho-systemu)
-* [At least one assertion](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md#minimalne-jedna-overovaci-metoda-na-test)
-* [Only one assertion](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md#prave-jedna-overovaci-metoda-na-test)
-* [No global static properties](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md#nepouzivat-globalni-staticke-promenne)
-* [Set up a test naming strategy](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md#urcit-strategii-pojmenovani-testu)
-* [Catch tested exceptions using framework tools](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
-* [No conditional logic](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md#podminena-logika)
+* [Test only public behaviour](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practice.md#testovat-pouze-verejne-chovani-testovaneho-systemu)
+* [At least one assertion](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practice.md#minimalne-jedna-overovaci-metoda-na-test)
+* [Only one assertion](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practice.md#prave-jedna-overovaci-metoda-na-test)
+* [No global static properties](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practice.md#nepouzivat-globalni-staticke-promenne)
+* [Set up a test naming strategy](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practice.md#urcit-strategii-pojmenovani-testu)
+* [Catch tested exceptions using framework tools](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practice.md#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
+* [No conditional logic](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practice.md#podminena-logika)
 
 ### Architecture
 Architecture of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform. With architecture it is same case as with the best practices documentation. I copied it from my master thesis, only UML diagrams are in 
