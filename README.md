@@ -2,7 +2,7 @@
 
 
 Testspector is an IndelliJ IDEA plugin which helps developers with writing unit tests. It contains a dataset of best practices which should be followed when writing unit tests. The unit tests are checked against the dataset and any violation is reported to the user. User is provided with description to the problem, hints how to solve it and also parts of code causing the problem. 
-Report also contains links to the documentation where are all best practices described with examples (the documentation can be found here: ![Best practices](./doc/Practices.md) - The documentation is only in czech. Translation is in progress).
+Report also contains links to the documentation where are all best practices described with examples.
 
 Plugin URL: https://plugins.jetbrains.com/plugin/16300-testspector
 
@@ -12,7 +12,11 @@ Please let me know by filling this survey: https://www.survio.com/survey/d/R2L3F
 ## Documentation
 
 ### Best practices 
-The dataset of best practices was created by detailed analysis of the world’s top books and studies regarding unit testing. The documentation can be found here: ![Best practices](./doc/Practices.md) (Only in czech at the moment. Translation is in progress). There are direct references to chapters in books and studies where the best practices were derived from. 
+The dataset of best practices was created by detailed analysis of the world’s top books and studies regarding unit testing. The plugin is result of a master thesis at a czech university. I copied identified best practices straight from my master thesis. Therefore it is currently available only in czech.
+* Original documantation in czech - ![Best practices](./doc/Practices.md)
+* Google translated documantion in english - [Best practices](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md)
+I am currently working on translation in the meantime please use the translation from google.
+The documantation contains direct references to chapters in books and studies where the best practices were derived from. 
 ### Architecture
 ![Architecture](./doc/Architecture.md) (Only UML class diagrams are in english, rest is in czech - translation is in progress) of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform.
 
