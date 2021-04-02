@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -96,15 +96,28 @@ public final class TestspectorController {
         ProgressManager.getInstance().run(new Task.Modal(project, String.format("%s %s", INSPECTION_LOADING_MAIN_HEADING, name), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                List<Callable<List<BestPracticeViolation>>> callables = prepareCallables(elements, indicator);
                 List<BestPracticeViolation> bestPracticeViolations = Collections.synchronizedList(new ArrayList<>());
-                try {
-                    bestPracticeViolations.addAll(fillBestPractices(callables, executorService));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                AtomicBoolean done = new AtomicBoolean(false);
+                new Thread(() -> {
+                    List<Callable<List<BestPracticeViolation>>> callables = prepareCallables(elements, indicator);
+                    try {
+                        bestPracticeViolations.addAll(fillBestPractices(callables, executorService));
+                        done.set(true);
+                    } catch (InterruptedException e) {
+                        done.set(true);
+                        e.printStackTrace();
+                    }
+                }).start();
+                while (!executorService.isTerminated() && !indicator.isCanceled()){
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (done.get()){
+                        break;
+                    }
                 }
-
-                awaitTerminationAfterShutdown(executorService);
                 ApplicationManager.getApplication().runReadAction(() -> {
                     if (indicator.isCanceled()) {
                         indicator.setText(CANCELING_MESSAGE);
@@ -171,18 +184,6 @@ public final class TestspectorController {
             name = element.toString();
         }
         return String.format("%d violations found so far - Inspecting %s", violationsCount, name);
-    }
-
-    private void awaitTerminationAfterShutdown(ExecutorService threadPool) {
-        threadPool.shutdownNow();
-        try {
-            if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
-                threadPool.shutdownNow();
-            }
-        } catch (InterruptedException ex) {
-            threadPool.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
     }
 
     private List<BestPracticeViolation> gatherFromElement(PsiElement element, ProgressIndicator indicator) {
