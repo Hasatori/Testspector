@@ -17,11 +17,13 @@ The dataset of best practices was created by detailed analysis of the world’s 
 * [Google translated documantion in english](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md)
 * ![Original documantation in czech](./doc/Practices.md)
 
-I am currently working on translation in the meantime please use the translation from google.
+I am currently working on translation. In the meantime please use the translation from google.
 ### Architecture
 Architecture of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform. With architecture it is same case as with the best practices documentation. I copied it from my master thesis, only UML diagrams are in 
 * [Google translated architecture in english](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md)
 * ![Architecture description in czech](./doc/Architecture.md) 
+
+I am currently working on translation. In the meantime please use the translation from google.
 
 Current version of the plugin supports checking of the following 7 best practices for ![JUnit 5](https://junit.org/junit5) and ![JUnit 4](https://junit.org/junit4):
 
