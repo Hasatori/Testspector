@@ -14,13 +14,13 @@ Please let me know by filling this survey: https://www.survio.com/survey/d/R2L3F
 ### Best practices 
 The dataset of best practices was created by detailed analysis of the world’s top books and studies regarding unit testing. The plugin is result of a master thesis at a czech university. I copied identified best practices straight from my master thesis. Therefore it is currently available only in czech. The documantation contains direct references to chapters in books and studies where the best practices were derived from. 
 
-* [Google translated documantion in english](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md)
+* [Google translated documantion in english](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md) - translation is quite good but totally wrong at times
 * ![Original documantation in czech](./doc/Practices.md)
 
 I am currently working on translation. In the meantime please use the translation from google.
 ### Architecture
 Architecture of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform. With architecture it is same case as with the best practices documentation. I copied it from my master thesis, only UML diagrams are in 
-* [Google translated architecture in english](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md)
+* [Google translated architecture in english](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md) - translation is quite good but totally wrong at times
 * ![Architecture description in czech](./doc/Architecture.md) 
 
 I am currently working on translation. In the meantime please use the translation from google.
