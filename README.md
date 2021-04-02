@@ -13,8 +13,8 @@ Please let me know by filling this survey: https://www.survio.com/survey/d/R2L3F
 
 ### Best practices 
 The dataset of best practices was created by detailed analysis of the world’s top books and studies regarding unit testing. The plugin is result of a master thesis at a czech university. I copied identified best practices straight from my master thesis. Therefore it is currently available only in czech.
-* Original documantation in czech - ![Best practices](./doc/Practices.md)
-* Google translated documantion in english - [Best practices](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md)
+* ![Original documantation in czech](./doc/Practices.md)
+* [Google translated documantion in english](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md)
 I am currently working on translation in the meantime please use the translation from google.
 The documantation contains direct references to chapters in books and studies where the best practices were derived from. 
 ### Architecture
