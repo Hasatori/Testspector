@@ -85,7 +85,7 @@
 
 >> [Používat jména vyjadřující záměr](#používat-jména-vyjadřující-záměr)
 
->   [Uložení testovací souboru a seskupování testů](#uložení-testovací-souboru-a-seskupování-testů)
+>   [Uložení testovacích souborů a seskupování testů](#uložení-testovacích-souborů-a-seskupování-testů)
 
 >> [Ukládat testy mimo produkční kód](#ukládat-testy-mimo-produkční-kód)
 
@@ -710,12 +710,12 @@ vyhledatelné* názvy, *Zamezovat* dezinformac a hovoří o tom že názvy metod
 proměnných by vždy měly vyjadřovat záměr a mělo by být zřejmé za jakým účelem
 byly vytvořeny [(Martin 2009, kap. 2. Meaningful Names)](#978-0-13-235088-4). Příkladem může být situace kdy vytváříme proměnnou reprezentující včerejší datum. Špatným pojmenováním by bylo, pokud bychom ji pojmenovali například "date". Naopak název, který vyjadřuje záměr by byl "yesterday".
 
-## Uložení testovací souboru a seskupování testů
+## Uložení testovacích souborů a seskupování testů
 
 Tato podsekce obsahuje nejlepší postupy týkající se uložení testů a testovacích
 souborů ve vývojovém prostředí.
 
-Nejlepší postupy týkající se uložení testovací souboru a seskupování testů jsou
+Nejlepší postupy týkající se uložení testovacích souborů a seskupování testů jsou
 následující:
 
 -   Ukládat testy mimo produkční kód
