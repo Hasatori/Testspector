@@ -85,7 +85,7 @@
 
 >> [Používat jména vyjadřující záměr](#používat-jména-vyjadřující-záměr)
 
->   [Uložení testovací souboru a seskupování testů](#uložení-testovací-souboru-a-seskupování-testů)
+>   [Uložení testovacích souborů a seskupování testů](#uložení-testovacích-souborů-a-seskupování-testů)
 
 >> [Ukládat testy mimo produkční kód](#ukládat-testy-mimo-produkční-kód)
 
@@ -711,12 +711,12 @@ vyhledatelné* názvy, *Zamezovat* dezinformac a hovoří o tom že názvy metod
 proměnných by vždy měly vyjadřovat záměr a mělo by být zřejmé za jakým účelem
 byly vytvořeny.
 
-## Uložení testovací souboru a seskupování testů
+## Uložení testovacích souborů a seskupování testů
 
 Tato podsekce obsahuje nejlepší postupy týkající se uložení testů a testovacích
 souborů ve vývojovém prostředí.
 
-Nejlepší postupy týkající se uložení testovací souboru a seskupování testů jsou
+Nejlepší postupy týkající se uložení testovacích souborů a seskupování testů jsou
 následující:
 
 -   Ukládat testy mimo produkční kód
