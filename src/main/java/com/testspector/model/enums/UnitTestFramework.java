@@ -3,13 +3,13 @@ package com.testspector.model.enums;
 import java.util.Collections;
 import java.util.List;
 
-import static com.testspector.model.enums.ProgrammingLanguage.JAVA;
-import static com.testspector.model.enums.ProgrammingLanguage.PHP;
+import static com.testspector.model.enums.ProgrammingLanguage.*;
 
 public enum UnitTestFramework {
 
     JUNIT("JUnit", Collections.singletonList(JAVA)),
-    PHP_UNIT("PHPUnit", Collections.singletonList(PHP));
+    PHP_UNIT("PHPUnit", Collections.singletonList(PHP)),
+    SPOCK("Spock",Collections.singletonList(GROOVY));
 
     private final String displayName;
     private final List<ProgrammingLanguage> programmingLanguage;

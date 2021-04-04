@@ -27,7 +27,7 @@ dependencies {
 intellij {
     type 'IU'
     version = '2019.3'
-    plugins = ['com.intellij.java', "JavaScriptLanguage","JavaScriptDebugger"]
+    plugins = ['com.intellij.java', "JavaScriptLanguage","JavaScriptDebugger","Groovy"]
 }
 patchPluginXml {
     sinceBuild="193"

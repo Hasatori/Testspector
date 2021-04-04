@@ -12,7 +12,7 @@
     <depends>JavaScript</depends>
     <depends>JavaScriptDebugger</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <codeInsight.lineMarkerProvider language="JAVA"
+        <codeInsight.lineMarkerProvider language=""
                                         implementationClass="com.testspector.view.TestLineMarkerFactory"/>
         <projectService serviceImplementation="com.testspector.controller.TestspectorController" />
         <projectService serviceImplementation="com.testspector.model.checking.factory.InspectionInvocationLineResolveStrategyFactory" />

@@ -4,7 +4,9 @@ public enum ProgrammingLanguage {
 
     JAVA("Java"),
     PHP("Php"),
-    TYPESCRIPT("Typescript");
+    TYPESCRIPT("Typescript"),
+    GROOVY("Groovy")
+    ;
 
     private final String displayName;
 
