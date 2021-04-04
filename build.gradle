@@ -26,13 +26,13 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     type 'IU'
-    version = '2019.2'
+    version = '2019.3'
     plugins = ['com.intellij.java', "JavaScriptLanguage","JavaScriptDebugger"]
 }
 patchPluginXml {
-    sinceBuild="192"
-    untilBuild = "193.5233.101"
-    changeNotes("Inspection run optimization and documentation links updated to point to the google-translated documentation in english")
+    sinceBuild="193"
+    untilBuild = "211"
+    changeNotes("Inspection run optimization and documentation links updated to point to the google translated documentation in english")
 }
 
 publishPlugin {
@@ -49,6 +49,6 @@ buildPlugin {
 }
 runPluginVerifier{
     localPaths = []
-    ideVersions = []
+    ideVersions = ["2020.1.3","2021.1"]
 
 }
