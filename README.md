@@ -1,20 +1,19 @@
 # Testspector ![Generic badge](https://img.shields.io/github/license/Hasatori/Testspector)  ![Version](https://img.shields.io/jetbrains/plugin/v/16300-testspector)
 
 
-Testspector is an IndelliJ IDEA plugin which helps developers with writing unit tests. It contains a dataset of best practices which should be followed when writing unit tests. The unit tests are checked against the dataset and any violation is reported to the user. User is provided with description to the problem, hints how to solve it and also parts of code causing the problem. 
-Report also contains links to the documentation where are all best practices described with examples.
+Testspector is an IntelliJ IDEA plugin that helps developers with writing unit tests. It contains a dataset of best practices that should be followed when writing unit tests. The unit tests are checked against the dataset and any violation is reported to the user. The user is provided with a description of the problem, hints on how to solve it and also parts of code causing the problem. The report also contains links to the documentation where are all best practices described with examples.
 
 Plugin URL: https://plugins.jetbrains.com/plugin/16300-testspector
 
 ### What do you think of the plugin?
-Please let me know by filling this survey: https://www.survio.com/survey/d/P5D2I3C1W2N5X9C2Q (**very short 10 min max, just 8 questions where 6 mandatory**).  This would help me a lot, since it will show me if I am headed the right direction and the plugin is useful.
+Please let me know by filling this survey: https://www.survio.com/survey/d/P5D2I3C1W2N5X9C2Q (**very short 10 min max, just 8 questions where 6 are mandatory**). This would help me a lot since it will show me if I am headed in the right direction and the plugin is useful.
 
 ## Documentation
 
 ### Best practices 
-The dataset of best practices was created by detailed analysis of the world’s top books and studies regarding unit testing. The plugin is result of a master thesis at a czech university. I copied identified best practices straight from my master thesis. Therefore it is currently available only in czech. The documantation contains direct references to chapters in books and studies where the best practices were derived from. 
+The dataset of best practices was created by a detailed analysis of the world’s top books and studies regarding unit testing. The plugin is a result of a master thesis at a Czech university. I copied identified best practices straight from my master thesis. Therefore it is currently available only in the Czech. The documentation contains direct references to chapters in books and studies where the best practices were derived from.
 
-* [Documentation translated by Google in English](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md) - translation is quite good but totally wrong at times
+* [Documentation translated by Google in English](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md) - translation is quite good but wrong at times
 * ![Original documantation in Czech](./doc/Practices.md)
 
 I am currently working on translation. In the meantime please use the translation from google.
@@ -30,15 +29,15 @@ Current version of the plugin supports checking of the following 7 best practice
 * [No conditional logic](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md#podminena-logika)
 
 ### Architecture
-Architecture of the plugin was designed in a way that it supports implementation for any unit testing framework that is currently supported by IntelliJ IDEA platform. With architecture it is same case as with the best practices documentation. I copied it from my master thesis, only UML diagrams are in 
-* [Architecture translated by Google in English](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md) - translation is quite good but totally wrong at times
+The architecture of the plugin was designed in a way that supports implementation for any unit testing framework that is currently supported by the IntelliJ IDEA platform. With architecture, it is the same case as with the best practices documentation. I copied it from my master thesis, only UML diagrams are in English
+* [Architecture translated by Google in English](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md) - translation is quite good but wrong at times
 * ![Architecture description in czech](./doc/Architecture.md) 
 
 I am currently working on translation. In the meantime please use the translation from google.
 
 ## Supportability
 
-Plugin currently supports IntelliJ IDEA ultimate versions 2019.2 (192) - 2020.3.3 (211)
+The plugin currently supports IntelliJ IDEA ultimate versions 2019.2 (192) - 2020.3.3 (211)
 
 # Install
 Install the plugin by going to ``Settings -> Plugins -> Browse repositories`` and then search for **Testspector**.
