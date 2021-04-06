@@ -121,8 +121,6 @@
 
 >> [Implementovat jak happy, tak sad testy](#implementovat-jak-happy,-tak-sad-testy)
 
->> [Implementovat testy pro každý netriviální systém](#implementovat-testy-pro-každý-netriviální-systém)
-
 >> [Netestovat abstraktní systémy](#netestovat-abstraktní-systémy)
 
 >> [Testovat pouze veřejné chování testovaného systému](#testovat-pouze-verejne-chovani-testovaneho-systemu)
