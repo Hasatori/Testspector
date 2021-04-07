@@ -20,7 +20,7 @@ public class InspectionInvocationLineResolveStrategyFactoryTest {
     }
 
     @Test
-    public void getInspectionInvocationLineResolveStrategy_PhpUnit_ShouldBeEmpty() {
+    public void getInspectionInvocationLineResolveStrategy_PhpUnitTestingFramework_ShouldBeEmpty() {
         InspectionInvocationLineResolveStrategyFactory inspectionInvocationLineResolveStrategyFactory = new InspectionInvocationLineResolveStrategyFactory();
 
         Optional<InspectionInvocationLineResolveStrategy> optionalInspectionInvocationLineResolveStrategy = inspectionInvocationLineResolveStrategyFactory
