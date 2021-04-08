@@ -34,8 +34,6 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-
-
         for (PsiMethod testMethod : methods) {
             PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();
             if (nameIdentifier != null) {
@@ -51,26 +49,12 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                         })
                         .collect(Collectors.toList());
                 if (methodsWithAlmostSameName.size() >= 1) {
-                    bestPracticeViolations.add(new BestPracticeViolation(
-                            String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                    bestPracticeViolations.add(createBestPracticeViolation(
                             testMethod,
-                            nameIdentifier.getTextRange(),
-                            "The test name is more or less the same as the tested method. This says nothing about tests scenario. You should setup a clear strategy for naming your tests so that the person reading then knows what is tested",
-                            Arrays.asList(
-                                    "Possible strategy: 'doingSomeOperationGeneratesSomeResult'",
-                                    "Possible strategy: 'someResultOccursUnderSomeCondition'",
-                                    "Possible strategy: 'given-when-then'",
-                                    "Possible strategy: 'givenSomeContextWhenDoingSomeBehaviorThenSomeResultOccurs'",
-                                    "Possible strategy: 'whatIsTested_conditions_expectedResult'",
-                                    "Chosen naming strategy is subjective. The key thing to remember is that name of the test should say: What is tests, What are the conditions, What is expected result"
-                            ),
-                            getCheckedBestPractice().get(0),
-                            createRelatedElements(testMethod, methodsWithAlmostSameName)
-                    ));
+                            nameIdentifier,
+                            methodsWithAlmostSameName));
                 }
             }
-
-
         }
 
         return bestPracticeViolations;
@@ -108,7 +92,9 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
 
 
     private Optional<PsiReferenceExpression> firstReferenceToMethodWithAlmostSameName(PsiElement element, PsiMethod methodWithAlmostSameName) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(element, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                element,
+                PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
             if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     reference.getParent(),
@@ -133,6 +119,27 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
         return Optional.empty();
     }
 
+    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiIdentifier nameIdentifier, List<PsiMethod> methodsWithAlmostSameName) {
+        return new BestPracticeViolation(
+                String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                testMethod,
+                nameIdentifier.getTextRange(),
+                "The test name is more or less the same as the tested method. " +
+                        "This says nothing about tests scenario. You should setup a clear strategy " +
+                        "for naming your tests so that the person reading then knows what is tested",
+                getCheckedBestPractice().get(0),
+                Arrays.asList(
+                        "Possible strategy: 'doingSomeOperationGeneratesSomeResult'",
+                        "Possible strategy: 'someResultOccursUnderSomeCondition'",
+                        "Possible strategy: 'given-when-then'",
+                        "Possible strategy: 'givenSomeContextWhenDoingSomeBehaviorThenSomeResultOccurs'",
+                        "Possible strategy: 'whatIsTested_conditions_expectedResult'",
+                        "Chosen naming strategy is subjective. The key thing to remember is that name of the " +
+                                "test should say: What is tests, What are the conditions, What is expected result"
+                ),
+                createRelatedElements(testMethod, methodsWithAlmostSameName)
+        );
+    }
 
     @Override
     public List<BestPractice> getCheckedBestPractice() {

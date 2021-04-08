@@ -14,7 +14,9 @@ public class InspectionInvocationLineResolveStrategyFactoryTest {
     public void getInspectionInvocationLineResolveStrategy_JUnit_ShouldReturnJUnitInspectionInvocationLineResolveStrategy() {
         InspectionInvocationLineResolveStrategyFactory inspectionInvocationLineResolveStrategyFactory = new InspectionInvocationLineResolveStrategyFactory();
 
-        InspectionInvocationLineResolveStrategy inspectionInvocationLineResolveStrategy = inspectionInvocationLineResolveStrategyFactory.getInspectionInvocationLineResolveStrategy(UnitTestFramework.JUNIT).get();
+        InspectionInvocationLineResolveStrategy inspectionInvocationLineResolveStrategy = inspectionInvocationLineResolveStrategyFactory
+                        .getInspectionInvocationLineResolveStrategy(UnitTestFramework.JUNIT)
+                        .get();
 
         Assertions.assertTrue(inspectionInvocationLineResolveStrategy instanceof JUnitInspectionInvocationLineResolveStrategy);
     }

@@ -21,11 +21,11 @@ public class TreeReportMouseListener implements MouseListener {
             if (clickedNode instanceof BestPracticeViolationNode) {
                 BestPracticeViolationNode bestPracticeViolationNode = (BestPracticeViolationNode) clickedNode;
                 Optional<PsiElement> optionalNavigationElement = bestPracticeViolationNode.getNavigationElement();
-                if (optionalNavigationElement.isPresent() && optionalNavigationElement.get() instanceof Navigatable && ((Navigatable) optionalNavigationElement.get()).canNavigate()) {
+                if (optionalNavigationElement.isPresent() && optionalNavigationElement.get() instanceof Navigatable
+                        && ((Navigatable) optionalNavigationElement.get()).canNavigate()) {
                     ((Navigatable) optionalNavigationElement.get()).navigate(true);
                 }
             }
-
             if (clickedNode instanceof ShowHideNode) {
                 ShowHideNode showHideNode = (ShowHideNode) clickedNode;
                 showHideNode.highlight();

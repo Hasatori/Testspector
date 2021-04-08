@@ -105,15 +105,12 @@ public final class TestspectorController {
                         done.set(true);
                     } catch (InterruptedException e) {
                         done.set(true);
-                        e.printStackTrace();
                     }
                 }).start();
                 while (!executorService.isTerminated() && !indicator.isCanceled()){
                     try {
                         Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    } catch (InterruptedException ignored) { }
                     if (done.get()){
                         break;
                     }
@@ -129,7 +126,6 @@ public final class TestspectorController {
                 });
             }
         });
-
     }
 
     private List<BestPracticeViolation> fillBestPractices(List<Callable<List<BestPracticeViolation>>> callables, ExecutorService executorService) throws InterruptedException {

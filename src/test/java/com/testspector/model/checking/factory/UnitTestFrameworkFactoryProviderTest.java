@@ -14,7 +14,8 @@ public class UnitTestFrameworkFactoryProviderTest {
     public void getUnitTestFrameworkFactory_Java_ShouldReturnListWithJustJUnitFrameworkFactory() {
         UnitTestFrameworkFactoryProvider unitTestFrameworkFactoryProvider = new UnitTestFrameworkFactoryProvider();
 
-        List<UnitTestFrameworkFactory> unitTestFrameworkFactories = unitTestFrameworkFactoryProvider.geUnitTestFrameworkFactory(ProgrammingLanguage.JAVA);
+        List<UnitTestFrameworkFactory> unitTestFrameworkFactories = unitTestFrameworkFactoryProvider
+                .geUnitTestFrameworkFactory(ProgrammingLanguage.JAVA);
 
         Assertions.assertTrue(unitTestFrameworkFactories.get(0) instanceof JUnitUnitTestFrameworkFactory);
     }
@@ -23,7 +24,8 @@ public class UnitTestFrameworkFactoryProviderTest {
     public void getUnitTestFrameworkFactory_Typescript_ShouldReturnEmptyList() {
         UnitTestFrameworkFactoryProvider unitTestFrameworkFactoryProvider = new UnitTestFrameworkFactoryProvider();
 
-        List<UnitTestFrameworkFactory> unitTestFrameworkFactories = unitTestFrameworkFactoryProvider.geUnitTestFrameworkFactory(ProgrammingLanguage.TYPESCRIPT);
+        List<UnitTestFrameworkFactory> unitTestFrameworkFactories = unitTestFrameworkFactoryProvider
+                .geUnitTestFrameworkFactory(ProgrammingLanguage.TYPESCRIPT);
 
         Assertions.assertTrue(unitTestFrameworkFactories.isEmpty());
     }

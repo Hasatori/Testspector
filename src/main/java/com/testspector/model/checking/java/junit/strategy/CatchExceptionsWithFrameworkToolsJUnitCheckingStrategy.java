@@ -7,7 +7,6 @@ import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
-import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
 import java.util.*;
@@ -42,33 +41,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                             PsiTryStatement.class,
                             contextResolver.isInTestContext());
             if (psiTryStatements.size() > 0) {
-                List<String> hints = new ArrayList<>();
-                String message = "Tests should not contain try catch block. " +
-                        "These blocks are redundant and make test harder to read and understand. " +
-                        "In some cases it might even lead to never failing tests " +
-                        "if we are not handling the exception properly.";
-                hints.add("If catching an exception is not part of a test then just delete it.");
-                if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)) {
-                    hints.add(String.format("If catching an exception is part of a test then since you are using JUnit5 it can be solved " +
-                                    "by using %s.assertThrows() method"
-                                    , JUNIT5_ASSERTIONS_CLASS_PATH));
-                }
-                if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)) {
-                    hints.add(String.format(
-                            "If catching an exception is part of a test then since you are using JUnit4 it can be solved by using" +
-                            " @%s.Test(expected = Exception.class) for the test method"
-                            , JUNIT4_ASSERTIONS_CLASS_PATH));
-                }
-                PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
-                bestPracticeViolations.add(new BestPracticeViolation(
-                        String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
-                        testMethod,
-                        methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
-                        message,
-                        hints,
-                        this.getCheckedBestPractice().get(0),
-                        createRelatedElements(testMethod, psiTryStatements)
-                ));
+                bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatements));
             }
         }
         return bestPracticeViolations;
@@ -85,20 +58,59 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
             } else {
                 elementNameHashMap.put(conditionalStatement, "statement");
             }
-            result.add(new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...", conditionalStatement.getTextRange().getStartOffset(), conditionalStatement.getTextRange().getEndOffset()), elementNameHashMap));
+            result.add(new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...",
+                    conditionalStatement.getTextRange().getStartOffset(),
+                    conditionalStatement.getTextRange().getEndOffset()),
+                    elementNameHashMap));
         }
 
         return result;
     }
 
     private Optional<PsiReferenceExpression> firstReferenceToTryStatement(PsiElement element, PsiTryStatement statement) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(element, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                element,
+                PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(reference.getParent(), PsiStatement.class, psiStatement -> statement == psiStatement, contextResolver.isInTestContext()).isEmpty()) {
+            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                    reference.getParent(),
+                    PsiStatement.class,
+                    psiStatement -> statement == psiStatement,
+                    contextResolver.isInTestContext()).isEmpty()) {
                 return Optional.of(reference);
             }
         }
         return Optional.empty();
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, List<PsiTryStatement> psiTryStatements) {
+        List<String> hints = new ArrayList<>();
+        String message = "Tests should not contain try catch block. " +
+                "These blocks are redundant and make test harder to read and understand. " +
+                "In some cases it might even lead to never failing tests " +
+                "if we are not handling the exception properly.";
+        hints.add("If catching an exception is not part of a test then just delete it.");
+        if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)) {
+            hints.add(String.format("If catching an exception is part of a test " +
+                            "then since you are using JUnit5 it can be solved by using %s.assertThrows() method"
+                    , JUNIT5_ASSERTIONS_CLASS_PATH));
+        }
+        if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)) {
+            hints.add(String.format(
+                    "If catching an exception is part of a test then since you are using JUnit4 " +
+                            "it can be solved by using @%s.Test(expected = Exception.class) for the test method"
+                    , JUNIT4_ASSERTIONS_CLASS_PATH));
+        }
+        PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
+        return new BestPracticeViolation(
+                String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                testMethod,
+                methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
+                message,
+                this.getCheckedBestPractice().get(0),
+                hints,
+                createRelatedElements(testMethod, psiTryStatements)
+        );
     }
 
     @Override

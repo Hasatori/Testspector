@@ -39,16 +39,21 @@ public class TestOnlyPublicBehaviourJUnitCheckingJUnitStrategyTest extends JUnit
     }, delimiter = '|')
     public void checkBestPractices_TestTestsPrivateBehaviourViaMethodCall_OneViolationReportingAboutTestingPrivateBehaviourShouldBeReturned(String expectedRelatedElementQualifierName, String testedMethodAccessQualifier) {
         // Given
-        PsiMethod testMethod = this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@Test"));
+        PsiMethod testMethod = this.javaTestElementUtil
+                .createTestMethod("testMethod", Collections.singletonList("@Test"));
         String testedMethodName = "testedMethod";
         PsiMethod testedMethod = this.javaTestElementUtil.createMethod(testedMethodName, "String", Collections.singletonList(testedMethodAccessQualifier));
-        PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) psiElementFactory.createExpressionFromText(String.format("%s()", testedMethodName), null);
+        PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) psiElementFactory
+                .createExpressionFromText(String.format("%s()", testedMethodName), null);
         testMethod = (PsiMethod) testClass.add(testMethod);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).times(2);
         EasyMock.replay(contextIndicator);
         EasyMock.expect(methodResolver.allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class))
+                .andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                 .andReturn(Collections.singletonList(testedMethodCall)).times(1);
         EasyMock.replay(methodResolver, elementResolver);
 
@@ -57,12 +62,22 @@ public class TestOnlyPublicBehaviourJUnitCheckingJUnitStrategyTest extends JUnit
                         String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
                         testMethod,
                         testMethod.getNameIdentifier().getTextRange(),
-                        "Only public behaviour should be tested. Testing 'private','protected' or 'package private' methods leads to problems with maintenance of tests because this private behaviour is likely to be changed very often. " +
-                                "In many cases we are refactoring private behaviour without influencing public behaviour of the class, yet this changes will change behaviour of the private method and cause tests to fail.",
+                        "Only public behaviour should be tested. Testing 'private','protected' " +
+                                "or 'package private' methods leads to problems with maintenance of tests because " +
+                                "this private behaviour is likely to be changed very often. " +
+                                "In many cases we are refactoring private behaviour without influencing public " +
+                                "behaviour of the class, yet this changes will change behaviour of the private method " +
+                                "and cause tests to fail.",
                         Arrays.asList(
-                                "There is an exception to this rule and that is in case when private 'method' is part of the observed behaviour of the system under test. For example we can have private constructor for class which is part of ORM and its initialization should not be permitted.",
+                                "There is an exception to this rule and that is in case when private 'method' is " +
+                                        "part of the observed behaviour of the system under test. For example we " +
+                                        "can have private constructor for class which is part of ORM and its " +
+                                        "initialization should not be permitted.",
                                 "Remove tests testing private behaviour",
-                                "If you really feel that private behaviour is complex enough that there should be separate test for it, then it is very probable that the system under test is breaking 'Single Responsibility Principle' and this private behaviour should be extracted to a separate system"
+                                "If you really feel that private behaviour is complex enough that there should " +
+                                        "be separate test for it, then it is very probable that the system under" +
+                                        " test is breaking 'Single Responsibility Principle' and this private " +
+                                        "behaviour should be extracted to a separate system"
                         ),
                         Arrays.asList(
                                 new RelatedElementWrapper(testedMethod.getName(), new HashMap<PsiElement, String>() {{
@@ -85,9 +100,11 @@ public class TestOnlyPublicBehaviourJUnitCheckingJUnitStrategyTest extends JUnit
     @Test
     public void checkBestPractices_TestTestsJustPublicMethods_NoViolationsShouldBeFound() {
         PsiMethod testMethod = this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@Test"));
-        PsiMethod testedMethod = this.javaTestElementUtil.createMethod("testedMethod", "String", Collections.singletonList(PsiKeyword.PUBLIC));
+        PsiMethod testedMethod = this.javaTestElementUtil
+                .createMethod("testedMethod", "String", Collections.singletonList(PsiKeyword.PUBLIC));
         testMethod = (PsiMethod) testClass.add(testMethod);
-        EasyMock.expect(methodResolver.allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
+        EasyMock.expect(methodResolver.allTestedMethods(testMethod))
+                .andReturn(Collections.singletonList(testedMethod)).times(1);
         EasyMock.replay(methodResolver);
 
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);
@@ -102,8 +119,8 @@ public class TestOnlyPublicBehaviourJUnitCheckingJUnitStrategyTest extends JUnit
                 testMethodElement,
                 testMethodTextRange,
                 problemDescription,
-                hints,
                 BestPractice.TEST_ONLY_PUBLIC_BEHAVIOUR,
+                hints,
                 relatedElementsWrapper
 
         );

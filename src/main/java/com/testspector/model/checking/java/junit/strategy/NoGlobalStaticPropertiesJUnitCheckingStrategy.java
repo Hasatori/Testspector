@@ -35,10 +35,10 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
 
-        for (PsiMethod method : methods) {
+        for (PsiMethod testMethod : methods) {
             List<PsiField> staticProperties = elementResolver
                     .allChildrenOfTypeMeetingConditionWithReferences(
-                            method,
+                            testMethod,
                             PsiField.class,
                             (psiField ->
                                     !(psiField instanceof PsiEnumConstant)
@@ -47,28 +47,9 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
                     .stream()
                     .filter(isStaticAndNotFinal())
                     .collect(Collectors.toList());
-            PsiIdentifier methodIdentifier = method.getNameIdentifier();
+            PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
             if (staticProperties.size() > 0) {
-                bestPracticeViolations.add(new BestPracticeViolation(
-                        String.format("%s#%s",
-                                method.getContainingClass().getQualifiedName(),
-                                method.getName()),
-                        method,
-                        methodIdentifier != null ?
-                                methodIdentifier.getTextRange() :
-                                method.getTextRange(),
-                        "Global static properties should not be part of a test. " +
-                                "Tests are sharing the reference and if some of them would update" +
-                                " it it might influence behaviour of other tests.",
-                        Arrays.asList(
-                                "If the property is immutable e.g.,String, Integer, Byte, Character" +
-                                        " etc. then you can add 'final' identifier so that tests can " +
-                                        "not change reference",
-                                "If the property is mutable then delete static modifier " +
-                                        "and make property reference unique for each test."),
-                        getCheckedBestPractice().get(0),
-                        createRelatedElements(method, staticProperties)
-                ));
+                bestPracticeViolations.add(createBestPracticeViolation(testMethod, methodIdentifier, staticProperties));
             }
 
         }
@@ -91,9 +72,8 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
         for (PsiField staticProperty : staticProperties) {
             HashMap<PsiElement, String> elementNameHashMap = new HashMap<>();
             Optional<PsiReferenceExpression> optionalPsiReferenceExpression = firstReferenceToGlobalStaticProperty(method, staticProperty);
-            if (optionalPsiReferenceExpression.isPresent()) {
-                elementNameHashMap.put(optionalPsiReferenceExpression.get(), "property reference from test method");
-            }
+            optionalPsiReferenceExpression.ifPresent(psiReferenceExpression ->
+                    elementNameHashMap.put(psiReferenceExpression, "property reference from test method"));
             elementNameHashMap.put(staticProperty, "property");
             result.add(new RelatedElementWrapper(staticProperty.getName(), elementNameHashMap));
         }
@@ -103,13 +83,43 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
 
 
     private Optional<PsiReferenceExpression> firstReferenceToGlobalStaticProperty(PsiElement element, PsiField psiField) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(element, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                element,
+                PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(reference.getParent(), PsiField.class, field -> psiField == field, contextIndicator.isInTestContext()).isEmpty()) {
+            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                    reference.getParent(),
+                    PsiField.class,
+                    field -> psiField == field,
+                    contextIndicator.isInTestContext()).isEmpty()
+            ) {
                 return Optional.of(reference);
             }
         }
         return Optional.empty();
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiIdentifier methodIdentifier, List<PsiField> staticProperties) {
+        return new BestPracticeViolation(
+                String.format("%s#%s",
+                        testMethod.getContainingClass().getQualifiedName(),
+                        testMethod.getName()),
+                testMethod,
+                methodIdentifier != null ?
+                        methodIdentifier.getTextRange() :
+                        testMethod.getTextRange(),
+                "Global static properties should not be part of a test. " +
+                        "Tests are sharing the reference and if some of them would update" +
+                        " it it might influence behaviour of other tests.",
+                getCheckedBestPractice().get(0),
+                Arrays.asList(
+                        "If the property is immutable e.g.,String, Integer, Byte, Character" +
+                                " etc. then you can add 'final' identifier so that tests can " +
+                                "not change reference",
+                        "If the property is mutable then delete static modifier " +
+                                "and make property reference unique for each test."),
+                createRelatedElements(testMethod, staticProperties)
+        );
     }
 
     @Override

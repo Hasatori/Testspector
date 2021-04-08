@@ -33,23 +33,30 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
     @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
     public void checkBestPractices_JUnit5TestMethodContainsTryCatchStatement_OneViolationReportingAboutCatchingTheExceptionUsingJUnit5AssertionShouldBeReturned(String jUnit5TestAnnotationQualifiedName) {
         // Given
-        PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@" + jUnit5TestAnnotationQualifiedName)));
-        PsiTryStatement tryStatement = (PsiTryStatement) testMethod.getBody().add(this.psiElementFactory.createStatementFromText("try {} catch (Exception e){}", null));
+        PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil
+                .createTestMethod("testMethod", Collections.singletonList("@" + jUnit5TestAnnotationQualifiedName)));
+        PsiTryStatement tryStatement = (PsiTryStatement) testMethod.getBody().add(this.psiElementFactory
+                .createStatementFromText("try {} catch (Exception e){}", null));
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiTryStatement.class), EasyMock.eq(contextIndicator.isInTestContext())))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiTryStatement.class), EasyMock.eq(contextIndicator.isInTestContext())))
                 .andReturn(Arrays.asList(tryStatement)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class)).andReturn(Collections.emptyList()).times(1);
-        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod,JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(true).once();
-        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod,JUNIT4_TEST_QUALIFIED_NAMES)).andReturn(false).once();
-        EasyMock.replay(elementResolver,methodResolver);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class))
+                .andReturn(Collections.emptyList()).times(1);
+        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(true).once();
+        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)).andReturn(false).once();
+        EasyMock.replay(elementResolver, methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
                         String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
                         testMethod,
                         testMethod.getNameIdentifier().getTextRange(),
-                        "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand." +
-                                " In some cases it might even lead to never failing tests if we are not handling the exception properly.",
+                        "Tests should not contain try catch block. These blocks are" +
+                                " redundant and make test harder to read and understand." +
+                                " In some cases it might even lead to never failing tests if we " +
+                                "are not handling the exception properly.",
                         Arrays.asList(
                                 "If catching an exception is not part of a test then just delete it.",
                                 "If catching an exception is part of a test then since you are using JUnit5 it can be solved " +
@@ -73,30 +80,40 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
     @Test
     public void checkBestPractices_JUnit4TestMethodContainsTryCatchStatement_OneViolationReportingAboutCatchingTheExceptionUsingJUnit4AnnotationShouldBeReturned() {
         // Given
-        PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
+        PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil
+                .createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
         PsiTryStatement tryStatement = (PsiTryStatement) testMethod.getBody().add(this.psiElementFactory.createStatementFromText("try {} catch (Exception e){}", null));
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiTryStatement.class), EasyMock.eq(contextIndicator.isInTestContext())))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiTryStatement.class), EasyMock.eq(contextIndicator.isInTestContext())))
                 .andReturn(Arrays.asList(tryStatement)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class)).andReturn(Collections.emptyList()).times(1);
-        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod,JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(false).once();
-        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod,JUNIT4_TEST_QUALIFIED_NAMES)).andReturn(true).once();
-        EasyMock.replay(elementResolver,methodResolver);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class))
+                .andReturn(Collections.emptyList()).times(1);
+        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(false).once();
+        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)).andReturn(true).once();
+        EasyMock.replay(elementResolver, methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
                         String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
                         testMethod,
                         testMethod.getNameIdentifier().getTextRange(),
-                        "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.",
+                        "Tests should not contain try catch block. These blocks are " +
+                                "redundant and make test harder to read and understand. In some cases " +
+                                "it might even lead to never failing tests if we are not handling the exception properly.",
                         Arrays.asList(
                                 "If catching an exception is not part of a test then just delete it.",
-                                "If catching an exception is part of a test then since you are using JUnit4 it can be solved by using" +
-                                " @org.junit.Assert.Test(expected = Exception.class) for the test method"),
+                                "If catching an exception is part of a test then since you are using JUnit4 " +
+                                        "it can be solved by using" +
+                                        " @org.junit.Assert.Test(expected = Exception.class) for the test method"),
                         Arrays.asList(
-                                new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...", tryStatement.getTextRange().getStartOffset(), tryStatement.getTextRange().getEndOffset()), new HashMap<PsiElement, String>() {{
-                                    put(tryStatement, "statement");
-                                }}))));
+                                new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...",
+                                        tryStatement.getTextRange().getStartOffset(),
+                                        tryStatement.getTextRange().getEndOffset()),
+                                        new HashMap<PsiElement, String>() {{
+                                            put(tryStatement, "statement");
+                                        }}))));
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);
 
@@ -112,30 +129,43 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
     @Test
     public void checkBestPractices_JUnit4TestMethodCallsMethodWithTryCatchStatement_OneViolationReportingContainingRelatedElementWithRefenceFromTestMethodAndReferenceToTheStatement() {
         // Given
-        PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
+        PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil
+                .createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
         String helperMethodName = "helperMethod";
-        PsiMethod helperMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createMethod(helperMethodName, "void", Arrays.asList("public")));
-        PsiMethodCallExpression helperMethodCall = (PsiMethodCallExpression) testMethod.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", helperMethodName), null));
-        PsiTryStatement tryStatement = (PsiTryStatement) helperMethod.getBody().add(this.psiElementFactory.createStatementFromText("try {} catch (Exception e){}", null));
+        PsiMethod helperMethod = (PsiMethod) testClass.add(this.javaTestElementUtil
+                .createMethod(helperMethodName, "void", Arrays.asList("public")));
+        PsiMethodCallExpression helperMethodCall = (PsiMethodCallExpression) testMethod
+                .getBody()
+                .add(this.psiElementFactory.createExpressionFromText(String.format("%s()", helperMethodName), null));
+        PsiTryStatement tryStatement = (PsiTryStatement) helperMethod
+                .getBody()
+                .add(this.psiElementFactory.createStatementFromText("try {} catch (Exception e){}", null));
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiTryStatement.class), EasyMock.eq(contextIndicator.isInTestContext())))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiTryStatement.class), EasyMock.eq(contextIndicator.isInTestContext())))
                 .andReturn(Arrays.asList(tryStatement)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(helperMethodCall.getMethodExpression())).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext()))).andReturn(Collections.singletonList(tryStatement)).times(1);
-        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod,JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(false).once();
-        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod,JUNIT4_TEST_QUALIFIED_NAMES)).andReturn(true).once();
-        EasyMock.replay(elementResolver,methodResolver);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(helperMethodCall.getMethodExpression())).times(1);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
+                .andReturn(Collections.singletonList(tryStatement)).times(1);
+        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(false).once();
+        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)).andReturn(true).once();
+        EasyMock.replay(elementResolver, methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
                         String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
                         testMethod,
                         testMethod.getNameIdentifier().getTextRange(),
-                        "Tests should not contain try catch block. These blocks are redundant and make test harder to read and understand. In some cases it might even lead to never failing tests if we are not handling the exception properly.",
+                        "Tests should not contain try catch block. These blocks" +
+                                " are redundant and make test harder to read and understand. In some " +
+                                "cases it might even lead to never failing tests if we are not handling the " +
+                                "exception properly.",
                         Arrays.asList(
                                 "If catching an exception is not part of a test then just delete it.",
                                 "If catching an exception is part of a test then since you are using JUnit4 it can be solved by using" +
-                                " @org.junit.Assert.Test(expected = Exception.class) for the test method"),
+                                        " @org.junit.Assert.Test(expected = Exception.class) for the test method"),
                         Arrays.asList(
                                 new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...", tryStatement.getTextRange().getStartOffset(), tryStatement.getTextRange().getEndOffset()), new HashMap<PsiElement, String>() {{
                                     put(helperMethodCall.getMethodExpression(), "reference from test method");
@@ -156,10 +186,12 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
     @Test
     public void checkBestPractices_TestMethodDoesNotContainTryCatchStatement_NoViolationShouldBeFound() {
         // Given
-        PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
+        PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil
+                .createTestMethod("testMethod", Collections.singletonList("@org.junit.Test")));
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiTryStatement.class), EasyMock.eq(contextIndicator.isInTestContext())))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiTryStatement.class), EasyMock.eq(contextIndicator.isInTestContext())))
                 .andReturn(Collections.emptyList()).times(1);
         EasyMock.replay(elementResolver);
         // When
@@ -174,8 +206,8 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
                 testMethodElement,
                 testMethodTextRange,
                 problemDescription,
-                hints,
                 BestPractice.CATCH_TESTED_EXCEPTIONS_USING_FRAMEWORK_TOOLS,
+                hints,
                 relatedElementsWrapper
 
         );

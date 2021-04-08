@@ -7,7 +7,6 @@ import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
-import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
 import java.security.InvalidParameterException;
@@ -27,6 +26,12 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             PsiForStatement.class,
             PsiForeachStatement.class
     ));
+    private static final String IF_STATEMENT_STRING = "if";
+    private static final String FOR_STATEMENT_STRING = "for";
+    private static final String FOR_EACH_STATEMENT_STRING = "forEach";
+    private static final String WHILE_STATEMENT_STRING = "while";
+    private static final String SWITCH_STATEMENT_STRING = "switch";
+
     private final JavaElementResolver elementResolver;
     private final JavaContextIndicator contextResolver;
     private final JavaMethodResolver methodResolver;
@@ -50,42 +55,23 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             List<PsiStatement> statements = elementResolver
                     .allChildrenOfTypeMeetingConditionWithReferences(
                             testMethod
-                            ,PsiStatement.class
-                            ,isConditionalStatement()
-                            ,methodInTestContext())
+                            , PsiStatement.class
+                            , isConditionalStatement()
+                            , methodInTestContext())
                     .stream()
                     .filter(partOfAssertionMethod().negate())
                     .collect(Collectors.toList());
             statements = statements.stream().distinct().collect(Collectors.toList());
             if (statements.size() > 0) {
-                List<String> hints = new ArrayList<>();
-                hints.add(String.format("Remove statements [ %s ] and create separate test scenario for each branch",
-                        SUPPORTED_STATEMENT_CLASSES.stream()
-                                .map(this::statementString).collect(Collectors.joining(", "))));
-                hints.add("Acceptable place where conditional logic can be are custom assertions, where base on inputs we decide if we throw exception or not");
-                if (methodResolver.methodHasAnyOfAnnotations(testMethod,JUNIT5_TEST_QUALIFIED_NAMES)) {
-                    hints.add(String.format("You are using JUnit5 so the problem can be solved by using data driven approach and generating each scenario using %s", JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH));
-                }
-                PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
-                bestPracticeViolations.add(new BestPracticeViolation(
-                                String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
-                                testMethod,
-                                methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
-                                "Conditional logic should not be part of the test method, it makes test hard to understand, read and maintain.",
-                                hints,
-                                getCheckedBestPractice().get(0),
-                                createRelatedElements(testMethod, statements)
-                        )
-
-                );
+                bestPracticeViolations.add(createBestPracticeViolation(testMethod, statements));
             }
 
         }
         return bestPracticeViolations;
     }
 
-    Predicate<PsiElement> methodInTestContext(){
-      return   (element) -> element instanceof PsiMethod && contextResolver.isInTestContext().test(element);
+    Predicate<PsiElement> methodInTestContext() {
+        return (element) -> element instanceof PsiMethod && contextResolver.isInTestContext().test(element);
     }
 
     Predicate<PsiStatement> isConditionalStatement() {
@@ -98,8 +84,8 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     Predicate<PsiStatement> partOfAssertionMethod() {
         return psiStatement -> {
             PsiElement element = psiStatement.getParent();
-            while (element !=  null) {
-                if(element instanceof PsiMethod){
+            while (element != null) {
+                if (element instanceof PsiMethod) {
                     return methodResolver.assertionMethod((PsiMethod) element).isPresent();
                 }
                 element = element.getContext();
@@ -116,16 +102,27 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             Optional<PsiReferenceExpression> optionalPsiReferenceExpression = firstReferenceToConditionalStatement(method, conditionalStatement);
             optionalPsiReferenceExpression.ifPresent(psiReferenceExpression -> elementNameHashMap.put(psiReferenceExpression, "reference from test method"));
             elementNameHashMap.put(conditionalStatement, "statement");
-            result.add(new RelatedElementWrapper(String.format("%s ...%d - %d...", statementString(conditionalStatement), conditionalStatement.getTextRange().getStartOffset(), conditionalStatement.getTextRange().getEndOffset()), elementNameHashMap));
+            result.add(new RelatedElementWrapper(
+                    String.format("%s ...%d - %d...",
+                            statementString(conditionalStatement),
+                            conditionalStatement.getTextRange().getStartOffset(),
+                            conditionalStatement.getTextRange().getEndOffset()),
+                    elementNameHashMap));
         }
 
         return result;
     }
 
     private Optional<PsiReferenceExpression> firstReferenceToConditionalStatement(PsiMethod method, PsiStatement statement) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(method, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                method,
+                PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(reference.getParent(), PsiStatement.class, psiStatement -> statement == psiStatement, contextResolver.isInTestContext()).isEmpty()) {
+            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                    reference.getParent(),
+                    PsiStatement.class,
+                    psiStatement -> statement == psiStatement,
+                    contextResolver.isInTestContext()).isEmpty()) {
                 return Optional.of(reference);
             }
         }
@@ -134,32 +131,64 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
 
     private String statementString(PsiStatement statement) {
         if (statement instanceof PsiIfStatement) {
-            return "if";
+            return IF_STATEMENT_STRING;
         } else if (statement instanceof PsiForStatement) {
-            return "for";
+            return FOR_STATEMENT_STRING;
         } else if (statement instanceof PsiForeachStatement) {
-            return "forEach";
+            return FOR_EACH_STATEMENT_STRING;
         } else if (statement instanceof PsiWhileStatement) {
-            return "while";
+            return WHILE_STATEMENT_STRING;
         } else if (statement instanceof PsiSwitchStatement) {
-            return "switch";
+            return SWITCH_STATEMENT_STRING;
         }
-        throw new InvalidParameterException(String.format("Invalid statement instance %s. Supported instances are: %s", statement.getClass(), SUPPORTED_STATEMENT_CLASSES));
+        throw new InvalidParameterException(
+                String.format("Invalid statement instance %s. Supported instances are: %s",
+                        statement.getClass(),
+                        SUPPORTED_STATEMENT_CLASSES));
     }
 
     private String statementString(Class<? extends PsiStatement> statementClass) {
         if (PsiIfStatement.class == statementClass) {
-            return "if";
+            return IF_STATEMENT_STRING;
         } else if (PsiForStatement.class == statementClass) {
-            return "for";
+            return FOR_STATEMENT_STRING;
         } else if (PsiForeachStatement.class == statementClass) {
-            return "forEach";
+            return FOR_EACH_STATEMENT_STRING;
         } else if (PsiWhileStatement.class == statementClass) {
-            return "while";
+            return WHILE_STATEMENT_STRING;
         } else if (PsiSwitchStatement.class == statementClass) {
-            return "switch";
+            return SWITCH_STATEMENT_STRING;
         }
-        throw new InvalidParameterException(String.format("Invalid statement instance %s. Supported instances are: %s", statementClass, SUPPORTED_STATEMENT_CLASSES));
+        throw new InvalidParameterException(
+                String.format("Invalid statement instance %s. Supported instances are: %s",
+                        statementClass,
+                        SUPPORTED_STATEMENT_CLASSES));
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, List<PsiStatement> conditionalStatements) {
+        List<String> hints = new ArrayList<>();
+        hints.add(String.format("Remove statements [ %s ] and create separate test scenario for each branch",
+                SUPPORTED_STATEMENT_CLASSES
+                        .stream()
+                        .map(this::statementString).collect(Collectors.joining(", "))));
+        hints.add("Acceptable place where conditional logic can be are custom assertions," +
+                " where base on inputs we decide if we throw exception or not");
+        if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)) {
+            hints.add(String.format("You are using JUnit5 so the problem can be solved by " +
+                            "using data driven approach and generating each scenario using %s",
+                    JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH));
+        }
+        PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
+        return new BestPracticeViolation(
+                String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                testMethod,
+                methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
+                "Conditional logic should not be part of the test " +
+                        "method, it makes test hard to understand, read and maintain.",
+                getCheckedBestPractice().get(0),
+                hints,
+                createRelatedElements(testMethod, conditionalStatements)
+        );
     }
 
     @Override
