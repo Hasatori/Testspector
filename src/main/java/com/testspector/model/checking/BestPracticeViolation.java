@@ -3,6 +3,7 @@ package com.testspector.model.checking;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.testspector.model.enums.BestPractice;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -22,12 +23,7 @@ public class BestPracticeViolation {
 
     private final String name;
 
-    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, BestPractice violatedRule) {
-        this(name, testMethodElement, testMethodTextRange,problemDescription,null, violatedRule,null);
-
-    }
-
-    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, List<String> hints, BestPractice violatedRule, List<RelatedElementWrapper> relatedElementsWrapper) {
+    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, BestPractice violatedRule, @Nullable List<String> hints, @Nullable List<RelatedElementWrapper> relatedElementsWrapper) {
         this.testMethodElement = testMethodElement;
         this.testMethodTextRange = testMethodTextRange;
         this.problemDescription = problemDescription;
@@ -35,10 +31,6 @@ public class BestPracticeViolation {
         this.violatedRule = violatedRule;
         this.relatedElementsWrapper = relatedElementsWrapper;
         this.name = name;
-    }
-
-    public BestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, BestPractice violatedRule, List<RelatedElementWrapper> relatedElementsWrapper) {
-        this(name, testMethodElement, testMethodTextRange,problemDescription,null, violatedRule, relatedElementsWrapper);
     }
 
     public String getName() {

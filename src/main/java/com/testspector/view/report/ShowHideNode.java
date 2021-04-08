@@ -70,7 +70,6 @@ public class ShowHideNode extends BestPracticeViolationNode {
     public void highlight() {
         FileEditor[] editors = FileEditorManager.getInstance(getElement().getProject()).getEditors(getElement().getContainingFile().getVirtualFile());
         MarkupModel markupModel = null;
-
         for (FileEditor editor2 : editors) {
             if (editor2 instanceof TextEditor) {
                 markupModel = ((TextEditor) editor2).getEditor().getMarkupModel();
@@ -80,7 +79,7 @@ public class ShowHideNode extends BestPracticeViolationNode {
         if (markupModel != null) {
             if (!isCodeHighlighted()) {
                 setCodeHighlighted(true);
-                setHighlighter(markupModel.addRangeHighlighter(textRange.getStartOffset(), textRange.getEndOffset(), 9999, new TextAttributes(null, null, Color.BLUE, EffectType.BOLD_LINE_UNDERSCORE, Font.PLAIN), HighlighterTargetArea.EXACT_RANGE));
+                setHighlighter(createRangeHighlighter(markupModel));
                 ((EditorMarkupModelImpl) markupModel).getEditor().addEditorMouseListener(new EditorMouseListener() {
                     @Override
                     public void mouseClicked(@NotNull EditorMouseEvent event) {
@@ -91,49 +90,8 @@ public class ShowHideNode extends BestPracticeViolationNode {
                         }
                     }
                 });
-                MarkupModel finalMarkupModel = markupModel;
                 com.intellij.codeInsight.daemon.DaemonCodeAnalyzer.getInstance(getElement().getProject()).restart();
-                getHighlighter().setGutterIconRenderer(new GutterIconRenderer() {
-                    @Override
-                    public boolean equals(Object obj) {
-                        return false;
-                    }
-
-                    @Override
-                    public int hashCode() {
-                        return 0;
-                    }
-
-                    @NotNull
-                    @Override
-                    public Icon getIcon() {
-                        return CustomIcon.DELETE.getBasic();
-                    }
-
-                    @Override
-                    public String getTooltipText() {
-                        return "Hide";
-                    }
-
-                    @Override
-                    public Alignment getAlignment() {
-                        return Alignment.RIGHT;
-
-
-                    }
-
-                    @Override
-                    public AnAction getClickAction() {
-                        return new AnAction() {
-                            @Override
-                            public void actionPerformed(@NotNull AnActionEvent e) {
-                                setCodeHighlighted(false);
-                                finalMarkupModel.removeHighlighter(getHighlighter());
-                            }
-                        };
-
-                    }
-                });
+                getHighlighter().setGutterIconRenderer(createGutterIconRenderer(markupModel));
 
             } else {
                 setCodeHighlighted(false);
@@ -141,5 +99,59 @@ public class ShowHideNode extends BestPracticeViolationNode {
             }
 
         }
+    }
+    private GutterIconRenderer createGutterIconRenderer(MarkupModel markupModel) {
+        return new GutterIconRenderer() {
+            @Override
+            public boolean equals(Object obj) {
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return 0;
+            }
+
+            @NotNull
+            @Override
+            public Icon getIcon() {
+                return CustomIcon.DELETE.getBasic();
+            }
+
+            @Override
+            public String getTooltipText() {
+                return "Hide";
+            }
+
+            @Override
+            public Alignment getAlignment() {
+                return Alignment.RIGHT;
+            }
+
+            @Override
+            public AnAction getClickAction() {
+                return new AnAction() {
+                    @Override
+                    public void actionPerformed(@NotNull AnActionEvent e) {
+                        setCodeHighlighted(false);
+                        markupModel.removeHighlighter(getHighlighter());
+                    }
+                };
+            }
+        };
+    }
+
+    private RangeHighlighter createRangeHighlighter(MarkupModel markupModel) {
+        return markupModel.addRangeHighlighter(
+                textRange.getStartOffset(),
+                textRange.getEndOffset(),
+                9999,
+                new TextAttributes(
+                        null,
+                        null,
+                        Color.BLUE,
+                        EffectType.BOLD_LINE_UNDERSCORE,
+                        Font.PLAIN),
+                HighlighterTargetArea.EXACT_RANGE);
     }
 }

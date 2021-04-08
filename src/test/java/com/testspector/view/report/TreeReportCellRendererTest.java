@@ -6,11 +6,10 @@ import org.easymock.EasyMock;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.*;
 import java.net.URI;
 
 import static org.junit.Assert.*;
@@ -31,7 +30,7 @@ public class TreeReportCellRendererTest {
         String wrapperNodeName = "Test";
         WrapperNode wrapperNode = new WrapperNode(null, wrapperNodeName);
 
-        JLabel renderComponent = (JLabel) this.treeReportCellRenderer.getTreeCellRendererComponent(null, wrapperNode, false, false, false, 0, false);
+        JLabel renderComponent = (JLabel) this.getTreeCellRendererComponent(wrapperNode);
 
         assertAll(
                 () -> assertEquals("Different wrapper node name", wrapperNodeName, renderComponent.getText()),
@@ -45,7 +44,7 @@ public class TreeReportCellRendererTest {
         String expectedLabelText = "<html><b>" + wrapperNodeName + "</b></html>";
         WarningNode warningNode = new WarningNode(null, wrapperNodeName);
 
-        JLabel renderComponent = (JLabel) this.treeReportCellRenderer.getTreeCellRendererComponent(null, warningNode, false, false, false, 0, false);
+        JLabel renderComponent = (JLabel) this.getTreeCellRendererComponent(warningNode);
 
         assertAll(
                 () -> assertEquals("Different warning node name", expectedLabelText, renderComponent.getText()),
@@ -59,7 +58,7 @@ public class TreeReportCellRendererTest {
         String expectedLabelText = "Broken rule: " + violatedBestPractice.getDisplayName().toUpperCase();
         ViolatedRuleNode violatedRuleNode = new ViolatedRuleNode(null, violatedBestPractice);
 
-        JPanel renderComponent = (JPanel) this.treeReportCellRenderer.getTreeCellRendererComponent(null, violatedRuleNode, false, false, false, 0, false);
+        JPanel renderComponent = (JPanel) this.getTreeCellRendererComponent(violatedRuleNode);
 
         assertAll(
                 () -> assertEquals("Different panel label text", expectedLabelText, ((JLabel) renderComponent.getComponent(0)).getText() + ((JLabel) renderComponent.getComponent(1)).getText()),
@@ -72,7 +71,7 @@ public class TreeReportCellRendererTest {
         String expectedLinkText = "www.google.com";
         LinkNode linkNode = new LinkNode(new URI(expectedLinkText), expectedLinkText);
 
-        JLabel renderComponent = (JLabel) this.treeReportCellRenderer.getTreeCellRendererComponent(null, linkNode, false, false, false, 0, false);
+        JLabel renderComponent = (JLabel) this.getTreeCellRendererComponent(linkNode);
 
         assertEquals("Different link panel label text", expectedLinkText, renderComponent.getText());
     }
@@ -83,7 +82,7 @@ public class TreeReportCellRendererTest {
         String expectedText = "<html><b>" + infoNodeName + "</b></html>";
         InfoNode infoNode = new InfoNode(null, infoNodeName);
 
-        JLabel renderComponent = (JLabel) this.treeReportCellRenderer.getTreeCellRendererComponent(null, infoNode, false, false, false, 0, false);
+        JLabel renderComponent = (JLabel) this.getTreeCellRendererComponent(infoNode);
 
         assertAll(
                 () -> assertEquals("Different info node name", expectedText, renderComponent.getText()),
@@ -96,7 +95,7 @@ public class TreeReportCellRendererTest {
         String expectedText = "show";
         ShowHideNode showHideNode = new ShowHideNode(null, null, null, null, expectedText, null);
 
-        JLabel renderComponent = (JLabel) this.treeReportCellRenderer.getTreeCellRendererComponent(null, showHideNode, false, false, false, 0, false);
+        JLabel renderComponent = (JLabel) this.getTreeCellRendererComponent(showHideNode);
 
         assertAll(
                 () -> assertEquals("Different show hide node name", expectedText, renderComponent.getText()),
@@ -112,7 +111,7 @@ public class TreeReportCellRendererTest {
         EasyMock.expect(showHideNode.getOnHideLabel()).andReturn(expectedText).times(1);
         EasyMock.replay(showHideNode);
 
-        JLabel renderComponent = (JLabel) this.treeReportCellRenderer.getTreeCellRendererComponent(null, showHideNode, false, false, false, 0, false);
+        JLabel renderComponent = (JLabel) this.getTreeCellRendererComponent(showHideNode);
 
         assertAll(
                 () -> assertEquals("Different show hide node name", expectedText, renderComponent.getText()),
@@ -125,20 +124,28 @@ public class TreeReportCellRendererTest {
         String expectedText = "Some description";
         SimpleTextNode simpleTextNode = new SimpleTextNode(null, expectedText);
 
-        JLabel renderComponent = (JLabel) this.treeReportCellRenderer.getTreeCellRendererComponent(null, simpleTextNode, false, false, false, 0, false);
+        JLabel renderComponent = (JLabel) this.getTreeCellRendererComponent(simpleTextNode);
 
         assertEquals("Different simple text node name", expectedText, renderComponent.getText());
     }
 
     @Test
-    public void getTreeCellRendererComponent_renderedObjectIsDefaultMutableTreeNode_ShouldReturnEmptyLabel() {
+    public void getTreeCellRendererComponent_renderedObjectIsDefaultMutableTreeNode_ShouldReturnNull() {
         DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode();
 
-        JLabel renderComponent = (JLabel) this.treeReportCellRenderer.getTreeCellRendererComponent(null, defaultMutableTreeNode, false, false, false, 0, false);
+        JLabel renderComponent = (JLabel) this.getTreeCellRendererComponent(defaultMutableTreeNode);
 
-        assertAll(
-                () -> assertEquals("No text should be present", "", renderComponent.getText()),
-                () -> assertNull("No icon should be present", renderComponent.getIcon())
-        );
+        assertNull(renderComponent);
+    }
+
+    private Component getTreeCellRendererComponent(Object value) {
+        return this.treeReportCellRenderer.getTreeCellRendererComponent(
+                null,
+                value,
+                false,
+                false,
+                false,
+                0,
+                false);
     }
 }

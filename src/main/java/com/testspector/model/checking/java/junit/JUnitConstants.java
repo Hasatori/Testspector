@@ -16,9 +16,9 @@ public final class JUnitConstants {
     public static final String JUNIT4_ASSERTIONS_CLASS_PATH = "org.junit.Assert";
     public static final String HAMCREST_ASSERTIONS_CLASS_PATH = "org.hamcrest.MatcherAssert";
 
-    public static final List<String> JUNIT4_TEST_QUALIFIED_NAMES = Collections.unmodifiableList(Arrays.asList(
+    public static final List<String> JUNIT4_TEST_QUALIFIED_NAMES = Collections.singletonList(
             "org.junit.Test"
-    ));
+    );
 
 
     public static final String JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH = "org.junit.jupiter.params.ParameterizedTest";

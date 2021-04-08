@@ -19,7 +19,8 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
     @ParameterizedTest
     @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
     public void resolveInspectionInvocationLine_AllJunit5Annotations_shouldResolve(String testMethodQualifiedName) {
-        PsiMethod someJUnit5Method = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList(String.format("@%s", testMethodQualifiedName)));
+        PsiMethod someJUnit5Method = this.javaTestElementUtil
+                .createTestMethod("someTest", Collections.singletonList(String.format("@%s", testMethodQualifiedName)));
         PsiElement expectedTestLine = someJUnit5Method.getNameIdentifier();
         JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
@@ -31,7 +32,8 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
 
     @Test
     public void resolveInspectionInvocationLine_JUnit4Test_ShouldReturnMethodsIdentifier() {
-        PsiMethod someJUnit4Method = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList("@org.junit.Test"));
+        PsiMethod someJUnit4Method = this.javaTestElementUtil
+                .createTestMethod("someTest", Collections.singletonList("@org.junit.Test"));
         PsiElement expectedTestLine = someJUnit4Method.getNameIdentifier();
         JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 
@@ -53,7 +55,8 @@ public class JUnitTestLineResolveStrategyInspectionInvocation extends JavaTest {
 
     @Test
     public void resolveInspectionInvocationLine_TestNGTestMethod_ShouldReturnEmpty() {
-        PsiMethod someTestNgMethod = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList("@org.testng.annotations.Test(groups = { \"fast\" })"));
+        PsiMethod someTestNgMethod = this.javaTestElementUtil
+                .createTestMethod("someTest", Collections.singletonList("@org.testng.annotations.Test(groups = { \"fast\" })"));
 
         JUnitInspectionInvocationLineResolveStrategy jUnitTestLineResolveStrategy = new JUnitInspectionInvocationLineResolveStrategy();
 

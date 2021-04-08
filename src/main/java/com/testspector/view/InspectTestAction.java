@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -37,7 +36,6 @@ public class InspectTestAction extends AnAction {
                         List<PsiFile> psiFiles = collectPsiFilesFromVirtualFile(project, virtualFile);
                         testspectorController.initializeTestspector(psiFiles, virtualFile.getName());
                     } catch (Exception ignored) {
-
                     }
                 }
             } else {
@@ -47,18 +45,24 @@ public class InspectTestAction extends AnAction {
     }
 
     private List<PsiFile> collectPsiFilesFromVirtualFile(Project project, VirtualFile virtualFile) throws Exception {
-        return ProgressManager.getInstance().run(new Task.WithResult<List<PsiFile>, Exception>(project, "Collecting Files", true) {
-            @Override
-            protected List<PsiFile> compute(@NotNull ProgressIndicator indicator) {
-                return ApplicationManager.getApplication().runReadAction((Computable<List<PsiFile>>) () -> collectPsiFilesFromVirtualFile(indicator, project, virtualFile));
-            }
-        });
+        return ProgressManager
+                .getInstance()
+                .run(new Task.WithResult<List<PsiFile>,
+                        Exception>(project, "Collecting Files", true) {
+                    @Override
+                    protected List<PsiFile> compute(@NotNull ProgressIndicator indicator) {
+                        return ApplicationManager
+                                .getApplication()
+                                .runReadAction((Computable<List<PsiFile>>) () ->
+                                        collectPsiFilesFromVirtualFile(indicator, project, virtualFile));
+                    }
+                });
     }
 
     private List<PsiFile> collectPsiFilesFromVirtualFile(ProgressIndicator progressIndicator, Project project, VirtualFile virtualFile) {
         ArrayList<PsiFile> collectedPsiFiles = new ArrayList<>();
         progressIndicator.setText(virtualFile.getName());
-        VfsUtilCore.visitChildrenRecursively(virtualFile, new VirtualFileVisitor() {
+        VfsUtilCore.visitChildrenRecursively(virtualFile, new VirtualFileVisitor<PsiFile>() {
             @NotNull
             @Override
             public Result visitFileEx(@NotNull VirtualFile file) {
@@ -75,8 +79,6 @@ public class InspectTestAction extends AnAction {
 
     @Override
     public void update(AnActionEvent e) {
-        Editor editor = e.getData(CommonDataKeys.EDITOR);
-        PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);
     }
 
 
