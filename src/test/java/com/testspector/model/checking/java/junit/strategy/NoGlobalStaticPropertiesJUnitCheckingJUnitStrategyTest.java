@@ -33,15 +33,22 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
     public void checkBestPractices_TestReferenceToStaticNotFinalConstant_OneViolationReportingAboutUsingStaticGlobalConstantShouldBeReturned() {
         // Given
         String constantName = "EXAMPLE_UNSECURE_CONSTANT";
-        PsiField staticNotFinalStringConstant = (PsiField) testClass.add(psiElementFactory.createFieldFromText(String.format("private static String %s = \"VALUE\"", constantName), testClass));
+        PsiField staticNotFinalStringConstant = (PsiField) testClass.add(psiElementFactory
+                .createFieldFromText(String.format("private static String %s = \"VALUE\"", constantName), testClass));
         PsiMethod testMethod = this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@Test"));
         testMethod = (PsiMethod) testClass.add(testMethod);
-        PsiMethodCallExpression methodCallingTheConstant = (PsiMethodCallExpression) psiElementFactory.createExpressionFromText(String.format("Assert.assertEquals(%s,\"Test\")", constantName), null);
+        PsiMethodCallExpression methodCallingTheConstant = (PsiMethodCallExpression) psiElementFactory
+                .createExpressionFromText(String.format("Assert.assertEquals(%s,\"Test\")", constantName), null);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).times(2);
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiField.class),EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.singletonList(staticNotFinalStringConstant)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(methodCallingTheConstant.getMethodExpression())).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(methodCallingTheConstant), EasyMock.eq(PsiField.class), EasyMock.anyObject(), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiField.class),EasyMock.anyObject(), EasyMock.anyObject()))
+                .andReturn(Collections.singletonList(staticNotFinalStringConstant)).times(1);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class))
+                .andReturn(Collections.singletonList(methodCallingTheConstant.getMethodExpression())).times(1);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(methodCallingTheConstant), EasyMock.eq(PsiField.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.singletonList(staticNotFinalStringConstant)).times(1);
         EasyMock.replay(elementResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
@@ -50,10 +57,13 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
                         testMethod,
                         testMethod.getNameIdentifier().getTextRange(),
                         "Global static properties should not be part of a test. " +
-                                "Tests are sharing the reference and if some of them would update it it might influence behaviour of other tests.",
+                                "Tests are sharing the reference and if some of them would update it " +
+                                "it might influence behaviour of other tests.",
                         Arrays.asList(
-                                "If the property is immutable e.g.,String, Integer, Byte, Character etc. then you can add 'final' identifier so that tests can not change reference",
-                                "If the property is mutable then delete static modifier and make property reference unique for each test."),
+                                "If the property is immutable e.g.,String, Integer, Byte, Character etc. then " +
+                                        "you can add 'final' identifier so that tests can not change reference",
+                                "If the property is mutable then delete static modifier and make property reference" +
+                                        " unique for each test."),
                         Arrays.asList(
                                 new RelatedElementWrapper(staticNotFinalStringConstant.getName(), new HashMap<PsiElement, String>() {{
                                     put(methodCallingTheConstant.getMethodExpression(), "property reference from test method");
@@ -74,12 +84,15 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
 
     @Test
     public void checkBestPractices_TestDoestNotReferenceToAnyStaticNotFinalConstants_NoViolationsShouldBeFound() {
-        PsiField staticFinalStringConstant = psiElementFactory.createFieldFromText("private static final String EXAMPLE_SECURE_CONSTANT = \"VALUE\"", null);
+        PsiField staticFinalStringConstant = psiElementFactory
+                .createFieldFromText("private static final String EXAMPLE_SECURE_CONSTANT = \"VALUE\"", null);
         PsiMethod testMethod = this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@Test"));
         testMethod = (PsiMethod) testClass.add(testMethod);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).times(1);
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiField.class),EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.singletonList(staticFinalStringConstant)).times(1);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethod), EasyMock.eq(PsiField.class),EasyMock.anyObject(), EasyMock.anyObject()))
+                .andReturn(Collections.singletonList(staticFinalStringConstant)).times(1);
         EasyMock.replay(elementResolver);
 
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);
@@ -94,8 +107,8 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
                 testMethodElement,
                 testMethodTextRange,
                 problemDescription,
-                hints,
                 BestPractice.NO_GLOBAL_STATIC_PROPERTIES,
+                hints,
                 relatedElementsWrapper
 
         );

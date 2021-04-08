@@ -33,11 +33,14 @@ public class AssertionCountJUnitCheckingJUnitStrategyTest extends JUnitStrategyT
     public void checkBestPractices_TestMethodWithoutAnyAssertions_OneViolationReportingAboutThatAtLeastOneAssertionShouldBeInTheTestShouldBeReturned() {
         // Given
         String testMethodName = "testWithNoAssertions";
-        PsiMethod testMethodWithoutAssertions = this.javaTestElementUtil.createTestMethod(testMethodName, Collections.singletonList("@Test"));
+        PsiMethod testMethodWithoutAssertions = this.javaTestElementUtil
+                .createTestMethod(testMethodName, Collections.singletonList("@Test"));
         testMethodWithoutAssertions = (PsiMethod) testClass.add(testMethodWithoutAssertions);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethodWithoutAssertions), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(
+                        EasyMock.eq(testMethodWithoutAssertions), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(new ArrayList<>()).times(1);
         EasyMock.replay(elementResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
@@ -46,7 +49,9 @@ public class AssertionCountJUnitCheckingJUnitStrategyTest extends JUnitStrategyT
                         testMethodWithoutAssertions,
                         testMethodWithoutAssertions.getNameIdentifier().getTextRange(),
                         "Test should contain at least one assertion method!",
-                        BestPractice.AT_LEAST_ONE_ASSERTION));
+                        BestPractice.AT_LEAST_ONE_ASSERTION,
+                        null,
+                        null));
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethodWithoutAssertions);
 
@@ -60,16 +65,22 @@ public class AssertionCountJUnitCheckingJUnitStrategyTest extends JUnitStrategyT
     @Test
     public void checkBestPractices_TestMethodWithOneAssertion_NoViolationShouldBeReturned() {
         // Given
-        this.testJavaFile.getImportList().add(this.psiElementFactory.createImportStatementOnDemand("org.junit.Assert"));
+        this.testJavaFile.getImportList().add(this.psiElementFactory
+                .createImportStatementOnDemand("org.junit.Assert"));
         String testMethodName = "testWithOneAssertion";
-        PsiMethod testWithOneAssertion = this.javaTestElementUtil.createTestMethod(testMethodName, Collections.singletonList("@Test"));
-        PsiMethodCallExpression assertionMethodCall = (PsiMethodCallExpression) testWithOneAssertion.getBody().add(this.psiElementFactory.createExpressionFromText("Assert.assertTrue(true)", null));
+        PsiMethod testWithOneAssertion = this.javaTestElementUtil
+                .createTestMethod(testMethodName, Collections.singletonList("@Test"));
+        PsiMethodCallExpression assertionMethodCall = (PsiMethodCallExpression) testWithOneAssertion
+                .getBody()
+                .add(this.psiElementFactory.createExpressionFromText("Assert.assertTrue(true)", null));
         testWithOneAssertion = (PsiMethod) testClass.add(testWithOneAssertion);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testWithOneAssertion), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testWithOneAssertion), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.singletonList(assertionMethodCall)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.emptyList()).times(1);
         EasyMock.replay(elementResolver);
         // When
@@ -85,20 +96,33 @@ public class AssertionCountJUnitCheckingJUnitStrategyTest extends JUnitStrategyT
         // Given
         String testMethodName = "testWithOneAssertion";
         String assertMethodText = "org.hamcrest.MatcherAssert.assertThat(null,null )";
-        PsiMethod testWithTwoNonGroupedAssertions = this.javaTestElementUtil.createTestMethod(testMethodName, Collections.singletonList("@org.junit.jupiter.api.Test"));
+        PsiMethod testWithTwoNonGroupedAssertions = this.javaTestElementUtil
+                .createTestMethod(testMethodName, Collections.singletonList("@org.junit.jupiter.api.Test"));
 
-        PsiMethodCallExpression firstAssertionMethodCall = (PsiMethodCallExpression) testWithTwoNonGroupedAssertions.getBody().add(this.psiElementFactory.createExpressionFromText(assertMethodText, null));
-        PsiMethodCallExpression secondAssertionMethodCall = (PsiMethodCallExpression) testWithTwoNonGroupedAssertions.getBody().add(this.psiElementFactory.createExpressionFromText(assertMethodText, null));
+        PsiMethodCallExpression firstAssertionMethodCall = (PsiMethodCallExpression) testWithTwoNonGroupedAssertions
+                .getBody()
+                .add(this.psiElementFactory.createExpressionFromText(assertMethodText, null));
+        PsiMethodCallExpression secondAssertionMethodCall = (PsiMethodCallExpression) testWithTwoNonGroupedAssertions
+                .getBody()
+                .add(this.psiElementFactory.createExpressionFromText(assertMethodText, null));
         testWithTwoNonGroupedAssertions = (PsiMethod) testClass.add(testWithTwoNonGroupedAssertions);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testWithTwoNonGroupedAssertions), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(
+                        EasyMock.eq(testWithTwoNonGroupedAssertions), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Arrays.asList(firstAssertionMethodCall, secondAssertionMethodCall)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(firstAssertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(
+                        EasyMock.eq(firstAssertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.emptyList()).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(secondAssertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(
+                        EasyMock.eq(secondAssertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.emptyList()).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testWithTwoNonGroupedAssertions, PsiReferenceExpression.class))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(
+                        testWithTwoNonGroupedAssertions, PsiReferenceExpression.class))
                 .andReturn(Collections.emptyList()).times(2);
         EasyMock.replay(elementResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
@@ -106,10 +130,13 @@ public class AssertionCountJUnitCheckingJUnitStrategyTest extends JUnitStrategyT
                         String.format("%s#%s", testWithTwoNonGroupedAssertions.getContainingClass().getQualifiedName(), testMethodName),
                         testWithTwoNonGroupedAssertions,
                         testWithTwoNonGroupedAssertions.getNameIdentifier().getTextRange(),
-                        "Test should fail for only one reason. Using multiple assertions in JUnit leads to that if one assertion fails other will not be executed and therefore you will not get overview of all problems.",
+                        "Test should fail for only one reason. " +
+                                "Using multiple assertions in JUnit leads to that if " +
+                                "one assertion fails other will not be executed and therefore" +
+                                " you will not get overview of all problems.",
+                        BestPractice.ONLY_ONE_ASSERTION,
                         Arrays.asList("You are using JUnit5 so it can be solved by wrapping multiple assertions into org.junit.jupiter.api.Assertions.assertAll() method",
                                 "You can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers"),
-                        BestPractice.ONLY_ONE_ASSERTION,
                         Arrays.asList(
                                 new RelatedElementWrapper(
                                         firstAssertionMethodCall.getText(), new HashMap<PsiElement, String>() {{

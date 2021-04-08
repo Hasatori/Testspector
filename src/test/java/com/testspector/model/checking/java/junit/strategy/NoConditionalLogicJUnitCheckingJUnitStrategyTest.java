@@ -28,7 +28,7 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
         return Stream.of(
                 Arguments.of("if", "if(true){}else if(false){}"),
                 Arguments.of("for", "for (int i = 0; i < 50; i++) {\n}"),
-                Arguments.of("forEach","for (Object object: Object){}"),
+                Arguments.of("forEach", "for (Object object: Object){}"),
                 Arguments.of("while", "while(true){}"),
                 Arguments.of("switch", "switch (integer) {case 1:\"Test1\"; default:\"Test2\";}"));
     }
@@ -43,40 +43,66 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
     public void checkBestPractices_CheckingAllConditionalStatementsOneIsInTheTestMethodAndSecondInTheHelperMethod_OneViolationReportingAboutConditionalLogicShouldBeReturned(String statementName, String statementStringDefinition) {
         // Given
         String helperMethodName = "helperMethod";
-        PsiMethod helperMethodWithStatement = this.javaTestElementUtil.createMethod(helperMethodName, "Object", Collections.singletonList(PsiKeyword.PUBLIC));
-        PsiStatement helperMethodStatement = (PsiStatement) helperMethodWithStatement.getBody().add(this.psiElementFactory.createStatementFromText(statementStringDefinition, null));
+        PsiMethod helperMethodWithStatement = this.javaTestElementUtil
+                .createMethod(helperMethodName, "Object", Collections.singletonList(PsiKeyword.PUBLIC));
+        PsiStatement helperMethodStatement = (PsiStatement) helperMethodWithStatement
+                .getBody()
+                .add(this.psiElementFactory.createStatementFromText(statementStringDefinition, null));
         String testMethodName = "testWithStatement";
-        PsiMethod testMethodWithStatement = this.javaTestElementUtil.createTestMethod(testMethodName, Collections.singletonList("@Test"));
-        PsiStatement testMethodStatement = (PsiStatement) testMethodWithStatement.getBody().add(this.psiElementFactory.createStatementFromText(statementStringDefinition, null));
-        PsiMethodCallExpression helperMethodCall = (PsiMethodCallExpression) testMethodWithStatement.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", helperMethodName), null));
+        PsiMethod testMethodWithStatement = this.javaTestElementUtil
+                .createTestMethod(testMethodName, Collections.singletonList("@Test"));
+        PsiStatement testMethodStatement = (PsiStatement) testMethodWithStatement
+                .getBody()
+                .add(this.psiElementFactory.createStatementFromText(statementStringDefinition, null));
+        PsiMethodCallExpression helperMethodCall = (PsiMethodCallExpression) testMethodWithStatement
+                .getBody()
+                .add(this.psiElementFactory.createExpressionFromText(String.format("%s()", helperMethodName), null));
         helperMethodWithStatement = (PsiMethod) testClass.add(helperMethodWithStatement);
         testMethodWithStatement = (PsiMethod) testClass.add(testMethodWithStatement);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethodWithStatement), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Arrays.asList(testMethodStatement, helperMethodStatement)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testMethodWithStatement, PsiReferenceExpression.class)).andReturn(Collections.singletonList(helperMethodCall.getMethodExpression())).times(2);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.emptyList()).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject())).andReturn(Collections.singletonList(helperMethodStatement)).times(1);
-        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethodWithStatement,JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(true).once();
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testMethodWithStatement), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject()))
+                .andReturn(Arrays.asList(testMethodStatement, helperMethodStatement)).times(1);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(testMethodWithStatement, PsiReferenceExpression.class))
+                .andReturn(Collections.singletonList(helperMethodCall.getMethodExpression())).times(2);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject()))
+                .andReturn(Collections.emptyList()).times(1);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(helperMethodCall), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject()))
+                .andReturn(Collections.singletonList(helperMethodStatement)).times(1);
+        EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethodWithStatement, JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(true).once();
         EasyMock.expect(methodResolver.assertionMethod(EasyMock.anyObject(PsiMethod.class))).andReturn(Optional.empty()).times(2);
-        EasyMock.replay(elementResolver,methodResolver);
+        EasyMock.replay(elementResolver, methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
                         String.format("%s#%s", testMethodWithStatement.getContainingClass().getQualifiedName(), testMethodWithStatement.getName()),
                         testMethodWithStatement,
                         testMethodWithStatement.getNameIdentifier().getTextRange(),
-                        "Conditional logic should not be part of the test method, it makes test hard to understand, read and maintain.",
-                       Arrays.asList("Remove statements [ if, while, switch, for, forEach ] and create separate test scenario for each branch",
-                               "Acceptable place where conditional logic can be are custom assertions, where base on inputs we decide if we throw exception or not",
-                               "You are using JUnit5 so the problem can be solved by using data driven approach and generating each scenario using org.junit.jupiter.params.ParameterizedTest"),
+                        "Conditional logic should not be part of the test method, it " +
+                                "makes test hard to understand, read and maintain.",
+                        Arrays.asList("Remove statements [ if, while, switch, for, forEach ] and create " +
+                                        "separate test scenario for each branch",
+                                "Acceptable place where conditional logic can be are custom assertions, " +
+                                        "where base on inputs we decide if we throw exception or not",
+                                "You are using JUnit5 so the problem can be solved by using data driven " +
+                                        "approach and generating each scenario using org.junit.jupiter.params.ParameterizedTest"),
                         Arrays.asList(
-                                new RelatedElementWrapper(String.format("%s ...%d - %d...", statementName, testMethodStatement.getTextRange().getStartOffset(), testMethodStatement.getTextRange().getEndOffset()), new HashMap<PsiElement, String>() {{
-                                    put(testMethodStatement, "statement");
-                                }}),
-                                new RelatedElementWrapper(String.format("%s ...%d - %d...", statementName, helperMethodStatement.getTextRange().getStartOffset(), helperMethodStatement.getTextRange().getEndOffset()), new HashMap<PsiElement, String>() {{
-                                    put(helperMethodCall.getMethodExpression(), "reference from test method");
-                                    put(helperMethodStatement, "statement");
-                                }}))));
+                                new RelatedElementWrapper(String.format("%s ...%d - %d...", statementName,
+                                        testMethodStatement.getTextRange().getStartOffset(),
+                                        testMethodStatement.getTextRange().getEndOffset()),
+                                        new HashMap<PsiElement, String>() {{
+                                            put(testMethodStatement, "statement");
+                                        }}),
+                                new RelatedElementWrapper(String.format("%s ...%d - %d...", statementName,
+                                        helperMethodStatement.getTextRange().getStartOffset(),
+                                        helperMethodStatement.getTextRange().getEndOffset()),
+                                        new HashMap<PsiElement, String>() {{
+                                            put(helperMethodCall.getMethodExpression(), "reference from test method");
+                                            put(helperMethodStatement, "statement");
+                                        }}))));
 
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethodWithStatement);
@@ -93,11 +119,13 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
 
     @Test
     public void checkBestPractices_TestWithNoConditionalLogic_NoViolationsShouldBeFound() {
-        PsiMethod testWithNoConditionalLogic = this.javaTestElementUtil.createTestMethod("testWithNoConditionalLogic", Collections.singletonList("@Test"));
+        PsiMethod testWithNoConditionalLogic = this.javaTestElementUtil
+                .createTestMethod("testWithNoConditionalLogic", Collections.singletonList("@Test"));
         testWithNoConditionalLogic = (PsiMethod) testClass.add(testWithNoConditionalLogic);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testWithNoConditionalLogic), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject()))
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testWithNoConditionalLogic), EasyMock.eq(PsiStatement.class), EasyMock.anyObject(), EasyMock.anyObject()))
                 .andReturn(Collections.emptyList()).times(1);
         EasyMock.replay(elementResolver);
 
@@ -113,8 +141,8 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
                 testMethodElement,
                 testMethodTextRange,
                 problemDescription,
-                hints,
                 BestPractice.NO_CONDITIONAL_LOGIC,
+                hints,
                 relatedElementsWrapper
 
         );

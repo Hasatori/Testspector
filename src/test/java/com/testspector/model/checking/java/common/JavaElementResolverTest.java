@@ -59,7 +59,10 @@ public class JavaElementResolverTest extends JavaTest {
                 .createStatementFromText("try {}catch (Exception e){}", null));
         searchStartElement.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
 
-        List<PsiTryStatement> result = javaElementResolver.allChildrenOfTypeWithReferences(searchStartElement, PsiTryStatement.class, (element -> element instanceof PsiMethod));
+        List<PsiTryStatement> result = javaElementResolver.allChildrenOfTypeWithReferences(
+                searchStartElement,
+                PsiTryStatement.class,
+                (element -> element instanceof PsiMethod));
 
         assertAll(
                 () -> assertSame("Only one try statement should be found!", 1, result.size()),
@@ -70,15 +73,22 @@ public class JavaElementResolverTest extends JavaTest {
     @Test
     public void allChildrenOfType_searchingForSwitchStatementWithReferencesFromMethodsAndReferencedMethodContainsOneAndUsesRecursionCallToItself_ShouldReturnSwitchStatement() {
         PsiClass psiClass = this.psiElementFactory.createClass("Test");
-        PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil.createMethod("testMethod", "String", Collections.singletonList("public")));
+        PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil
+                .createMethod("testMethod", "String", Collections.singletonList("public")));
         String referencedMethodName = "referencedMethod";
-        PsiMethod referencedMethod = (PsiMethod) psiClass.add(this.javaTestElementUtil.createMethod(referencedMethodName, "String", Collections.singletonList("public")));
+        PsiMethod referencedMethod = (PsiMethod) psiClass.add(this.javaTestElementUtil
+                .createMethod(referencedMethodName, "String", Collections.singletonList("public")));
         PsiSwitchStatement psiSwitchStatement = (PsiSwitchStatement) referencedMethod.getBody().add(this.psiElementFactory
                 .createStatementFromText("switch (\"\"){}", null));
-        referencedMethod.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
-        searchStartElement.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
+        referencedMethod.getBody().add(this.psiElementFactory
+                .createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
+        searchStartElement.getBody().add(this.psiElementFactory
+                .createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
 
-        List<PsiSwitchStatement> result = javaElementResolver.allChildrenOfTypeWithReferences(searchStartElement, PsiSwitchStatement.class, (element -> element instanceof PsiMethod));
+        List<PsiSwitchStatement> result = javaElementResolver.allChildrenOfTypeWithReferences(
+                searchStartElement,
+                PsiSwitchStatement.class,
+                (element -> element instanceof PsiMethod));
 
         assertAll(
                 () -> assertSame("Only one switch statement should be found!", 1, result.size()),
@@ -89,7 +99,8 @@ public class JavaElementResolverTest extends JavaTest {
     @Test
     public void allChildrenOfType_searchingForMethodsWithReferencesFromClassesInSpecificPackageAndReferencedMethodIsNotInTheClassWithThePackage_ShouldReturnEmptyList() {
         PsiClass psiClass = this.psiElementFactory.createClass("Test");
-        PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil.createMethod("testMethod", "String", Collections.singletonList("public")));
+        PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil
+                .createMethod("testMethod", "String", Collections.singletonList("public")));
         String referencedMethodName = "referencedMethod";
         psiClass.add(this.javaTestElementUtil.createMethod(referencedMethodName, "String", Collections.singletonList("public")));
         searchStartElement.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
@@ -106,12 +117,17 @@ public class JavaElementResolverTest extends JavaTest {
     @Test
     public void allChildrenOfType_searchingForForStatementWhichContainsIfStatementWithReferencesFromMethodsWhichNameStartsWithAssertAndReferencedMethodContainsOne_ShouldReturnForStatement() {
         PsiClass psiClass = this.psiElementFactory.createClass("Test");
-        PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil.createMethod("testMethod", "String", Collections.singletonList("public")));
+        PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil
+                .createMethod("testMethod", "String", Collections.singletonList("public")));
         String referencedMethodName = "assertMethod";
-        PsiMethod referencedMethod = (PsiMethod) psiClass.add(this.javaTestElementUtil.createMethod(referencedMethodName, "String", Collections.singletonList("public")));
-        PsiForStatement psiForStatement = (PsiForStatement) referencedMethod.getBody().add(this.javaTestElementUtil.createForStatement());
+        PsiMethod referencedMethod = (PsiMethod) psiClass.add(this.javaTestElementUtil
+                .createMethod(referencedMethodName, "String", Collections.singletonList("public")));
+        PsiForStatement psiForStatement = (PsiForStatement) referencedMethod
+                .getBody()
+                .add(this.javaTestElementUtil.createForStatement());
         psiForStatement.getBody().getChildren()[0].add(this.javaTestElementUtil.createIfStatement());
-        searchStartElement.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
+        searchStartElement.getBody().add(this.psiElementFactory
+                .createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
 
         List<PsiForStatement> result = javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                 searchStartElement,
@@ -127,13 +143,16 @@ public class JavaElementResolverTest extends JavaTest {
 
     @Test
     public void allChildrenOfType_searchingForForStatementWhichContainsIfStatementWithReferencesToMethodsAndThereIsOneForStatementButWithoutIfStatement_ShouldReturnEmptyList() {
-        PsiMethod searchStartElement = this.javaTestElementUtil.createMethod("testMethod", "String", Collections.singletonList("public"));
+        PsiMethod searchStartElement = this.javaTestElementUtil
+                .createMethod("testMethod", "String", Collections.singletonList("public"));
         searchStartElement.getBody().add(this.javaTestElementUtil.createForStatement());
 
         List<PsiForStatement> result = javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                 searchStartElement,
                 PsiForStatement.class,
-                (forStatement) -> javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(forStatement, PsiIfStatement.class).size() > 0,
+                (forStatement) -> javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                        forStatement,
+                        PsiIfStatement.class).size() > 0,
                 (element -> element instanceof PsiMethod));
 
         assertTrue(result.isEmpty());
@@ -142,7 +161,8 @@ public class JavaElementResolverTest extends JavaTest {
     @Test
     public void allChildrenOfType_searchingForForStatementWithReferencesFromMethodsAndThereIsOneReferenceButItIsNull_ShouldReturnEmpty() {
         PsiClass psiClass = this.psiElementFactory.createClass("Test");
-        PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil.createMethod("testMethod", "String", Collections.singletonList("public")));
+        PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil
+                .createMethod("testMethod", "String", Collections.singletonList("public")));
         searchStartElement.getBody().add(this.psiElementFactory.createExpressionFromText("reference()", psiClass));
 
         List<PsiForStatement> result = javaElementResolver.allChildrenOfTypeWithReferences(
@@ -166,10 +186,15 @@ public class JavaElementResolverTest extends JavaTest {
 
     @Test
     public void firstImmediateChildIgnoring_IgnoringPsiJavaTokenAndFirstImmediateChildIsForStatement_ShouldReturnForStatement() {
-        PsiMethod method = this.javaTestElementUtil.createMethod("TestMethod", "String", Collections.singletonList("public"));
-        PsiForStatement firstPsiForStatement = (PsiForStatement) method.getBody().add(this.javaTestElementUtil.createForStatement());
+        PsiMethod method = this.javaTestElementUtil
+                .createMethod("TestMethod", "String", Collections.singletonList("public"));
+        PsiForStatement firstPsiForStatement = (PsiForStatement) method
+                .getBody()
+                .add(this.javaTestElementUtil.createForStatement());
 
-        PsiElement result = javaElementResolver.firstImmediateChildIgnoring(method.getBody(), Collections.singletonList(PsiJavaToken.class)).get();
+        PsiElement result = javaElementResolver.firstImmediateChildIgnoring(
+                method.getBody(),
+                Collections.singletonList(PsiJavaToken.class)).get();
 
         assertSame(firstPsiForStatement, result);
     }
@@ -179,7 +204,9 @@ public class JavaElementResolverTest extends JavaTest {
         PsiClass psiClass = this.psiElementFactory.createClass("Test");
         PsiModifierList expectedElement = (PsiModifierList) psiClass.getChildren()[0];
 
-        PsiElement result = javaElementResolver.firstImmediateChildIgnoring(psiClass, Collections.emptyList()).get();
+        PsiElement result = javaElementResolver.firstImmediateChildIgnoring(
+                psiClass,
+                Collections.emptyList()).get();
 
         assertSame(expectedElement, result);
     }

@@ -49,7 +49,8 @@ public class JUnitUnitTestFrameworkFactoryTest extends JavaTest {
     @ParameterizedTest
     @ValueSource(strings = {"org.junit.jupiter.api.Test", "org.junit.jupiter.params.ParameterizedTest", "org.junit.jupiter.api.RepeatedTest"})
     public void getUnitTestFramework_AllJUnit5Methods_ShouldReturnJUnit(String testMethodQualifiedName) {
-        PsiMethod psiMethod = this.javaTestElementUtil.createTestMethod("someTest", Collections.singletonList(String.format("@%s", testMethodQualifiedName)));
+        PsiMethod psiMethod = this.javaTestElementUtil
+                .createTestMethod("someTest", Collections.singletonList(String.format("@%s", testMethodQualifiedName)));
 
         UnitTestFramework unitTestFramework = jUnitUnitTestFrameworkFactory.getUnitTestFramework(psiMethod).get();
 

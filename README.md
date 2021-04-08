@@ -18,7 +18,7 @@ The dataset of best practices was created by a detailed analysis of the world’
 
 I am currently working on translation. In the meantime please use the translation from google.
 
-Current version of the plugin supports checking of the following 7 best practices for ![JUnit 5](https://junit.org/junit5) and ![JUnit 4](https://junit.org/junit4):
+Current version of the plugin supports checking of the following 7 best practices for [JUnit 5](https://junit.org/junit5) and [JUnit 4](https://junit.org/junit4):
 
 * [Test only public behaviour](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md#testovat-pouze-verejne-chovani-testovaneho-systemu)
 * [At least one assertion](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md#minimalne-jedna-overovaci-metoda-na-test)

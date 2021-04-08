@@ -102,7 +102,7 @@ public class JavaMethodResolver {
 
     public Optional<PsiMethod> assertionMethod(PsiMethod method) {
         if ((method.getContainingClass() != null && ASSERTION_CLASSES_CLASS_PATHS.contains(method.getContainingClass().getQualifiedName()))
-                || (method.getName().toLowerCase().contains("assert"))) {
+                || (method.getName().toLowerCase().contains("assert") && !contextResolver.isInProductionCodeContext().test(method))) {
             return Optional.of(method);
         }
         return Optional.empty();

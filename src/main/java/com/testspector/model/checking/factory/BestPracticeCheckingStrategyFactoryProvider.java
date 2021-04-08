@@ -20,7 +20,7 @@ public class BestPracticeCheckingStrategyFactoryProvider {
         return Optional.empty();
     }
 
-    public List<ProgrammingLanguage> getsupportedProgrammingLanguages() {
+    public List<ProgrammingLanguage> getSupportedProgrammingLanguages() {
         return Collections.singletonList(ProgrammingLanguage.JAVA);
     }
 

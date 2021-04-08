@@ -22,7 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnitStrategyTest {
 
-    private static final String ALMOST_SAME_NAME_PROBLEM_DESCRIPTION = "The test name is more or less the same as the tested method. This says nothing about tests scenario. You should setup a clear strategy for naming your tests so that the person reading then knows what is tested";
+    private static final String ALMOST_SAME_NAME_PROBLEM_DESCRIPTION = "The test name is more or less the same as" +
+            " the tested method. This says nothing about tests scenario. You should setup a clear " +
+            "strategy for naming your tests so that the person reading then knows what is tested";
     private SetupTestNamingStrategyJUnitCheckingStrategy strategy;
 
     @BeforeEach
@@ -42,15 +44,20 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
     }, delimiter = '|')
     public void checkBestPractices_TestNameTooSimilarOrTooDifferent_OneViolationReportingAboutTestNamingStrategyShouldBeReturned(String testedMethodName, String testName, String problemDescription) {
         // Given
-        PsiMethod testedMethod = this.javaTestElementUtil.createMethod(testedMethodName, "String", Collections.singletonList(PsiKeyword.PUBLIC));
+        PsiMethod testedMethod = this.javaTestElementUtil
+                .createMethod(testedMethodName, "String", Collections.singletonList(PsiKeyword.PUBLIC));
         PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) this.psiElementFactory.createExpressionFromText(String.format("%s()", testedMethodName), null);
         PsiMethod testMethod = this.javaTestElementUtil.createTestMethod(testName, Collections.singletonList("@org.junit.Test"));
         testMethod = (PsiMethod) testClass.add(testMethod);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(methodResolver.allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class)).andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
+        EasyMock.expect(methodResolver
+                .allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class))
+                .andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
+        EasyMock.expect(elementResolver
+                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
                 .andReturn(Collections.singletonList(testedMethodCall)).times(1);
         EasyMock.replay(elementResolver, methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
@@ -65,7 +72,8 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
                                 "Possible strategy: 'given-when-then'",
                                 "Possible strategy: 'givenSomeContextWhenDoingSomeBehaviorThenSomeResultOccurs'",
                                 "Possible strategy: 'whatIsTested_conditions_expectedResult'",
-                                "Chosen naming strategy is subjective. The key thing to remember is that name of the test should say: What is tests, What are the conditions, What is expected result"
+                                "Chosen naming strategy is subjective. The key thing to remember is that name " +
+                                        "of the test should say: What is tests, What are the conditions, What is expected result"
                         ),
                         Arrays.asList(
                                 new RelatedElementWrapper(testedMethodName, new HashMap<PsiElement, String>() {{
@@ -93,8 +101,10 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
     }, delimiter = '|')
     public void checkBestPractices_TestNameIsUsingStrategy_NoViolationShouldBeReturned(String testName, String testedMethodName) {
         // Given
-        PsiMethod testedMethod = this.javaTestElementUtil.createMethod(testedMethodName, "String", Collections.singletonList(PsiKeyword.PUBLIC));
-        PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) this.psiElementFactory.createExpressionFromText(String.format("%s()", testedMethodName), null);
+        PsiMethod testedMethod = this.javaTestElementUtil
+                .createMethod(testedMethodName, "String", Collections.singletonList(PsiKeyword.PUBLIC));
+        PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) this.psiElementFactory
+                .createExpressionFromText(String.format("%s()", testedMethodName), null);
         PsiMethod testMethod = this.javaTestElementUtil.createTestMethod(testName, Collections.singletonList("@org.junit.Test"));
         testMethod = (PsiMethod) testClass.add(testMethod);
         EasyMock.expect(methodResolver.allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
@@ -111,8 +121,8 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
                 testMethodElement,
                 testMethodTextRange,
                 problemDescription,
-                hints,
                 BestPractice.SETUP_A_TEST_NAMING_STRATEGY,
+                hints,
                 relatedElementsWrapper
 
         );

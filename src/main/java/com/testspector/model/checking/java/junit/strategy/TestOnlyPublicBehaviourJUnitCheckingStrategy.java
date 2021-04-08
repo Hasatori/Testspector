@@ -40,26 +40,16 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                     .allTestedMethods(testMethod)
                     .stream()
                     .filter(testedMethod ->
-                            methodHasModifier(testedMethod, "protected") ||
+                            methodHasModifier(testedMethod, PsiModifier.PROTECTED) ||
                                     isMethodPackagePrivate(testedMethod) ||
-                                    methodHasModifier(testedMethod, "private"))
+                                    methodHasModifier(testedMethod, PsiModifier.PRIVATE))
                     .collect(Collectors.toList());
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
             if (notPublicMethods.size() > 0) {
-                bestPracticeViolations.add(new BestPracticeViolation(
-                        String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
+                bestPracticeViolations.add(createBestPracticeViolation(
                         testMethod,
-                        methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
-                        "Only public behaviour should be tested. Testing 'private','protected' or 'package private' methods leads to problems with maintenance of tests because this private behaviour is likely to be changed very often. " +
-                                "In many cases we are refactoring private behaviour without influencing public behaviour of the class, yet this changes will change behaviour of the private method and cause tests to fail.",
-                        Arrays.asList(
-                                "There is an exception to this rule and that is in case when private 'method' is part of the observed behaviour of the system under test. For example we can have private constructor for class which is part of ORM and its initialization should not be permitted.",
-                                "Remove tests testing private behaviour",
-                                "If you really feel that private behaviour is complex enough that there should be separate test for it, then it is very probable that the system under test is breaking 'Single Responsibility Principle' and this private behaviour should be extracted to a separate system"
-                                ),
-                        getCheckedBestPractice().get(0),
-                        createRelatedElements(testMethod, notPublicMethods)
-                ));
+                        methodIdentifier,
+                        notPublicMethods));
             }
         }
 
@@ -72,9 +62,9 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
 
     private boolean isMethodPackagePrivate(PsiMethod method) {
         PsiModifierList modifierList = method.getModifierList();
-        return !modifierList.hasModifierProperty("public") &&
-                !modifierList.hasModifierProperty("private") &&
-                !modifierList.hasModifierProperty("protected");
+        return !modifierList.hasModifierProperty(PsiModifier.PUBLIC) &&
+                !modifierList.hasModifierProperty(PsiModifier.PRIVATE) &&
+                !modifierList.hasModifierProperty(PsiModifier.PROTECTED);
     }
 
 
@@ -97,12 +87,16 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
 
 
     private Optional<PsiReferenceExpression> firstReferenceToMethod(PsiElement element, PsiMethod notPublicMethod) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(element, PsiReferenceExpression.class);
+        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                element,
+                PsiReferenceExpression.class);
         for (PsiReferenceExpression reference : references) {
             if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     reference.getParent(),
                     PsiMethodCallExpression.class,
-                    psiMethodCallExpression -> psiMethodCallExpression.resolveMethod() != null && psiMethodCallExpression.resolveMethod() == notPublicMethod,
+                    psiMethodCallExpression ->
+                            psiMethodCallExpression.resolveMethod() != null
+                                    && psiMethodCallExpression.resolveMethod() == notPublicMethod,
                     contextIndicator.isInTestContext()).isEmpty()) {
                 return Optional.of(reference);
             }
@@ -111,16 +105,46 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     }
 
     private String getMethodAccessQualifier(PsiMethod method) {
-        if (method.hasModifierProperty("private")) {
+        if (method.hasModifierProperty(PsiModifier.PRIVATE)) {
             return "private";
-        } else if (method.hasModifierProperty("protected")) {
+        } else if (method.hasModifierProperty(PsiModifier.PROTECTED)) {
             return "protected";
         } else if (isMethodPackagePrivate(method)) {
             return "package private";
         }
-        throw new InvalidParameterException(String.format("Invalid not public method instance %s. Supported not public methods are: ['private','protected','package private']", method));
+        throw new InvalidParameterException(String.format("Invalid not public method instance %s. Supported not " +
+                "public methods are: ['private','protected','package private']", method));
     }
 
+    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiIdentifier methodIdentifier, List<PsiMethod> notPublicMethods) {
+        String classQualifiedName = Optional.ofNullable(testMethod.getContainingClass())
+                .map(PsiClass::getQualifiedName)
+                .orElse("");
+        return new BestPracticeViolation(
+                String.format("%s#%s", classQualifiedName, testMethod.getName()),
+                testMethod,
+                methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
+                "Only public behaviour should be tested. Testing 'private','protected' " +
+                        "or 'package private' methods leads to problems with maintenance of tests because " +
+                        "this private behaviour is likely to be changed very often. " +
+                        "In many cases we are refactoring private behaviour without influencing public " +
+                        "behaviour of the class, yet this changes will change behaviour of the private method" +
+                        " and cause tests to fail.",
+                getCheckedBestPractice().get(0),
+                Arrays.asList(
+                        "There is an exception to this rule and that is in case when private 'method' " +
+                                "is part of the observed behaviour of the system under test. For example " +
+                                "we can have private constructor for class which is part of ORM and its " +
+                                "initialization should not be permitted.",
+                        "Remove tests testing private behaviour",
+                        "If you really feel that private behaviour is complex enough that there should be " +
+                                "separate test for it, then it is very probable that the system under test is " +
+                                "breaking 'Single Responsibility Principle' and this private behaviour should be " +
+                                "extracted to a separate system"
+                ),
+                createRelatedElements(testMethod, notPublicMethods)
+        );
+    }
 
     @Override
     public List<BestPractice> getCheckedBestPractice() {
