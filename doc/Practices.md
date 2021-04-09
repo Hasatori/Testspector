@@ -1,153 +1,153 @@
 # Obsah
-[Vymezení pojmu "Best practice"](#vymezeni-pojmu-best-practice)
+[Definition of the term "Best Practice"](#vymezeni-pojmu-best-practice)
 
-[Způsob vymezení nejlepších postupů v oblasti jednotkového testování](#zpusob-vymezeni-nejlepsich-postupu-v-oblasti-jednotkoveho-testovani)
+[How "best practices" have been defined](#zpusob-vymezeni-nejlepsich-postupu-v-oblasti-jednotkoveho-testovani)
 
-[Vytváření testů](#vytvareni-testu)
+[Creating tests](#vytvareni-testu)
 
->   [Práce s duplicitami](#práce-s-duplicitami)
+>   [Duplicates](#práce-s-duplicitami)
 
->>[Extrakce opakujících se částí testovacího kódu](#extrakce-opakujících-se-částí-testovacího-kódu)
+>>[Extract repetitive parts of the test code](#extrakce-opakujících-se-částí-testovacího-kódu)
 
->> [Extrakce opakujících se testovacích metod](#extrakce-opakujících-se-testovacích-metod)
+>> [Extract repetitive test methods](#extrakce-opakujících-se-testovacích-metod)
 
->   [Rychlost](#rychlost)
+>   [Speed](#rychlost)
 
->> [Používání „In memory“ prostředků a mockování](#používání-„in-memory“-prostředků-a-mockování)
+>> [Using "In memory" resources and mocking](#používání-„in-memory“-prostředků-a-mockování)
 
->> [Vyhýbat se akcím, které uspávají hlavní vlákno](#vyhýbat-se-akcím,-které-uspávají-hlavní-vlákno)
+>> [Avoid actions that are blocking the main thread](#vyhýbat-se-akcím,-které-uspávají-hlavní-vlákno)
 
->   [Ověřování (kontrola)](#ověřování-(kontrola))
+>   [Assertions](#ověřování-(kontrola))
 
->> [Minimálně jedna ověřovací metoda na test](#minimalne-jedna-overovaci-metoda-na-test)
+>> [At least one assertion per test](#minimalne-jedna-overovaci-metoda-na-test)
 
->> [Právě jedna ověřovací metoda na test](#prave-jedna-overovaci-metoda-na-test)
+>> [Only one assertion per test](#prave-jedna-overovaci-metoda-na-test)
 
->> [Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)](#nepoužívat-strážní-ověřovací-metody-(tzv.-guard-assertion))
+>> [Do not use Guard Assertions](#nepoužívat-strážní-ověřovací-metody-(tzv.-guard-assertion))
 
->> [Dodržovat správné pořadí parametrů ověřovací metody](#dodržovat-správné-pořadí-parametrů-ověřovací-metody)
+>> [Keep the right order of the assertion method parameters](#dodržovat-správné-pořadí-parametrů-ověřovací-metody)
 
->> [Přikládat zprávy o popisu chyby](#přikládat-zprávy-o-popisu-chyby)
+>> [Use  messages describing the error](#přikládat-zprávy-o-popisu-chyby)
 
->   [Struktura testovací metody](#struktura-testovací-metody)
+>   [Structure of the test method](#struktura-testovací-metody)
 
->> [3-fázový design testů](#3-fázový-design-testů)
+>> [3-phase test design](#3-fázový-design-testů)
 
->> [4-fázový design testů](#4-fázový-design-testů)
+>> [4-phase test design](#4-fázový-design-testů)
 
->> [Neopakovat fáze testů](#neopakovat-fáze-testů)
+>> [Do not repeat the test phases](#neopakovat-fáze-testů)
 
->> [Oddělovat části testu](#oddělovat-části-testu)
+>> [Separate the test phases](#oddělovat-části-testu)
 
->   [Proměnné](#proměnné)
+>   [Variables](#proměnné)
 
->> [Nahrazovat pevné hodnoty konstantami](#nahrazovat-pevné-hodnoty-konstantami)
+>> [Replace fixed values with constants](#nahrazovat-pevné-hodnoty-konstantami)
 
->> [Nepoužívat magická čísla](#nepoužívat-magická-čísla)
+>> [Do not use magic numbers](#nepoužívat-magická-čísla)
 
->   [Ostatní doporučení](#ostatní-doporučení)
+>   [Other "Best Practices"](#ostatní-doporučení)
 
->> [Zachovávat spolehlivost testů](#zachovávat-spolehlivost-testů)
+>> [Keep the tests reliable](#zachovávat-spolehlivost-testů)
 
->> [Odstraňovat mrtvý kód](#odstraňovat-mrtvý-kód)
+>> [Delete the dead code](#odstraňovat-mrtvý-kód)
 
->> [Oddělovat generování dat od jejich verifikace](#oddělovat-generování-dat-od-jejich-verifikace)
+>> [Separate the data generating from its asserting](#oddělovat-generování-dat-od-jejich-verifikace)
 
->   [Testování výjimek](#testování-výjimek)
+>   [Testing exceptions](#testování-výjimek)
 
->> [Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích frameworků](#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
+>> [Catch tested exceptions using framework or library tools](#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
 
->> [Stanovovat obecnou úroveň pro výjimky testovací metody](#stanovovat-obecnou-úroveň-pro-výjimky-testovací-metody)
+>> [Set general level for the test exception](#stanovovat-obecnou-úroveň-pro-výjimky-testovací-metody)
 
->   [Podmíněná logika](#podminena-logika)
+>   [Conditional logic](#podminena-logika)
 
->> [Nepoužívat bloky if, else, switch, for či while v rámci testu](#nepouzivat-bloky-if,-else,-switch,-for-ci-while-v-ramci-testu)
+>> [Do not use if,switch, for or while blocks in a test](#nepouzivat-bloky-if,-else,-switch,-for-ci-while-v-ramci-testu)
 
->   [Pojmenování](#pojmenování)
+>   [Naming conventions](#pojmenování)
 
->> [Určit strategii pojmenování testů](#urcit-strategii-pojmenovani-testu)
+>> [Setup a test naming strategy](#urcit-strategii-pojmenovani-testu)
 
->> [Zachovat konzistentní pojmenování testů](#zachovat-konzistentní-pojmenování-testů)
+>> [Maintain consistent test naming](#zachovat-konzistentní-pojmenování-testů)
 
->> [Zachovávat jeden styl pojmenování pro koncept](#zachovávat-jeden-styl-pojmenování-pro-koncept)
+>> [Use one naming strategy for the concept](#zachovávat-jeden-styl-pojmenování-pro-koncept)
 
->> [Používat jména pro známá řešení](#používat-jména-pro-známá-řešení)
+>> [Use known solution names](#používat-jména-pro-známá-řešení)
 
->> [Používat vhodné pojmenování pro testovací třídy](#používat-vhodné-pojmenování-pro-testovací-třídy)
+>> [Use appropriate names for test classes](#používat-vhodné-pojmenování-pro-testovací-třídy)
 
->> [Používat vyslovitelné a vyhledatelné názvy](#používat-vyslovitelné-a-vyhledatelné-názvy)
+>> [Use pronounceable and searchable names](#používat-vyslovitelné-a-vyhledatelné-názvy)
 
->> [Zamezovat dezinformaci](#zamezovat-dezinformaci)
+>> [Prevent misinformation](#zamezovat-dezinformaci)
 
->> [Dělat dostatečné rozdíly mezi jmény](#dělat-dostatečné-rozdíly-mezi-jmény)
+>> [Use sufficiently distinct names](#dělat-dostatečné-rozdíly-mezi-jmény)
 
->> [Vynechávat nadbytečné součásti názvů](#vynechávat-nadbytečné-součásti-názvů)
+>> [Omit redundant name parts](#vynechávat-nadbytečné-součásti-názvů)
 
->> [Používat jména vyjadřující záměr](#používat-jména-vyjadřující-záměr)
+>> [Use intent revealing names](#používat-jména-vyjadřující-záměr)
 
->   [Uložení testovacích souborů a seskupování testů](#uložení-testovacích-souborů-a-seskupování-testů)
+>   [Storing test files and grouping tests](#uložení-testovacích-souborů-a-seskupování-testů)
 
->> [Ukládat testy mimo produkční kód](#ukládat-testy-mimo-produkční-kód)
+>> [Keep tests outside of production code](#ukládat-testy-mimo-produkční-kód)
 
->> [Ukládat testy pro jeden testovaný systém na jedno místo](#ukládat-testy-pro-jeden-testovaný-systém-na-jedno-místo)
+>> [Store tests for one system under test in one place](#ukládat-testy-pro-jeden-testovaný-systém-na-jedno-místo)
 
->   [Nezávislost](#nezávislost)
+>   [Independence](#nezávislost)
 
->> [Nepoužívat globální statické proměnné](#nepouzivat-globalni-staticke-promenne)
+>> [Do not use global static properties](#nepouzivat-globalni-staticke-promenne)
 
->> [Nepoužívat znalost domény](#nepoužívat-znalost-domény)
+>> [Do not the domain knowledge](#nepoužívat-znalost-domény)
 
->> [Používat relativní cesty](#používat-relativní-cesty)
+>> [Use relative paths](#používat-relativní-cesty)
 
->> [Nezávislost na platformě](#nezávislost-na-platformě)
+>> [Keep tests platform independent](#nezávislost-na-platformě)
 
->> [Dodržovat nezávislost na produkčním kódu](#dodržovat-nezávislost-na-produkčním-kódu)
+>> [Keep tests independent of production code](#dodržovat-nezávislost-na-produkčním-kódu)
 
->> [Tvořit vlastní data a zdroje](#tvořit-vlastní-data-a-zdroje)
+>> [Create your own data and resources](#tvořit-vlastní-data-a-zdroje)
 
->   [Izolovanost](#izolovanost)
+>   [Isolation](#izolovanost)
 
->> [Používat správného testovacího dvojníka](#používat-správného-testovacího-dvojníka)
+>> [Use the right test double](#používat-správného-testovacího-dvojníka)
 
->> [Nepoužívat testovací dvojníky na testovaný systém](#nepoužívat-testovací-dvojníky-na-testovaný-systém)
+>> [Do not use test double on the system under the test](#nepoužívat-testovací-dvojníky-na-testovaný-systém)
 
->> [Nepoužívat návrhový vzor Singleton](#nepoužívat-návrhový-vzor-singleton)
+>> [Do not use the Singleton design pattern](#nepoužívat-návrhový-vzor-singleton)
 
-[Vymezení testů](#vymezení-testů)
+[Defining tests](#vymezení-testů)
 
->   [Pokrytí kódu (Code coverage)](#pokrytí-kódu-(code-coverage))
+>   [Code coverage](#pokrytí-kódu-(code-coverage))
 
->> [Neimplementovat jednoduché testy](#neimplementovat-jednoduché-testy)
+>> [Do not define tests for primitive behavior](#neimplementovat-jednoduché-testy)
 
->> [Implementovat jak happy, tak sad testy](#implementovat-jak-happy,-tak-sad-testy)
+>> [Implement both happy and sad tests](#implementovat-jak-happy,-tak-sad-testy)
 
->> [Netestovat abstraktní systémy](#netestovat-abstraktní-systémy)
+>> [Do not test abstract systems](#netestovat-abstraktní-systémy)
 
->> [Testovat pouze veřejné chování testovaného systému](#testovat-pouze-verejne-chovani-testovaneho-systemu)
+>> [Test only the public behavior of the tested system](#testovat-pouze-verejne-chovani-testovaneho-systemu)
 
->> [Testovat chování, ne metody systému](#testovat-chování,-ne-metody-systému)
+>> [Test behavior, not system methods](#testovat-chování,-ne-metody-systému)
 
->> [Zachovávat princip jedné odpovědnosti testu](#zachovávat-princip-jedné-odpovědnosti-testu)
+>> [Make the tests follow the single responsibility principle ](#zachovávat-princip-jedné-odpovědnosti-testu)
 
->   [Datové pokrytí (Data coverage)](#datové-pokrytí-(data-coverage))
+>   [Data coverage](#datové-pokrytí-(data-coverage))
 
->> [Testovat hraniční podmínky](#testovat-hraniční-podmínky)
+>> [Test boundary conditions](#testovat-hraniční-podmínky)
 
->> [Kontrolovat inverzní vztahy](#kontrolovat-inverzní-vztahy)
+>> [Assert inverse relationships](#kontrolovat-inverzní-vztahy)
 
->> [Provádět křížovou kontrolu s pomocí jiných prostředků](#provádět-křížovou-kontrolu-s-pomocí-jiných-prostředků)
+>> [Do cross-checking using external means](#provádět-křížovou-kontrolu-s-pomocí-jiných-prostředků)
 
->> [Vynucovat chybné podmínky](#vynucovat-chybné-podmínky)
+>> [Enforce bad conditions](#vynucovat-chybné-podmínky)
 
->> [Používat jednotkové testy pro měření výkonových charakteristik testovaného systému](#používat-jednotkové-testy-pro-měření-výkonových-charakteristik-testovaného-systému)
+>> [Use unit tests to measure the performance characteristics of the tested system](#používat-jednotkové-testy-pro-měření-výkonových-charakteristik-testovaného-systému)
 
->> [Vymezovat třídy ekvivalence](#vymezovat-třídy-ekvivalence)
+>> [Test equivalence classes](#vymezovat-třídy-ekvivalence)
 
->> [Testovat krajní hodnoty](#testovat-krajní-hodnoty)
+>> [Test extreme values](#testovat-krajní-hodnoty)
 
->> [Testovat změny stavu](#testovat-změny-stavu)
+>> [Test the state transitions](#testovat-změny-stavu)
 
->> [Testovat pomocí rozhodovacích tabulek](#testovat-pomocí-rozhodovacích-tabulek)
+>> [Test using decision tables](#testovat-pomocí-rozhodovacích-tabulek)
 
 **![](Dropbox/Vysoka_skola/Magisterske_studium/Diplomova_prace/media/e75f34a382eac9c11065578930414b8b.jpeg)**
 
