@@ -71,7 +71,7 @@
 
 >> [Use one naming strategy for the concept](#zachovávat-jeden-styl-pojmenování-pro-koncept)
 
->> [Use known solution names](#používat-jména-pro-známá-řešení)
+>> [Use "known solution" names](#používat-jména-pro-známá-řešení)
 
 >> [Use appropriate names for test classes](#používat-vhodné-pojmenování-pro-testovací-třídy)
 
