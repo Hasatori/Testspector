@@ -1,7 +1,7 @@
 # Obsah
-[Definition of the term "Best Practice"](#vymezeni-pojmu-best-practice)
+[Definition of the term "Best Practice"](#definition-of-the-term-best-practices)
 
-[How "best practices" have been defined](#zpusob-vymezeni-nejlepsich-postupu-v-oblasti-jednotkoveho-testovani)
+[How "best practices" have been defined](#how-best-practices-have-been-defined)
 
 [Creating tests](#vytvareni-testu)
 
@@ -151,33 +151,21 @@
 
 **![](Dropbox/Vysoka_skola/Magisterske_studium/Diplomova_prace/media/e75f34a382eac9c11065578930414b8b.jpeg)**
 
-<h1 id="vymezeni-pojmu-best-practice">Vymezení pojmu "Best practice"</h1>
-Cambridge slovník vymezuje pojem Best practice následovně:
+<h1 id="definition-of-the-term-best-practices">Definition of the term "Best Practices"</h1>
+The Cambridge Dictionary defines the term Best Practice as follows: 
 
 > „A working method or set of working methods that is officially accepted as being the best to use in a particular business or industry, usually described formally and in detail.“ [(Cambridge Dictionary 2020)](#Best_practice_definition_cambridge_dictionary_2020)
 
-Autorský překlad:
-> „Obvykle detailně a formálně popsaná metoda nebo sada fungujících metod, která je oficiálně přijímána jako nejlepší pro použití v konkrétním podnikání nebo odvětví.“
-
-Definice z webového portálu Merriam-Webster je trochu specifičtější a vymezuje pojem takto:
+The definition from the Merriam-Webster web portal is a bit more specific and defines the term as follows:
 
 > „A procedure that has been shown by research and experience to produce optimal results and that is established or proposed as a standard suitable for widespread adoption.“ [(Merriam-Webster 1927)](#Best_practice_definition_merriam_webster_1927)
 
-Autorský překlad:
-> „Postup, který skrze výzkum a zkušenost zajistil dosahování optimálních výsledků a který je stanoveným nebo navrhovaným standardem pro široké použití.“
+As we can see, the second definition is a bit more specific and does not only speak in abstract terms of the general acceptance of the method, but suggests that this status has 
+been gained through previous research and good experience from its application to other projects.
 
-Jak můžeme vidět, tak druhá definice je o něco specifičtější a nehovoří pouze abstraktně o obecném příjímání metody, ale naznačuje že tento status si metoda získala skrze předešlý výzkum a dobrou zkušenost z její aplikací na další projekty. Velmi podobně se k tomu staví také česká definice pojmu z [(ManagementMania 2020)](#Best_practice_definition_management_mania_2020), ta ale pracuje s českým překladem pojmu, tedy pojmem „nejlepší praxe“ či „osvědčená praxe“. V rámci této práce je pojem chápán a je s ním pracováno podle druhé definice. Místo anglického pojmu „best practice“ je v rámci dokumentace nadále používán český překlad „nejlepší postup“ či „nejlepší postupy“. Záměrně není používán pojem „nejlepší praxe“ či „osvědčená praxe“, jelikož jsou tyto pojmy pro použití ve větě velmi krkolomné.
+<h1 id="how-best-practices-have-been-defined">How "Best Practices" have been defined</h1>
 
-<h1 id="zpusob-vymezeni-nejlepsich-postupu-v-oblasti-jednotkoveho-testovani">Způsob vymezení nejlepších postupů v oblasti jednotkového testování</h1>
-
-Jak vyplývá z definice zmíněné v kapitole [Vymezení pojmu „Best practice“](#vymezeni-pojmu-best-practice), tak nejlepší postup je velmi široký pojem a je dán zkušenostmi z působení v určitém oboru. Z tohoto důvodu je velmi těžké určit množinu nejlepších postupů, která by byla finální a zahrnovala všechny relevantní postupy.
-V rámci této práce byly pro vymezení nejlepších postupů použity tři sady informačních zdrojů. 
-
-1. Autorem vybraná literatura týkající se jednotkového testování
-2. Seznam světově neuznávanější odborné literatury týkající se tématu jednotkového testování
-3. Odborné články renomované společnosti ACM 
-
-První z výše zmíněných sad zdrojů byla vybrána prostřednictvím systému O´Reilly, kde bylo, ze seznamu zdrojů vyhledaných pod slovy „unit testing“, autorem vybráno několik zdrojů. Kritéria výběru byla subjektivní na základě názvu literatury, jejího abstraktu a obsahu. Tímto způsobem byla pro analýzu vybrána následující literatura:
+Following sources were used to define "Best practices":
 
 * xUnit Test Patterns: Refactoring Test Code [(Meszaros 2007)](#978-0-13-149505-0)
 * Mastering Software Testing with JUnit 5 [(García 2017)](#978-1-78712-439-4)
@@ -185,16 +173,31 @@ První z výše zmíněných sad zdrojů byla vybrána prostřednictvím systém
 * Developer Testing: Building Quality into Software [(Tarlinder 2016)](#978-0-13-429106-2)
 * Clean Code: A Handbook of Agile Software Craftsmanship [(Martin 2009)](#978-0-13-235088-4)
 * Unit Testing Principles, Practices, and Patterns [(Khorikov 2020)](#978-1-61729-627-7)
-* Unit test frameworks [(Hamill 2004)](#978-0-596-00689-1)
+* Unit Test frameworks [(Hamill 2004)](#978-0-596-00689-1)
 * Pragmatic Unit Testing in Java 8  [(Langr et al. 2015)](#978-1-937785-48-2)
 * Effective Unit Testing [(Koskela 2013)](#978-1-935182-57-3)
+* Testing for Continuous Delivery with Visual Studio 2012
+* Top 50 JUnit Unit Testing Interview Questions & Answers
+* Professional Node.js
+* Testing Python
+* Python Testing Cookbook.
+* Test-Driven Python Development
+* Composing Software Components
+* Prime Path Coverage Exploration for Automated Unit Testing
+* Test-Driven iOS Development with Swift
+* Mastering Unit Testing Using Mockito and JUnit
+* SPA Design and Architecture
+* Getting Started with Visual Studio 2019
+* Python Unit Test Automation
+* The Case Against Unit Testing in Software Development
+* Unit Testing in Java
+* How good are my tests [(Bowes et al. 2017)](#978-1-5386-2807-2)
 
-Pro získání druhé sady zdrojů byla použita webová stránka bookauthority.org, která je přední světovou stránkou pro tematické doporučování literatury. Využívá proprietární technologii, jež identifikuje a hodnotí nejlepší knihy na základě desítek různých znaků od doporučení, počtu veřejných zmínění knihy, hodnocení, popularity a historie prodejů. Zahrnuje také hodnocení předních expertů na danou problematiku [(BookAuthority 2020a)](#book_authority_about). Web připravil přehled 21 nejlepších knih všech dob týkajících se jednotkového testování [(BookAuthority 2020b)](#21_best_software_unit_testing_books_of_all_time). Knihy jsou analyzovány a nejlepší postupy a doporučení pro psaní jednotkových testů jsou z nich vyextrahovány. Jednotlivé postupy jsou následně metodou klasifikace rozděleny do skupin na základě jejich podobných charakteristik a duplicitní doporučené postupy jsou vymazány. Ke knihám MATLAB PROGRAMMING. SOFTWARE DEVELOPMENT, Java Testing and Design [(Cohen 2004)](#978-0-13-142189-9) a Prime Path Coverage Exploration for Automated Unit Testing [(Gerritsen 2010)](#978-3-8433-6435-5) se však nepodařilo získat přístup a nejsou tedy předmětem analýzy a klasifikace. 
-Pro získání třetí sady byly použity odborné články vyhledané pod pojmem „unit testing best practices“, kde byly vráceny 3 výsledky, z nichž byl nalezen 1 relevantní článek: How good are my tests [(Bowes et al. 2017)](#978-1-5386-2807-2)
-Celkem bylo tedy analyzováno 28 zdrojů. Výsledkem analýzy výše zmíněné odborné literatury, vznikl souhrn poznámek týkajících se doporučených nejlepších postupů pro různé oblasti jednotkového testování. Analýza probíhala formou přečtením kapitol knih a článků, které obsahují informace o jednotkovém testování, a děláním si výpisků o doporučovaných postupech pro danou oblast. Veškeré posbírané poznámky, byly následně vloženy do nástroje Miro a zkoumáním jejich podobnosti byly postupně uspořádávány do skupin. Výsledkem je myšlenková mapa, která zachycuje stromovou strukturu nejlepších postupů týkajících se jednotkového testování (viz obr.1). 
+Based on the information in the sources mentioned above "Best Practices" in unit testing were defined and classified. 
+The structure is represented by img.1
 
-![best_practices_mind_map.png](./best_practices_mind_map.png)
-obr.1 Myšlenková mapa zachycující rozpad nejlepších postupů do skupin a podskupin (autor)
+![best_practices_mind_map.jpg](./best_practices_mind_map.jpg)
+img.1 Mind map capturing the breakdown of "Best Practices" into groups and subgroups
 
 <h1 id="vytvareni-testu">Vytváření testů</h1>
 
