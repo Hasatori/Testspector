@@ -5,9 +5,6 @@ Testspector is an IntelliJ IDEA plugin that helps developers with writing unit t
 
 Plugin URL: https://plugins.jetbrains.com/plugin/16300-testspector
 
-### What do you think of the plugin?
-Please let me know by filling this survey: https://www.survio.com/survey/d/P5D2I3C1W2N5X9C2Q (**very short 10 min max, just 8 questions where 6 are mandatory**). This would help me a lot since it will show me if I am headed in the right direction and the plugin is useful.
-
 ## Documentation
 
 ### Best practices 
