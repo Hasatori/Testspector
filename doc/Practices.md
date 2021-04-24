@@ -5,11 +5,11 @@
 
 [Creating tests](#creating-tests)
 
->   [Duplicates](#práce-s-duplicitami)
+>   [Duplicates](#duplicates)
 
->>[Extract repetitive parts of the test code](#extrakce-opakujících-se-částí-testovacího-kódu)
+>>[Extract duplicate parts of the test code](#extract-duplicate-parts-of-the-test-code)
 
->> [Extract repetitive test methods](#extrakce-opakujících-se-testovacích-metod)
+>> [Extract duplicate methods](#extract-duplicate-methods)
 
 >   [Speed](#rychlost)
 
@@ -199,63 +199,31 @@ The structure is represented by img.1
 ![best_practices_mind_map.jpg](./best_practices_mind_map.jpg)
 img.1 Mind map capturing the breakdown of "Best Practices" into groups and subgroups
 
-<h1 id="creating-tests">Creating tests</h1>
+# Creating tests
 
 This section contains best practices for creating unit tests. It basically answers the question "What should the tests and test code look like?". In other words what should 
 the code of the tests look like to follow Best Practices be easy to maintain and understand.
 
-## Práce s duplicitami
+## Duplicates
 
-V kontextu programování je obecně bráno duplikování kódu jako špatnou praktikou,
-jelikož porušuje jedno ze základních pravidel DRY, tedy „*Do not repeat
-yourself!*“, což by se dalo volně přeložit jako „Neopakujte se!“. Pravidlo bylo
-původně formulováno v knize **The pragmatic programmer** a jeho znění v
-originále zní:
+In programming, duplication of code is generally considered a bad practice. In this respect, unit tests are no exception and same principle should apply to them.
 
-„*Every piece of knowledge must have a single, unambiguous, authoritative
-representation within a system*“[(Hunt a Thomas 2000, kap. Topic 9. DRY—The Evils of Duplication)](#978-0-201-61622-4)
+The Best Practices for working with duplicates are as follows:
 
-**Autorský překlad:**
+-   Extract repetitive parts of the test code
 
-„*Každa informace musí mít v systému jediné, jednoznačné a jasné zastoupení*“
+-   Extract repetitive test methods
 
-V tomto ohledu nejsou jednotkové testy žádnou výjimkou a stejný princip bychom
-měli aplikovat i na ně. Porušování tohoto pravidla se může zdát z krátkodobého
-hlediska poměrně výhodné, protože umožňuje velmi rychlou tvorbu jednotlivých
-testovacích případů. Pokud implementujeme nový test, lze využít kódu některého z
-dalších testů v dané testovací třídě a následně pouze změnit části specifické
-pro test nový. Jak uvádí kniha *Effective unit testing* [(Koskela 2013, kap. 5.1 Duplication)](#978-1-935182-57-3), tak z
-dlouhodobého hlediska má tento přístup negativní vliv jak na udržovatelnost, tak
-na srozumitelnost testovacího kódu. Samotný test by měl obsahovat pouze nezbytné
-informace, které pomohou čtenáři velmi snadno a rychle pochopit jeho fungování.
-Stejně tak pokud bude v budoucnu potřeba provést v testech změny je časově
-úspornější provést změnu pouze na jednom místě. Také tím výrazně snižujeme
-riziko opomnění provedení změn na všech místech.
+### Extract duplicate parts of the test code
 
-Nejlepší postupy týkající se práce s duplicitami jsou následující:
+Extract code blocks that are duplicated across multiple tests into a *helper method*, *setup method*, *fixture method* or *teardown method*. 
+The methods should follow the same rule, and it should not share same code as well. [(Govindaraj 2015, kap. Making tests readable)](#978-1-78398-792-4),[(Martin 2009, kap. 9. Unit tests-Clean Tests)](#978-0-13-235088-4).
 
--   Extrakce opakujících se částí testovací kódu
+In addition to structural and literal duplicates you should also pay attention to so-called semantic duplicates, ie parts of the code that do not look the same but do the same thing [(Koskela 2013, kap. 5.1 Duplication)](#978-1-935182-57-3).
 
--   Extrakce opakujících se testovacích metod
+### Extract duplicate methods
 
-### Extrakce opakujících se částí testovacího kódu
-
-Části kódu opakující se mezi jednotlivými testovacími případy vyextrahovat do
-*pomocných metod*, *setup metod*, *fixture metod* a *teardown metod* [(Govindaraj 2015, kap. Making tests readable)](#978-1-78398-792-4),[(Martin 2009, kap. 9. Unit tests-Clean Tests)](#978-0-13-235088-4). Pro tyto
-metody musí platit stejná pravidla, jako pro zbytek testovacího kódu, tedy ani
-mezi nimi by se neměly vyskytovat duplicity a měly by být čtenáři srozumitelné.
-Samozřejmě srozumitelnost testovacího kódu není pouze otázkou minimalizace
-duplicit, ale také například jejich pojmenování, které je detailně rozebíráno v
-sekci *[Pojmenování](#pojmenování)*
-
-Mimo typické strukturální a literární duplicity, je také nutné dávat pozor na
-tzv. sémantické duplicity, tedy části kódu, které nevypadají stejně, ale dělají
-stejnou věc [(Koskela 2013, kap. 5.1 Duplication)](#978-1-935182-57-3).
-
-### Extrakce opakujících se testovacích metod
-
-Metody opakující se napříč několika testovacími třídami vyextrahovat do
-samostatné třídy, a tu poté přidělit jako rodiče těchto testovacích tříd [(Govindaraj 2015, kap. Making tests readable)](#978-1-78398-792-4).
+Extract methods that are duplicated across several test files  into a separate file and import methods from the file [(Govindaraj 2015, kap. Making tests readable)](#978-1-78398-792-4).
 
 ## Rychlost
 
