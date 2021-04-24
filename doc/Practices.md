@@ -3,7 +3,7 @@
 
 [How "best practices" have been defined](#how-best-practices-have-been-defined)
 
-[Creating tests](#vytvareni-testu)
+[Creating tests](#creating-tests)
 
 >   [Duplicates](#práce-s-duplicitami)
 
@@ -199,16 +199,10 @@ The structure is represented by img.1
 ![best_practices_mind_map.jpg](./best_practices_mind_map.jpg)
 img.1 Mind map capturing the breakdown of "Best Practices" into groups and subgroups
 
-<h1 id="vytvareni-testu">Vytváření testů</h1>
+<h1 id="creating-tests">Creating tests</h1>
 
-Tato podkapitola obsahuje nejlepší postupy zabývající se tvorbou jednotkových
-testů. Pomyslně odpovídá na otázku „Jak by měli testy a testovací kód vypadat?“,
-tedy jak by měl samotný kód jednotkových testů vypadat, aby splňoval doporučené
-nejlepší postupy a dobře se s ním ostatním programátorům pracovalo. Podkapitola
-je dále rozpadnuta do několika podsekcí, které vymezují nejlepší postupy
-týkající se určitého aspektu tvorby testů. Některé nejlepší postupy nebylo možné
-jednoznačně zařadit do nadřazené skupiny, a proto byly vloženy do obecné sekce
-*Ostatní doporučení*.
+This section contains best practices for creating unit tests. It basically answers the question "What should the tests and test code look like?". In other words what should 
+the code of the tests look like to follow Best Practices be easy to maintain and understand.
 
 ## Práce s duplicitami
 
