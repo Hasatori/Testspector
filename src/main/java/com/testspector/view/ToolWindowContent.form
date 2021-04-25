@@ -70,12 +70,13 @@
       <splitpane id="5b5f" binding="splitPane">
         <constraints>
           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="800" height="-1"/>
             <preferred-size width="1000" height="49"/>
           </grid>
         </constraints>
         <properties>
           <continuousLayout value="true"/>
-          <dividerLocation value="1000"/>
+          <dividerLocation value="500"/>
           <dividerSize value="10"/>
           <enabled value="true"/>
           <foreground color="-13948117"/>
@@ -109,7 +110,9 @@
                   <grid id="5c8f8" binding="contentWrapper" layout-manager="FlowLayout" hgap="0" vgap="0" flow-align="0">
                     <constraints/>
                     <properties/>
-                    <border type="none"/>
+                    <border type="empty">
+                      <size top="10" left="10" bottom="10" right="10"/>
+                    </border>
                     <children>
                       <grid id="14ad3" binding="processingWrapper" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
                         <constraints/>
@@ -125,13 +128,6 @@
                               <horizontalAlignment value="0"/>
                               <horizontalTextPosition value="0"/>
                               <text value="processing"/>
-                            </properties>
-                          </component>
-                          <component id="a062a" class="javax.swing.JLabel">
-                            <constraints/>
-                            <properties>
-                              <icon value="icons/loading.gif"/>
-                              <text value=""/>
                             </properties>
                           </component>
                         </children>
@@ -177,6 +173,26 @@
                 <properties>
                   <background color="-11447983"/>
                   <foreground color="-11447983"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="2043e" binding="detailWrapper" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+            <constraints>
+              <splitpane position="right"/>
+            </constraints>
+            <properties/>
+            <border type="empty">
+              <size top="10" left="10" bottom="10" right="10"/>
+            </border>
+            <children>
+              <component id="b8b3" class="javax.swing.JLabel" binding="openToDisplayDetailsLabel">
+                <constraints/>
+                <properties>
+                  <horizontalAlignment value="10"/>
+                  <horizontalTextPosition value="2"/>
+                  <maximumSize width="0" height="16"/>
+                  <text value="Open violation do display details"/>
                 </properties>
               </component>
             </children>

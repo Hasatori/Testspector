@@ -2,6 +2,7 @@ package com.testspector.view.report;
 
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
+import com.testspector.view.ToolWindowContent;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
@@ -12,6 +13,14 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class TreeReportMouseListener implements MouseListener {
+
+
+    private final ToolWindowContent toolWindowContent;
+
+    public TreeReportMouseListener(ToolWindowContent toolWindowContent) {
+        this.toolWindowContent = toolWindowContent;
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
         JTree root = ((JTree) e.getComponent());
@@ -24,6 +33,11 @@ public class TreeReportMouseListener implements MouseListener {
                 if (optionalNavigationElement.isPresent() && optionalNavigationElement.get() instanceof Navigatable
                         && ((Navigatable) optionalNavigationElement.get()).canNavigate()) {
                     ((Navigatable) optionalNavigationElement.get()).navigate(true);
+                }
+                if (bestPracticeViolationNode.bestPracticeViolation != null) {
+                    toolWindowContent.violationOpened(bestPracticeViolationNode.bestPracticeViolation);
+                } else {
+                    toolWindowContent.leaveViolationDetail();
                 }
             }
             if (clickedNode instanceof ShowHideNode) {
@@ -60,4 +74,6 @@ public class TreeReportMouseListener implements MouseListener {
     @Override
     public void mouseExited(MouseEvent e) {
     }
+
+
 }

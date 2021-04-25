@@ -11,6 +11,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
+import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.view.CustomIcon;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,8 +29,8 @@ public class ShowHideNode extends BestPracticeViolationNode {
     private boolean isCodeHighlighted = false;
     private RangeHighlighter highlighter;
 
-    public ShowHideNode(PsiElement navigationElement, PsiElement element, TextRange textRange, TreeViewReport treeViewReport, String onShowLabel, String onHideLabel) {
-        super(navigationElement);
+    public ShowHideNode(PsiElement navigationElement, PsiElement element, TextRange textRange, TreeViewReport treeViewReport, String onShowLabel, String onHideLabel, BestPracticeViolation bestPracticeViolation) {
+        super(navigationElement, bestPracticeViolation);
         this.highlighter = null;
         this.treeViewReport = treeViewReport;
         this.element = element;
@@ -100,6 +101,7 @@ public class ShowHideNode extends BestPracticeViolationNode {
 
         }
     }
+
     private GutterIconRenderer createGutterIconRenderer(MarkupModel markupModel) {
         return new GutterIconRenderer() {
             @Override

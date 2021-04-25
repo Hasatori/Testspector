@@ -24,7 +24,7 @@ public class TreeViewReport extends JTree {
     private final DefaultTreeModel byTestsModel;
     private final DefaultTreeModel byViolatedBestPracticesModel;
 
-    public TreeViewReport(List<BestPracticeViolation> bestPracticeViolations, GroupBy groupBy) {
+    public TreeViewReport(TreeReportMouseListener treeReportMouseListener, List<BestPracticeViolation> bestPracticeViolations, GroupBy groupBy) {
         super();
         this.bestPracticeViolations = bestPracticeViolations;
         this.byTestsModel = this.groupByTests();
@@ -34,7 +34,7 @@ public class TreeViewReport extends JTree {
         this.setAlignmentY(TOP_ALIGNMENT);
         this.setRootVisible(false);
         this.setCellRenderer(new TreeReportCellRenderer());
-        this.addMouseListener(new TreeReportMouseListener());
+        this.addMouseListener(treeReportMouseListener);
     }
 
     public void expandAll() {
@@ -85,16 +85,12 @@ public class TreeViewReport extends JTree {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
         HashMap<BestPractice, List<BestPracticeViolation>> psiElementBestPracticeViolationHashMap = getBestPracticeViolationsMap();
         psiElementBestPracticeViolationHashMap.forEach((bestPractice, group) -> {
-            ViolatedRuleNode groupNode = new ViolatedRuleNode(bestPractice);
-            groupNode.add(createLinkNode(bestPractice));
+            ViolatedRuleNode groupNode = new ViolatedRuleNode(bestPractice,null);
+            groupNode.add(createLinkNode(bestPractice, null));
             for (BestPracticeViolation bestPracticeViolation : group) {
                 PsiElement mainNavigationElement = bestPracticeViolation.getTestMethodElement().getNavigationElement();
-                WrapperNode bestPracticeViolationNode = new WrapperNode(mainNavigationElement, bestPracticeViolation.getName());
+                WrapperNode bestPracticeViolationNode = new WrapperNode(mainNavigationElement, bestPracticeViolation.getName(),bestPracticeViolation);
                 bestPracticeViolationNode.add(createShowHideNode(mainNavigationElement, bestPracticeViolation));
-                bestPracticeViolationNode.add(new WarningNode(mainNavigationElement, bestPracticeViolation.getProblemDescription()));
-                if (bestPracticeViolation.getHints() != null && bestPracticeViolation.getHints().size() > 0) {
-                    bestPracticeViolationNode.add(createInfoNode(mainNavigationElement, bestPracticeViolation));
-                }
                 if (bestPracticeViolation.getRelatedElements() != null && bestPracticeViolation.getRelatedElements().size() > 0) {
                     bestPracticeViolationNode.add(createWarningNode(mainNavigationElement, bestPracticeViolation));
                 }
@@ -133,15 +129,12 @@ public class TreeViewReport extends JTree {
         }
         psiElementBestPracticeViolationHashMap.forEach((element, group) -> {
             PsiElement mainNavigationElement = element.getNavigationElement();
-            WrapperNode groupNode = new WrapperNode(mainNavigationElement, group.get(0).getName());
+            WrapperNode groupNode = new WrapperNode(mainNavigationElement, group.get(0).getName(),null);
             for (BestPracticeViolation bestPracticeViolation : group) {
-                ViolatedRuleNode bestPracticeViolationNode = new ViolatedRuleNode(mainNavigationElement, bestPracticeViolation.getViolatedRule());
-                bestPracticeViolationNode.add(createLinkNode(bestPracticeViolation.getViolatedRule()));
+                ViolatedRuleNode bestPracticeViolationNode = new ViolatedRuleNode(mainNavigationElement, bestPracticeViolation.getViolatedRule(),bestPracticeViolation);
+                bestPracticeViolationNode.add(createLinkNode(bestPracticeViolation.getViolatedRule(), bestPracticeViolation));
                 bestPracticeViolationNode.add(createShowHideNode(mainNavigationElement, bestPracticeViolation));
-                bestPracticeViolationNode.add(new WarningNode(mainNavigationElement, bestPracticeViolation.getProblemDescription()));
-                if (bestPracticeViolation.getHints() != null && bestPracticeViolation.getHints().size() > 0) {
-                    bestPracticeViolationNode.add(createInfoNode(mainNavigationElement, bestPracticeViolation));
-                }
+
                 if (bestPracticeViolation.getRelatedElements() != null && bestPracticeViolation.getRelatedElements().size() > 0) {
                     bestPracticeViolationNode.add(createWarningNode(mainNavigationElement, bestPracticeViolation));
                 }
@@ -159,22 +152,23 @@ public class TreeViewReport extends JTree {
                 bestPracticeViolation.getTestMethodTextRange(),
                 this,
                 HIGHLIGHT_LABEL_TEXT,
-                DELETE_HIGHLIGHTING_LABEL_TEXT);
+                DELETE_HIGHLIGHTING_LABEL_TEXT,
+                bestPracticeViolation);
     }
 
     private InfoNode createInfoNode(PsiElement mainNavigationElement, BestPracticeViolation bestPracticeViolation) {
-        InfoNode hintsWrapper = new InfoNode(mainNavigationElement, "Hints");
+        InfoNode hintsWrapper = new InfoNode(mainNavigationElement, "Hints", bestPracticeViolation.getHints(), bestPracticeViolation);
         for (String hint : bestPracticeViolation.getHints()) {
-            SimpleTextNode simpleTextNode = new SimpleTextNode(mainNavigationElement, hint);
+            SimpleTextNode simpleTextNode = new SimpleTextNode(mainNavigationElement, hint, bestPracticeViolation);
             hintsWrapper.add(simpleTextNode);
         }
         return hintsWrapper;
     }
 
     private WarningNode createWarningNode(PsiElement mainNavigationElement, BestPracticeViolation bestPracticeViolation) {
-        WarningNode warningNode = new WarningNode(mainNavigationElement, "Related elements");
+        WarningNode warningNode = new WarningNode(mainNavigationElement, "Related elements",bestPracticeViolation);
         for (RelatedElementWrapper relatedElementWrapper : bestPracticeViolation.getRelatedElements()) {
-            WrapperNode errorElementWrapper = new WrapperNode(mainNavigationElement, relatedElementWrapper.getName());
+            WrapperNode errorElementWrapper = new WrapperNode(mainNavigationElement, relatedElementWrapper.getName(),bestPracticeViolation);
             for (Map.Entry<PsiElement, String> entry : relatedElementWrapper.getRelatedElementNameHashMap().entrySet()) {
                 errorElementWrapper.add(new ShowHideNode(
                         entry.getKey().getNavigationElement(),
@@ -182,15 +176,16 @@ public class TreeViewReport extends JTree {
                         entry.getKey().getTextRange(),
                         this,
                         entry.getValue() + " - " + HIGHLIGHT_LABEL_TEXT,
-                        entry.getValue() + " - " + DELETE_HIGHLIGHTING_LABEL_TEXT));
+                        entry.getValue() + " - " + DELETE_HIGHLIGHTING_LABEL_TEXT,
+                        bestPracticeViolation));
             }
             warningNode.add(errorElementWrapper);
         }
         return warningNode;
     }
 
-    private LinkNode createLinkNode(BestPractice bestPractice) {
-        return new LinkNode(bestPractice.getWebPageHyperlink(), "get more information about the rule");
+    private LinkNode createLinkNode(BestPractice bestPractice, BestPracticeViolation bestPracticeViolation) {
+        return new LinkNode(bestPractice.getWebPageHyperlink(), "get more information about the rule", bestPracticeViolation);
     }
 
 

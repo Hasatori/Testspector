@@ -1,8 +1,5 @@
 package com.testspector.view;
 
-import com.intellij.execution.filters.TextConsoleBuilderFactory;
-import com.intellij.execution.ui.ConsoleView;
-import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -10,6 +7,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.view.report.GroupBy;
+import com.testspector.view.report.TreeReportMouseListener;
 import com.testspector.view.report.TreeViewReport;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,6 +20,7 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.testspector.view.CustomIcon.*;
 
@@ -44,20 +43,21 @@ public class ToolWindowContent {
     private JSplitPane splitPane;
     private JPanel processingWrapper;
     private JPanel contentWrapper;
-    private JPanel rightNav;
     private JPanel lefNavElementsWrapper;
     private JComboBox<GroupBy> groupByComboBox;
     private JLabel processingLabel;
+    private JLabel openToDisplayDetailsLabel;
+    private JPanel detailWrapper;
     private TreeViewReport treeViewReport;
 
     private TreeViewReport reportContent = null;
 
     public ToolWindowContent(Project project, RerunToolWindowContentAction rerunToolWindowContentAction) {
+        this.openToDisplayDetailsLabel.setIcon(INFO.getBasic());
         this.project = project;
         ((BasicSplitPaneDivider) splitPane.getComponent(0)).setBorder(BorderFactory.createEmptyBorder());
         leftNav.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
         splitPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
-        rightNav.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
         Arrays.stream(lefNavElementsWrapper.getComponents()).filter(component -> component instanceof JLabel).forEach(leftNavComp -> {
             ((JLabel) leftNavComp).setBorder(new EmptyBorder(2, 0, 2, 0));
         });
@@ -234,7 +234,7 @@ public class ToolWindowContent {
             collapse.setEnabled(true);
             expand.setEnabled(true);
 
-            this.treeViewReport = new TreeViewReport(bestPracticeViolations, (GroupBy) groupByComboBox.getSelectedItem());
+            this.treeViewReport = new TreeViewReport(new TreeReportMouseListener(this), bestPracticeViolations, (GroupBy) groupByComboBox.getSelectedItem());
             this.reportContent = treeViewReport;
             this.contentWrapper.add(treeViewReport);
         }
@@ -245,5 +245,24 @@ public class ToolWindowContent {
         this.panel1.repaint();
     }
 
+    public void violationOpened(BestPracticeViolation bestPracticeViolation) {
+        this.detailWrapper.removeAll();
+        ViolationDetail violationDetail = new ViolationDetail();
+        violationDetail.getProblemDescription().setText(bestPracticeViolation.getProblemDescription());
+        if (violationDetail.getHintsDescription() != null) {
+            violationDetail.getHintsDescription().setText(bestPracticeViolation.getHints().stream().map(hint -> "-    " + hint + "\n").collect(Collectors.joining("\n")));
+        }
+        violationDetail.getTestName().setText(bestPracticeViolation.getName());
+        this.detailWrapper.add(violationDetail.getDetailContent());
+        this.detailWrapper.revalidate();
+        this.detailWrapper.repaint();
+    }
+
+    public void leaveViolationDetail() {
+        this.detailWrapper.removeAll();
+        this.detailWrapper.add(openToDisplayDetailsLabel);
+        this.detailWrapper.revalidate();
+        this.detailWrapper.repaint();
+    }
 
 }
