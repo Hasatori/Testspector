@@ -49,15 +49,12 @@ public class ToolWindowContent {
     private JPanel lefNavElementsWrapper;
     private JComboBox<GroupBy> groupByComboBox;
     private JLabel processingLabel;
-    private ConsoleView consoleView;
     private TreeViewReport treeViewReport;
 
     private TreeViewReport reportContent = null;
 
     public ToolWindowContent(Project project, RerunToolWindowContentAction rerunToolWindowContentAction) {
         this.project = project;
-        consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
-        splitPane.setRightComponent(consoleView.getComponent());
         ((BasicSplitPaneDivider) splitPane.getComponent(0)).setBorder(BorderFactory.createEmptyBorder());
         leftNav.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
         splitPane.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
@@ -73,7 +70,6 @@ public class ToolWindowContent {
     private void setupActions() {
         setupActionLabel(expand, EXPAND_ALL, false, () -> ProgressManager.getInstance().run(createSimpleCancellableTestTask("Expanding Report Nodes", this::expandAll)));
         setupActionLabel(collapse, COLLAPSE_ALL, false, () -> ProgressManager.getInstance().run(createSimpleCancellableTestTask("Collapsing Report Nodes", this::collapseAll)));
-        setupActionLabel(clearConsole, CLEAR, false, () -> this.consoleView.clear());
         setupActionLabel(rerun, RERUN, false);
         groupByComboBox.setEnabled(false);
         groupByComboBox.removeAllItems();
@@ -189,10 +185,6 @@ public class ToolWindowContent {
         return splitPane;
     }
 
-    public ConsoleView getConsoleView() {
-        return consoleView;
-    }
-
 
     public RerunToolWindowContentAction getRerunToolWindowContentAction() {
         return rerunToolWindowContentAction;
@@ -232,7 +224,6 @@ public class ToolWindowContent {
     }
 
     public void setData(List<BestPracticeViolation> bestPracticeViolations) {
-        getConsoleView().print(String.format("\n%d best practice violations found", bestPracticeViolations.size()), ConsoleViewContentType.SYSTEM_OUTPUT);
         this.contentWrapper.removeAll();
         if (bestPracticeViolations.size() == 0) {
             collapse.setEnabled(false);

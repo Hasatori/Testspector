@@ -37,7 +37,6 @@ public final class TestspectorController {
 
     private static final String TOOL_WINDOW_NAME = "Testspector";
     private static final String CANCELING_MESSAGE = "Cancelling...";
-    private static final String RERUNNING_MESSAGE = "Rerunning inspection in";
     private static final String INSPECTION_LOADING_MAIN_HEADING = "Inspecting Unit Tests in";
     private static final String CREATING_REPORT_MESSAGE = "Creating report...";
     private final Project project;
@@ -52,7 +51,6 @@ public final class TestspectorController {
 
     public void initializeTestspector(List<? extends PsiElement> files, String name) {
         ToolWindowContent toolWindowContent = new ToolWindowContent(project, (toolWindowContent1) -> {
-            toolWindowContent1.getConsoleView().print(String.format("\n%s %s", RERUNNING_MESSAGE, name), ConsoleViewContentType.LOG_INFO_OUTPUT);
             initializeInspection(files, toolWindowContent1, name);
         });
         initializeInspection(files, toolWindowContent, name);
