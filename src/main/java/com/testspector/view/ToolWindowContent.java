@@ -44,7 +44,6 @@ public class ToolWindowContent {
     private JSplitPane splitPane;
     private JPanel processingWrapper;
     private JPanel contentWrapper;
-    private JLabel clearConsole;
     private JPanel rightNav;
     private JPanel lefNavElementsWrapper;
     private JComboBox<GroupBy> groupByComboBox;
