@@ -44,7 +44,7 @@ public abstract class BestPracticeInspection extends LocalInspectionTool {
             public void visitFile(@NotNull PsiFile file) {
                 List<ProblemDescriptor> registeredProblems = fileListHashMap.get(getBestPractice()).get(file);
                 if (registeredProblems != null) {
-                    List<ProblemDescriptor> nullElements = registeredProblems.stream().filter(problem->problem.getPsiElement()==null).collect(Collectors.toList());
+                    List<ProblemDescriptor> nullElements = registeredProblems.stream().filter(problem -> problem.getPsiElement() == null).collect(Collectors.toList());
                     registeredProblems.removeAll(nullElements);
                     registeredProblems.forEach(holder::registerProblem);
                 }
@@ -76,6 +76,7 @@ public abstract class BestPracticeInspection extends LocalInspectionTool {
                         }
                     }
                 }
+                HashMap<PsiElement, List<ProblemDescriptor>> problemDescriptorsHashMap = new HashMap<>();
                 bestPracticeViolations.forEach(bestPracticeViolation -> {
                     String problemDescriptionTemplate = String.format("<html>" +
                                     "<h3>Rule <strong>%s</strong> was violated</h3>" +
@@ -93,7 +94,10 @@ public abstract class BestPracticeInspection extends LocalInspectionTool {
                     for (PsiElement relatedElement : bestPracticeViolation.getRelatedElements()) {
                         PsiFile relatedElementFile = relatedElement.getContainingFile();
                         if (relatedElementFile == file) {
-                            holder.registerProblem(relatedElement, problemDescriptionTemplate, localQuickFixes.toArray(new LocalQuickFix[0]));
+                            List<ProblemDescriptor> problemDescriptors = problemDescriptorsHashMap.computeIfAbsent(relatedElement, k -> new ArrayList<>());
+                            if (problemDescriptors.stream().noneMatch(problemDescriptor -> problemDescriptionTemplate.equals(problemDescriptor.getDescriptionTemplate()))) {
+                                problemDescriptors.add(InspectionManager.getInstance(project).createProblemDescriptor(relatedElement, problemDescriptionTemplate, isOnTheFly, localQuickFixes.toArray(new LocalQuickFix[0]), ProblemHighlightType.GENERIC_ERROR_OR_WARNING));
+                            }
                         } else {
                             List<ProblemDescriptor> relatedElementRegisteredProblems = fileListHashMap.get(getBestPractice()).computeIfAbsent(relatedElementFile, k -> new ArrayList<>());
                             if (relatedElementRegisteredProblems.stream().noneMatch(registeredProblem -> registeredProblem.getPsiElement() == relatedElement)) {
@@ -104,7 +108,7 @@ public abstract class BestPracticeInspection extends LocalInspectionTool {
                     }
 
                 });
-
+                problemDescriptorsHashMap.forEach((psiElement, problemDescriptors) -> problemDescriptors.forEach(holder::registerProblem));
             }
 
             ;
