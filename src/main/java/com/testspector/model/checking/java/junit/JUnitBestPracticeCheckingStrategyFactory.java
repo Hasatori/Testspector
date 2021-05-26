@@ -26,8 +26,7 @@ public class JUnitBestPracticeCheckingStrategyFactory implements BestPracticeChe
             new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new NoConditionalLogicJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver), methodResolver),
             new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new NoGlobalStaticPropertiesJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator), methodResolver),
             new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new SetupTestNamingStrategyJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator), methodResolver),
-            new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new TestOnlyPublicBehaviourJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator), methodResolver),
-            new NoDeadCodeJUnitCheckingStrategy(javaElementResolver, contextIndicator, methodResolver)
+            new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new TestOnlyPublicBehaviourJUnitCheckingStrategy(javaElementResolver, methodResolver, contextIndicator), methodResolver)
     );
 
     @Override
