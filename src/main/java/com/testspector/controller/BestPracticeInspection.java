@@ -81,15 +81,17 @@ public abstract class BestPracticeInspection extends LocalInspectionTool {
                     String problemDescriptionTemplate = String.format("<html>" +
                                     "<h3>Rule <strong>%s</strong> was violated</h3>" +
                                     "<h4>Description</h4>" +
-                                    "<p>%s</p>%s" +
-                                    "<h4>Hints how to solve the problem</h4>" +
+                                    "<p>%s</p>" +
+                                    "%s" +
+                                    "<br/>" +
                                     "<a href=\"%s\">%s</a></html>",
                             bestPracticeViolation.getViolatedBestPractice().getDisplayName(),
                             bestPracticeViolation.getProblemDescription(),
-                            Optional.ofNullable(bestPracticeViolation.getHints()).stream().map(hint -> String.format("<li>%s</li>", hint))
-                                    .collect(Collectors.joining("\n", "<ul>", "</ul>")),
+                            Optional.ofNullable(bestPracticeViolation.getHints()).isPresent() && !bestPracticeViolation.getHints().isEmpty()? bestPracticeViolation.getHints().stream().map(hint -> String.format("<li>%s</li>", hint))
+                                    .collect(Collectors.joining("\n", "<h4>Hints how to solve the problem</h4><ul>", "</ul>")):"",
                             bestPracticeViolation.getViolatedBestPractice().getWebPageHyperlink(),
                             "Get more information about the rule");
+
                     List<LocalQuickFix> localQuickFixes = Optional.ofNullable(bestPracticeViolation.getQuickFixes()).orElse(new ArrayList<>());
                     for (PsiElement relatedElement : bestPracticeViolation.getRelatedElements()) {
                         PsiFile relatedElementFile = relatedElement.getContainingFile();
