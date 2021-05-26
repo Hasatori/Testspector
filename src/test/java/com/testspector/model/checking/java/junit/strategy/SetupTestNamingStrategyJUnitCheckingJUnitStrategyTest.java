@@ -123,9 +123,9 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
                 problemDescription,
                 BestPractice.SETUP_A_TEST_NAMING_STRATEGY,
                 hints,
-                relatedElementsWrapper
+                relatedElementsWrapper,
 
-        );
+                reference);
     }
 
 }

@@ -1,13 +1,17 @@
 package com.testspector.model.checking.java.junit.strategy;
 
+import com.intellij.codeInspection.LocalQuickFix;
+import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.openapi.project.Project;
+import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
+import org.jetbrains.annotations.NotNull;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -94,41 +98,6 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         };
     }
 
-
-    private List<RelatedElementWrapper> createRelatedElements(PsiMethod method, List<PsiStatement> conditionalStatements) {
-        List<RelatedElementWrapper> result = new ArrayList<>();
-        for (PsiStatement conditionalStatement : conditionalStatements) {
-            HashMap<PsiElement, String> elementNameHashMap = new HashMap<>();
-            Optional<PsiReferenceExpression> optionalPsiReferenceExpression = firstReferenceToConditionalStatement(method, conditionalStatement);
-            optionalPsiReferenceExpression.ifPresent(psiReferenceExpression -> elementNameHashMap.put(psiReferenceExpression, "reference from test method"));
-            elementNameHashMap.put(conditionalStatement, "statement");
-            result.add(new RelatedElementWrapper(
-                    String.format("%s ...%d - %d...",
-                            statementString(conditionalStatement),
-                            conditionalStatement.getTextRange().getStartOffset(),
-                            conditionalStatement.getTextRange().getEndOffset()),
-                    elementNameHashMap));
-        }
-
-        return result;
-    }
-
-    private Optional<PsiReferenceExpression> firstReferenceToConditionalStatement(PsiMethod method, PsiStatement statement) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                method,
-                PsiReferenceExpression.class);
-        for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                    reference.getParent(),
-                    PsiStatement.class,
-                    psiStatement -> statement == psiStatement,
-                    contextResolver.isInTestContext()).isEmpty()) {
-                return Optional.of(reference);
-            }
-        }
-        return Optional.empty();
-    }
-
     private String statementString(PsiStatement statement) {
         if (statement instanceof PsiIfStatement) {
             return IF_STATEMENT_STRING;
@@ -180,15 +149,31 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         }
         PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
         return new BestPracticeViolation(
-                String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
                 testMethod,
-                methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
                 "Conditional logic should not be part of the test " +
                         "method, it makes test hard to understand, read and maintain.",
                 getCheckedBestPractice().get(0),
-                hints,
-                createRelatedElements(testMethod, conditionalStatements)
-        );
+                conditionalStatements.stream().map(statement->(PsiElement) statement).collect(Collectors.toList()),
+                conditionalStatements.stream().map(statement -> {
+                            return new LocalQuickFix() {
+                                @Override
+                                public
+                                @NotNull
+                                String getFamilyName() {
+                                    return "Navigate " + statement.toString() + " in " + statement.getContainingFile().getName();
+                                }
+
+                                @Override
+                                public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor problemDescriptor) {
+                                    Optional<PsiElement> optionalNavigationElement = Optional.ofNullable(statement.getNavigationElement());
+                                    if (optionalNavigationElement.isPresent() && optionalNavigationElement.get() instanceof Navigatable
+                                            && ((Navigatable) optionalNavigationElement.get()).canNavigate()) {
+                                        ((Navigatable) optionalNavigationElement.get()).navigate(true);
+                                    }
+                                }
+                            };
+                        }).collect(Collectors.toList())
+                );
     }
 
     @Override

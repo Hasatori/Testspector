@@ -23,6 +23,9 @@ public class JavaElementResolver {
         return Optional.empty();
     }
 
+    public <T extends PsiElement> List<T> allChildrenOfTypeMeetingCondition(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition) {
+        return allChildrenOfTypeMeetingConditionWithReferences(new HashSet<>(), psiElement, elementType, typeCondition,  t -> false);
+    }
 
     public <T extends PsiElement> List<T> allChildrenOfTypeWithReferences(PsiElement psiElement, Class<T> elementType, Predicate<PsiElement> fromReferencesMeetingCondition) {
         return allChildrenOfTypeMeetingConditionWithReferences(psiElement, elementType, t -> true, fromReferencesMeetingCondition);

@@ -51,7 +51,7 @@ public class AssertionCountJUnitCheckingJUnitStrategyTest extends JUnitStrategyT
                         "Test should contain at least one assertion method!",
                         BestPractice.AT_LEAST_ONE_ASSERTION,
                         null,
-                        null));
+                        null, reference));
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethodWithoutAssertions);
 
@@ -146,8 +146,8 @@ public class AssertionCountJUnitCheckingJUnitStrategyTest extends JUnitStrategyT
                                         secondAssertionMethodCall.getText(), new HashMap<PsiElement, String>() {{
                                     put(secondAssertionMethodCall, "reference in the test method");
                                 }})
-                        )
-                ));
+                        ),
+                        reference));
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testWithTwoNonGroupedAssertions);
 

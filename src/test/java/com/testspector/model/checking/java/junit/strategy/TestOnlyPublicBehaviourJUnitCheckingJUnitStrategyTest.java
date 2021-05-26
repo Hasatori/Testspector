@@ -121,9 +121,9 @@ public class TestOnlyPublicBehaviourJUnitCheckingJUnitStrategyTest extends JUnit
                 problemDescription,
                 BestPractice.TEST_ONLY_PUBLIC_BEHAVIOUR,
                 hints,
-                relatedElementsWrapper
+                relatedElementsWrapper,
 
-        );
+                reference);
     }
 
 }

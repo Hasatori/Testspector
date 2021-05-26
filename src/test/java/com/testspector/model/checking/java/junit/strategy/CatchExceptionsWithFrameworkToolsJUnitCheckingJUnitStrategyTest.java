@@ -208,9 +208,9 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
                 problemDescription,
                 BestPractice.CATCH_TESTED_EXCEPTIONS_USING_FRAMEWORK_TOOLS,
                 hints,
-                relatedElementsWrapper
+                relatedElementsWrapper,
 
-        );
+                reference);
     }
 
 }

@@ -1,17 +1,21 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.*;
-import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiIdentifier;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiMethodCallExpression;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
@@ -38,14 +42,18 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
             PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();
             if (nameIdentifier != null) {
                 String testMethodName = nameIdentifier.getText();
-                List<PsiMethod> allTestedMethod = methodResolver.allTestedMethods(testMethod);
-                List<PsiMethod> methodsWithAlmostSameName = allTestedMethod
+                List<PsiMethodCallExpression> allTestedMethod = methodResolver.allTestedMethodsExpressions(testMethod);
+                List<PsiMethodCallExpression> methodsWithAlmostSameName = allTestedMethod
                         .stream()
-                        .filter(testedMethod -> {
-                            int minRatio = selectMinRatio(testedMethod.getName());
-                            return FuzzySearch.ratio(
-                                    testMethodName.toLowerCase(),
-                                    testedMethod.getName().toLowerCase()) > minRatio;
+                        .filter(testedMethodCall -> {
+                            PsiMethod testedMethod = testedMethodCall.resolveMethod();
+                            if (testedMethod != null) {
+                                int minRatio = selectMinRatio(testedMethod.getName());
+                                return FuzzySearch.ratio(
+                                        testMethodName.toLowerCase(),
+                                        testedMethod.getName().toLowerCase()) > minRatio;
+                            }
+                            return false;
                         })
                         .collect(Collectors.toList());
                 if (methodsWithAlmostSameName.size() >= 1) {
@@ -73,61 +81,16 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
         }
     }
 
-    private List<RelatedElementWrapper> createRelatedElements(PsiMethod method, List<PsiMethod> methodsWithAlmostSameName) {
-        List<RelatedElementWrapper> result = new ArrayList<>();
-        for (PsiMethod methodWithAlmostSameName : methodsWithAlmostSameName) {
-            HashMap<PsiElement, String> elementNameHashMap = new HashMap<>();
-            Optional<PsiReferenceExpression> optionalPsiReferenceExpression = firstReferenceToMethodWithAlmostSameName(method, methodWithAlmostSameName);
-            if (optionalPsiReferenceExpression.isPresent()) {
-                elementNameHashMap.put(optionalPsiReferenceExpression.get(), "simple method call from test");
-                elementNameHashMap.put(methodWithAlmostSameName, "method call in production code");
-            } else {
-                elementNameHashMap.put(methodWithAlmostSameName, "method call in production code");
-            }
-            result.add(new RelatedElementWrapper(methodWithAlmostSameName.getName(), elementNameHashMap));
-        }
 
-        return result;
-    }
-
-
-    private Optional<PsiReferenceExpression> firstReferenceToMethodWithAlmostSameName(PsiElement element, PsiMethod methodWithAlmostSameName) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                element,
-                PsiReferenceExpression.class);
-        for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                    reference.getParent(),
-                    PsiMethodCallExpression.class,
-                    psiMethodCallExpression -> psiMethodCallExpression.resolveMethod() != null && psiMethodCallExpression.resolveMethod() == methodWithAlmostSameName,
-                    contextIndicator.isInTestContext()).isEmpty()
-                    || !elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                    reference.getParent(),
-                    PsiLiteralExpression.class,
-                    psiLiteralExpression -> Arrays.stream(ReferenceProvidersRegistry.getReferencesFromProviders(psiLiteralExpression))
-                            .map(PsiReference::resolve)
-                            .filter(Objects::nonNull)
-                            .filter(referencedElement -> referencedElement instanceof PsiMethod)
-                            .filter(contextIndicator.isInProductionCodeContext())
-                            .map(resolvedElement -> (PsiMethod) resolvedElement)
-                            .anyMatch(method -> method == methodWithAlmostSameName),
-                    contextIndicator.isInTestContext()).isEmpty()
-            ) {
-                return Optional.of(reference);
-            }
-        }
-        return Optional.empty();
-    }
-
-    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiIdentifier nameIdentifier, List<PsiMethod> methodsWithAlmostSameName) {
+    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiIdentifier nameIdentifier, List<PsiMethodCallExpression> methodsWithAlmostSameName) {
         return new BestPracticeViolation(
-                String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
-                testMethod,
-                nameIdentifier.getTextRange(),
+                testMethod.getNameIdentifier(),
                 "The test name is more or less the same as the tested method. " +
                         "This says nothing about tests scenario. You should setup a clear strategy " +
                         "for naming your tests so that the person reading then knows what is tested",
                 getCheckedBestPractice().get(0),
+                methodsWithAlmostSameName.stream().map(methodWithAlmostSameNameCall -> (PsiElement) methodWithAlmostSameNameCall.getMethodExpression()).collect(Collectors.toList()),
+                null,
                 Arrays.asList(
                         "Possible strategy: 'doingSomeOperationGeneratesSomeResult'",
                         "Possible strategy: 'someResultOccursUnderSomeCondition'",
@@ -136,9 +99,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                         "Possible strategy: 'whatIsTested_conditions_expectedResult'",
                         "Chosen naming strategy is subjective. The key thing to remember is that name of the " +
                                 "test should say: What is tests, What are the conditions, What is expected result"
-                ),
-                createRelatedElements(testMethod, methodsWithAlmostSameName)
-        );
+                ));
     }
 
     @Override

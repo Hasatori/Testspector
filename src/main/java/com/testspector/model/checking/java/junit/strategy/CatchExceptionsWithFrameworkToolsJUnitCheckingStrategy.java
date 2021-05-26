@@ -3,13 +3,16 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.*;
 
@@ -47,26 +50,6 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         return bestPracticeViolations;
     }
 
-    private List<RelatedElementWrapper> createRelatedElements(PsiMethod method, List<PsiTryStatement> tryStatements) {
-        List<RelatedElementWrapper> result = new ArrayList<>();
-        for (PsiTryStatement conditionalStatement : tryStatements) {
-            HashMap<PsiElement, String> elementNameHashMap = new HashMap<>();
-            Optional<PsiReferenceExpression> optionalPsiReferenceExpression = firstReferenceToTryStatement(method, conditionalStatement);
-            if (optionalPsiReferenceExpression.isPresent()) {
-                elementNameHashMap.put(optionalPsiReferenceExpression.get(), "reference from test method");
-                elementNameHashMap.put(conditionalStatement, "statement position");
-            } else {
-                elementNameHashMap.put(conditionalStatement, "statement");
-            }
-            result.add(new RelatedElementWrapper(String.format("Try catch statement ...%d - %d...",
-                    conditionalStatement.getTextRange().getStartOffset(),
-                    conditionalStatement.getTextRange().getEndOffset()),
-                    elementNameHashMap));
-        }
-
-        return result;
-    }
-
     private Optional<PsiReferenceExpression> firstReferenceToTryStatement(PsiElement element, PsiTryStatement statement) {
         List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                 element,
@@ -101,16 +84,12 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                             "it can be solved by using @%s.Test(expected = Exception.class) for the test method"
                     , JUNIT4_ASSERTIONS_CLASS_PATH));
         }
-        PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
         return new BestPracticeViolation(
-                String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
                 testMethod,
-                methodIdentifier != null ? methodIdentifier.getTextRange() : testMethod.getTextRange(),
                 message,
                 this.getCheckedBestPractice().get(0),
-                hints,
-                createRelatedElements(testMethod, psiTryStatements)
-        );
+                psiTryStatements.stream().map(statement -> (PsiElement) statement).collect(Collectors.toList()),
+                null);
     }
 
     @Override

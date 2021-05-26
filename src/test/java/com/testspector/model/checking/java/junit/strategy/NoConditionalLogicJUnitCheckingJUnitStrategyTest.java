@@ -143,9 +143,9 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
                 problemDescription,
                 BestPractice.NO_CONDITIONAL_LOGIC,
                 hints,
-                relatedElementsWrapper
+                relatedElementsWrapper,
 
-        );
+                reference);
     }
 
 }

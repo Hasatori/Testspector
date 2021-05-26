@@ -3,25 +3,25 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.RelatedElementWrapper;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
     private final JavaElementResolver elementResolver;
-    private final JavaMethodResolver methodResolver;
     private final JavaContextIndicator contextIndicator;
 
     public NoGlobalStaticPropertiesJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
         this.elementResolver = elementResolver;
-        this.methodResolver = methodResolver;
         this.contextIndicator = contextIndicator;
     }
 
@@ -67,59 +67,21 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
         };
     }
 
-    private List<RelatedElementWrapper> createRelatedElements(PsiMethod method, List<PsiField> staticProperties) {
-        List<RelatedElementWrapper> result = new ArrayList<>();
-        for (PsiField staticProperty : staticProperties) {
-            HashMap<PsiElement, String> elementNameHashMap = new HashMap<>();
-            Optional<PsiReferenceExpression> optionalPsiReferenceExpression = firstReferenceToGlobalStaticProperty(method, staticProperty);
-            optionalPsiReferenceExpression.ifPresent(psiReferenceExpression ->
-                    elementNameHashMap.put(psiReferenceExpression, "property reference from test method"));
-            elementNameHashMap.put(staticProperty, "property");
-            result.add(new RelatedElementWrapper(staticProperty.getName(), elementNameHashMap));
-        }
-
-        return result;
-    }
-
-
-    private Optional<PsiReferenceExpression> firstReferenceToGlobalStaticProperty(PsiElement element, PsiField psiField) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                element,
-                PsiReferenceExpression.class);
-        for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                    reference.getParent(),
-                    PsiField.class,
-                    field -> psiField == field,
-                    contextIndicator.isInTestContext()).isEmpty()
-            ) {
-                return Optional.of(reference);
-            }
-        }
-        return Optional.empty();
-    }
-
     private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiIdentifier methodIdentifier, List<PsiField> staticProperties) {
         return new BestPracticeViolation(
-                String.format("%s#%s",
-                        testMethod.getContainingClass().getQualifiedName(),
-                        testMethod.getName()),
                 testMethod,
-                methodIdentifier != null ?
-                        methodIdentifier.getTextRange() :
-                        testMethod.getTextRange(),
                 "Global static properties should not be part of a test. " +
                         "Tests are sharing the reference and if some of them would update" +
                         " it it might influence behaviour of other tests.",
                 getCheckedBestPractice().get(0),
+                new ArrayList<PsiElement>(staticProperties),
+                null,
                 Arrays.asList(
                         "If the property is immutable e.g.,String, Integer, Byte, Character" +
                                 " etc. then you can add 'final' identifier so that tests can " +
                                 "not change reference",
                         "If the property is mutable then delete static modifier " +
-                                "and make property reference unique for each test."),
-                createRelatedElements(testMethod, staticProperties)
-        );
+                                "and make property reference unique for each test."));
     }
 
     @Override

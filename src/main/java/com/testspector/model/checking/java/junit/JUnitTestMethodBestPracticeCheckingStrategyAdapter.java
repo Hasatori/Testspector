@@ -13,14 +13,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class JUnitGroupMethodBestPracticeCheckingStrategyAdapter implements BestPracticeCheckingStrategy<PsiElement> {
+public class JUnitTestMethodBestPracticeCheckingStrategyAdapter implements BestPracticeCheckingStrategy<PsiElement> {
 
 
-    private final List<BestPracticeCheckingStrategy<PsiMethod>> decoratedMethodSpecificStrategies;
+    private final BestPracticeCheckingStrategy<PsiMethod> decoratedMethodSpecificStrategy;
     private final JavaMethodResolver methodResolver;
 
-    public JUnitGroupMethodBestPracticeCheckingStrategyAdapter(List<BestPracticeCheckingStrategy<PsiMethod>> decoratedMethodSpecificStrategies, JavaMethodResolver methodResolver) {
-        this.decoratedMethodSpecificStrategies = decoratedMethodSpecificStrategies;
+    public JUnitTestMethodBestPracticeCheckingStrategyAdapter( BestPracticeCheckingStrategy<PsiMethod> decoratedMethodSpecificStrategy, JavaMethodResolver methodResolver) {
+        this.decoratedMethodSpecificStrategy = decoratedMethodSpecificStrategy;
         this.methodResolver = methodResolver;
     }
 
@@ -33,18 +33,11 @@ public class JUnitGroupMethodBestPracticeCheckingStrategyAdapter implements Best
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
         List<PsiMethod> methods = methodResolver.methodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES);
-        return decoratedMethodSpecificStrategies.stream()
-                .map(decoratedStrategy -> decoratedStrategy.checkBestPractices(methods))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+        return decoratedMethodSpecificStrategy.checkBestPractices(methods);
     }
 
     @Override
     public List<BestPractice> getCheckedBestPractice() {
-        return decoratedMethodSpecificStrategies.stream()
-                .map(BestPracticeCheckingStrategy::getCheckedBestPractice)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+        return decoratedMethodSpecificStrategy.getCheckedBestPractice();
     }
 }

@@ -109,9 +109,9 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
                 problemDescription,
                 BestPractice.NO_GLOBAL_STATIC_PROPERTIES,
                 hints,
-                relatedElementsWrapper
+                relatedElementsWrapper,
 
-        );
+                reference);
     }
 
 }
