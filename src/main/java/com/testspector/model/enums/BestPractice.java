@@ -23,8 +23,7 @@ public enum BestPractice {
     NO_GLOBAL_STATIC_PROPERTIES("No global static properties", "","nepouzivat-globalni-staticke-promenne"),
     SETUP_A_TEST_NAMING_STRATEGY("Setup a test naming strategy", "","urcit-strategii-pojmenovani-testu"),
     CATCH_TESTED_EXCEPTIONS_USING_FRAMEWORK_TOOLS("Catch exceptions using frameworks tools", "","odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku"),
-    NO_CONDITIONAL_LOGIC("No conditional logic", "","podminena-logika"),
-    NO_DEAD_CODE("No dead code", "","odstranovat-mrtvy-kod");
+    NO_CONDITIONAL_LOGIC("No conditional logic", "","podminena-logika");
 
     static {
         ONLY_ONE_ASSERTION.relatedRules = Collections.singletonList(AT_LEAST_ONE_ASSERTION);
