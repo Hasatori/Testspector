@@ -11,11 +11,11 @@
 
 >> [Extract duplicate methods](#extract-duplicate-methods)
 
->   [Speed](#rychlost)
+>   [Speed](#speed)
 
->> [Using "In memory" resources and mocking](#používání-„in-memory“-prostředků-a-mockování)
+>> [Using in-memory resources and mocking](#using-in-memory-resources-and-mocking)
 
->> [Avoid actions that are blocking the main thread](#vyhýbat-se-akcím,-které-uspávají-hlavní-vlákno)
+>> [Avoid actions that are blocking the main thread](#avoid-actions-that-are-blocking-the-main-thread)
 
 >   [Assertions](#ověřování-(kontrola))
 
@@ -225,41 +225,23 @@ In addition to structural and literal duplicates you should also pay attention t
 
 Extract methods that are duplicated across several test files  into a separate file and import methods from the file [(Govindaraj 2015, kap. Making tests readable)](#978-1-78398-792-4).
 
-## Rychlost
+## Speed
 
-Vysoká rychlost je jednou z 5 základních vlastností, které by správný jednotkový
-test měl mít. Pokud vycházíme z testovací pyramidy agilního vývoje (viz 2.3
-Význam jednotkového testování pro vývoj software), tak jednotkové testy jsou na
-nejnižší úrovní, je jich největší množství a pouštějí se nejčastěji. Z těchto
-důvodů je nutné zajistit jejich co možná nejvyšší rychlost a vyhnout se akcím,
-které prodlužují dobu běhu testu.
+High speed is one of the basic qualities that unit tests should have. Based on the Agile testing pyramid unit tests are created first and they are the most frequent type of test. Therefore it is wery important to make sure each unit test will be very fast and should avaid executing any actions that might prolongate its run. 
 
-Nejlepší postupy týkající se rychlosti jsou následující:
+The Best Practices regarding speed are as follows:
 
--   Používání „In memory“ prostředků a mockování
+-   Using in-memory resources and mocking
 
--   Vyhýbat se akcím, které uspávají hlavní vlákno
+-   Avoid actions that are blocking the main thread 
 
-### Používání „In memory“ prostředků a mockování
+### Using in-memory resources and mocking
 
-Pokud v rámci testů pracujeme s databází, potřebujeme volat http požadavky,
-provádět soap operace, číst data ze souboru apod., je nutné tyto operace
-provádět v paměti a vyhnout se tak zpomalujícím operacím [(Acharya 2014, kap. Configuring tests)](#978-1-78398-251-6-978-1-78398-250-9). Příkladem může být
-použití in-memory databáze na místo databáze klasické. In-memory databáze data
-neukládá do skutečných souborů, ale vše si drží v paměti. Operace pro čtení či
-zápis dat jsou pak mnohem rychlejší.
+In case we are working with database, need to call http requests, execute soap operations, read data from files etc., it is imortant to run such actions in-memory and avoid actions which slow things down [(Acharya 2014, kap. Configuring tests)](#978-1-78398-251-6-978-1-78398-250-9). For example you can use in-memory database instead of typical one. In-memory database system doest not work with actual files but it keeps everything in memory. Operations like reading or writing are much faster. Similarly mocking can be used. The principle is exactly the same so actions which in real system take very long time will be much faster and due to that test it self will take less time to finish. 
 
-Podobně bychom mohli využít prostředky mockování, tedy simulace chování reálného
-systému. V tomto ohledu je však princip zcela stejný.
+### Avoid actions that are blocking the main thread
 
-### Vyhýbat se akcím, které uspávají hlavní vlákno
-
-Jedná se zejména o případy, kdy čekáme na dokončení akcí na vedlejších vláknech,
-a proto uspíme vlákno hlavní. Tento přístup však není efektivní, jelikož akce
-prováděné na vedlejších vláknech mohou pokaždé trvat jinou dobu. V takovém
-případě je doporučeno zajistit přímé čekání hlavního vlákna na dokončení operací
-vláken vedlejších. Tímto způsobem je hlavní vlákno blokováno pouze po nejkratší
-nutnou dobu [(Acharya 2014, kap. Configuring tests)](#978-1-78398-251-6-978-1-78398-250-9).
+This is mostly connected to cases when we are waiting for actions to finish in side threads and therefore we have slepr the main thread. This approach is not efficient becasue actions on side threads might take different time to finish each time. Therefore it is recommended to ensure that we will directly wait till actions on separate threads will finish and then we can continue in main thread. By using this approach we will ensure that main thread is going to wait least time possible.
 
 ## Ověřování (kontrola)
 
