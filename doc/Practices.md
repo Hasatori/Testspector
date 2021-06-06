@@ -17,17 +17,17 @@
 
 >> [Avoid actions that are blocking the main thread](#avoid-actions-that-are-blocking-the-main-thread)
 
->   [Assertions](#ověřování-(kontrola))
+>   [Assertions](#assertions)
 
->> [At least one assertion per test](#minimalne-jedna-overovaci-metoda-na-test)
+>> [At least one assertion per test](#at-least-one-assertion-per-test)
 
->> [Only one assertion per test](#prave-jedna-overovaci-metoda-na-test)
+>> [Only one assertion per test](#only-one-assertion-per-test)
 
->> [Do not use Guard Assertions](#nepoužívat-strážní-ověřovací-metody-(tzv.-guard-assertion))
+>> [Do not use Guard Assertions](#do-not-use-guard-assertions)
 
->> [Keep the right order of the assertion method parameters](#dodržovat-správné-pořadí-parametrů-ověřovací-metody)
+>> [Keep the right order of the assertion method parameters](#keep-the-right-order-of-the-assertion-method-parameters)
 
->> [Use  messages describing the error](#přikládat-zprávy-o-popisu-chyby)
+>> [Use  messages describing the error](#use-messages-describing-the-error)
 
 >   [Structure of the test method](#struktura-testovací-metody)
 
@@ -217,13 +217,13 @@ The Best Practices for working with duplicates are as follows:
 ### Extract duplicate parts of the test code
 
 Extract code blocks that are duplicated across multiple tests into a *helper method*, *setup method*, *fixture method* or *teardown method*. 
-The methods should follow the same rule, and it should not share same code as well. [(Govindaraj 2015, kap. Making tests readable)](#978-1-78398-792-4),[(Martin 2009, kap. 9. Unit tests-Clean Tests)](#978-0-13-235088-4).
+The methods should follow the same rule, and it should not share same code as well. [(Govindaraj 2015, chap. Making tests readable)](#978-1-78398-792-4),[(Martin 2009, chap. 9. Unit tests-Clean Tests)](#978-0-13-235088-4).
 
-In addition to structural and literal duplicates you should also pay attention to so-called semantic duplicates, ie parts of the code that do not look the same but do the same thing [(Koskela 2013, kap. 5.1 Duplication)](#978-1-935182-57-3).
+In addition to structural and literal duplicates you should also pay attention to so-called semantic duplicates, ie parts of the code that do not look the same but do the same thing [(Koskela 2013, chap. 5.1 Duplication)](#978-1-935182-57-3).
 
 ### Extract duplicate methods
 
-Extract methods that are duplicated across several test files  into a separate file and import methods from the file [(Govindaraj 2015, kap. Making tests readable)](#978-1-78398-792-4).
+Extract methods that are duplicated across several test files  into a separate file and import methods from the file [(Govindaraj 2015, chap. Making tests readable)](#978-1-78398-792-4).
 
 ## Speed
 
@@ -237,58 +237,44 @@ The Best Practices regarding speed are as follows:
 
 ### Using in-memory resources and mocking
 
-In case we are working with a database, need to call HTTP requests, execute soap operations, read data from files, etc., it is important to run such actions in memory and avoid actions that slow things down [(Acharya 2014, kap. Configuring tests)](#978-1-78398-251-6-978-1-78398-250-9). For example, you can use an in-memory database instead of a typical one. The in-memory database system does not work with actual files but it keeps everything in memory. Operations like reading or writing are much faster. Similarly, mocking can be used. The principle is exactly the same so actions which in the real system take a very long time will be much faster and due to that test itself will take less time to finish.
+In case we are working with a database, need to call HTTP requests, execute soap operations, read data from files, etc., it is important to run such actions in memory and avoid actions that slow things down [(Acharya 2014, chap. Configuring tests)](#978-1-78398-251-6-978-1-78398-250-9). For example, you can use an in-memory database instead of a typical one. The in-memory database system does not work with actual files but it keeps everything in memory. Operations like reading or writing are much faster. Similarly, mocking can be used. The principle is exactly the same so actions which in the real system take a very long time will be much faster and due to that test itself will take less time to finish.
 
 ### Avoid actions that are blocking the main thread
 
 This is mostly connected to cases when we are waiting for actions to finish in separate threads and therefore we are putting the main thread to sleep. This approach is not efficient because actions on side threads might take different time to finish each time. Therefore it is recommended to ensure that we will directly wait till actions on separate threads will finish and then we can continue in the main thread. By using this approach we will ensure that the main thread is going to wait the least time possible.
 
-## Ověřování (kontrola)
+## Assertions
 
-V rámci této podsekce jsou popisovány nejlepší postupy týkající se ověřování
-předpokládaného chování, tedy práce s ověřovacími metodami a způsob jejich
-použití. Obecně se nejlepší postupy k tomuto tématu týkají doporučeného počtu
-ověřovacích metod a způsobu jejich použití.
+This section contains best practices regarding working with assertions, how to use them, and generally how to evaluate expected behaviour.
 
-Nejlepší postupy týkající se ověřování (kontroly) jsou následující:
+Best practices regarding assertions are as follows:
+ 
+ -  At least one assertion per test
 
--   Minimálně jedna ověřovací metoda na test
+ -  Only one assertion per test
 
--   Právě jedna ověřovací metoda na test
+-   Do not use Guard Assertions
 
--   Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)
+-   Keep the right order of the assertion method parameters
 
--   Dodržovat správné pořadí parametrů ověřovací metody
+-   Use  messages describing the error
 
--   Přikládat zprávy o popisu chyby
+-   Create custom assertions methods
 
--   Tvořit vlastní ověřovací metody
+-   Keep the assertions simple
 
--   Zachovávat jednoduchost ověřovací metody
+### At least one assertion per test
 
-<h3 id="minimalne-jedna-overovaci-metoda-na-test">Minimálně jedna ověřovací metoda na test</h3>
 
-Každý test by měl obsahovat minimálně jednu testovací metodu, tedy měli bychom
-se vyvarovat případům, kdy tělo testovací metody neobsahuje žádnou metodu
-ověřování nebo je dokonce úplně prázdné. Řada testovacích frameworků takové
-testy reportuje jako prošlé, což povede k falešnému reportování výsledků testů.
+Each test should contain at least one assertion method. You should avoid cases when the body of a test contains no assertion method or is empty. Unit test frameworks usually report such tests as passed which leads to false results.
 
-<h3 id="prave-jedna-overovaci-metoda-na-test">Právě jedna ověřovací metoda na test</h3>
+### Only one assertion per test
 
-Toto pravidlo není jednoznačné a autoři se k němu nestaví jednotně. Knihy [(Meszaros 2007, kap. 5. Principles of Test Automation)](#978-0-13-149505-0), [(Powerhouse 2018, kap. 6. Why JUnit does not report all the failures in a single test)](#978-1-976900-84-6) a [(Acharya 2014, kap. 10.Best  Practices-Working with assertions)](#978-1-78398-251-6-978-1-78398-250-9) přistupuje k problematice poměrně dogmaticky a vyžadují vždy pouze jednu ověřovací metodu na test a pokud jeden test obsahuje více ověřovacích metod, tak jej doporučují rozdělit do více testovacích metod. Více testovacích metod vede k horší čitelnosti testu a způsobuje také jeho horší udržovatelnost. 
 
-Na druhé straně jsou autoři [(Martin 2009, kap. 9. Unit Tests)](#978-0-13-235088-4), [(Khorikov 2020, kap. 3.1.5 How many assertions should the assert section hold?)](#978-1-61729-627-7), [(Langr a Swaine 2013, kap. 7. Quality Tests-One Assert per Test) ](#978-1-937785-48-2) a
-[(Tarlinder 2016)](#978-0-13-429106-2), [(Turnquist a Das 2018, kap. What is the right size for a test method?)](#978-1-78728-150-9), kteří pravidlo považují pravidlo za příliš drakonické a
-doporučují o celé problematice přemýšlet spíše z pohledu testování jedné
-jednotky chování testovaného systému. Testování jedné jednotky chování může vést
-k více různým výstupům, které je v pořádku otestovat více ověřovacími metodami v
-jednom testu. Příkladem je situace, kdy v testu kontrolujeme obsah jednotlivých
-proměnných složitého objektu, v takovém případě dává použití více ověřovacích za
-sebou smysl. Jinými slovy počet ověřovacích metod by neměl být způsoben míchání
-několika různých testovacích případů dohromady, ale spíše nevyhnutelná nutnost
-pro otestování jednoho chování. Obecně však i tato skupina autorů zastává názor,
-že bychom neměli počet ověřovacích metod bezmyšlenkovitě zvyšovat a obecně čím
-méně tím lépe.
+Opinions on this best practice are not uniform and a lot of authors have different opinions on it. Books [(Meszaros 2007, chap. 5. Principles of Test Automation)](#978-0-13-149505-0), [(Powerhouse 2018, chap. 6. Why JUnit does not report all the failures in a single test)](#978-1-976900-84-6) and [(Acharya 2014, chap. 10.Best  Practices-Working with assertions)](#978-1-78398-251-6-978-1-78398-250-9) are quite strict about it and they always require only one assertion per test. In their mind, if a test contains multiple assertions it should be split into multiple test methods. Generally, they think that having multiple assertions in a test has an impact on readability and also makes maintenance trickier.
+
+On the other hand authors [(Martin 2009, chap. 9. Unit Tests)](#978-0-13-235088-4), [(Khorikov 2020, chap. 3.1.5 How many assertions should the assert section hold?)](#978-1-61729-627-7), [(Langr a Swaine 2013, chap. 7. Quality Tests-One Assert per Test) ](#978-1-937785-48-2) a
+[(Tarlinder 2016)](#978-0-13-429106-2), [(Turnquist a Das 2018, chap. What is the right size for a test method?)](#978-1-78728-150-9) think that the rule is way too strict and that we should think about the whole thing differently. Rather than aiming for one assertion method, we should aim for testing one behaviour per test. Testing one behaviour per test can lead to multiple different outputs and it is ok to use multiple assertions to check them. In other words, a number of assertion methods should not be caused by mixing multiple test cases together but more of an unavoidable thing to test one behaviour. In general, however, the authors hold the view that a number of assertions should not be mindlessly increased and it should be kept as low as possible.
 
 V souvislosti s více ověřovacími podmínkami je také nutné zmínit další problém, který je potřeba zohlednit. Řada testovacích frameworků, jako například JUnit, označí test jako celek za selhaný, už po selhání první ověřovací metody. To představuje veliký problém, protože i přes to že je test napsaný tak aby testoval pouze jednu jednotku chování testovaného systému, tak výsledek je zavádějící a my nemáme přehled o všech chybových hlášeních. Problém je pak nutné řešit postupným zakomentováním jednotlivých ověřovacích metod a znovu opakovaným pouštěním testu. V takovém případě je použití více ověřovacích metod chybou. Řešením problému je použití metod pro dávkové vyhodnocování ověřovacích metod. Příkladem je metoda assertAll(), která je dostupná pro testovací framework JUnit verze 5 [(García 2017, kap. Jupiter assertions)](#978-1-78712-439-4). 
 
