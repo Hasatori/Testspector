@@ -276,52 +276,32 @@ Opinions on this best practice are not uniform and a lot of authors have differe
 On the other hand authors [(Martin 2009, chap. 9. Unit Tests)](#978-0-13-235088-4), [(Khorikov 2020, chap. 3.1.5 How many assertions should the assert section hold?)](#978-1-61729-627-7), [(Langr a Swaine 2013, chap. 7. Quality Tests-One Assert per Test) ](#978-1-937785-48-2) a
 [(Tarlinder 2016)](#978-0-13-429106-2), [(Turnquist a Das 2018, chap. What is the right size for a test method?)](#978-1-78728-150-9) think that the rule is way too strict and that we should think about the whole thing differently. Rather than aiming for one assertion method, we should aim for testing one behaviour per test. Testing one behaviour per test can lead to multiple different outputs and it is ok to use multiple assertions to check them. In other words, a number of assertion methods should not be caused by mixing multiple test cases together but more of an unavoidable thing to test one behaviour. In general, however, the authors hold the view that a number of assertions should not be mindlessly increased and it should be kept as low as possible.
 
-V souvislosti s více ověřovacími podmínkami je také nutné zmínit další problém, který je potřeba zohlednit. Řada testovacích frameworků, jako například JUnit, označí test jako celek za selhaný, už po selhání první ověřovací metody. To představuje veliký problém, protože i přes to že je test napsaný tak aby testoval pouze jednu jednotku chování testovaného systému, tak výsledek je zavádějící a my nemáme přehled o všech chybových hlášeních. Problém je pak nutné řešit postupným zakomentováním jednotlivých ověřovacích metod a znovu opakovaným pouštěním testu. V takovém případě je použití více ověřovacích metod chybou. Řešením problému je použití metod pro dávkové vyhodnocování ověřovacích metod. Příkladem je metoda assertAll(), která je dostupná pro testovací framework JUnit verze 5 [(García 2017, kap. Jupiter assertions)](#978-1-78712-439-4). 
+Regarding multiple assertion methods it is also important to realize one additional problem. A lot of unit testing frameworks, for example JUnit, will fail the whole test even if just one assertion method fails. This is a big problem, because even if the test is testing just one behaviour using multiple assertion methods, the result of it is misleading and it does not provide overview of all the errors. In order to get information about all the errors assertions has to be commented out one by one and test has to be repeatedly executed. Solution is either limit number of assertion errors to one or use special assertions which allow asserting multiple things in a batch. One example is the method assertAll(), that is available for the testing framework JUnit version 5 [(García 2017, chap. Jupiter assertions)](#978-1-78712-439-4). 
 
-### Nepoužívat strážní ověřovací metody (tzv. Guard Assertion)
+### Do not use Guards Assertions
 
-Jednou z nejčastějších příčin chyby v kódu je nenadálá výjimka
-*NullPointerException* nebo *IndexOutOfBoundsException*. Z tohoto důvodu
-programátoři přidávají do kódu různé kontroly, aby k tomu nedošlo. Bohužel je
-pak zvykem přidávat tyto kontroly v podobě ověřovacích metod i do testovacího
-kódu. To je však zbytečné, protože pokud by kontrola nebyla přítomna, test by
-selhal a chybové hlášení by bylo součástí reportu. Je doporučeno tyto nadbytečné
-ověřovací metody vůbec nepoužívat, jelikož neposkytují žádnou přidanou hodnotu a
-pouze zbytečně nafukují tělo testovací metody [(Koskela 2013, kap. 4.9. Overprotective tests)](#978-1-935182-57-3).
+One of the most common errors in the code is sudden exception like *NullPointerException* or *IndexOutOfBoundsException*. For this reason programmers add extra check which would prevent such situations. In tests such checks are redundant because the test would fail and the error message would be part of the result report. Therefore it is recommended to avoid such redundant checks, because they add no value to the test and they make the whole test longer and harder to understand [(Koskela 2013, chap. 4.9. Overprotective tests)](#978-1-935182-57-3).
 
-### Dodržovat správné pořadí parametrů ověřovací metody
+### Keep the right order of the assertion method parameters
 
-Je důležité dbát na správné pořadí parametrů ověřovací metody. Očekávanou
-hodnotou vždy musí být vlastní testovací data a skutečnou hodnotou hodnota
-vrácená systémem jež testujeme. Jedná se o drobnou chybu, může však vést k
-velkým problémům [(Acharya 2014, kap. 10. Best Practices-Working with assertions)](#978-1-78398-251-6-978-1-78398-250-9).
+Expected value should always be custom test data and actual value the value returned by the system under the test. It is a small mistake but can lead to big problems [(Acharya 2014, chap. 10. Best Practices-Working with assertions)](#978-1-78398-251-6-978-1-78398-250-9).
 
-### Přikládat zprávy o popisu chyby
+### Use  messages describing the error
 
-K ověřovacím metodám je doporučeno přidávat zprávy, jež vysvětlují nastalou
-chybu. Napomáhá to rychlejšímu pochopení fungování testů a opravě chyby [(Hamill 2004, kap. 4. Writing Unit Tests-Types of Asserts)](#978-0-596-00689-1).
+If it is possible it is recommended to add some additional messages exaplaining the error to the assertion methods. The message will then make it easier to understand what is the error about [(Hamill 2004, chap. 4. Writing Unit Tests-Types of Asserts)](#978-0-596-00689-1).
 
-### Tvořit vlastní ověřovací metody
+### Create custom assertions methods
 
-Pro specifické případy je vhodné tvořit vlastní ověřovací metody. Tento přístup
-napomáhá lepší čitelnosti testů a zabraňuje duplicitě kódu. [(Hamill 2004, kap. 4. Writing Unit Tests-Defining Custom Asserts)](#978-0-596-00689-1). Tento
-přístup je vhodné volit, pokud se opakuje stejná sekvence ověřovacích metod
-napříč několika testy. Tuto sekvence je pak vhodné vyextrahovat do samostatné či
-třídy, která ověření provede [(Govindaraj 2015, kap. 6. Maintaining Your Test Suite-Writing tests closer to the domain)](#978-1-78398-792-4).
+In specific cases it is recommended to create a custom assertion methods. This approach helps readibility of the tests and prevents code duplications[(Hamill 2004, kap. 4. Writing Unit Tests-Defining Custom Asserts)](#978-0-596-00689-1). It is recommended to use this approach if there is same sequence of assertions across multiple tests. Such sequence can be then extracted into a separate class or method [(Govindaraj 2015, kap. 6. Maintaining Your Test Suite-Writing tests closer to the domain)](#978-1-78398-792-4).
 
-### Zachovávat jednoduchost ověřovací metody
+### Keep the assertions simple
 
-Doporučením je vyhnout se přehnaně komplikovaným ověřovacím metodám, které
-jednoznačně neoznačují, co vlastně ověřují. Takovým ověřovacím metodám se jednak
-dá jen velmi obtížně rozumět a jednak jsou velmi nestabilní a byť malá změna
-může vést k jejich selhání. Tyto metody označuje [(Koskela 2013, kap. 4.2 Hyperassertions) ](#978-1-935182-57-3) za tzv.
-Hyperasserce a jako příklad uvádí ověřovací metodu, jež porovnává očekávaný
-obsah souboru s obsahem vyprodukovaným po transformaci vstupního souboru (viz
-obr. 2 )
+It is recommended to avoid overly complicated assertion methods, that do not imply what is asserted. It is very hard to understand such methods and they are also very unstable and even simple change can lead to a failure. Book [(Koskela 2013, chap. 4.2 Hyperassertions) ](#978-1-935182-57-3) calls such assertions Hyperassertions and 
+gives an example of an assertions that compares content of a file with content of a file produced filed after transformation (img. 2).
 
 ![hyperassertion_example.png](./hyperassertion_example.png)
 
-obr. 2 Příklad tzv. Hyperasserce [(Koskela 2013)](#978-1-935182-57-3)
+img. 2 Příklad tzv. Hyperasserce [(Koskela 2013)](#978-1-935182-57-3)
 
 ## Struktura testovací metody
 
