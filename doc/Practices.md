@@ -64,27 +64,27 @@
 
 >> [Do not use if, switch, for or while blocks in a test](#do-not-use-if-switch-for-or-while-blocks-in-a-test)
 
->   [Naming conventions](#pojmenování)
+>   [Naming conventions](#naming-conventions)
 
->> [Setup a test naming strategy](#urcit-strategii-pojmenovani-testu)
+>> [Setup a test naming strategy](#setup-a-test-naming-strategy)
 
->> [Maintain consistent test naming](#zachovat-konzistentní-pojmenování-testů)
+>> [Maintain consistent test naming](#maintaint-consistent-test-naming)
 
->> [Use one naming strategy for the concept](#zachovávat-jeden-styl-pojmenování-pro-koncept)
+>> [Use one naming strategy for the concept](#use-one-naming-strategy-for-the-concept)
 
->> [Use "known solution" names](#používat-jména-pro-známá-řešení)
+>> [Use "known solution" names](#use-"known-solution"-names)
 
->> [Use appropriate names for test classes](#používat-vhodné-pojmenování-pro-testovací-třídy)
+>> [Use appropriate names for test classes](#use-appropriate-names-for-test-classes)
 
->> [Use pronounceable and searchable names](#používat-vyslovitelné-a-vyhledatelné-názvy)
+>> [Use pronounceable and searchable names](#use-pronounceable-and-searchable-names)
 
->> [Prevent misinformation](#zamezovat-dezinformaci)
+>> [Prevent misinformation](#prevent-misinformation)
 
->> [Use sufficiently distinct names](#dělat-dostatečné-rozdíly-mezi-jmény)
+>> [Use sufficiently distinct names](#use-sufficiently-distinct-names)
 
->> [Omit redundant name parts](#vynechávat-nadbytečné-součásti-názvů)
+>> [Omit redundant name parts](#omit-redundant-name-parts)
 
->> [Use intent revealing names](#používat-jména-vyjadřující-záměr)
+>> [Use intent revealing names](#use-intent-revealing-names)
 
 >   [Storing test files and grouping tests](#uložení-testovacích-souborů-a-seskupování-testů)
 
@@ -433,134 +433,94 @@ Nejlepší postupy týkající se podmíněné logiky jsou následující:
 Conditional logic in the form of if, else, for, or while should not be part of part of the test code. It generally increases the complexity of the test method, making it difficult to read and makes it very difficult to determine what is actually being tested. It leads to skipping some verification methods and gives the illusion of correctness [(Koskela 2013, chap. 4.5 Split personality)](#978-1-935182-57-3). A general solution to this problem is to extract all conditional
 branches into separate tests. Another possibility is to use the so-called *Parameterized tests,* each option is represented by a single set of parameters.*
 
-## Pojmenování
+## Naming conventions
 
-V rámci této podsekce obsahuje nejlepší postupy pro pojmenování testovacích
-metod, testovacích tříd a obecná doporučení pro pojmenování. Správné pojmenování
-je nesmírně důležité, jelikož napomáhá čitelnosti a srozumitelnosti testů. Z
-dlouhodobého hlediska také napomáhá snazší udržovatelnosti testů, jelikož nám
-jméno jasně naznačuje, co test vlastně testuje.
+This subsection contains best practices for naming test methods, test classes, and general naming recommendations. Proper naming is extremely important as it helps the readability and clarity of the tests. In the long run, it also helps make tests easier to maintain, as the name gives us a clear indication of what the test actually tests.
 
-Nejlepší postupy týkající se pojmenování jsou následující:
+Best practices regarding naming conventions are as follows:
 
--   Určit strategii pojmenování testů
+-   Setup a test naming strategy
 
--   Zachovat konzistentní pojmenování testů
+-   Maintain consistent test naming
 
--   Zachovávat jeden styl pojmenování pro koncept
+-   Use one naming strategy for the concept
 
--   Používat jména pro známá řešení
+-   Use "known solution" names
 
--   Používat vhodné pojmenování pro testovací třídy
+-   Use appropriate names for test classes
 
--   Používat vyslovitelné a vyhledatelné názvy
+-   Use pronounceable and searchable names
 
--   Zamezovat dezinformaci
+-   Prevent misinformation
 
--   Dělat dostatečné rozdíly mezi jmény
+-   Use sufficiently distinct names
 
--   Vynechávat nadbytečné součásti názvů
+-   Omit redundant name parts
 
--   Používat jména vyjadřující záměr
+-   Use intent revealing names
 
-<h3 id="urcit-strategii-pojmenovani-testu">Určit strategii pojmenování testů</h3>
+### Setup a test naming strategy
 
-Existuje několik doporučených strategií, které lze použít pro pojmenování testů.
-Například [(Langr et al. 2015, kap. 4. Organizing Your Tests-Tests as Documentation)](#978-1-937785-48-2) doporučuje způsoby:
+There are several recommended strategies that can be used for naming tests.
+For example, [(Langr et al. 2015, Ch. 4. Organizing Your Tests-Tests as Documentation)](#978-1-937785-48-2) recommends following ways:
 
--   *doingSomeOperationGeneratesSomeResult*
+- *doingSomeOperationGeneratesSomeResult*
 
--   *someResultOccursUnderSomeCondition*
+- *someResultOccursUnderSomeCondition*
 
--   *given-when-then*
+- *given-when-then*
 
--   *givenSomeContextWhenDoingSomeBehaviorThenSomeResultOccurs*
+- *givenSomeContextWhenDoingSomeBehaviorThenSomeResultOccurs*
 
-Další literatura [(Tarlinder 2016, kap. 7. Unit Testing)](#978-0-13-429106-2), [(Khorikov 2020, kap. 3. The anatomy of a unit test)](#978-1-61729-627-7) navrhuje rozdělení názvu na 3 části
-*whatIsTested_contitions_expectedResult.*
+Other literature [(Tarlinder 2016, Ch. 7. Unit Testing)](#978-0-13-429106-2), [(Khorikov 2020, Ch. 3. The anatomy of a unit test)](#978-1-61729-627-7) suggests splitting the title into 3 parts *whatIsTested_contitions_expectedResult.*
 
-Výše zmíněné způsoby jsou také nazývané jako Behavior-driven Development Style, tedy názvem testu je vyjádřeno předpokládané chování testovaného systému. Je však nuzné zmínit že zvolená strategie pojmenování je subjektivní, až už si však vybereme kteroukoliv, klíčové je, aby název vyjadřoval:
+The above mentioned methods are also referred to as Behavior-driven Development Style, i.e. the test name expresses the expected behavior of the system under test. However, it is worth mentioning that the chosen naming strategy is subjective, but regardless of which naming strategy we choose name should always contain 3 informations:
 
-1.  co je testováno
+1. what is being tested
 
-2.  jaké jsou podmínky, data pro test
+2. what are the conditions, the data for the test
 
-3.  jaký je předpokládaný výsledek testu
+3. what is the expected outcome of the test
 
-V některých případech může výše uvedený postup vést k velmi dlouhým jménům testů, která jsou špatně čitelná. V takovém případě je hodné přidat k názvu testu také dlouhá popis. V případě jazyku python toho lze dosáhnout s pomocí docstring [(Govindaraj 2015, kap. 7. Executable Documentation with doctest)](#978-1-78398-792-4). Pro Javu a testovací framework JUnit verze 5 existuje anotace displayName
+In some cases, the above procedure can lead to very long test names that are difficult to read. In this case, it is worth adding a long description to the test name. For example in Python, this can be achieved with docstring [(Govindaraj 2015, ch. 7. Executable Documentation with doctest)](#978-1-78398-792-4). For Java and the JUnit version 5 testing framework, there is a displayName annotation
 
-### Zachovat konzistentní pojmenování testů
+### Maintain consistent test naming
 
-Ať už si zvolíme kteroukoliv strategii pojmenování testovacích metod, je nutné
-se jí držet a konzistentně daným způsobem pojmenovávat všechny testy. Pokud by
-byl každý test pojmenován jiným, byť i správným způsobem, bude pro jeho čtenáře
-mnohem náročnější pochopit fungování testů a testy jako celek [(Tarlinder 2016, kap. 7. Unit Testing)](#978-0-13-429106-2).
+Whichever test naming strategy you choose, you must stick to it and name all tests in a consistent way. If each test is named in a different, albeit correct, way, it will be much more difficult for its reader to understand what is being tested and the tests as a whole [(Tarlinder 2016, Ch. 7. Unit Testing)](#978-0-13-429106-2).
 
-### Zachovávat jeden styl pojmenování pro koncept
+### Use one naming strategy for the concept
 
-Pro určitý koncept je obecně doporučováné požívat pouze jeden styl pojmenování.
-Je velmi matoucí, pokud v jednom testu použijeme pro jednu pomocnou metodu, jež
-vytváří objekt prefix create a pro další build. Ve čtenáři testů to následně
-bude vyvolávat otázku, zda se metoda s prefixem create nějak liší od metody s
-prefixem build, bude muset metodu prozkoumávat a v konečném důsledku to povede k
-prodloužení tvorby testů či pochopení testů stávajících [(Martin 2009, kap. 2. Meaningful Names)](#978-0-13-235088-4).
+It is generally recommended to use only one naming style for a concept. It is very confusing to use the prefix "create" for a helper method that creates an object in one test and use the prefix "build" for a helper method that does exacltly same thing. This will then make a person reading a method wonder if the method with the "create" prefix is any different from the method with the "build" prefix. They will then have to explore a method and spend will more time with writing tests [(Martin 2009, ch. 2. Meaningful Names)](#978-0-13-235088-4).
 
-### Používat jména pro známá řešení
+### Use "known solution" names
 
-Toto doporučení je úzce spjato s předcházejícím. Pro koncepty, které jsou obecně
-známé a jsou tvořeny stejným způsobem bychom měli používat obvyklá jména [(Martin 2009, kap. 2. Meaningful Names)](#978-0-13-235088-4).
-Příkladem je pokud v rámci testů používáme návrhový vzor Builder, který je
-pomocným vzorem pro konstruování složitých objektu. Namísto standartního
-pojmenování stylem „JménoObjektuBuilder“ bychom jej zakončili sufixem creator,
-nebo jiným ekvivalentem. Opět se jedná o matoucí název, který vyžaduje
-procházení implementace a stěžuje práci při tvorbě či čtení testů.
+This recommendation is closely linked to the previous one. For concepts that are generally known and are formed in the same way we should use common names [(Martin 2009, ch. 2. Meaningful Names)](#978-0-13-235088-4). An example of this is if we use the Builder design pattern. Instead of the standard naming style "NameObjectBuilder", we would end it with the suffix creator, or other equivalent. Again, this is a confusing name that requires to navigate through the implementation and makes it difficult to create or read tests.
 
-### Používat vhodné pojmenování pro testovací třídy
+### Use appropriate names for test classes
 
-Jméno testovací třídy je doporučováno zakončit sufixem „Test“. Tento způsob
-jasně označuje, které třídy jsou testovací a také v řadě případů hraje roli pro
-nástroje, které testy spouštějí.
+It is recommended to end the name of the test class with the suffix "Test". This way clearly indicates which classes are test classes and also plays a role in many cases for the tools that run the tests.
 
-### Používat vyslovitelné a vyhledatelné názvy
+### Use pronounceable and searchable names
 
-Ať už se jedná o názvy metod, tříd, či proměnných, obecně by měla být použitá
-jména snadno vyslovitelná i vyhledatelná [(Martin 2009, kap. 2. Meaningful Names)](#978-0-13-235088-4). Jednak to napomáhá lepšímu
-zapamatování a jednak to usnadňuje komunikaci mezi lidmi, kteří s testy pracují.
+Whether it is a method, class, or variable, in general names that are easy to pronounce and find should be used [(Martin 2009, ch. 2. Meaningful Names)](#978-0-13-235088-4). It makes it easier for people working with tests to communicate because name are easier to memorize and search.
 
-### Zamezovat dezinformaci
+### Prevent misinformation
 
-Jméno metody či proměnné by nemělo mystifikovat a mělo by vyjadřovat co ve
-skutečnosti reprezentuje [(Martin 2009, kap. 2. Meaningful Names)](#978-0-13-235088-4). Příkladem může být proměnná pojmenovaná
-*activationDate*, která je ve skutečnosti typu long a reprezentuje datum v
-podobě milisekund. V tomto případě název zavádí a vhodnější by bylo pojmenovat
-proměnnou *activationDateMilis*
+The name of the method or variable should not be confusing and should express what is it actually represents [(Martin 2009, ch. 2. Meaningful Names)](#978-0-13-235088-4). An example would be a variable named *activationDate*, which is actually of type long and represents a date in milliseconds. In this case, the name is misleading and a more appropriate name would be variable *activationDateMilis*
 
-### Dělat dostatečné rozdíly mezi jmény
+### Use sufficiently distinct names
 
-Pro rozdílné koncepty bychom vždy měli používat odlišná jména. Příkladem jsou
-dva parametry reprezentující zdroj a cíl, které jsou pojmenované *a1* a *a2*.
-Takové pojmenování je zcela nevhodné, protože může velmi snadno dojít k jejich
-záměně. Pokud bychom je pojmenovali *source* a *destination,* záměna by byla
-mnohem obtížnější [(Martin 2009, kap. 2. Meaningful Names)](#978-0-13-235088-4).
+We should always use different names for different concepts. Examples are two parameters representing the source and target, named *a1* and *a2*. Such naming is completely inappropriate because they can very easily be confused. If the names were *source* and *destination,* it would be much more difficult to confused them [(Martin 2009, ch. 2. Meaningful Names)](#978-0-13-235088-4).
 
-S tímto tématem souvisí také informační šum ve jménech. Například pokud
-vytvoříme dvě třídy *ProductInfo* a *ProductData*. *Data* a *Info* znamená
-vlastně to samé, ale jsou to dvě separátní třídy [(Martin 2009, kap. 2. Meaningful Names)](#978-0-13-235088-4).
+Information noise in names is also related to this issue. For example, if we create two classes *ProductInfo* and *ProductData*. *Data* and *Info* means actually the same thing, but they are two separate classes [(Martin 2009, ch. 2. Meaningful Names)](#978-0-13-235088-4).
 
-### Vynechávat nadbytečné součásti názvů
+###  Omit redundant name parts
 
-Součástí názvů by neměly být přebytečné informace, které nepřidávají žádnou
-přidanou hodnotu a pouze prodlužují dané jméno. Jedná se o ty části, které jsou
-zcela zřejmé z kontextu použití a není je tedy potřeba uvádět [(Martin 2009, kap. 2. Meaningful Names)](#978-0-13-235088-4). Příkladem je v
-názvu proměnné používat slova jako *variable*, *constant* či *property*, v názvu
-metody slova *method, function* a v názvu třídy slovo *class.*
+Names should not include redundant information that does not add any value and only lengthens the name. Those are information that are quite obvious from the context of use and thus need not be included [(Martin 2009, ch. 2. Meaningful Names)](#978-0-13-235088-4). An example are words like *variable*, *constant* or *property* in variable name or words *method or function* in method names or *class* in name of a class.
 
-### Používat jména vyjadřující záměr
+### Use intent revealing names
 
-Toto pravidlo úzce souvisí s výše zmíněným pravidly *Používat vyslovitelné a
-vyhledatelné* názvy, *Zamezovat* dezinformac a hovoří o tom že názvy metod či
-proměnných by vždy měly vyjadřovat záměr a mělo by být zřejmé za jakým účelem
-byly vytvořeny [(Martin 2009, kap. 2. Meaningful Names)](#978-0-13-235088-4). Příkladem může být situace kdy vytváříme proměnnou reprezentující včerejší datum. Špatným pojmenováním by bylo, pokud bychom ji pojmenovali například "date". Naopak název, který vyjadřuje záměr by byl "yesterday".
+This best practice is closely related to the aforementioned rules of *Use pronounceable and searchable* names, *Avoid misinformation*, and states that method or variable names should always communicate intent and make it clear for which purpose they were created [(Martin 2009, Ch. 2. Meaningful Names)](#978-0-13-235088-4).  An example might be when we create a variable representing yesterday's date. A bad name would be if we named it, for example, "date". Conversely, a name that communicates the intent would be "yesterday".
 
 ## Uložení testovacích souborů a seskupování testů
 
