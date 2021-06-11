@@ -62,7 +62,7 @@
 
 >   [Conditional logic](#conditional-logic)
 
->> [Do not use if,switch, for or while blocks in a test](#do-not-use-if-switch-for-or-while-blocks-in-a-test)
+>> [Do not use if, switch, for or while blocks in a test](#do-not-use-if,-switch,-for-or-while-blocks-in-a-test)
 
 >   [Naming conventions](#pojmenování)
 
