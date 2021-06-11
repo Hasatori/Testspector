@@ -60,9 +60,9 @@
 
 >> [Set general level for the test exception](#set-general-level-for-the-test-exception)
 
->   [Conditional logic](#podminena-logika)
+>   [Conditional logic](#conditional-logic)
 
->> [Do not use if,switch, for or while blocks in a test](#nepouzivat-bloky-if,-else,-switch,-for-ci-while-v-ramci-testu)
+>> [Do not use if,switch, for or while blocks in a test](#do-not-use-if,-switch,-for-or-while-blocks-in-a-test)
 
 >   [Naming conventions](#pojmenování)
 
@@ -420,23 +420,18 @@ by the test framework itself and the test will fail.
 
 In this respect, it is also very important to pay attention to the level of exception that the test method will catch. It should always be the level of the exception at the top of the hierarchy, for example for the c++ programming language it is the *exception* class. This approach ensures easier maintainability of the tests, because if the production code is modified and a certain method starts throwing a different type of exception, the tests will not need to be changed as the top level will catch this case [(Acharya 2014, chap. 10. Best Practices-Handling exceptions)](#978-1-78398-251-6-978-1-78398-250-9)
 
-<h2 id="podminena-logika">Podmíněná logika</h2>
+## Conditional logic
 
-Tato podsekce řeší otázku použití podmíněné logiky uvnitř testovacího kódu.
+This subsection addresses the issue of using conditional logic inside test code.
 
 Nejlepší postupy týkající se podmíněné logiky jsou následující:
 
--   Nepoužívat bloky if, else, switch, for či while v rámci testu
+-   Do not use if,switch, for or while blocks in a test
 
-### Nepoužívat bloky if, else, switch, for či while v rámci testu
+### Do not use if,switch, for or while blocks in a test
 
-Podmíněná logika v podobě if, else, for, či while by neměla být součástí
-testovacího kodu. Obecně zvyšuje komplexnost testovací metody, což stěžuje jeho
-srozumitelnost, čitelnost a je velmi těžké určit co je vlastně spouštěno a kdy.
-Vede k přeskakování některých ověřovacích metod a dává tak iluzi správnosti
-[(Koskela 2013, kap. 4.5 Split personality)](#978-1-935182-57-3). Obecným řešením tohoto problému je extrakce všech podmíněných
-větví do samostatných testů. Další možností je využití tzv. *Parametrizovaných
-testů,* je každá možnost reprezentována jednou sadou parametrů*.*
+Conditional logic in the form of if, else, for, or while should not be part of part of the test code. It generally increases the complexity of the test method, making it difficult to read and makes it very difficult to determine what is actually being tested. It leads to skipping some verification methods and gives the illusion of correctness [(Koskela 2013, chap. 4.5 Split personality)](#978-1-935182-57-3). A general solution to this problem is to extract all conditional
+branches into separate tests. Another possibility is to use the so-called *Parameterized tests,* each option is represented by a single set of parameters.*
 
 ## Pojmenování
 
