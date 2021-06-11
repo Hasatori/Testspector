@@ -1,4 +1,5 @@
-# Obsah
+# Table of contents
+
 [Definition of the term "Best Practice"](#definition-of-the-term-best-practices)
 
 [How "best practices" have been defined](#how-best-practices-have-been-defined)
@@ -45,13 +46,13 @@
 
 >> [Do not use magic numbers](#do-not-use-magic-numbers)
 
->   [Other "Best Practices"](#ostatní-doporučení)
+>   [Other "Best Practices"](#other-best-practices)
 
->> [Keep the tests reliable](#zachovávat-spolehlivost-testů)
+>> [Keep the tests reliable](#keep-the-tests-reliable)
 
->> [Delete the dead code](#odstraňovat-mrtvý-kód)
+>> [Delete dead code](#delete-dead-code)
 
->> [Separate the data generating from its asserting](#oddělovat-generování-dat-od-jejich-verifikace)
+>> [Separate data generating from its asserting](#separate-data-generating-from-its-asserting)
 
 >   [Testing exceptions](#testování-výjimek)
 
@@ -368,42 +369,30 @@ or variables. Appropriately named constant or variable gives the number a meanin
 
 img. 5 Example of using an auxiliary method instead of magic numbers [(Koskela 2013, chap. 4.7 Magic Numbers)](#978-1-935182-57-3)
 
-## Ostatní doporučení
+## Other "Best practices" 
 
-Tato podsekce zahrnuje dodatečné nejlepší postupy týkající se tvorby
-jednotkových testů.
+Other best practices in group creating tests are as follows:
 
-Nejlepší postupy týkající se ostatních doporučení jsou následující:
+-   Keep the tests reliable
 
--   Zachovávat spolehlivost testů
+-   Delete dead code
 
--   Odstraňovat mrtvý kód
+-   Separate data generating from its asserting
 
--   Oddělovat generování dat od jejich verifikace
+###  Keep the tests reliable
 
-### Zachovávat spolehlivost testů
+Tests should be consistent and should behave exactly same every time you run them. Tests that have from time to time different result are bad and are called "*Erratic tests*" [(Koskela 2013, kap. 2.4 Independent tests run easily in solitude)](#978-1-935182-57-3).
 
-Testy by měly být konzistentní a měly by se chovat, jak je předpokládáno. Tím je
-myšleno že při opakovaném spouštění testu, a aniž by došlo ke změně relevantních
-částí kódu, by měl být výsledek vždy stejný. Testy, které mají čas od času jiný
-výsledek jsou negativním příznakem a jsou často označovány jako „*Erratic
-tests*[(Koskela 2013, kap. 2.4 Independent tests run easily in solitude)](#978-1-935182-57-3).
+### Delete dead code
 
-### Odstraňovat mrtvý kód
-
-Mrtvý kód představuje přebytečnou část, která nafukuje testovací třídu a pouze
-mate ostatní programátory. Příkladem mrtvého kódu jsou zakomentované testovací
-metody [(Koskela 2013, kap. 6.1 Commented-out tests)](#978-1-935182-57-3). Doporučením je analyzovat příčinu zakomentování testu a pokud žádná
+Dead code is a redundant part that just makes test files bigger and confuses other programmers. Example of dead code is commented out test methods [(Koskela 2013, chap. 6.1 Commented-out tests)](#978-1-935182-57-3). It is recommended to analyze why was a certain test commented out and if there was no particular reason it should be deleted.
 není, tak test vymazat.
 
-### Oddělovat generování dat od jejich verifikace
+### Separate data generating from its asserting
 
-Pokud máme velkou spoustu testovacích dat, jejich generování bychom měli oddělit
-od verifikace. Testovací metoda by měla přijímat pouze parametry, ale sada dat
-by měla být generována separátně [(Brader et al. 2012, kap. Separate test data generation from verification)](#978-1-62114-018-4). Každá kombinace parametrů poté představuje jeden testovací případ. Příkladem jsou parametrizované testy v JUnit
-verze 5 (viz obr.6)
+If there are a lot of testing data then its generating should be separated from its asserting. Testing method should accept just parameters and data itself should be generated separately [(Brader et al. 2012, chap. Separate test data generation from verification)](#978-1-62114-018-4). Each combination of parameters is then one test case. An example of this are parameterized tests in JUnit version 5(see img.6)
 
-obr.6 Příklad oddělení generování dat od verifikace (autor)
+img.6 Example of separating data generation from asserting
 ![separate_data_generating_From_verification_example.png](./separate_data_generating_from_verification_example.png)
 
 
