@@ -92,19 +92,19 @@
 
 >> [Store tests for one system under test in one place](#store-tests-for-one-system-under-test-in-one-place)
 
->   [Independence](#nezávislost)
+>   [Independence](#independence)
 
->> [Do not use global static properties](#nepouzivat-globalni-staticke-promenne)
+>> [Do not use global static properties](#do-not-use-global-static-properties)
 
->> [Do not the domain knowledge](#nepoužívat-znalost-domény)
+>> [Do not use domain knowledge](#do-not-use-domain-logic)
 
->> [Use relative paths](#používat-relativní-cesty)
+>> [Use relative paths](#use-relative-paths)
 
->> [Keep tests platform independent](#nezávislost-na-platformě)
+>> [Keep tests platform independent](#keep-tests-platform-independent)
 
->> [Keep tests independent of production code](#dodržovat-nezávislost-na-produkčním-kódu)
+>> [Keep tests independent of the production code](#keep-tests-independet-of-the-production-code)
 
->> [Create your own data and resources](#tvořit-vlastní-data-a-zdroje)
+>> [Create your own data and resources](#create-your-own-data-and-resources)
 
 >   [Isolation](#izolovanost)
 
@@ -591,96 +591,88 @@ it is appropriate to violate this rule:
 
 - Preliminary steps, e.g. in the setUp method, are repeated for many tests and for others
     do not. These tests should be separated into a separate test class.
+    
+    >   [Independence](#independence)
 
-## Nezávislost
+>> [Do not use global static properties](#do-not-use-global-static-properties)
 
-Tato podsekce obsahuje nejlepší postupy pro zajištění nezávislosti testů.
-Nezávislost testů je jednou ze základních vlastností jednotkového testu.
-Vyjadřuje to, že by testy neměly záviset jeden na druhém. Jeden test by neměl
-nastavovat podmínky pro následující test a každý test by měl být schopen běžet
-nezávisle a v jakémkoliv pořadí [(Martin 2009)](#978-0-13-235088-4). Mimo rozsah této definice pokrývá
-podsekce také širší aspekt nezávislosti testů z hlediska nezávislosti na
-prostředí či produkčním kódu
+>> [Do not use domain knowledge](#do-not-use-domain-logic)
 
-Nejlepší postupy týkající se nezávislosti jsou následující:
+>> [Use relative paths](#use-relative-paths)
 
--   Nepoužívat globální statické proměnné
+>> [Keep tests platform independent](#keep-tests-platform-independent)
 
--   Nepoužívat znalost domény
+>> [Keep tests independent of the production code](#keep-tests-independet-of-the-production-code)
 
--   Používat relativní cesty
+>> [Create your own data and resources](#create-your-own-data-and-resources)
 
--   Nezávislost na platformě
+## Independence
 
--   Nezávislost na produkčním kódu
+This subsection contains best practices to ensure test independence.
+Test independence is one of the essential characteristics of a unit test.
+It means that tests should not depend on each other. One test should not set the conditions for the next test, and each test should be able to run independently and in any order [(Martin 2009)](#978-0-13-235088-4). Beyond the scope of this definition, the subsection also covers the broader aspect of test independence in terms of independence from environment or production code
 
--   Tvořit vlastní data a zdroje
+Best practices regarding independence are as follows:
 
-<h3 id="nepouzivat-globalni-staticke-promenne">Nepoužívat globální statické proměnné</h3>
+-   Do not use global static properties
 
-Napříč jednotlivými testy bychom neměly používat a upravovat globální statické
-proměnné. Testy sdílejí referenci na stejnou proměnnou a pokud ji některý
-upraví, změní to podmínky pro test následující [(Acharya 2014, kap. 10. Best Practices-Configuring tests)](#978-1-78398-251-6-978-1-78398-250-9). Pokud je proměnná tzv. Neměnná (Immutable), tedy není možné měnit její vnitřní nastavené hodnoty, je řešením udělat proměnnou konstantou. Poté už nemohou jednotlivé testy měnit její referenci a ani její obsah (příkladem je klíčové slovo final v jazyku Java).
-Pokud lze pro proměnnou měnit její vnitřní hodnoty je doporučeno převést ji na úrovni testovací třídy a nastavit ji buď v testu samotném nebo pomocí tzv. hook metody, která je spouštěna před každým testem.  Pří použití hook metody je nutné proměnnou znovu
-inicializovat.
+-   Do not use domain knowledge
 
-### Nepoužívat znalost domény
+-   Use relative paths
 
-Jedná se o případ, kdy používáme doménu, na níž testy vytváříme, pro stanovení
-výsledku testu. Jednoduchým příkladem je třída, jež má metodu pro sčítání dvou
-čísel. Špatným způsobem, jak metodu testovat je sečíst vstupní parametry v testu
-a poté je očekávat jako výsledek (viz. obr. 10). Správně bychom však měly
-výsledek vypočítat sami a rovnou jej dosazovat jako očekávaný výsledek (obr.
-11).
+-   Keep tests platform independent
+
+-   Keep tests independent of the production code
+
+-   Create your own data and resources
+
+### Do not use global static properties
+
+We should not use and modify global static variables across tests. Tests share a reference to the same variable, and if one modifies it, it will change the conditions for the following test [(Acharya 2014, Ch. 10. Best Practices-Configuring tests)](#978-1-78398-251-6-978-1-78398-250-9). If a variable is so-called Immutable, i.e., its internal set values cannot be changed, the solution is to make the variable a constant. Then individual tests cannot change its reference or its content (an example is the final keyword in Java). If it is possible to change the internal values of a variable, it is recommended to convert it at the test class level and set it either in the test itself or using the hook method that is run before each test.  When using the hook method, the variable must be reinitialized.
+
+### Do not use domain knowledge
+
+This is the case when we use the domain on which we create tests to determine
+the result of the test. A simple example is a class that has a method for adding two
+numbers. The wrong way to test the method is to sum the input parameters in the test
+and then expect them as the result (see img. 10). However, the correct way is to
+calculate the result ourselves and directly insert it as the expected result (img. 11).
 
 ![img.png](./breaking_rule_using_domains_knowledge_example.png)
 
-obr. 10 Ukázka porušení pravidla a používání znalosti domény [(Khorikov 2020, kap. 11. Unit testing anti-patterns)](#978-1-61729-627-7)
+img. 10 Example of using a domain knowledge [(Khorikov 2020, Ch. 11. Unit testing anti-patterns)](#978-1-61729-627-7)
 
 ![img.png](./correct_test_not_using_domains_knowledge_example.png)
 
-obr. 11 Ukázka správného testu, kde není použita znalost domény [(Khorikov 2020, kap. 11. Unit testing anti-patterns)](#978-1-61729-627-7)
+img.11 Example of a correct test where domain knowledge is not used [(Khorikov 2020, Ch. 11. Unit testing anti-patterns)](#978-1-61729-627-7)
 
-###  Používat relativní cesty
+###  Use relative paths
 
-Součástí testů by nikdy neměli být absolutní cesty k používaným zdrojům. Zdroje
-bychom měly ukládat na společné místo sdíleného projektu a odkazovat na ně
-relativními cestami [(Koskela 2013, kap. 5.4 Clippling File Path)](#978-1-935182-57-3).
+Tests should never include absolute paths to the resources being used. Resources should be stored in a common place in a shared project and referenced by relative paths [(Koskela 2013, ch. 5.4 Clipping File Path)](#978-1-935182-57-3).
 
-### Nezávislost na platformě
+### Keep tests platform independent
 
-Často se v testu vyskytuje podmíněná logika, která rozlišuje, co a jak se bude
-testovat v závislosti na použité platformě. Příklad špatného testu, který je
-závislý na platformě, je ukázán na obr. 12. Jak je možné vidět, tak podle
-operačního systému se mění ověřovací metody testu.
+There is often conditional logic in the test that differentiates what and how to test depending on the platform used. An example of a bad test that is platform-dependent is shown in Figure 12. As can be seen, the verification methods of the test change depending on the operating system.
 
 ![img.png](./platform_dependent_test_example.png)
 
-obr. 12 Příklad testu závislého na platformě [(Koskela 2013, kap. 6.6 Platform prejudice)](#978-1-935182-57-3)
+Figure 12 Example of a platform dependent test [(Koskela 2013, ch. 6.6 Platform prejudice)](#978-1-935182-57-3)
 
-Namísto tohoto postupu je doporučováno jednak test rozdělit na samostatné testy
-a jednak zajištění prostředků pro spouštění testu nezávisle na platformě.
-Příkladem je vytvoření vlastní třídy, jež bude představovat operační systém a na
-ní poté pouštět test (viz obr. 13).
+Instead of this approach, it is recommended to split the test into separate tests
+and provide a means to run the test independently of the platform. An example is to create a custom class to represent the operating system and then run the test on it (see Figure 13).
 
 ![img.png](./test_not_dependent_on_operation_system_example.png)
 
-obr. 13 Příklad testu nezávislého na operačním systému [(Koskela 2013, kap. 6.6 Platform prejudice)](#978-1-935182-57-3)
+img. 13 Example of an operating system independent test [(Koskela 2013, ch. 6.6 Platform prejudice)](#978-1-935182-57-3)
 
-### Dodržovat nezávislost na produkčním kódu
+### Keep tests independent of the production code
 
-Testovací kód by v žádném případě neměl být součástí produkčního kódu. Stejně
-tak by neměl produkční kód obsahovat metodu co je volaná jenom v rámci testů. 
-Pokud se systém chová jinak pokud je testován, jak si můžeme být jistí, že opravdu funguje. Správný systém by měl umožnit izolování každé jeho části a umožnit její otestování
-[(Meszaros 2007, kap. 5. Principles of Test Automation)](#978-0-13-149505-0), [(Bowes et al. 2017)](#978-1-5386-2807-2).
+The test code should never be part of the production code. Anyway nor should the production code contain a method that is only called as part of the tests.  If the system behaves differently when it is tested, how can we be sure that it really works. A proper system should allow each part of the system to be isolated and tested
+[(Meszaros 2007, Ch. 5. Principles of Test Automation)](#978-0-13-149505-0), [(Bowes et al. 2017)](#978-1-5386-2807-2).
 
-### Tvořit vlastní data a zdroje
+### Create your own data and resources
 
-Zdroje a data bychom měli vytvářet pro testy separátně a odděleně od testovaného
-kódu [(Meszaros 2007)](#978-0-13-149505-0). Příkladem mohou být konstanty jež jsou součástí testovaného kódu a
-rozhodují o chování systému. Pokud v testech potřebujeme s touto konstantou
-pracovat a na jejím základě například ověřovat správné chování systému, je nutné
-ji zde vytvořit znovu.
+We should generate sources and data for tests [(Meszaros 2007)](#978-0-13-149505-0). Examples are constants that are part of the code under test and decide the behavior of the system. If we need to work with this constant in tests and verify the correct behavior of the system based on it, we need to recreate it here.
 
 ## Izolovanost
 
