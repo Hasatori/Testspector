@@ -54,11 +54,11 @@
 
 >> [Separate data generating from its asserting](#separate-data-generating-from-its-asserting)
 
->   [Testing exceptions](#testování-výjimek)
+>   [Testing exceptions](#testing-exceptions)
 
->> [Catch tested exceptions using framework or library tools](#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
+>> [Catch tested exceptions using framework or library tools](#catch-tested-exceptions-using-framework-or-library-tools)
 
->> [Set general level for the test exception](#stanovovat-obecnou-úroveň-pro-výjimky-testovací-metody)
+>> [Set general level for the test exception](#set-general-level-for-the-test-exception)
 
 >   [Conditional logic](#podminena-logika)
 
@@ -396,47 +396,30 @@ img.6 Example of separating data generation from asserting
 ![separate_data_generating_From_verification_example.png](./separate_data_generating_from_verification_example.png)
 
 
-## Testování výjimek
+## Testing exceptions
 
-Tato podsekce obsahuje nejlepší postupy pro testování výjimek vyhozených
-testovaným systémem. Pokrývá jednak případy, kdy výjimky testujeme a jednak
-případy kdy jsou pouze součástí testovacího kódu.
+This subsection contains best practices regarding testing exception which are thrown by system under test. It covers cases when we are testing that certain exception was thrown and also cases when exceptions are just part of the test code.
 
-Nejlepší postupy týkající se testování výjimek jsou následující:
+Best practices regarding testing exceptions are as follows:
 
--   Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích
-    frameworků
+-   Catch tested exceptions using framework or library tools
 
--   Stanovovat obecnou úroveň pro výjimky testovací metody
+-   Set general level for the test exception
 
-<h3 id="odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku">Odchytávat testované výjimky pomocí nástrojů knihoven či testovacích frameworků</h3>
+### Catch tested exceptions using framework or library tools
 
-Testování vyhození výjimky testovaným systémem je možno standartně pomocí bloků
-pro zachytávání výjimek *try* a *catch*. Tento způsob však není doporučován vede
-k nafukování testovací metody a zhoršování čitelnosti testovacího kódu [(Link a Fröhlich 2003, kap. 4. Test Ideas and Heuristics)](#978-0-08-052017-9-978-1-55860-868-9). Navíc
-jak uvádí [(Koskela 2013, kap. 6.3 Never-Failing Tests)](#978-1-935182-57-3), tak tento přístup může také vést k tzv. *Testům co
-nikdy neselžou* a to v případě kdy zapomeneme test nechat selhat pokud není
-výjimka vyhozena nebo naopak výjimku utajíme.
+It is not recommended to test exceptions by using *try* and *catch* block. Using the blocks only is redundant and it make test method bigger and makes it harder to read and understand test [(Link a Fröhlich 2003, chap. 4. Test Ideas and Heuristics)](#978-0-08-052017-9-978-1-55860-868-9). Also as stated by [(Koskela 2013, chap. 6.3 Never-Failing Tests)](#978-1-935182-57-3), this approach can lead to so-called *Never failing tests* which happends in case when we fortget to fail test in case when exception has not been thrown. 
 
-Namísto toho je doporučeno využívat metod a možností použitého testovacího
-frameworku či testovací knihovny. Příkladem je anotace @expectException pro
-testovací framework JUnit verze 4 nebo ExpectedException pro testovací framework
-*Visual Studio Test Systém.* Použití tohoto přístupu napomáhá lepší čitelnosti
-testovacího kódu a také zajišťuje korektní chování.
+Instead it is recommended to use methods or tools provided by testing frameworks and testing libraries. For example annotation @expectException for testing framework JUnit version 4 or ExpectedException for testing framework
+*Visual Studio Test System.* By using this method we ensure that test is easier to read and understand and we also ensure that the test will behave correctly in all occasions.
 
-### Stanovovat obecnou úroveň pro výjimky testovací metody
+### Set general level for the test exception
 
-V případech, kdy vyhození výjimky není součástí testu, ale je možným produktem
-některé z exekuovaných metod, tak bychom opět neměli používat bloky *try catch*,
-ale výjimka by měla být zachycována samotnou testovací metodou. Důvod je opět
-zlepšování čitelnosti testovacího kódu díky snížení jeho délky a také zajištění
-korektního chování v případě vyhození výjimky. Výjimka tak bude zachycena
-samotným testovacím frameworkem a test selže.
+In cases where throwing an exception is not part of the test but is a possible product of one of the executed methods, we should again not use *try catch* blocks, but the exception should be caught by the test method itself. The reason is again improving the readability of the test code by reducing its length and also ensuring correct behaviour in case of exception thrown. The exception will thus be caught
+by the test framework itself and the test will fail.
 
-V tomto ohledu je také velmi důležité dbát na úroveň výjimky, kterou stanovíme
-že bude testovací metoda zachytávat. Vždy by se mělo jednat o úroveň výjimky na
-vrcholu hierarchie, tedy například pro programovací jazyk c++ se jedná o třídu
-*exception*. Tento přístup zajišťuje snazší udržovatelnost testů, jelikož v případě kdy dojde k upravení produkčního kódu a určitá metoda začne vyhazovat jiný typ výjimky nebude nutno testy nijak měnit jelikož nejvyšší úroveň tento případ zachytí  [(Acharya 2014, kap. 10. Best Practices-Handling exceptions)](#978-1-78398-251-6-978-1-78398-250-9)
+In this respect, it is also very important to pay attention to the level of exception that the test method will catch. It should always be the level of the exception at the top of the hierarchy, for example for the c++ programming language it is the *exception* class. This approach ensures easier maintainability of the tests, because if the production code is modified and a certain method starts throwing a different type of exception, the tests will not need to be changed as the top level will catch this case [(Acharya 2014, chap. 10. Best Practices-Handling exceptions)](#978-1-78398-251-6-978-1-78398-250-9)
+
 <h2 id="podminena-logika">Podmíněná logika</h2>
 
 Tato podsekce řeší otázku použití podmíněné logiky uvnitř testovacího kódu.
