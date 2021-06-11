@@ -86,11 +86,11 @@
 
 >> [Use intent revealing names](#use-intent-revealing-names)
 
->   [Storing test files and grouping tests](#uložení-testovacích-souborů-a-seskupování-testů)
+>   [Storing test files and grouping tests](#storing-test-files-and-grouping-tests)
 
->> [Keep tests outside of production code](#ukládat-testy-mimo-produkční-kód)
+>> [Keep tests outside of production code](#keep-test-outside-of-production-code)
 
->> [Store tests for one system under test in one place](#ukládat-testy-pro-jeden-testovaný-systém-na-jedno-místo)
+>> [Store tests for one system under test in one place](#store-tests-for-one-system-under-test-in-one-place)
 
 >   [Independence](#nezávislost)
 
@@ -522,7 +522,7 @@ Names should not include redundant information that does not add any value and o
 
 This best practice is closely related to the aforementioned rules of *Use pronounceable and searchable* names, *Avoid misinformation*, and states that method or variable names should always communicate intent and make it clear for which purpose they were created [(Martin 2009, Ch. 2. Meaningful Names)](#978-0-13-235088-4).  An example might be when we create a variable representing yesterday's date. A bad name would be if we named it, for example, "date". Conversely, a name that communicates the intent would be "yesterday".
 
-## Uložení testovacích souborů a seskupování testů
+## Storing test files and grouping tests
 
 Tato podsekce obsahuje nejlepší postupy týkající se uložení testů a testovacích
 souborů ve vývojovém prostředí.
@@ -530,72 +530,67 @@ souborů ve vývojovém prostředí.
 Nejlepší postupy týkající se uložení testovacích souborů a seskupování testů jsou
 následující:
 
--   Ukládat testy mimo produkční kód
+-   Keep tests outside of production code
 
--   Ukládat testy pro jeden testovaný systém na jedno místo
+-   Store tests for one system under test in one place
 
-### Ukládat testy mimo produkční kód
+### Keep tests outside of production code
 
-Jednotkové testy bychom vždy měli umisťovat mimo produkční kód. Jedním z častých
-problémů je ukládání testů do stejné třídy jako je testovaný kód, to však vede k
-řadě problémů:
+Unit tests should always be placed outside of production code. One of the common
+problem is to store tests in the same class as the code under test, but this leads to
+a number of problems:
 
--   Třída se po čase stane velmi dlouhou a nepřehlednou
+- The class becomes very long and unreadable over time.
 
--   Testy vyžadují importování dalších závislostí, a to zbytečně ovlivňuje
-    velikost finálního balíčku při buildu aplikace
+- Tests require importing additional dependencies, and that affects
+    the size of the final package when building the application
 
--   Exekuce testů je náročnější
+- Execution of tests is more challenging
 
-Stejně tak vede k problémům ukládání testů sice do samostatného souboru, ale do
-stejného balíčku jako testovaný kód:
+Similarly, saving tests in a separate file that is in the same package as the code under test leads to problems:
 
--   Nepřehlednost balíčku, obtížně se naleznou soubory
+- Package clutter, difficult to find files
 
--   Nafukování velikosti výsledného balíčku při buildu aplikace
+- Inflating the size of the resulting package when building the application
 
-Doporučeno je testy ukládat do samostatné hierarchie složek, která je zcela
-oddělena od produkčního kódu. [(Govindaraj 2015, kap. 6. Maintaining Your Test Suite-Organizing tests)](#978-1-78398-792-4) uvádí dva populární způsoby
-uložení testů. Prvním je uložení testů do samostatného balíčku, který je
-součástí hlavního balíčku kódu (viz. obr. 7).
+It is recommended to store tests in a separate folder hierarchy that is completely
+separate from the production code. [(Govindaraj 2015, Ch. 6. Maintaining Your Test Suite-Organizing tests)](#978-1-78398-792-4) lists two popular ways
+storing tests. The first is to store the tests in a separate package that is
+part of the main code package (see img. 7).
 
 ![img.png](./save_tests_into_production_code_sub_package_example.png)
 
-obr. 7 Ukázka uložení testů jako pod balíčku produkčního kódu [(Govindaraj 2015, kap. 6. Maintaining Your Test Suite-Organizing tests)](#978-1-78398-792-4)
+img. 7 Example of saving tests as a sub package of production code [(Govindaraj 2015, Ch. 6. Maintaining Your Test Suite-Organizing tests)](#978-1-78398-792-4)
 
-Druhý způsob je znázorněn na obr. 8 a v tomto případě jsou testy uloženy v
-samostatném balíčku, mimo balíček produkčního kódu.
+The second way is shown in img. 8, and in this case the tests are stored in
+separate package, outside of the production code package.
 
 ![img.png](./save_tests_into_separate_package_outside_production_code_package.png)
 
-obr. 8 Uložení testů do separátního balíčku mimo balíček produkčního kódu
-[(Govindaraj 2015, kap. 6. Maintaining Your Test Suite-Organizing tests)](#978-1-78398-792-4)
+img. 8 Saving tests in a separate package outside the production code package
+[(Govindaraj 2015, Ch. 6. Maintaining Your Test Suite-Organizing tests)](#978-1-78398-792-4)
 
-Vedle těchto dvou způsobů však existuje i třetí, který je však specifický pro
-určité systémy, jako například Java. Ten umísťuje testy a produkční kód do
-stejného balíčku, ale na rozdílná fyzická míst, tzn. nastavuje jim rozdílnou
-kořenovou složku (viz obr. 9).
+In addition to these two methods, however, there is a third method that is specific to
+certain systems, such as Java. The latter places tests and production code in
+the same package, but in different physical locations, i.e. it sets them to different
+root folder (see img. 9).
 
 ![img.png](./save_tests_into_same_package_under_different_root_folder.png)
 
-obr. 9 Uložení testů a kódu do stejných balíčků s rozdílnou kořenovou složkou
-[(Govindaraj 2015, kap. 6. Maintaining Your Test Suite-Organizing tests)](#978-1-78398-792-4)
+img. 9 Saving tests and code into the same packages with different root folder
+[(Govindaraj 2015, Ch. 6. Maintaining Your Test Suite-Organizing tests)](#978-1-78398-792-4)
 
-### Ukládat testy pro jeden testovaný systém na jedno místo
+### Store tests for one system under test in one place
 
-Obecně je doporučováno všechny testy týkající se určitého testovaného systému,
-například testované třídy, bychom měli ukládat na jedno místo, do jedné
-testovací třídy. Kniha [(Link a Fröhlich 2003, kap. 4. Test Ideas and Heuristics) ](#978-0-08-052017-9-978-1-55860-868-9) však představuje případy kdy je
-vhodné toto pravidlo porušit:
+It is generally recommended to store all tests related to a particular system under test in one place. However, the book [(Link and Fröhlich 2003, Ch. 4. Test Ideas and Heuristics) ](#978-0-08-052017-9-978-1-55860-868-9) presents cases where
+it is appropriate to violate this rule:
 
--   Množství testů v testovací třídě je příliš velké a třída se stává velice
-    nepřehlednou, je měli bychom separovat testy se stejnými vlastnostmi do
-    samostatných testovacích tříd. Obrovské množství testů také může nasvědčovat
-    porušení principu jedné odpovědnosti v testovaném systému, a tedy bylo by
-    dobré zvážit i rozdělení testovaného systému do více částí.
+- The number of tests in the test suite is too large and the class becomes very
+    cluttered, we should separate tests with the same characteristics into
+    separate test files. The huge number of tests may also indicate a violation of the principle of one responsibility in the system under test, and thus is is a good idea to consider splitting the system under test into multiple parts.
 
--   Předběžné kroky, např. v setUp metodě, se pro mnoho testů opakují a pro jiné
-    ne. Tyto testy je vhodné separovat do samostatné testovací třídy.
+- Preliminary steps, e.g. in the setUp method, are repeated for many tests and for others
+    do not. These tests should be separated into a separate test class.
 
 ## Nezávislost
 
