@@ -114,21 +114,21 @@
 
 >> [Do not use the Singleton design pattern](#do-not-use-the-singleton-design-pattern)
 
-[Defining tests](#vymezení-testů)
+[Defining tests](#defining-tests)
 
->   [Code coverage](#pokrytí-kódu-(code-coverage))
+>   [Code coverage](code-coverage)
 
->> [Do not define tests for primitive behavior](#neimplementovat-jednoduché-testy)
+>> [Do not define tests for primitive behavior](#do-not-define-tests-for-primitive-behaviour)
 
->> [Implement both happy and sad tests](#implementovat-jak-happy,-tak-sad-testy)
+>> [Implement both happy and sad tests](#implement-both-happy-and-sad-tests)
 
->> [Do not test abstract systems](#netestovat-abstraktní-systémy)
+>> [Do not test abstract systems](#do-not-test-abstract-systems)
 
->> [Test only the public behavior of the tested system](#testovat-pouze-verejne-chovani-testovaneho-systemu)
+>> [Test only the public behavior of the tested system](#test-only-the-public-behaviour-of-the-tested-system)
 
->> [Test behavior, not system methods](#testovat-chování,-ne-metody-systému)
+>> [Test behavior, not methods of the system under the test](#test-behaviour-not-methods-of-the-system-under-the-test)
 
->> [Make the tests follow the single responsibility principle ](#zachovávat-princip-jedné-odpovědnosti-testu)
+>> [Make the tests follow the single responsibility principle ](#make-the-tests-follow-the-single-responsibility-principle )
 
 >   [Data coverage](#datové-pokrytí-(data-coverage))
 
