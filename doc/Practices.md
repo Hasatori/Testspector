@@ -730,96 +730,72 @@ we can not initialize it or affect its internal state. This lead to the followin
 
 The solution is to avoid using singletons. The principle of singleton objects is that their state is static and available in a certain context. This context can be a system, a user or session. Instead of creating a singleton, we can take advantage of this principle and use system, user or session object to give us access to objects that would otherwise be sigletons [(Link and Fröhlich 2003, ch. 6.9 Evil Singletons) ](#978-0-08-052017-9-978-1-55860-868-9).
 
-# Vymezení testů
+# Defining tests
 
-Tato podkapitola obsahuje nejlepší postupy týkající vymezování jednotkových
-test. Pomyslně odpovídá na otázku „Co by mělo být testováno?“, tedy jaké by měly
-být jednotlivé testovací případy a podle čeho bychom je měli vymezovat.
-Podkapitola je dále rozpadnuta do několika podsekcí, které vymezují nejlepší
-postupy týkající se určitého aspektu vymezení testovacích případů.
+This subsection contains best practices regarding the definition of unit
+test. It answers the question "What should be tested?", i.e. what should
+should be, and what should be used to define them.
+The subchapter is further broken down into several subsections that define the best
+practices regarding a particular aspect of test case definition.
 
-## Pokrytí kódu (Code coverage)
+## Code coverage
 
-Tato podsekce obsahuje nejlepší postupy pro zajištění správného pokrytí kódu
-jednotkovými testy. Je zde vymezeno, které části a oblasti je nezbytné testovat
-a jak přemýšlet při vymezování testovacích případů.
+This subsection contains best practices for ensuring proper code coverage
+by unit tests. It defines which parts should be tested
+and how to think when defining test cases.
 
-Nejlepší postupy týkající se pokrytí kódu (Code coverage) jsou následující:
+Best practices for code coverage are as follows:
 
--   Neimplementovat jednoduché testy
+- Do not define tests for primitive behavior
 
--   Implementovat jak happy, tak sad testy
+- Implement both happy and sad tests
 
--   Implementovat testy pro každý netriviální systém
+- Do not test abstract systems
 
--   Netestovat abstraktní systémy
+- Test only the public behavior of the system under the test
 
--   Testovat pouze veřejné chování testovaného systému
+- Test behavior, not methods of the system under the test
 
--   Testovat chování, ne metody systému
+- Make the tests follow the single responsibility principle 
 
--   Zachovávat princip jedné odpovědnosti testu
+### Do not define tests for primitive behavior
 
-### Neimplementovat jednoduché testy
+It is generally recommended not to create tests for primitive functionality of the tested
+system. Examples are get and set methods, which are a commonly used methods for getting and setting properties [(García 2017, ch. Software testing principles)](#978-1-78712-439-4). Testing such methods is unnecessary because they are immune to error. However, if there is some more complex logic tied to them that could lead to side effects, it is appropriate to write a unit test for these methods as well.
 
-Obecně je doporučováno nevytvářet testy pro primitivní funkcionality testovaného
-systému. Příkladem jsou get a set metody, které jsou obecně používaným principem
-pro získávání hodnot parametrů a nastavování hodnot parametrů objektů [(García 2017, kap. Software testing principles)](#978-1-78712-439-4). Testování
-těchto velmi jednoduchých metod je zbytečně, protože jsou prakticky imunní vůči
-chybě. Pokud je však s nimi svázaná nějaká komplexnější logika, jež by mohla
-vést k vedlejším účinkům, je vhodné i pro tyto metody napsat jednotkový test.
+As a general rule, for any non-trivial system we should create
+unit tests. The basic question we should ask is "Does the system
+inherent logic?" [(Link and Fröhlich 2003, Ch. 3. Basic Steps of the Test-First Approach)](#978-0-08-052017-9-978-1-55860-868-9).
 
-Obecně platí pravidlo, že pro každý netriviální systém bychom měli vytvářet
-jednotkové testy. Základní otázkou, kterou bychom si měli klást je „Má systém
-uvnitř vlastní logiku?“ [(Link a Fröhlich 2003, kap. 3. Basic Steps of the Test-First Approach)](#978-0-08-052017-9-978-1-55860-868-9).
+### Implement both happy and sad tests
 
-### Implementovat jak happy, tak sad testy
+When creating unit tests for a particular system, we should implement both
+happy tests (testing if the system is working correctly) and sad
+tests (trying to break the system and test if the how will the system behave and respond) [(García 2017, ch. Software testing principles)](#978-1-78712-439-4). If we did not implement both happy and set tests it can lead to false positive or false negative results of a system under test.
 
-Při vytváření jednotkových testů pro určitý systém, bychom měli vytvářet jak
-happy testy, tedy test správného fungování testované funkcionality, tak sad
-testy, tedy testy, jež se snaží rozbít systém a očekávají adekvátní reakci na
-toto nesprávné použití funkcionality [(García 2017, kap. Software testing principles)](#978-1-78712-439-4). Pokud bychom neimplementovali jak happy tak sad testy, tak to může vést k falešně pozitivním či falešně negativním výsledkům jednotkových testů.
+### Do not test abstract systems
 
+Abstract systems should not be tested, since the existence of a concrete instance is required to create them. As described in [(Link and Fröhlich 2003, ch. 7. Inheritance and Polymorphism)](#978-0-08-052017-9-978-1-55860-868-9), one possibility is to create an instance of an abstract system purely for testing purposes. However, this approach does not pay off in most cases, since the abstract system is rarely complex enough to make this approach reasonable. However, it is recommended to break this best practice in case when we are implementing a framework. In this case, it is necessary to test the abstract system even if no concrete instance exists , since users of the framework will create concrete instances.
 
-### Netestovat abstraktní systémy
+### Test only the public behavior of the system under the test
 
-Abstraktní systémy jako takové by neměli být testovány, jelikož pro jejich vytvoření je potřeba existence konkrétní instance. Jak popisuje  [(Link a Fröhlich 2003, kap. 7. Inheritance and Polymorphism)](#978-0-08-052017-9-978-1-55860-868-9), tak jednou možností je vytvoření instance abstraktního systému čistě pro účely testování. Tento přístup se však ve většině případů nevyplácí, jelikož abstraktní systém je zřídkakdy natolik komplexní, aby byl tento přístup obhajitelný.
-Autoři však tento postup doporučují porušit v případě kdy je vyvíjen framework. V takovém případě je nutné otestovat abstraktní systém i pokud pro něj neexistuje žádná konkrétní instance, jelikož uživatelé frameworku konkrétní instance vytvářet budou.
+It is recommended to always test only the public behaviour
+of the system under test, which is expressed through public methods. Private methods are often updated, deleted or added regardless of if public behaviour of a system under test has changed. Private methods are only a helper tool for the public behaviour of the tested system. Testing them leads to dependencies between the code and the tests, and in the long run, it makes it hard to maintain the tests and even the slightest change will require an update to the tests. Books [(Khorikov 2020, Ch. 11. Unit testing anti-patterns) ](#978-1-61729-627-7) and [(Langr et al. 2015, Ch. 9. Bigger Design Issues) ](#978-1-937785-48-2) state, that if private methods contain complex behaviors and it seems thet it makes sense to write a separate test for them, it is a sign that the tested system is probably breaking the Single Responsibility Principle. Such behaviour should therefore be extracted into a separate class and made public.
 
-<h3 id="testovat-pouze-verejne-chovani-testovaneho-systemu">Testovat pouze veřejné chování testovaného systému</h3>
+An exception to this principle is when a private method is part of a
+ observed behavior of the tested system. For example, if we have a private class constructor, which is part of the ORM library and its initialization should not be allowed. In
+this case, the privacy is part of the observed behavior and the constructor should
+remain private [(Khorikov 2020, Ch. 11. Unit testing anti-patterns)](#978-1-61729-627-7).
 
-Platí doporučení, že bychom vždy měli vždy testovat pouze veřejné chování
-testovaného systému, které bývá vyjádřeno pomocí veřejných metod. Implementace
-privátních metod či metod privátních pro balíček je velmi často měněna, metody
-jsou mazány či přidávány, a to nezávisle na chování systému jako celku. Privátní
-metody jsou pouze pomocným nástrojem pro zajištění veřejného chování testovaného
-systému. Jejich testování vytváří velké množství závislostí mezi kódem a testy a
-z dlouhodobého hlediska to vede k obtížné udržovatelnosti testů a nutnosti
-jejich časté úpravy a aktualizace. [(Khorikov 2020, kap. 11. Unit testing anti-patterns)](#978-1-61729-627-7) a [(Langr et al. 2015, kap. 9. Bigger Design Issues) ](#978-1-937785-48-2) uvádí,
-že pokud obsahují privátní metody komplexní chování a zdá se, že by mělo smysl
-pro ně samostatný test napsat, jedná se o ukázku chyby v návrhu daného systému a
-porušení principu jedné odpovědnosti (Single Responsibility Principle). Takové
-chování by tedy mělo být vyextrahováno do samostatné třídy a testovaný systém by
-s ní měl pouze komunikovat.
+### Test behavior, not methods of the system under the test
 
-Výjimkou z tohoto principu je situace, kdy je privátní metoda součástí
-pozorovaného chování systému. Například pokud máme privátní konstruktor třídy,
-která je součástí ORM knihovny a její inicializace by neměla být povolena. V
-takovém případě je privátnost součástí pozorovaného chování a konstruktor by měl
-zůstat privátní [(Khorikov 2020, kap. 11. Unit testing anti-patterns)](#978-1-61729-627-7).
+It is important to focus on testing behaviour of a system, not on testing individual methods. When specifying unit tests, it is important to take a holistic view and test the behaviour of the system under test, not its individual methods [(Langr et al. 2015, ch. Testing Behavior Versus Testing Methods)](#978-1-937785-48-2).
 
-### Testovat chování, ne metody systému
+### Make the tests follow the single responsibility principle
 
-Je důležité zaměřovat se na chování tříd, ne na testování individuálních metod. Při specifikaci jednotkových testů je nutné používat holistický pohled a testovat chování testovaného systému, ne jeho individuální metody [(Langr et al. 2015, kap. Testing Behavior Versus Testing Methods)](#978-1-937785-48-2).
-
-### Zachovávat princip jedné odpovědnosti testu
-
-Stejně jako při psaní produkčního kódu, kde je princip jedné odpovědnosti jedním
-ze základních pravidel, je doporučováno toho pravidla dbát i při psaní
-jednotkových testů. I pouze jedna testovaná komponenta v sobě může zahrnovat
-více malých funkcionalit, nebo funkcí. Důležité je v rámci testu zohledňovat
-pouze jednu tuto dílčí funkcionalitu či chování, jelikož se pak testy snáze
-udržují a také se snáze odhalují problémy, pokud testy selhávají [(Meszaros 2007)](#978-0-13-149505-0).
+As in writing production code, where the single responsibility principle is one
+of the basic principles, it is recommended to follow this principle also when writing
+unit tests. Even just one component under test may include multiple small functionalities or features. It is important to take into account only one of these sub-functionalities or behaviours and create tests just for them. This approach makes tests easier to maintain and it is also easier to detect the root of a problem if some test fails [(Meszaros 2007)](#978-0-13-149505-0).
 
 ## Datové pokrytí (Data coverage)
 
