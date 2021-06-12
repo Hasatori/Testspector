@@ -28,7 +28,7 @@
 
 >> [Keep the right order of the assertion method parameters](#keep-the-right-order-of-the-assertion-method-parameters)
 
->> [Use  messages describing the error](#use-messages-describing-the-error)
+>> [Use messages describing the error](#use-messages-describing-the-error)
 
 >   [Structure of the test method](#structure-of-the-test-method)
 
@@ -68,11 +68,11 @@
 
 >> [Setup a test naming strategy](#setup-a-test-naming-strategy)
 
->> [Maintain consistent test naming](#maintaint-consistent-test-naming)
+>> [Maintain consistent test naming](#maintain-consistent-test-naming)
 
 >> [Use one naming strategy for the concept](#use-one-naming-strategy-for-the-concept)
 
->> [Use "known solution" names](#use-"known-solution"-names)
+>> [Use "known solution" names](#use-known-solution-names)
 
 >> [Use appropriate names for test classes](#use-appropriate-names-for-test-classes)
 
@@ -88,7 +88,7 @@
 
 >   [Storing test files and grouping tests](#storing-test-files-and-grouping-tests)
 
->> [Keep tests outside of production code](#keep-test-outside-of-production-code)
+>> [Keep tests outside of production code](#keep-tests-outside-of-production-code)
 
 >> [Store tests for one system under test in one place](#store-tests-for-one-system-under-test-in-one-place)
 
@@ -96,13 +96,13 @@
 
 >> [Do not use global static properties](#do-not-use-global-static-properties)
 
->> [Do not use domain knowledge](#do-not-use-domain-logic)
+>> [Do not use domain knowledge](#do-not-use-domain-knowledge)
 
 >> [Use relative paths](#use-relative-paths)
 
 >> [Keep tests platform independent](#keep-tests-platform-independent)
 
->> [Keep tests independent of the production code](#keep-tests-independet-of-the-production-code)
+>> [Keep tests independent of the production code](#keep-tests-independent-of-the-production-code)
 
 >> [Create your own data and resources](#create-your-own-data-and-resources)
 
@@ -116,17 +116,17 @@
 
 [Defining tests](#defining-tests)
 
->   [Code coverage](code-coverage)
+> [Code coverage](#code-coverage)
 
->> [Do not define tests for primitive behavior](#do-not-define-tests-for-primitive-behaviour)
+>> [Do not define tests for primitive behaviour](#do-not-define-tests-for-primitive-behaviour)
 
 >> [Implement both happy and sad tests](#implement-both-happy-and-sad-tests)
 
 >> [Do not test abstract systems](#do-not-test-abstract-systems)
 
->> [Test only the public behavior of the tested system](#test-only-the-public-behaviour-of-the-tested-system)
+>> [Test only the public behaviour of the tested system](#test-only-the-public-behaviour-of-the-tested-system)
 
->> [Test behavior, not methods of the system under the test](#test-behaviour-not-methods-of-the-system-under-the-test)
+>> [Test behaviour, not methods of the system under the test](#test-behaviour-not-methods-of-the-system-under-the-test)
 
 >> [Make the tests follow the single responsibility principle ](#make-the-tests-follow-the-single-responsibility-principle )
 
@@ -271,7 +271,6 @@ Each test should contain at least one assertion method. You should avoid cases w
 
 ### Only one assertion per test
 
-
 Opinions on this best practice are not uniform and a lot of authors have different opinions on it. Books [(Meszaros 2007, chap. 5. Principles of Test Automation)](#978-0-13-149505-0), [(Powerhouse 2018, chap. 6. Why JUnit does not report all the failures in a single test)](#978-1-976900-84-6) and [(Acharya 2014, chap. 10.Best  Practices-Working with assertions)](#978-1-78398-251-6-978-1-78398-250-9) are quite strict about it and they always require only one assertion per test. In their mind, if a test contains multiple assertions it should be split into multiple test methods. Generally, they think that having multiple assertions in a test has an impact on readability and also makes maintenance trickier.
 
 On the other hand authors [(Martin 2009, chap. 9. Unit Tests)](#978-0-13-235088-4), [(Khorikov 2020, chap. 3.1.5 How many assertions should the assert section hold?)](#978-1-61729-627-7), [(Langr a Swaine 2013, chap. 7. Quality Tests-One Assert per Test) ](#978-1-937785-48-2) a
@@ -279,7 +278,7 @@ On the other hand authors [(Martin 2009, chap. 9. Unit Tests)](#978-0-13-235088-
 
 Regarding multiple assertion methods it is also important to realize one additional problem. A lot of unit testing frameworks, for example JUnit, will fail the whole test even if just one assertion method fails. This is a big problem, because even if the test is testing just one behaviour using multiple assertion methods, the result of it is misleading and it does not provide overview of all the errors. In order to get information about all the errors assertions has to be commented out one by one and test has to be repeatedly executed. Solution is either limit number of assertion errors to one or use special assertions which allow asserting multiple things in a batch. One example is the method assertAll(), that is available for the testing framework JUnit version 5 [(García 2017, chap. Jupiter assertions)](#978-1-78712-439-4). 
 
-### Do not use Guards Assertions
+### Do not use Guard Assertions
 
 One of the most common errors in the code is sudden exception like *NullPointerException* or *IndexOutOfBoundsException*. For this reason programmers add extra check which would prevent such situations. In tests such checks are redundant because the test would fail and the error message would be part of the result report. Therefore it is recommended to avoid such redundant checks, because they add no value to the test and they make the whole test longer and harder to understand [(Koskela 2013, chap. 4.9. Overprotective tests)](#978-1-935182-57-3).
 
@@ -287,7 +286,7 @@ One of the most common errors in the code is sudden exception like *NullPointerE
 
 Expected value should always be custom test data and actual value the value returned by the system under the test. It is a small mistake but can lead to big problems [(Acharya 2014, chap. 10. Best Practices-Working with assertions)](#978-1-78398-251-6-978-1-78398-250-9).
 
-### Use  messages describing the error
+### Use messages describing the error
 
 If it is possible it is recommended to add some additional messages exaplaining the error to the assertion methods. The message will then make it easier to understand what is the error about [(Hamill 2004, chap. 4. Writing Unit Tests-Types of Asserts)](#978-0-596-00689-1).
 
@@ -746,7 +745,7 @@ and how to think when defining test cases.
 
 Best practices for code coverage are as follows:
 
-- Do not define tests for primitive behavior
+- Do not define tests for primitive behaviour
 
 - Implement both happy and sad tests
 
@@ -754,11 +753,11 @@ Best practices for code coverage are as follows:
 
 - Test only the public behavior of the system under the test
 
-- Test behavior, not methods of the system under the test
+- Test behaviour, not methods of the system under the test
 
 - Make the tests follow the single responsibility principle 
 
-### Do not define tests for primitive behavior
+### Do not define tests for primitive behaviour
 
 It is generally recommended not to create tests for primitive functionality of the tested
 system. Examples are get and set methods, which are a commonly used methods for getting and setting properties [(García 2017, ch. Software testing principles)](#978-1-78712-439-4). Testing such methods is unnecessary because they are immune to error. However, if there is some more complex logic tied to them that could lead to side effects, it is appropriate to write a unit test for these methods as well.
@@ -777,7 +776,7 @@ tests (trying to break the system and test if the how will the system behave and
 
 Abstract systems should not be tested, since the existence of a concrete instance is required to create them. As described in [(Link and Fröhlich 2003, ch. 7. Inheritance and Polymorphism)](#978-0-08-052017-9-978-1-55860-868-9), one possibility is to create an instance of an abstract system purely for testing purposes. However, this approach does not pay off in most cases, since the abstract system is rarely complex enough to make this approach reasonable. However, it is recommended to break this best practice in case when we are implementing a framework. In this case, it is necessary to test the abstract system even if no concrete instance exists , since users of the framework will create concrete instances.
 
-### Test only the public behavior of the system under the test
+### Test only the public behaviour of the system under the test
 
 It is recommended to always test only the public behaviour
 of the system under test, which is expressed through public methods. Private methods are often updated, deleted or added regardless of if public behaviour of a system under test has changed. Private methods are only a helper tool for the public behaviour of the tested system. Testing them leads to dependencies between the code and the tests, and in the long run, it makes it hard to maintain the tests and even the slightest change will require an update to the tests. Books [(Khorikov 2020, Ch. 11. Unit testing anti-patterns) ](#978-1-61729-627-7) and [(Langr et al. 2015, Ch. 9. Bigger Design Issues) ](#978-1-937785-48-2) state, that if private methods contain complex behaviors and it seems thet it makes sense to write a separate test for them, it is a sign that the tested system is probably breaking the Single Responsibility Principle. Such behaviour should therefore be extracted into a separate class and made public.
@@ -787,7 +786,7 @@ An exception to this principle is when a private method is part of a
 this case, the privacy is part of the observed behavior and the constructor should
 remain private [(Khorikov 2020, Ch. 11. Unit testing anti-patterns)](#978-1-61729-627-7).
 
-### Test behavior, not methods of the system under the test
+### Test behaviour, not methods of the system under the test
 
 It is important to focus on testing behaviour of a system, not on testing individual methods. When specifying unit tests, it is important to take a holistic view and test the behaviour of the system under test, not its individual methods [(Langr et al. 2015, ch. Testing Behavior Versus Testing Methods)](#978-1-937785-48-2).
 
