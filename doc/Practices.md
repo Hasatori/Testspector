@@ -130,25 +130,25 @@
 
 >> [Make the tests follow the single responsibility principle ](#make-the-tests-follow-the-single-responsibility-principle )
 
->   [Data coverage](#datové-pokrytí-(data-coverage))
+> [Data coverage](#data-coverage)
 
->> [Test boundary conditions](#testovat-hraniční-podmínky)
+>> [Test boundary conditions](#test-boundary-conditions)
 
->> [Assert inverse relationships](#kontrolovat-inverzní-vztahy)
+>> [Assert inverse relationships](#assert-inverse-relationships)
 
->> [Do cross-checking using external means](#provádět-křížovou-kontrolu-s-pomocí-jiných-prostředků)
+>> [Do cross-checking using external means](#do-cross-checking-using-external-means)
 
->> [Enforce bad conditions](#vynucovat-chybné-podmínky)
+>> [Enforce bad conditions](#enforce-bad-conditions)
 
->> [Use unit tests to measure the performance characteristics of the tested system](#používat-jednotkové-testy-pro-měření-výkonových-charakteristik-testovaného-systému)
+>> [Use unit tests to measure the performance characteristics of the tested system](#use-unit-tests-to-measure-the-performance-characteristics-of-the-tested-system)
 
->> [Test equivalence classes](#vymezovat-třídy-ekvivalence)
+>> [Test equivalence classes](#test-equivalence-classes)
 
->> [Test extreme values](#testovat-krajní-hodnoty)
+>> [Test extreme values](#test-extreme-values)
 
->> [Test the state transitions](#testovat-změny-stavu)
+>> [Test the state transitions](#test-the-state-transitions)
 
->> [Test using decision tables](#testovat-pomocí-rozhodovacích-tabulek)
+>> [Test using decision tables](#test-using-decision-tables)
 
 **![](Dropbox/Vysoka_skola/Magisterske_studium/Diplomova_prace/media/e75f34a382eac9c11065578930414b8b.jpeg)**
 
@@ -797,155 +797,149 @@ As in writing production code, where the single responsibility principle is one
 of the basic principles, it is recommended to follow this principle also when writing
 unit tests. Even just one component under test may include multiple small functionalities or features. It is important to take into account only one of these sub-functionalities or behaviours and create tests just for them. This approach makes tests easier to maintain and it is also easier to detect the root of a problem if some test fails [(Meszaros 2007)](#978-0-13-149505-0).
 
-## Datové pokrytí (Data coverage)
+## Data coverage
 
-V rámci této podsekce jsou vymezeny nejlepší postupy týkající se volení vhodných
-dat při specifikaci testovacích systému. Vhodné zvolení dat vede k zajištění
-dostatečného datového pokrytí testovaného systému a neopomenutí důležitých
-testovacích scénářů.
+This subsection defines best practices regarding the selection of appropriate
+data for the test. Appropriate data selection leads to ensuring
+sufficient data coverage of the system under test and not omitting important
+test scenarios.
 
-Nejlepší postupy týkající se datového pokrytí (Data coverage) jsou následující:
+Best practices regarding data coverage are as follows:
 
--   Testovat hraniční podmínky
+- Test boundary conditions
 
--   Kontrolovat inverzní vztahy
+- Assert inverse relationships
 
--   Provádět křížovou kontrolu s pomocí jiných prostředků
+- Do cross-checking using external means
 
--   Vynucovat chybné podmínky
+- Enforce bad conditions
 
--   Používat jednotkové testy pro měření výkonových charakteristik testovaného
-    systému
+- Use unit tests to measure the performance characteristics of the tested system
 
--   Vymezovat třídy ekvivalence
+- Test equivalence classes
 
--   Testovat krajní hodnoty
+- Test extreme values
 
--   Testovat změny stavu
+- Test the state transitions
 
--   Testovat pomocí rozhodovacích tabulek
+- Test using decision tables
 
-### Testovat hraniční podmínky
+### Test boundary conditions
 
-Mnoho chyb v kódu velmi často vzniká vlivem mezních hodnot povolené podoby dat.
-Jeden obyčejný *„happy day“* scénář na takové problémy nenarazí. Je proto
-doporučováno testovat hraniční podmínky vstupních dat. [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2)
-vymezuje akronym **CORRECT**, který napomáhá zapamatování si vhodného přemýšlení
-o hraničních podmínkách jednotkových testů (viz Tabulka 4).
+Many errors in code are very often caused by boundary values.
+An ordinary *"happy day "* scenario will not encounter such problems. It is therefore recommended to test the boundary conditions of the input data. Book [(Langr et al. 2015, Ch. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2) 
+defines the acronym **CORRECT** which makes it easy to remember how should we think about boundary conditions for the input data (see Table 4).
 
-Tabulka 4 Popis dílčích částí akronymu CORRECT (autor a [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2)
+Table 4 Description of the subparts of the acronym CORRECT (author and [(Langr et al. 2015, ch. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2)
 
-| Conformance-Shoda                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Data velmi často musejí splňovat nějaký formát, aby byla validní. Může se tak například jednat o emailovou adresu, uživatelské jméno, název souboru, telefonní číslo apod. Pokud je struktura dat velmi komplexní může to vést k extrémnímu počtu kombinací k otestování (S velkým množstvím kombinací může velmi napomoct využití parametrizovaných testů, jako například nabízí JUnit5. Zde je možné velmi jednoduše vytvořit stovky testovacích napsáním pár řádků kódu). Stejná data mohou být v našem systému používána mnoha funkcionalitami. Není však potřeba testovat jejich správný formát úplně všude, ale zaměřit se pouze na míst kdy data do systému vstupují, zde provést kontrolu a další kontrola již není potřeba (Stejně tak je potřeba data kontrolovat na výstupu funkcí jež je nějakým způsobem mění či upravují).                                                                                                                                                                                                                                                                                                  |
-| **Order-Pořadí**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Správné pořadí dat v kolekci je jedním z předpokladů, který může být v kódu snadno porušen. Pokud tedy testujeme nějakou kolekci, kde je důležité pořadí, je vhodné vytvořit testy jež pořadí testují.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| **Range-Rozsah**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Je důležité se zaměřit na povolený rozsah hodnot proměnné. V řadě případů je velmi nevhodné používat primitivní datové typy pro hodnoty s omezeným rozsahem, jelikož pak může velmi snadno nastat chyba a dostaneme se mimo povolený rozsah. Příkladem je například věk, nebo úhel. Tomuto se dá předejít vytvořením vlastního datového typu, který nepovolí překročení dovoleného rozsahu.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Conformance |
+|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Data very often has to conform to some format to be valid. For example, it can be an email address, username, file name, phone number, etc. If the data structure is very complex this can lead to an extreme number of combinations to test (With a large number of combinations, the use of parameterized tests such as those offered by JUnit5 can be very helpful. Here it is very easy to create hundreds of tests by writing a few lines of code). The same data can be used by many functionalities in our system. However, it is not necessary to test their correct format everywhere, but to focus only on the places where the data enters the system, here to perform the check and further checking is not needed (Similarly, the data should be checked on the output of functions that change or modify them in some way).
+| **Order** |
+| The correct order of data in a collection is one of the assumptions that can be easily broken in code. So if you are testing a collection where order is important, it is a good idea to create tests that test the order. |
+| **Range** |
+| It is important to focus on the allowed range of values for a variable. In many cases, it is very inappropriate to use primitive data types for values with a limited range, as it is very easy to get an error and go outside the allowed range. Examples are age, or angle. This can be avoided by creating a custom data type that does not allow exceeding the allowed range. |
 | **Reference**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Při testování metody je nutné zvážit na co odkazuje mimo rámec své působnosti, jaké má externí závislosti, jestli závisí na tom, zda je objekt v určitém stavu a zda musejí být splněny nějaké další podmínky. Například pro zobrazení účtu uživatele musí být uživatel přihlášen apod. Měli potom vytvářet testy tak abychom ověřili že se daná třída nebo zkrátka testovaný kus kódu chová správně i když některé podmínky nejsou splněny, protože jsme usoudili že logicky nejsou potřeba. Je ale vhodné takové stavy ověřovat a předejít tak nepředvídatelnému chování.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| **Existence**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Je důležité klást si otázku, zda musí určitá věc vždy existovat. Obvykle mají programátoři tendenci psát pouze „happy day“ testy, je však také důležité zamyslet se nad tím jaké vstupní parametry se mohou do metody dostat. Co se stane, pokud je vstupní parametr null, soubor neexistuje apod.?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| **Cardinality – kardinalita**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Zásada pojednává o četnosti či mohutnosti a chyby, ke kterým se často můžeme dostat. Jedná se o tzv. fencepost errors nebo také off-by-one error, což je typ chyby kdy se můžeme splést v důsledku fatální podmínky, které podlehneme. Při psaní testů bychom se měli zamyslet nad tím, jak se v našem kódu počítá, jaký výskyt určité věci můžeme mít, a jaký to má vliv. Výskyt lze zobecnit na 3 případy: Nula – nemáme nic, tedy speciální případ předchozího pravidla **Existence** Jedna – pouze jeden výskyt Mnoho – více jak jedna V angličtině se toto pravidlo nazývá jako **0-1-n** pravidlo, nebo také **ZOM (Zero,One,Many).** Je zde uveden příklad se seznamem top 10 jídel nějaké restaurace. Pokaždé co je vzata nějaká objednávka měl by se list v reálném čase updatovat. Pravidlo kardinality je v tomto případě aplikováno na specifikaci vhodných testovacích případů: Tvorba reportu, pokud v seznamu není žádné jídlo Tvorba reportu, pokud v seznamu je pouze jedno jídlo Tvorba reportu, pokud v seznamu není ještě 10 jídel  Atd…                                                                                                                                             |
-| **Time - čas**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| V souvislosti s pravidlem času je nutné si uvědomit 3 věci: **Relativní čas** – správné pořadí volání v čase Některá rozhraní jsou závislá na stavu a očekávají že se nejprve uživatel přihlásí a poté se až může odhlásit apod. Je důležité se nad tím zamyslet a přidávat testy, které pořadí porušují a očekávají chybu apod. Podobně jaké pravidlo O - ordering, kde záleží na pořadí dat, tak stejně tak záleží i na pořadí volání metod. **Absolutní čas** – uběhnutý čas, aktuální čas V souvislosti s pořadím volání se také mohou vyskytnou čekání na dostupnost zdroje. Je nutné hledat místa v kódu, kde by se potenciálně mohlo čekat na věky. Také je vhodné na určitých místech uplynutý čas měřit, a rozhodovat, zda je čekání až moc dlouhé. Aktuální čas je také velmi důležité kontrolovat. V závislosti na aktuálním čase se mohou podmínky lišit a některé testy tak nemusí vždy fungovat. Nespoléhat se na to že knihovny, které používáme tyto problémy mají ošetřené! **Problémy s konkurencí**  Je důležité si položit otázku, co se stane, pokud bude s tímto zdrojem pracovat více vláken najednou? Je to možné, může to nastat? Je potřeba synchronizovat globální proměnné?  |
+| When testing a method, it is necessary to consider what it references outside of its scope, what external dependencies it has, whether it depends on the object being in a certain state, and whether any other conditions must be met. For example, to view a user's account, the user must be logged in, etc. We should then create tests to verify that the piece of code under test behaves correctly even if some conditions are not met, because we have concluded that logically they are not needed. But it is advisable to verify such conditions to avoid unpredictable behavior.
+| **Existence** |
+| It is important to ask whether a thing must always exist. Usually, programmers tend to write only "happy day" tests, but it is also important to think about what input parameters can go into a method. What happens if the input parameter is null, the file does not exist, etc.?
+| **Cardinality** |
+| The principle deals with frequency or magnitude and the errors we can often get to. These are called fencepost errors or also off-by-one error, which is a type of error where we can get confused due to a fatal condition that we succumb to. When writing tests, we should think about how our code calculates how many occurrences of a particular thing we can have, and what effect it has. Occurrence can be generalized to 3 cases: Zero - we have nothing, a special case of the previous **Existence** rule One - only one occurrence Many - more than one In English, this rule is called the **0-1-n** rule, or also **ZOM (Zero,One,Many).** Here is an example with a list of the top 10 dishes of a restaurant. Every time an order is taken the list should be updated in real time. The cardinality rule is applied in this case to specify the appropriate test cases: report generation if there is no dish in the list report generation if there is only one dish in the list report generation if there are not yet 10 dishes in the list etc... |
+| **Time - time** |
+| There are 3 things to remember about the time rule: **Relative time** - the correct order of calls in time Some interfaces are state-dependent and expect the user to log in first and then can log out, etc. It's important to think about this and add tests that break the order and expect an error, etc. Similar to the O - ordering rule, where the order of data matters, so does the order of method calls. **Absolute time** - elapsed time, current time Waiting for resource availability can also occur in the context of call order. It is necessary to look for places in the code where it could potentially wait forever. It is also useful to measure elapsed time at certain points, and decide if the wait is too long. The actual time is also very important to check. Depending on the current time, conditions may vary and so some tests may not always work. Don't rely on the libraries we use to have these problems taken care of! **Competition issues** It's important to ask what happens if multiple threads work with this resource at the same time? Is this possible, can this occur? Do global variables need to be synchronized?|
 
-### Kontrolovat inverzní vztahy
+### Assert inverse relationships
 
-V některých případech je možné a samozřejmě vhodné otestovat inverzní chování
-dané funkcionality. Příkladem je, pokud máme implementovanou matematickou funkci
-pro výpočet druhé mocniny čísla. Inverzní test by poté spočíval v tom, že bychom
-spočítali kořen nějakého čísla a poté testovali že použitím funkce pro výpočet
-druhé mocniny ke stejnému číslu [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
+In some cases it is possible and of course advisable to test the inverse behaviour
+of a given functionality. An example is if we have implemented a mathematical function
+to calculate the square of a number. The inverse test would then consist of
+calculate the square root of some number and then test that by using the function to calculate
+square root to the same number [(Langr et al. 2015, Ch. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
 
-### Provádět křížovou kontrolu s pomocí jiných prostředků
+### Do cross-checking using external means
 
-Jedná se o podobný přístup jako v předchozím bodě, ale používáme jiné prostředky
-než vlastní. Může se jednat o nějakou externí knihovnu, nebo používání různých
-kusů dat z testované třídy proto abychom zjistili, zda vše dohromady sedí [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
+This is a similar approach to the previous point, but we use different means
+than our own. This may be some external library, or using different
+pieces of data from the class under test to see if everything fits together [(Langr et al. 2015, Ch. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
 
-### Vynucovat chybné podmínky
+### Enforce bad conditions
 
-Tento princip je o simulování chybných podmínek, které mohou v reálném světe
-nastat. Může se například jednat o:
+This principle is about simulating bad conditions that may, in the real world
+occur in the real world. For example:
 
--   Nedostatek paměti
+- Lack of memory
 
--   Nedostatek místa na disku
+- Lack of disk space
 
--   Dostupnost sítě apod.
+- Network availability, etc.
 
-Správný jednotkový test by neměl pouze testovat logické správné cesty, ale také
-zjišťovat, jak se kód chová za chybných podmínek, respektive jestli se chová tak
-jak očekáváme [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
+A proper unit test should not only test for logical correct paths, but also
+to see how the code behaves under faulty conditions, or if it behaves as
+as we expect [(Langr et al. 2015, Ch. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
 
-### Používat jednotkové testy pro měření výkonových charakteristik testovaného systému
+### Use unit tests to measure the performance characteristics of the tested system
 
-Není vhodné vytvářet složité výkonové testy, které poběží velmi dlouho. Budou
-narušovat ostatní jednotkové testy, které splňují základní zásady jednotkového
-testu a běží velmi rychlé. Samozřejmě výkonnostní testy jsou důležité a jsou
-potřeba, je ale lepší je spouštět odděleně od jednotkových testů. Jednotkové
-testy však v tomto ohledu mohou být nápomocné. Mohou být použity pro poskytnutí
-základní informace o výkonnosti nějaké funkce a tato informace bude následně
-využita pro vytvoření výkonnostních testů [(Langr et al. 2015, kap. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
+It is not appropriate to create complex performance tests that will run for a very long time. They will
+interfere with other unit tests that meet the basic principles of unit
+and therefore run very fast. Of course performance tests are important and are
+needed, but it is better to run them separately from the unit tests. Unit
+tests can be helpful in this respect. They can be used to provide
+basic information about the performance of a function and this information will then be
+used to create performance tests [(Langr et al. 2015, Ch. 6. What to Test: The Right-BICEP)](#978-1-937785-48-2).
 
-### Vymezovat třídy ekvivalence
+### Test equivalence classes
 
-Pokud testovaný systém přijímá hodnoty v určitém stanoveném rozsahu, bylo by
-psaní pro každou hodnotu velmi neefektivní a také zbytečné. Jednou z metod, jak
-tomu předejít je určení skupin testovacích hodnot, které jsou ekvivalentní
-neboli stačí napsat test pro každou ekvivalentní skupinu a nepsat zbytečně testy
-pro prvky, které jsou si rovny. Příkladem může být funkce pro výpočet
-rizikovosti pojištěných řidičů. Rozdělení může být podle věku na mladé (18-24),
-střední věk (24-60) a staré (nad 60 až 100) a každý skupina představuje jiné
-riziko. Stačí pak napsat pouze 3 testy pro každou ze skupin a dále můžeme napsat
-ještě dva testy pro neplatné hodnoty tedy mladší 18 let a starší 100 [(Tarlinder 2016, kap. 8. Specification-based Testing Techniques)](#978-0-13-429106-2).
+If the system under test accepts values within a certain specified range, it would be
+writing a test for each value would be very inefficient and also unnecessary. One method
+to avoid this is to specify groups of test values that are equivalent and just create a test for each equivalence group. An example would be a function for calculating an riskness of drivers. There can be three equivalence groups - young (18-24),
+middle-aged (24-60) and old (over 60 to 100) and each group represents a different
+risk. We only need to write 3 tests for each group and then we can write
+two more tests for invalid values i.e. under 18 and over 100 [(Tarlinder 2016, Ch. 8. Specification-based Testing Techniques)](#978-0-13-429106-2).
 
-### Testovat krajní hodnoty
+### Test extreme values
 
-Pokud není možné v rámci rozsahu nalézt určité skupiny ekvivalence, je místo
-doporučováno specifikovat testovací případy pro krajní hodnoty povoleného
-rozsahu [(Dooley 2017, kap. 16. Unit Testing)](#978-1-4842-3153-1),[(Tarlinder 2016, kap. 8. Specification-based Testing Techniques)](#978-0-13-429106-2). Princip je velmi jednoduchý, pokud máme například povolený rozsah
-**0-100** včetně, vytvoříme testy pro hodnoty **-1,0,100,101**. Tímto způsobem
-zajistíme dostatečné otestování jak pozitivních, tak negativních případů, bez
-testování zbytečných případů.
+If it is not possible to find certain equivalence groups within the range, the place
+recommended to specify test cases for the extreme values of the allowed
+range [(Dooley 2017, Ch. 16. Unit Testing)](#978-1-4842-3153-1),[(Tarlinder 2016, Ch. 8. Specification-based Testing Techniques)](#978-0-13-429106-2). The principle is very simple, for example, if we have an allowed range of
+**0-100** inclusive, we create tests for values **-1,0,100,101**. This way
+we ensure that we can test both positive and negative cases sufficiently without
+testing unnecessary cases.
 
-### Testovat změny stavu
+### Test the state transitions
 
-V případě že v testovaném systému dochází ke změnám stavu, je vhodné vymezovat
-jednotlivé testovací případy na základě stavového diagramu. Příklad takového
-diagramu je zachycen na obr. 16. Zachycení jednotlivých stavů a jejich
-vzájemných přechodů nám umožňuje snadno vymezit jednotlivé testovací případy.
+In case there are state transitions in the system under test, it is useful to define
+individual test cases based on the state diagram. An example of such a
+An example of such a diagram is shown in Figure 16.
+of the states and their transitions allows us to easily define the individual test cases.
 
 ![img.png](./state_diagram_example.png)
 
-obr. 16 Ukázka stavového diagramu [(Tarlinder 2016, kap. 8. Specification-based Testing Techniques)](#978-0-13-429106-2)
+Figure 16 Sample state diagram [(Tarlinder 2016, Ch. 8. Specification-based Testing Techniques)](#978-0-13-429106-2)
 
-### Testovat pomocí rozhodovacích tabulek
+### Test using decision tables
 
-V případě, kdy je potřeba otestovat veškeré varianty a neopomenou ani jeden
-případ, je doporučováno použít rozhodovací tabulku. Tento nástroj je velmi
-vhodný pro tvorbu parametrizovaných testů. Řada testovacích frameworku (např.
-Cucumber, JUnit5 či Spoc), poskytuje podporu pro tvorbu parametrizovaných testů
-s pomocí rozhodovacích tabulek. Příklad takové rozhodovací tabulky je zobrazen
-na obr. 17. Tabulka stanovuje, jaká je výše pojistného faktoru a zda bude
-zahájeno vyšetřování pro podezření z podvodu, na základě věku a pohlaví klienta.
+In the case when all variants need to be tested and not a single one can be omitted
+case, it is recommended to use a decision table. This tool is very
+useful for creating parameterized tests. A number of testing frameworks (e.g.
+Cucumber, JUnit5 or Spoc) provide support for creating parameterized tests
+using decision tables. An example of such decision table is shown in
+in Figure 17. The table determines the amount of the premium factor and whether it will
+also initialize an fraud investigation, based on the age and gender of the client.
 
 ![img.png](./decision_table_premium_factor.png)
 
-obr. 17 Rozhodovací tabulky pro určení pojistného faktoru a vyšetření podvodu
-[(Tarlinder 2016, kap. 8. Specification-based Testing Techniques)](#978-0-13-429106-2)
+Figure 17 Decision tables for premium factor determination and fraud investigation.
+[(Tarlinder 2016, Ch. 8. Specification-based Testing Techniques)]](#978-0-13-429106-2)
 
-Tabulku je poté možné použít pro vymezení jednotkových testů pro otestování
-pomocné metody, jež faktor pojistného vypočítává (viz obr.18).
+The table can then be used to define unit tests for testing
+auxiliary method that calculates the premium factor (see Figure 18).
 
-obr. 18 Ukázka použití rozhodovací tabulky pro specifikaci testovacích případů
-(autor)
+Figure 18 Example of the use of a decision table for specifying test cases
+(author)
 
 ![img.png](./decision_table_usage_example.png)
 
-## Literatura
+## Literature
 <p id="978-1-935182-57-3">KOSKELA, Lasse, 2013. Effective unit testing: a guide for Java developers. Shelter Island, NY: Manning. ISBN 978-1-935182-57-3</p>
 <p id="978-0-13-235088-4">MARTIN, Robert C., ed., 2009. Clean code: a handbook of agile software craftsmanship. Upper Saddle River, NJ: Prentice Hall. ISBN 978-0-13-235088-4.</p>
 <p id="978-1-78398-792-4">GOVINDARAJ, Siddharta, 2015. Test-driven python development. Place of publication not identified: Packt Publishing Limited. ISBN 978-1-78398-792-4.</p>
