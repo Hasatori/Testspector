@@ -32,7 +32,11 @@ intellij {
 patchPluginXml {
     sinceBuild="193"
     untilBuild = "211"
-    changeNotes("Inspection run optimization and documentation links updated to point to the google translated documentation in english")
+    changeNotes("<![CDATA[" +
+            "<ul>" +
+            "<li>Best practices translated to english</li>" +
+            "</ul>" +
+            "]]>")
 }
 
 publishPlugin {
