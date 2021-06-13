@@ -5,35 +5,26 @@ Testspector is an IntelliJ IDEA plugin that helps developers with writing unit t
 
 Plugin URL: https://plugins.jetbrains.com/plugin/16300-testspector
 
-### What do you think of the plugin?
-Please let me know by filling this survey: https://www.survio.com/survey/d/P5D2I3C1W2N5X9C2Q (**very short 10 min max, just 8 questions where 6 are mandatory**). This would help me a lot since it will show me if I am headed in the right direction and the plugin is useful.
-
 ## Documentation
 
 ### Best practices 
-The dataset of best practices was created by a detailed analysis of the world’s top books and studies regarding unit testing. The plugin is a result of a master thesis at a Czech university. I copied identified best practices straight from my master thesis. Therefore it is currently available only in the Czech. The documentation contains direct references to chapters in books and studies where the best practices were derived from.
+The dataset of best practices was created by a detailed analysis of the world’s top books and studies regarding unit testing. 
 
-* [Documentation translated by Google in English](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md) - translation is quite good but wrong at times
-* ![Original documantation in Czech](./doc/Practices.md)
-
-I am currently working on translation. In the meantime please use the translation from google.
+* ![Documentation](./doc/Practices.md)
 
 Current version of the plugin supports checking of the following 7 best practices for [JUnit 5](https://junit.org/junit5) and [JUnit 4](https://junit.org/junit4):
 
-* [Test only public behaviour](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md#testovat-pouze-verejne-chovani-testovaneho-systemu)
-* [At least one assertion](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md#minimalne-jedna-overovaci-metoda-na-test)
-* [Only one assertion](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md#prave-jedna-overovaci-metoda-na-test)
-* [No global static properties](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md#nepouzivat-globalni-staticke-promenne)
-* [Set up a test naming strategy](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md#urcit-strategii-pojmenovani-testu)
-* [Catch tested exceptions using framework tools](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md#odchytavat-testovane-vyjimky-pomoci-nastroju-knihoven-ci-testovacich-frameworku)
-* [No conditional logic](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Practices.md#podminena-logika)
+* [Test only public behaviour](./doc/Practices.md#test-only-the-public-behaviour-of-the-tested-system)
+* [At least one assertion](./doc/Practices.md#at-least-one-assertion-per-test)
+* [Only one assertion](./doc/Practices.md#only-one-assertion-per-test)
+* [No global static properties](./doc/Practices.md#do-not-use-global-static-properties)
+* [Set up a test naming strategy](./doc/Practices.md#setup-a-test-naming-strategy)
+* [Catch tested exceptions using framework tools](./doc/Practices.md#catch-tested-exceptions-using-framework-or-library-tools)
+* [No conditional logic](./doc/Practices.md#do-not-use-if-switch-for-or-while-blocks-in-a-test)
 
 ### Architecture
-The architecture of the plugin was designed in a way that supports implementation for any unit testing framework that is currently supported by the IntelliJ IDEA platform. With architecture, it is the same case as with the best practices documentation. I copied it from my master thesis, only UML diagrams are in English
-* [Architecture translated by Google in English](https://ooh3dpsdytm34sfhws63yjfbwy--github-com.translate.goog/Hasatori/Testspector/blob/master/doc/Architecture.md) - translation is quite good but wrong at times
-* ![Architecture description in czech](./doc/Architecture.md) 
-
-I am currently working on translation. In the meantime please use the translation from google.
+The architecture of the plugin was designed in a way that supports implementation for any unit testing framework that is currently supported by the IntelliJ IDEA platform.
+* [Architecture](./doc/Architecture.md) 
 
 ## Supportability
 
