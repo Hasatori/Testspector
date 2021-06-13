@@ -4,6 +4,7 @@
 Testspector is an IntelliJ IDEA plugin that helps developers with writing unit tests. It contains a dataset of best practices that should be followed when writing unit tests. The unit tests are checked against the dataset and any violation is reported to the user. The user is provided with a description of the problem, hints on how to solve it and also parts of code causing the problem. The report also contains links to the documentation where are all best practices described with examples.
 
 Plugin URL: https://plugins.jetbrains.com/plugin/16300-testspector
+
 ## Documentation
 
 ### Best practices 
