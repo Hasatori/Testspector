@@ -9,8 +9,6 @@
     </description>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
-    <depends>JavaScript</depends>
-    <depends>JavaScriptDebugger</depends>
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="com.testspector.view.TestLineMarkerFactory"/>
