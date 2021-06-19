@@ -23,9 +23,8 @@ dependencies {
 }
 
 intellij {
-    type 'IU'
     version = '2019.3'
-    plugins = ['com.intellij.java', "JavaScriptLanguage","JavaScriptDebugger"]
+    plugins = ['com.intellij.java']
 }
 patchPluginXml {
     sinceBuild="192"
@@ -40,10 +39,11 @@ patchPluginXml {
             "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#setup-a-test-naming-strategy\">Set up a test naming strategy</a></li>" +
             "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#catch-tested-exceptions-using-framework-or-library-tools\">Catch tested exceptions using framework tools</a></li>" +
             "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#do-not-use-if-switch-for-or-while-blocks-in-a-test\">No conditional logic</a></li>" +
-            "</ul>>")
-    changeNotes("<ul>" +
-            "<li>Best practices translated to english</li>" +
-            "<li>Architecture description translated to english</li>" +
+            "</ul>")
+    changeNotes("<ul>Added support for:" +
+            "<li>IntelliJ IDEA Community</li>" +
+            "<li>IntelliJ IDEA Educational</li>" +
+            "<li>Android Studio</li>" +
             "</ul>")
 }
 

@@ -2,8 +2,6 @@ package com.testspector.model.checking.factory;
 
 import com.intellij.lang.Language;
 import com.intellij.lang.java.JavaLanguage;
-import com.intellij.lang.javascript.dialects.ECMA6LanguageDialect;
-import com.intellij.lang.javascript.dialects.TypeScriptLanguageDialect;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.testspector.HeavyTestBase;
@@ -26,8 +24,7 @@ public class ProgrammingLanguageFactoryTest extends HeavyTestBase {
     private static Stream<Arguments> provideSupportedProgrammingLanguageAndCorrespondingFileCombinations() {
         return Stream.of(
                 // Expected language | file name
-                Arguments.of(JavaLanguage.INSTANCE, ProgrammingLanguage.JAVA),
-                Arguments.of(TypeScriptLanguageDialect.findLanguageByID("TypeScript"), ProgrammingLanguage.TYPESCRIPT)
+                Arguments.of(JavaLanguage.INSTANCE, ProgrammingLanguage.JAVA)
         );
     }
 
@@ -58,18 +55,4 @@ public class ProgrammingLanguageFactoryTest extends HeavyTestBase {
 
     }
 
-    @Test
-    public void resolveProgrammingLanguage_NotSupportedLanguage_ShouldNoReturnLanguage() {
-        PsiElement psiElement = mock(PsiElement.class);
-        PsiFile languageFile = mock(PsiFile.class);
-        expect(psiElement.getContainingFile()).andReturn(languageFile).times(1);
-        expect(languageFile.getLanguage()).andReturn(ECMA6LanguageDialect.findLanguageByID("ECMAScript 6")).times(1);
-        replay(psiElement, languageFile);
-        ProgrammingLanguageFactory programmingLanguageFactory = new ProgrammingLanguageFactory();
-
-        Optional<ProgrammingLanguage> optionalProgrammingLanguage = programmingLanguageFactory.getProgrammingLanguage(psiElement);
-
-        Assertions.assertFalse(optionalProgrammingLanguage.isPresent(), "No programming language should be returned!");
-
-    }
 }
