@@ -23,7 +23,7 @@ dependencies {
 }
 
 intellij {
-    version = '2019.3'
+    version = '2019.2'
     plugins = ['com.intellij.java']
 }
 patchPluginXml {
