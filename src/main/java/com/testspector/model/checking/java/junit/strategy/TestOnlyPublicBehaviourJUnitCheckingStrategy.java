@@ -1,9 +1,9 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.codeInspection.LocalQuickFix;
-import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.openapi.project.Project;
+import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
+import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -53,63 +53,27 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
             ;
             nonPublicTestedMethodsFromMethodCallExpressions.forEach(nonPublicFromMethodCallExpression -> {
                 bestPracticeViolations.add(new BestPracticeViolation(
-                        testMethod,
+                        nonPublicFromMethodCallExpression,
                         "Not public method called by a method call",
                         this.getCheckedBestPractice().get(0),
-                        Collections.singletonList(nonPublicFromMethodCallExpression)
-                        , Arrays.asList(new LocalQuickFix() {
-                                            @Override
-                                            public
-                                            @NotNull
-                                            String getFamilyName() {
-                                                return "Make public";
-                                            }
-
-                                            @Override
-                                            public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor problemDescriptor) {
-                                                PsiMethod method = nonPublicFromMethodCallExpression.resolveMethod();
-                                                if (method != null) {
-                                                    method.replace(PsiElementFactory.getInstance(method.getProject()).createMethodFromText("public   static float test(){\n" +
-                                                            "\n" +
-                                                            "    }", null));
-                                                }
-
-                                            }
-                                        }
-                )));
+                        Collections.singletonList(makePublicQuickFix(nonPublicFromMethodCallExpression.resolveMethod(),nonPublicFromMethodCallExpression.getMethodExpression())
+                        )));
             });
 
             List<PsiReference> nonPublicTestedMethodsFromReferences = methodResolver.allTestedMethodsFromReference(testMethod)
                     .stream()
                     .filter(reference -> {
-                        PsiMethod testedMethod = (PsiMethod) reference.resolveReference();
+                        PsiMethod testedMethod = (PsiMethod) reference.resolve();
                         return methodHasModifier(testedMethod, PsiModifier.PROTECTED) ||
                                 isMethodPackagePrivate(testedMethod) ||
                                 methodHasModifier(testedMethod, PsiModifier.PRIVATE);
                     }).collect(Collectors.toList());
             nonPublicTestedMethodsFromReferences.forEach(reference -> {
                 bestPracticeViolations.add(new BestPracticeViolation(
-                        testMethod,
+                        reference.getElement(),
                         "Not public method called by a method call",
                         this.getCheckedBestPractice().get(0),
-                        Collections.singletonList(reference.getElement()),
-                        Arrays.asList(new LocalQuickFix() {
-                                          @Override
-                                          public
-                                          @NotNull
-                                          String getFamilyName() {
-                                              return "Make public";
-                                          }
-
-                                          @Override
-                                          public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor problemDescriptor) {
-                                              PsiElement element = reference.resolve();
-                                              if (element instanceof PsiMethod) {
-                                                  ((PsiMethod) element).getModifierList().setModifierProperty("public", false);
-                                              }
-
-                                          }
-                                      }
+                        Collections.singletonList(makePublicQuickFix((PsiMethod) reference.resolve(),reference)
                         )));
             });
 
@@ -127,6 +91,23 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
         return !modifierList.hasModifierProperty(PsiModifier.PUBLIC) &&
                 !modifierList.hasModifierProperty(PsiModifier.PRIVATE) &&
                 !modifierList.hasModifierProperty(PsiModifier.PROTECTED);
+    }
+
+    private Action<BestPracticeViolation> makePublicQuickFix(PsiMethod method,PsiReference psiReference){
+      return new Action<>() {
+          @Override
+          public
+          @NotNull
+          String getName() {
+              return String.format("Make %s public",method.getName());
+          }
+
+          @Override
+          public void execute(BestPracticeViolation bestPracticeViolation) {
+              method.replace(PsiElementFactory.getInstance(method.getProject()).createMethodFromText("public " + method.getText(), null));
+              ((Navigatable) psiReference.resolve().getNavigationElement()).navigate(true);
+          }
+      };
     }
 
     @Override

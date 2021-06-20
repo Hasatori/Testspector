@@ -10,7 +10,6 @@ import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -59,10 +58,9 @@ public class AtLeastOneAssertionJUnitCheckingStrategy extends AssertionCountJUni
     private BestPracticeViolation createAtLeastOneAssertionBestPracticeViolation(PsiMethod testMethod,
                                                                                    PsiIdentifier methodIdentifier) {
         return new BestPracticeViolation(
-                testMethod,
+                methodIdentifier,
                 "Test should contain at least one assertion method!",
                 BestPractice.AT_LEAST_ONE_ASSERTION,
-                Arrays.asList(methodIdentifier),
                 null);
     }
 }

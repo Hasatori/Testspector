@@ -48,8 +48,8 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
                     .filter(isStaticAndNotFinal())
                     .collect(Collectors.toList());
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
-            if (staticProperties.size() > 0) {
-                bestPracticeViolations.add(createBestPracticeViolation(testMethod, methodIdentifier, staticProperties));
+            for (PsiField staticProperty : staticProperties) {
+                bestPracticeViolations.add(createBestPracticeViolation(staticProperty));
             }
 
         }
@@ -67,14 +67,13 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
         };
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiIdentifier methodIdentifier, List<PsiField> staticProperties) {
+    private BestPracticeViolation createBestPracticeViolation(PsiField staticProperty) {
         return new BestPracticeViolation(
-                testMethod,
+                staticProperty,
                 "Global static properties should not be part of a test. " +
                         "Tests are sharing the reference and if some of them would update" +
                         " it it might influence behaviour of other tests.",
                 getCheckedBestPractice().get(0),
-                new ArrayList<PsiElement>(staticProperties),
                 null,
                 Arrays.asList(
                         "If the property is immutable e.g.,String, Integer, Byte, Character" +

@@ -57,10 +57,9 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                         })
                         .collect(Collectors.toList());
                 if (methodsWithAlmostSameName.size() >= 1) {
-                    bestPracticeViolations.add(createBestPracticeViolation(
-                            testMethod,
-                            nameIdentifier,
-                            methodsWithAlmostSameName));
+                    for (PsiMethodCallExpression methodCallExpression : methodsWithAlmostSameName) {
+                        bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));
+                    }
                 }
             }
         }
@@ -82,14 +81,13 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
     }
 
 
-    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiIdentifier nameIdentifier, List<PsiMethodCallExpression> methodsWithAlmostSameName) {
+    private BestPracticeViolation createBestPracticeViolation(PsiMethodCallExpression methodWithAlmostSameName) {
         return new BestPracticeViolation(
-                testMethod.getNameIdentifier(),
+                methodWithAlmostSameName.getMethodExpression(),
                 "The test name is more or less the same as the tested method. " +
                         "This says nothing about tests scenario. You should setup a clear strategy " +
                         "for naming your tests so that the person reading then knows what is tested",
                 getCheckedBestPractice().get(0),
-                methodsWithAlmostSameName.stream().map(methodWithAlmostSameNameCall -> (PsiElement) methodWithAlmostSameNameCall.getMethodExpression()).collect(Collectors.toList()),
                 null,
                 Arrays.asList(
                         "Possible strategy: 'doingSomeOperationGeneratesSomeResult'",

@@ -42,11 +42,9 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
             removeGroupedAssertions(allAssertionMethods);
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
             if (allAssertionMethods.size() > 1) {
-                allAssertionMethods.forEach(assertionMethod -> {
-                    bestPracticeViolations.add(createOnlyOneBestPracticeViolation(
-                            testMethod, assertionMethod, methodIdentifier
-                    ));
-                });
+                for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
+                    bestPracticeViolations.add(createOnlyOneBestPracticeViolation(testMethod, assertionMethod));
+                }
             }
         }
         return bestPracticeViolations;
@@ -54,8 +52,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
 
 
     private BestPracticeViolation createOnlyOneBestPracticeViolation(PsiMethod testMethod,
-                                                                     PsiMethodCallExpression assertionMethod,
-                                                                     PsiIdentifier methodIdentifier) {
+                                                                     PsiMethodCallExpression assertionMethod) {
         List<String> hints = new ArrayList<>();
         String message = "Test should fail for only one reason. " +
                 "Using multiple assertions in JUnit leads to that if " +
@@ -71,10 +68,9 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
             hints.add("You can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers");
         }
         return new BestPracticeViolation(
-                testMethod,
+                assertionMethod.getMethodExpression(),
                 message,
                 BestPractice.ONLY_ONE_ASSERTION,
-                Collections.singletonList(assertionMethod.getMethodExpression()),
                 null,
                 hints);
     }

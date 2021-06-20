@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.*;
 
@@ -43,8 +42,8 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                             testMethod,
                             PsiTryStatement.class,
                             contextResolver.isInTestContext());
-            if (psiTryStatements.size() > 0) {
-                bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatements));
+            for (PsiTryStatement psiTryStatement : psiTryStatements) {
+                bestPracticeViolations.add(createBestPracticeViolation(testMethod,psiTryStatement));
             }
         }
         return bestPracticeViolations;
@@ -66,7 +65,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         return Optional.empty();
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, List<PsiTryStatement> psiTryStatements) {
+    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiTryStatement psiTryStatement) {
         List<String> hints = new ArrayList<>();
         String message = "Tests should not contain try catch block. " +
                 "These blocks are redundant and make test harder to read and understand. " +
@@ -85,10 +84,9 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                     , JUNIT4_ASSERTIONS_CLASS_PATH));
         }
         return new BestPracticeViolation(
-                testMethod,
+                psiTryStatement,
                 message,
                 this.getCheckedBestPractice().get(0),
-                psiTryStatements.stream().map(statement -> (PsiElement) statement).collect(Collectors.toList()),
                 null);
     }
 

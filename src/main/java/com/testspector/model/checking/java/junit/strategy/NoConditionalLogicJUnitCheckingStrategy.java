@@ -1,17 +1,14 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.codeInspection.LocalQuickFix;
-import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.openapi.project.Project;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
+import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
-import org.jetbrains.annotations.NotNull;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -66,8 +63,8 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                     .filter(partOfAssertionMethod().negate())
                     .collect(Collectors.toList());
             statements = statements.stream().distinct().collect(Collectors.toList());
-            if (statements.size() > 0) {
-                bestPracticeViolations.add(createBestPracticeViolation(testMethod, statements));
+            for (PsiStatement statement : statements) {
+                bestPracticeViolations.add(createBestPracticeViolation(testMethod, statement));
             }
 
         }
@@ -134,7 +131,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                         SUPPORTED_STATEMENT_CLASSES));
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, List<PsiStatement> conditionalStatements) {
+    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiStatement conditionalStatement) {
         List<String> hints = new ArrayList<>();
         hints.add(String.format("Remove statements [ %s ] and create separate test scenario for each branch",
                 SUPPORTED_STATEMENT_CLASSES
@@ -147,33 +144,29 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                             "using data driven approach and generating each scenario using %s",
                     JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH));
         }
-        PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
         return new BestPracticeViolation(
-                testMethod,
+                conditionalStatement,
                 "Conditional logic should not be part of the test " +
                         "method, it makes test hard to understand, read and maintain.",
                 getCheckedBestPractice().get(0),
-                conditionalStatements.stream().map(statement->(PsiElement) statement).collect(Collectors.toList()),
-                conditionalStatements.stream().map(statement -> {
-                            return new LocalQuickFix() {
-                                @Override
-                                public
-                                @NotNull
-                                String getFamilyName() {
-                                    return "Navigate " + statement.toString() + " in " + statement.getContainingFile().getName();
-                                }
+                Collections.singletonList(new Action<>() {
+                                              @Override
+                                              public String getName() {
+                                                  return "Navigate " + conditionalStatement.toString() + " in " + conditionalStatement.getContainingFile().getName();
+                                              }
 
-                                @Override
-                                public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor problemDescriptor) {
-                                    Optional<PsiElement> optionalNavigationElement = Optional.ofNullable(statement.getNavigationElement());
-                                    if (optionalNavigationElement.isPresent() && optionalNavigationElement.get() instanceof Navigatable
-                                            && ((Navigatable) optionalNavigationElement.get()).canNavigate()) {
-                                        ((Navigatable) optionalNavigationElement.get()).navigate(true);
-                                    }
-                                }
-                            };
-                        }).collect(Collectors.toList())
-                );
+                                              @Override
+                                              public void execute(BestPracticeViolation bestPracticeViolation) {
+                                                  Optional<PsiElement> optionalNavigationElement = Optional.ofNullable(bestPracticeViolation.getElement().getNavigationElement());
+                                                  if (optionalNavigationElement.isPresent() && optionalNavigationElement.get() instanceof Navigatable
+                                                          && ((Navigatable) optionalNavigationElement.get()).canNavigate()) {
+                                                      ((Navigatable) optionalNavigationElement.get()).navigate(true);
+                                                  }
+                                              }
+                                          }
+                ),
+                hints
+        );
     }
 
     @Override
