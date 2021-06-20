@@ -9,8 +9,6 @@
     </description>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
-    <depends>JavaScript</depends>
-    <depends>JavaScriptDebugger</depends>
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="com.testspector.controller.TestspectorController" />
         <projectService serviceImplementation="com.testspector.model.checking.factory.InspectionInvocationLineResolveStrategyFactory" />

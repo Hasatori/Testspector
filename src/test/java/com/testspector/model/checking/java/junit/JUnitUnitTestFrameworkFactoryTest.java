@@ -58,16 +58,6 @@ public class JUnitUnitTestFrameworkFactoryTest extends JavaTest {
     }
 
     @Test
-    public void canResolveFromPsiElement_TypescriptFileWithJestTests_ShouldBeEmpty() throws Exception {
-        String typescriptFileText = loadFileContentFromResources("jUnitUnitTestFrameworkResolveIndicationStrategyTest/TypeScriptWithJest.tsx");
-        PsiFile psiFile = psiFileFactory.createFileFromText(JavaLanguage.INSTANCE, typescriptFileText);
-
-        Optional<UnitTestFramework> optionalUnitTestFramework = jUnitUnitTestFrameworkFactory.getUnitTestFramework(psiFile);
-
-        assertFalse(optionalUnitTestFramework.isPresent());
-    }
-
-    @Test
     public void canResolveFromPsiElement_NullElement_ShouldBeEmpty() {
         PsiElement element = null;
 
