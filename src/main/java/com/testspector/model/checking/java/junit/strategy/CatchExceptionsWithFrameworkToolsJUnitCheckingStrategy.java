@@ -1,6 +1,8 @@
 package com.testspector.model.checking.java.junit.strategy;
 
+import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
+import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.*;
 
@@ -37,32 +40,27 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
-            List<PsiTryStatement> psiTryStatements = elementResolver
+            JavaElementResolver.SearchResult<PsiTryStatement> psiTryStatementsSearchResult = elementResolver
                     .allChildrenOfTypeWithReferences(
                             testMethod,
                             PsiTryStatement.class,
                             contextResolver.isInTestContext());
-            for (PsiTryStatement psiTryStatement : psiTryStatements) {
-                bestPracticeViolations.add(createBestPracticeViolation(testMethod,psiTryStatement));
+            for (PsiTryStatement psiTryStatement : elementResolver.getElementsFromSearchResult(psiTryStatementsSearchResult)) {
+                bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatement));
             }
+            psiTryStatementsSearchResult.getReferencedResults().stream().filter(searchResult ->
+                    Optional.ofNullable(searchResult.getLeft()).map(reference -> reference.getParent() instanceof PsiMethodCallExpression).isPresent())
+                    .forEach(result -> {
+                        List<PsiTryStatement> tryStatements = elementResolver.getElementsFromSearchResult(result.getRight());
+                        if (!tryStatements.isEmpty()){
+                            bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), tryStatements));
+                        }
+
+                    });
+
+
         }
         return bestPracticeViolations;
-    }
-
-    private Optional<PsiReferenceExpression> firstReferenceToTryStatement(PsiElement element, PsiTryStatement statement) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                element,
-                PsiReferenceExpression.class);
-        for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                    reference.getParent(),
-                    PsiStatement.class,
-                    psiStatement -> statement == psiStatement,
-                    contextResolver.isInTestContext()).isEmpty()) {
-                return Optional.of(reference);
-            }
-        }
-        return Optional.empty();
     }
 
     private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiTryStatement psiTryStatement) {
@@ -88,6 +86,26 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                 message,
                 this.getCheckedBestPractice().get(0),
                 null);
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiTryStatement> tryStatements) {
+        return new BestPracticeViolation(
+                reference.getElement(),
+                "Following method leads to an ",
+                getCheckedBestPractice().get(0),
+                tryStatements.stream().map(tryStatement -> new Action<BestPracticeViolation>() {
+                    @Override
+                    public String getName() {
+                        return "Go to try catch statement in " + tryStatement.getContainingFile().getName() + "(line " + PsiDocumentManager.getInstance(tryStatement.getProject()).getDocument(tryStatement.getContainingFile()).getLineNumber(tryStatement.getTextOffset()) + ")";
+                    }
+
+                    @Override
+                    public void execute(BestPracticeViolation bestPracticeViolation) {
+                        ((Navigatable) tryStatement.getNavigationElement()).navigate(true);
+                    }
+                }).collect(Collectors.toList())
+        );
+
     }
 
     @Override

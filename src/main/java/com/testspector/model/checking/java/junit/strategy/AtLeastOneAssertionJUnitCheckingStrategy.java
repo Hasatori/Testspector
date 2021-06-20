@@ -30,7 +30,7 @@ public class AtLeastOneAssertionJUnitCheckingStrategy extends AssertionCountJUni
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
-            List<PsiMethodCallExpression> allAssertionMethods = elementResolver
+            JavaElementResolver.SearchResult<PsiMethodCallExpression> allAssertionMethods = elementResolver
                     .allChildrenOfTypeMeetingConditionWithReferences(
                             testMethod,
                             PsiMethodCallExpression.class,
@@ -38,9 +38,9 @@ public class AtLeastOneAssertionJUnitCheckingStrategy extends AssertionCountJUni
                                     .assertionMethod(psiMethodCallExpression)
                                     .isPresent())
                             , methodInTestContext());
-            removeGroupedAssertions(allAssertionMethods);
+            removeGroupedAssertions(elementResolver.getElementsFromSearchResult(allAssertionMethods));
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
-            if (allAssertionMethods.isEmpty()) {
+            if (elementResolver.getElementsFromSearchResult(allAssertionMethods).isEmpty()) {
                 bestPracticeViolations.add(createAtLeastOneAssertionBestPracticeViolation(
                         testMethod,
                         methodIdentifier));

@@ -39,11 +39,11 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
     protected void removeGroupedAssertions(List<PsiMethodCallExpression> allAssertions) {
         List<PsiMethodCallExpression> toRemove = new ArrayList<>();
         for (PsiMethodCallExpression assertion : allAssertions) {
-            toRemove.addAll(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+            toRemove.addAll(elementResolver.getElementsFromSearchResult(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     assertion,
                     PsiMethodCallExpression.class,
                     psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent(),
-                    contextIndicator.isInTestContext()));
+                    contextIndicator.isInTestContext())));
         }
         allAssertions.removeAll(toRemove);
     }
@@ -57,15 +57,15 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
 
     protected Optional<PsiReferenceExpression> firstReferenceToAssertionMethod(PsiElement element,
                                                                              PsiMethodCallExpression psiMethodCallExpression) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+        List<PsiReferenceExpression> references = elementResolver.getElementsFromSearchResult(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                 element,
-                PsiReferenceExpression.class);
+                PsiReferenceExpression.class));
         for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+            if (!elementResolver.getElementsFromSearchResult(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     reference.getParent(),
                     PsiMethodCallExpression.class, psiMethodCallExpression1 ->
                             psiMethodCallExpression == psiMethodCallExpression1,
-                    contextIndicator.isInTestContext()).isEmpty()) {
+                    contextIndicator.isInTestContext())).isEmpty()) {
                 return Optional.of(reference);
             }
         }

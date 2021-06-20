@@ -3,6 +3,7 @@ package com.testspector.model.checking.java.common;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
 import com.intellij.psi.search.GlobalSearchScope;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,23 +23,23 @@ public class JavaMethodResolver {
 
     public List<PsiMethod> allTestedMethods(PsiMethod testMethod) {
         List<PsiMethod> result = new ArrayList<>();
-        List<PsiMethodCallExpression> assertionMethods = elementResolver
+        List<PsiMethodCallExpression> assertionMethods = elementResolver.getElementsFromSearchResult(elementResolver
                 .allChildrenOfTypeMeetingConditionWithReferences(
                         testMethod,
                         PsiMethodCallExpression.class,
                         (psiMethodCallExpression ->
                                 assertionMethod(psiMethodCallExpression).isPresent()),
-                        contextResolver.isInTestContext())
+                        contextResolver.isInTestContext()))
                 .stream()
                 .distinct()
                 .collect(Collectors.toList());
 
         result.addAll(assertionMethods.stream()
-                .map(element -> elementResolver
+                .map(element -> elementResolver.getElementsFromSearchResult(elementResolver
                         .allChildrenOfTypeWithReferences(
                                 element,
                                 PsiMethodCallExpression.class,
-                                contextResolver.isInTestContext()))
+                                contextResolver.isInTestContext())))
                 .flatMap(Collection::stream)
                 .map(PsiCall::resolveMethod)
                 .filter(Objects::nonNull)
@@ -47,11 +48,11 @@ public class JavaMethodResolver {
 
         result.addAll(assertionMethods
                 .stream()
-                .map(assertionMethod -> elementResolver
+                .map(assertionMethod -> elementResolver.getElementsFromSearchResult(elementResolver
                         .allChildrenOfTypeWithReferences(
                                 assertionMethod,
                                 PsiLiteralExpression.class,
-                                contextResolver.isInTestContext()))
+                                contextResolver.isInTestContext())))
                 .flatMap(Collection::stream)
                 .map(ReferenceProvidersRegistry::getReferencesFromProviders)
                 .flatMap(Arrays::stream)
@@ -65,22 +66,22 @@ public class JavaMethodResolver {
     }
 
     public List<PsiMethodCallExpression> allTestedMethodsExpressions(PsiMethod testMethod) {
-        List<PsiMethodCallExpression> assertionMethods = elementResolver
+        List<PsiMethodCallExpression> assertionMethods = elementResolver.getElementsFromSearchResult( elementResolver
                 .allChildrenOfTypeMeetingConditionWithReferences(
                         testMethod,
                         PsiMethodCallExpression.class,
                         (psiMethodCallExpression ->
                                 assertionMethod(psiMethodCallExpression).isPresent()),
-                        contextResolver.isInTestContext())
+                        contextResolver.isInTestContext()))
                 .stream()
                 .distinct()
                 .collect(Collectors.toList());
         List<PsiMethodCallExpression> result = assertionMethods.stream()
-                .map(element -> elementResolver
+                .map(element ->elementResolver.getElementsFromSearchResult( elementResolver
                         .allChildrenOfTypeWithReferences(
                                 element,
                                 PsiMethodCallExpression.class,
-                                contextResolver.isInTestContext()))
+                                contextResolver.isInTestContext())))
                 .flatMap(Collection::stream)
                 .filter(psiMethodCallExpression -> {
                     PsiMethod method = psiMethodCallExpression.resolveMethod();
@@ -91,23 +92,23 @@ public class JavaMethodResolver {
     }
 
     public List<PsiReference> allTestedMethodsFromReference(PsiMethod testMethod){
-        List<PsiMethodCallExpression> assertionMethods = elementResolver
+        List<PsiMethodCallExpression> assertionMethods = elementResolver.getElementsFromSearchResult(elementResolver
                 .allChildrenOfTypeMeetingConditionWithReferences(
                         testMethod,
                         PsiMethodCallExpression.class,
                         (psiMethodCallExpression ->
                                 assertionMethod(psiMethodCallExpression).isPresent()),
-                        contextResolver.isInTestContext())
+                        contextResolver.isInTestContext()))
                 .stream()
                 .distinct()
                 .collect(Collectors.toList());
         List<PsiReference> result = assertionMethods
                 .stream()
-                .map(assertionMethod -> elementResolver
+                .map(assertionMethod -> elementResolver.getElementsFromSearchResult(elementResolver
                         .allChildrenOfTypeWithReferences(
                                 assertionMethod,
                                 PsiLiteralExpression.class,
-                                contextResolver.isInTestContext()))
+                                contextResolver.isInTestContext())))
                 .flatMap(Collection::stream)
                 .map(ReferenceProvidersRegistry::getReferencesFromProviders)
                 .flatMap(Arrays::stream)

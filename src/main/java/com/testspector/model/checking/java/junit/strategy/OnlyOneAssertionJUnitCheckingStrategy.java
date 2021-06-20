@@ -31,14 +31,15 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
-            List<PsiMethodCallExpression> allAssertionMethods = elementResolver
-                    .allChildrenOfTypeMeetingConditionWithReferences(
-                            testMethod,
-                            PsiMethodCallExpression.class,
-                            (psiMethodCallExpression -> methodResolver
-                                    .assertionMethod(psiMethodCallExpression)
-                                    .isPresent())
-                            , methodInTestContext());
+            List<PsiMethodCallExpression> allAssertionMethods = elementResolver.getElementsFromSearchResult(
+                    elementResolver
+                            .allChildrenOfTypeMeetingConditionWithReferences(
+                                    testMethod,
+                                    PsiMethodCallExpression.class,
+                                    (psiMethodCallExpression -> methodResolver
+                                            .assertionMethod(psiMethodCallExpression)
+                                            .isPresent())
+                                    , methodInTestContext()));
             removeGroupedAssertions(allAssertionMethods);
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
             if (allAssertionMethods.size() > 1) {

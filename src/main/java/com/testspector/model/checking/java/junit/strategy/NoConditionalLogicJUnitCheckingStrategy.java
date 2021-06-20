@@ -53,12 +53,13 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
         for (PsiMethod testMethod : methods) {
-            List<PsiStatement> statements = elementResolver
+            JavaElementResolver.SearchResult<PsiStatement> statementsSearchResult = elementResolver
                     .allChildrenOfTypeMeetingConditionWithReferences(
                             testMethod
                             , PsiStatement.class
                             , isConditionalStatement()
-                            , methodInTestContext())
+                            , methodInTestContext());
+            List<PsiStatement> statements = elementResolver.getElementsFromSearchResult(statementsSearchResult)
                     .stream()
                     .filter(partOfAssertionMethod().negate())
                     .collect(Collectors.toList());
