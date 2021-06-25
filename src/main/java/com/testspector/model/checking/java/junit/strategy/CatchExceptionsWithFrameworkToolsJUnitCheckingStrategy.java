@@ -46,13 +46,13 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                             testMethod,
                             PsiTryStatement.class,
                             contextResolver.isInTestContext());
-            for (PsiTryStatement psiTryStatement : elementResolver.getElementsFromSearchResult(psiTryStatementsElementSearchResult)) {
+            for (PsiTryStatement psiTryStatement : psiTryStatementsElementSearchResult.getAllElements()) {
                 bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatement));
             }
             psiTryStatementsElementSearchResult.getReferencedResults().stream().filter(searchResult ->
                     Optional.ofNullable(searchResult.getLeft()).map(reference -> reference.getParent() instanceof PsiMethodCallExpression).isPresent())
                     .forEach(result -> {
-                        List<PsiTryStatement> tryStatements = elementResolver.getElementsFromSearchResult(result.getRight());
+                        List<PsiTryStatement> tryStatements = result.getRight().getAllElements();
                         if (!tryStatements.isEmpty()){
                             bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), tryStatements));
                         }

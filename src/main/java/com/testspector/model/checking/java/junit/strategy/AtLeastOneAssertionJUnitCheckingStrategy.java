@@ -39,9 +39,9 @@ public class AtLeastOneAssertionJUnitCheckingStrategy extends AssertionCountJUni
                                     .assertionMethod(psiMethodCallExpression)
                                     .isPresent())
                             , methodInTestContext());
-            removeGroupedAssertions(elementResolver.getElementsFromSearchResult(allAssertionMethods));
+            removeGroupedAssertions(allAssertionMethods.getAllElements());
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
-            if (elementResolver.getElementsFromSearchResult(allAssertionMethods).isEmpty()) {
+            if (allAssertionMethods.getAllElements().isEmpty()) {
                 bestPracticeViolations.add(createAtLeastOneAssertionBestPracticeViolation(
                         testMethod,
                         methodIdentifier));

@@ -36,7 +36,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
 
 
         for (PsiMethod testMethod : methods) {
-            List<PsiField> staticProperties = elementResolver.getElementsFromSearchResult(
+            List<PsiField> staticProperties =
                     elementResolver
                             .allChildrenOfTypeMeetingConditionWithReferences(
                                     testMethod,
@@ -44,10 +44,11 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
                                     (psiField ->
                                             !(psiField instanceof PsiEnumConstant)
                                     ),
-                                    contextIndicator.isInTestContext()))
-                    .stream()
-                    .filter(isStaticAndNotFinal())
-                    .collect(Collectors.toList());
+                                    contextIndicator.isInTestContext())
+                            .getAllElements()
+                            .stream()
+                            .filter(isStaticAndNotFinal())
+                            .collect(Collectors.toList());
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
             for (PsiField staticProperty : staticProperties) {
                 bestPracticeViolations.add(createBestPracticeViolation(staticProperty));

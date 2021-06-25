@@ -81,14 +81,4 @@ public class JavaElementResolver {
         }
         return result;
     }
-
-    public <T extends PsiElement> List<T> getElementsFromSearchResult(ElementSearchResult<T> elementSearchResult) {
-        List<T> result = new ArrayList<>();
-        result.addAll(elementSearchResult.getElements());
-        for (Pair<PsiReferenceExpression, ElementSearchResult> referencedResult : elementSearchResult.getReferencedResults()) {
-            result.addAll(getElementsFromSearchResult(referencedResult.getRight()));
-        }
-
-        return result;
-    }
 }

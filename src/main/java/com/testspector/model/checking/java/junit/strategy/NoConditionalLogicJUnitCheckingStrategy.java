@@ -60,7 +60,8 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                             , PsiStatement.class
                             , isConditionalStatement()
                             , methodInTestContext());
-            List<PsiStatement> statements = elementResolver.getElementsFromSearchResult(statementsElementSearchResult)
+            List<PsiStatement> statements = statementsElementSearchResult
+                    .getAllElements()
                     .stream()
                     .filter(partOfAssertionMethod().negate())
                     .collect(Collectors.toList());

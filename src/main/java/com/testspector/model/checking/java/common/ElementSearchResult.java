@@ -1,5 +1,6 @@
 package com.testspector.model.checking.java.common;
 
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReferenceExpression;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -33,6 +34,16 @@ public class ElementSearchResult<T> {
 
     public void setElements(List<T> elements) {
         this.elements = elements;
+    }
+
+    public List<T> getAllElements() {
+        List<T> result = new ArrayList<>();
+        result.addAll(this.getElements());
+        for (Pair<PsiReferenceExpression, ElementSearchResult> referencedResult : this.getReferencedResults()) {
+            result.addAll(referencedResult.getRight().getAllElements());
+        }
+
+        return result;
     }
 
 }
