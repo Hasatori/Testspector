@@ -1,9 +1,10 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.PsiIdentifier;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.pom.Navigatable;
+import com.intellij.psi.*;
+import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.java.common.ElementSearchResult;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -14,8 +15,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCheckingStrategy {
+
+    private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE =  "Test should fail for only one reason. " +
+            "Using multiple assertions in JUnit leads to that if " +
+            "one assertion fails other will not be executed and " +
+            "therefore you will not get overview of all problems.";
 
     public OnlyOneAssertionJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
         super(elementResolver, contextIndicator, methodResolver);
@@ -31,7 +38,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
-            List<PsiMethodCallExpression> allAssertionMethods =
+            ElementSearchResult<PsiMethodCallExpression> allAssertionMethodsResult =
                     elementResolver
                             .allChildrenOfTypeMeetingConditionWithReferences(
                                     testMethod,
@@ -39,15 +46,17 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                                     (psiMethodCallExpression -> methodResolver
                                             .assertionMethod(psiMethodCallExpression)
                                             .isPresent())
-                                    , methodInTestContext())
-                            .getAllElements();
-            removeGroupedAssertions(allAssertionMethods);
-            PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
+                                    ,el-> el instanceof  PsiMethod && methodInTestContext().test(el));
+            removeGroupedAssertions(allAssertionMethodsResult);
+            List<PsiMethodCallExpression> allAssertionMethods = allAssertionMethodsResult.getAllElements();
             if (allAssertionMethods.size() > 1) {
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
                     bestPracticeViolations.add(createOnlyOneBestPracticeViolation(testMethod, assertionMethod));
                 }
+
             }
+            bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
+
         }
         return bestPracticeViolations;
     }
@@ -56,10 +65,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
     private BestPracticeViolation createOnlyOneBestPracticeViolation(PsiMethod testMethod,
                                                                      PsiMethodCallExpression assertionMethod) {
         List<String> hints = new ArrayList<>();
-        String message = "Test should fail for only one reason. " +
-                "Using multiple assertions in JUnit leads to that if " +
-                "one assertion fails other will not be executed and " +
-                "therefore you will not get overview of all problems.";
+        String message = DEFAULT_PROBLEM_DESCRIPTION_MESSAGE;
         if (isJUnit5TestMethod(testMethod)) {
             hints.add(String.format(
                     "You are using JUnit5 so it can be solved " +
@@ -75,6 +81,39 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                 BestPractice.ONLY_ONE_ASSERTION,
                 null,
                 hints);
+    }
+
+    private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiMethodCallExpression> elementSearchResult){
+        List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        elementSearchResult.getReferencedResults()
+                .forEach(result -> {
+                    List<PsiMethodCallExpression> assertionMethods = result.getRight().getAllElements();
+                    if (!assertionMethods.isEmpty()){
+                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), assertionMethods));
+                    }
+                    bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
+                });
+        return bestPracticeViolations;
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiMethodCallExpression> assertionMethods) {
+        return new BestPracticeViolation(
+                reference.getElement(),
+                "Following method breaks best practice. "+ DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                getCheckedBestPractice().get(0),
+                assertionMethods.stream().map(assertionMethod -> new Action<BestPracticeViolation>() {
+                    @Override
+                    public String getName() {
+                        return "Go to assertion method in " + assertionMethod.getContainingFile().getName() + "(line " + (PsiDocumentManager.getInstance(assertionMethod.getProject()).getDocument(assertionMethod.getContainingFile()).getLineNumber(assertionMethod.getTextOffset())+1) + ")";
+                    }
+
+                    @Override
+                    public void execute(BestPracticeViolation bestPracticeViolation) {
+                        ((Navigatable) assertionMethod.getNavigationElement()).navigate(true);
+                    }
+                }).collect(Collectors.toList())
+        );
+
     }
 
     @Override

@@ -5,10 +5,12 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiReferenceExpression;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
+import com.testspector.model.checking.java.common.ElementSearchResult;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.checking.java.junit.JUnitConstants;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,9 +38,9 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
                         );
     }
 
-    protected void removeGroupedAssertions(List<PsiMethodCallExpression> allAssertions) {
+    protected void removeGroupedAssertions(ElementSearchResult<PsiMethodCallExpression> allAssertionsSearch) {
         List<PsiMethodCallExpression> toRemove = new ArrayList<>();
-        for (PsiMethodCallExpression assertion : allAssertions) {
+        for (PsiMethodCallExpression assertion : allAssertionsSearch.getAllElements()) {
             toRemove.addAll(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     assertion,
                     PsiMethodCallExpression.class,
@@ -46,7 +48,10 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
                     contextIndicator.isInTestContext())
                     .getAllElements());
         }
-        allAssertions.removeAll(toRemove);
+        allAssertionsSearch.getAllElements().removeAll(toRemove);
+        for (Pair<PsiReferenceExpression, ElementSearchResult> referencedResult : allAssertionsSearch.getReferencedResults()) {
+            removeGroupedAssertions(referencedResult.getRight());
+        }
     }
 
     protected Predicate<PsiMethodCallExpression> isAssertionMethodFrom(String qualifiedName) {

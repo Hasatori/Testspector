@@ -38,6 +38,9 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     private final JavaContextIndicator contextResolver;
     private final JavaMethodResolver methodResolver;
 
+    private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Conditional logic should not be part of the test " +
+            "method, it makes test hard to understand, read and maintain.";
+
     public NoConditionalLogicJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
         this.elementResolver = elementResolver;
         this.contextResolver = contextResolver;
@@ -59,7 +62,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                             testMethod
                             , PsiStatement.class
                             , isConditionalStatement()
-                            , methodInTestContext());
+                            , el -> el instanceof PsiMethod && methodInTestContext().test(el));
             List<PsiStatement> statements = statementsElementSearchResult
                     .getAllElements()
                     .stream()
@@ -69,6 +72,8 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             for (PsiStatement statement : statements) {
                 bestPracticeViolations.add(createBestPracticeViolation(testMethod, statement));
             }
+
+            bestPracticeViolations.addAll(createBestPracticeViolation(statementsElementSearchResult));
 
         }
         return bestPracticeViolations;
@@ -134,6 +139,42 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                         SUPPORTED_STATEMENT_CLASSES));
     }
 
+    private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiStatement> elementSearchResult) {
+        List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        elementSearchResult.getReferencedResults()
+                .forEach(result -> {
+                    List<PsiStatement> conditionalStatements = result.getRight().getAllElements();
+                    if (!conditionalStatements.isEmpty()) {
+                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), conditionalStatements));
+                    }
+                    bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
+                });
+        return bestPracticeViolations;
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiStatement> tryStatements) {
+        return new BestPracticeViolation(
+                reference.getElement(),
+                "Following method contains conditional logic. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                getCheckedBestPractice().get(0),
+                tryStatements.stream().map(tryStatement -> new Action<BestPracticeViolation>() {
+                    @Override
+                    public String getName() {
+                        return String.format("Go to %s statement in file %s (line %s)"
+                                , statementString(tryStatement),
+                                tryStatement.getContainingFile().getName(),
+                                (PsiDocumentManager.getInstance(tryStatement.getProject()).getDocument(tryStatement.getContainingFile()).getLineNumber(tryStatement.getTextOffset()) + 1));
+                    }
+
+                    @Override
+                    public void execute(BestPracticeViolation bestPracticeViolation) {
+                        ((Navigatable) tryStatement.getNavigationElement()).navigate(true);
+                    }
+                }).collect(Collectors.toList())
+        );
+
+    }
+
     private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiStatement conditionalStatement) {
         List<String> hints = new ArrayList<>();
         hints.add(String.format("Remove statements [ %s ] and create separate test scenario for each branch",
@@ -149,8 +190,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         }
         return new BestPracticeViolation(
                 conditionalStatement,
-                "Conditional logic should not be part of the test " +
-                        "method, it makes test hard to understand, read and maintain.",
+                DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 Collections.singletonList(new Action<>() {
                                               @Override

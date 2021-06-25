@@ -1,8 +1,11 @@
 package com.testspector.model.checking.java.junit.strategy;
 
+import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
+import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.java.common.ElementSearchResult;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -20,6 +23,10 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
     private final JavaElementResolver elementResolver;
     private final JavaContextIndicator contextIndicator;
 
+    private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Global static properties should not be part of a test. " +
+            "Tests are sharing the reference and if some of them would update" +
+            " it it might influence behaviour of other tests.";
+
     public NoGlobalStaticPropertiesJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
         this.elementResolver = elementResolver;
         this.contextIndicator = contextIndicator;
@@ -36,23 +43,20 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
 
 
         for (PsiMethod testMethod : methods) {
-            List<PsiField> staticProperties =
+            ElementSearchResult<PsiField> staticPropertiesResult =
                     elementResolver
                             .allChildrenOfTypeMeetingConditionWithReferences(
                                     testMethod,
                                     PsiField.class,
                                     (psiField ->
-                                            !(psiField instanceof PsiEnumConstant)
+                                            !(psiField instanceof PsiEnumConstant) && isStaticAndNotFinal().test(psiField)
                                     ),
-                                    contextIndicator.isInTestContext())
-                            .getAllElements()
-                            .stream()
-                            .filter(isStaticAndNotFinal())
-                            .collect(Collectors.toList());
-            PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
-            for (PsiField staticProperty : staticProperties) {
+                                   el-> (el instanceof PsiMethod || el.getParent() instanceof PsiField) && contextIndicator.isInTestContext().test(el));
+            for (PsiField staticProperty : staticPropertiesResult.getAllElements()) {
                 bestPracticeViolations.add(createBestPracticeViolation(staticProperty));
             }
+
+            bestPracticeViolations.addAll(createBestPracticeViolation(staticPropertiesResult));
 
         }
 
@@ -72,9 +76,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
     private BestPracticeViolation createBestPracticeViolation(PsiField staticProperty) {
         return new BestPracticeViolation(
                 staticProperty,
-                "Global static properties should not be part of a test. " +
-                        "Tests are sharing the reference and if some of them would update" +
-                        " it it might influence behaviour of other tests.",
+                DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 null,
                 Arrays.asList(
@@ -83,6 +85,39 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
                                 "not change reference",
                         "If the property is mutable then delete static modifier " +
                                 "and make property reference unique for each test."));
+    }
+
+    private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiField> elementSearchResult) {
+        List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        elementSearchResult.getReferencedResults()
+                .forEach(result -> {
+                    List<PsiField> globalStaticProps = result.getRight().getAllElements();
+                    if (!globalStaticProps.isEmpty()) {
+                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), globalStaticProps));
+                    }
+                    bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
+                });
+        return bestPracticeViolations;
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiField> staticProperties) {
+        return new BestPracticeViolation(
+                reference.getElement(),
+                "Following method contains global static properties. "+ DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                getCheckedBestPractice().get(0),
+                staticProperties.stream().map(staticProperty -> new Action<BestPracticeViolation>() {
+                    @Override
+                    public String getName() {
+                        return "Go to global static property in " + staticProperty.getContainingFile().getName() + "(line " + (PsiDocumentManager.getInstance(staticProperty.getProject()).getDocument(staticProperty.getContainingFile()).getLineNumber(staticProperty.getTextOffset())+1) + ")";
+                    }
+
+                    @Override
+                    public void execute(BestPracticeViolation bestPracticeViolation) {
+                        ((Navigatable) staticProperty.getNavigationElement()).navigate(true);
+                    }
+                }).collect(Collectors.toList())
+        );
+
     }
 
     @Override

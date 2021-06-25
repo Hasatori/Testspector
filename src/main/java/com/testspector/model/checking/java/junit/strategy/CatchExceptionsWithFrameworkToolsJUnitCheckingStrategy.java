@@ -25,6 +25,11 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     private final JavaContextIndicator contextResolver;
     private final JavaMethodResolver methodResolver;
 
+    private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Tests should not contain try catch block. " +
+            "These blocks are redundant and make test harder to read and understand. " +
+            "In some cases it might even lead to never failing tests " +
+            "if we are not handling the exception properly.";
+
     public CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
         this.elementResolver = elementResolver;
         this.contextResolver = contextResolver;
@@ -45,31 +50,22 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                     .allChildrenOfTypeWithReferences(
                             testMethod,
                             PsiTryStatement.class,
-                            contextResolver.isInTestContext());
+                            el->  el instanceof  PsiMethod && contextResolver.isInTestContext().test(el) );
             for (PsiTryStatement psiTryStatement : psiTryStatementsElementSearchResult.getAllElements()) {
                 bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatement));
             }
-            psiTryStatementsElementSearchResult.getReferencedResults().stream().filter(searchResult ->
-                    Optional.ofNullable(searchResult.getLeft()).map(reference -> reference.getParent() instanceof PsiMethodCallExpression).isPresent())
-                    .forEach(result -> {
-                        List<PsiTryStatement> tryStatements = result.getRight().getAllElements();
-                        if (!tryStatements.isEmpty()){
-                            bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), tryStatements));
-                        }
-
-                    });
+            bestPracticeViolations.addAll(createBestPracticeViolation(psiTryStatementsElementSearchResult));
 
 
         }
         return bestPracticeViolations;
     }
 
+
+
     private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiTryStatement psiTryStatement) {
         List<String> hints = new ArrayList<>();
-        String message = "Tests should not contain try catch block. " +
-                "These blocks are redundant and make test harder to read and understand. " +
-                "In some cases it might even lead to never failing tests " +
-                "if we are not handling the exception properly.";
+        String message = DEFAULT_PROBLEM_DESCRIPTION_MESSAGE;
         hints.add("If catching an exception is not part of a test then just delete it.");
         if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)) {
             hints.add(String.format("If catching an exception is part of a test " +
@@ -89,15 +85,28 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                 null);
     }
 
+    private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiTryStatement> elementSearchResult){
+        List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        elementSearchResult.getReferencedResults()
+                .forEach(result -> {
+                    List<PsiTryStatement> tryStatements = result.getRight().getAllElements();
+                    if (!tryStatements.isEmpty()){
+                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), tryStatements));
+                    }
+                    bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
+                });
+        return bestPracticeViolations;
+    }
+
     private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiTryStatement> tryStatements) {
         return new BestPracticeViolation(
                 reference.getElement(),
-                "Following method leads to an ",
+                "Following method breaks best practice. "+ DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 tryStatements.stream().map(tryStatement -> new Action<BestPracticeViolation>() {
                     @Override
                     public String getName() {
-                        return "Go to try catch statement in " + tryStatement.getContainingFile().getName() + "(line " + PsiDocumentManager.getInstance(tryStatement.getProject()).getDocument(tryStatement.getContainingFile()).getLineNumber(tryStatement.getTextOffset()) + ")";
+                        return "Go to try catch statement in " + tryStatement.getContainingFile().getName() + "(line " + (PsiDocumentManager.getInstance(tryStatement.getProject()).getDocument(tryStatement.getContainingFile()).getLineNumber(tryStatement.getTextOffset()) + 1) + ")";
                     }
 
                     @Override
