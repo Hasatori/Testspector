@@ -5,6 +5,7 @@ import com.intellij.psi.*;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.java.common.ElementSearchResult;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -40,15 +41,15 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
-            JavaElementResolver.SearchResult<PsiTryStatement> psiTryStatementsSearchResult = elementResolver
+            ElementSearchResult<PsiTryStatement> psiTryStatementsElementSearchResult = elementResolver
                     .allChildrenOfTypeWithReferences(
                             testMethod,
                             PsiTryStatement.class,
                             contextResolver.isInTestContext());
-            for (PsiTryStatement psiTryStatement : elementResolver.getElementsFromSearchResult(psiTryStatementsSearchResult)) {
+            for (PsiTryStatement psiTryStatement : elementResolver.getElementsFromSearchResult(psiTryStatementsElementSearchResult)) {
                 bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatement));
             }
-            psiTryStatementsSearchResult.getReferencedResults().stream().filter(searchResult ->
+            psiTryStatementsElementSearchResult.getReferencedResults().stream().filter(searchResult ->
                     Optional.ofNullable(searchResult.getLeft()).map(reference -> reference.getParent() instanceof PsiMethodCallExpression).isPresent())
                     .forEach(result -> {
                         List<PsiTryStatement> tryStatements = elementResolver.getElementsFromSearchResult(result.getRight());

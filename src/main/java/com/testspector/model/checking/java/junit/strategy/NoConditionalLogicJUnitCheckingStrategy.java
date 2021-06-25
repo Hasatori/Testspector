@@ -5,6 +5,7 @@ import com.intellij.psi.*;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.java.common.ElementSearchResult;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -53,13 +54,13 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
         for (PsiMethod testMethod : methods) {
-            JavaElementResolver.SearchResult<PsiStatement> statementsSearchResult = elementResolver
+            ElementSearchResult<PsiStatement> statementsElementSearchResult = elementResolver
                     .allChildrenOfTypeMeetingConditionWithReferences(
                             testMethod
                             , PsiStatement.class
                             , isConditionalStatement()
                             , methodInTestContext());
-            List<PsiStatement> statements = elementResolver.getElementsFromSearchResult(statementsSearchResult)
+            List<PsiStatement> statements = elementResolver.getElementsFromSearchResult(statementsElementSearchResult)
                     .stream()
                     .filter(partOfAssertionMethod().negate())
                     .collect(Collectors.toList());
