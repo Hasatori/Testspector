@@ -27,6 +27,13 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
             "Tests are sharing the reference and if some of them would update" +
             " it it might influence behaviour of other tests.";
 
+    private static final List<String> hints =  Arrays.asList(
+            "If the property is immutable e.g.,String, Integer, Byte, Character" +
+                    " etc. then you can add 'final' identifier so that tests can " +
+                    "not change reference",
+            "If the property is mutable then delete static modifier " +
+                    "and make property reference unique for each test.");
+
     public NoGlobalStaticPropertiesJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
         this.elementResolver = elementResolver;
         this.contextIndicator = contextIndicator;
@@ -51,7 +58,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
                                     (psiField ->
                                             !(psiField instanceof PsiEnumConstant) && isStaticAndNotFinal().test(psiField)
                                     ),
-                                   el-> (el instanceof PsiMethod || el.getParent() instanceof PsiField) && contextIndicator.isInTestContext().test(el));
+                                   el-> (el instanceof PsiMethod || el instanceof PsiField) && contextIndicator.isInTestContext().test(el));
             for (PsiField staticProperty : staticPropertiesResult.getAllElements()) {
                 bestPracticeViolations.add(createBestPracticeViolation(staticProperty));
             }
@@ -79,25 +86,33 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 null,
-                Arrays.asList(
-                        "If the property is immutable e.g.,String, Integer, Byte, Character" +
-                                " etc. then you can add 'final' identifier so that tests can " +
-                                "not change reference",
-                        "If the property is mutable then delete static modifier " +
-                                "and make property reference unique for each test."));
+                hints);
     }
+
+
 
     private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiField> elementSearchResult) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
                     List<PsiField> globalStaticProps = result.getRight().getAllElements();
-                    if (!globalStaticProps.isEmpty()) {
-                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), globalStaticProps));
+                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()){
+                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(),globalStaticProps));
+                    } else if (!globalStaticProps.isEmpty()){
+                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft()));
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
                 });
         return bestPracticeViolations;
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiReference reference) {
+        return new BestPracticeViolation(
+                reference.getElement(),
+                DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                getCheckedBestPractice().get(0),
+                null,
+               hints);
     }
 
     private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiField> staticProperties) {

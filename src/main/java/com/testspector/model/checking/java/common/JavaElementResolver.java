@@ -51,11 +51,8 @@ public class JavaElementResolver {
                 }
                 if (child instanceof PsiReferenceExpression) {
                     PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
-                    if (!(referencedElement instanceof PsiClass) && referencedElement != null && !visitedReferences.contains(referencedElement)) {
+                    if (referencedElement != null && !visitedReferences.contains(referencedElement)) {
                         if (fromReferencesMeetingCondition.test(referencedElement)) {
-                            if (elementType.isInstance(referencedElement) && typeCondition.test(elementType.cast(referencedElement))) {
-                                result.getElements().add(elementType.cast(referencedElement));
-                            }
                             visitedReferences.add(referencedElement);
                             ElementSearchResult<T> next = allChildrenOfTypeMeetingConditionWithReferences(
                                     visitedReferences,
@@ -66,6 +63,9 @@ public class JavaElementResolver {
                                     fromReferencesMeetingCondition)
                                     ;
                             next.setPrevious(result);
+                            if (elementType.isInstance(referencedElement) && typeCondition.test(elementType.cast(referencedElement))) {
+                                next.getElements().add(elementType.cast(referencedElement));
+                            }
                             result.addReferencedResults(Pair.of((PsiReferenceExpression)child,next));
                         }
                     }
