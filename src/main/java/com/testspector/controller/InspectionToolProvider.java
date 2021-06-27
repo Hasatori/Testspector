@@ -29,9 +29,6 @@ public class InspectionToolProvider implements com.intellij.codeInspection.Inspe
 
         private static final BestPractice bestPractice = BestPractice.NO_GLOBAL_STATIC_PROPERTIES;
 
-        static {
-            fileListHashMap.put(bestPractice, new HashMap<>());
-        }
 
         @Override
         public @Nullable
@@ -89,9 +86,6 @@ public class InspectionToolProvider implements com.intellij.codeInspection.Inspe
 
         private static final BestPractice bestPractice = BestPractice.ONLY_ONE_ASSERTION;
 
-        static {
-            fileListHashMap.put(bestPractice, new HashMap<>());
-        }
 
 
         @Override
@@ -151,9 +145,6 @@ public class InspectionToolProvider implements com.intellij.codeInspection.Inspe
 
         private static final BestPractice bestPractice = BestPractice.AT_LEAST_ONE_ASSERTION;
 
-        static {
-            fileListHashMap.put(bestPractice, new HashMap<>());
-        }
 
         @Override
         public @Nullable
@@ -212,9 +203,6 @@ public class InspectionToolProvider implements com.intellij.codeInspection.Inspe
 
         private static final BestPractice bestPractice = BestPractice.NO_CONDITIONAL_LOGIC;
 
-        static {
-            fileListHashMap.put(bestPractice, new HashMap<>());
-        }
 
         @Override
         public @Nullable
@@ -277,10 +265,6 @@ public class InspectionToolProvider implements com.intellij.codeInspection.Inspe
     private static class SetupTestNamingStrategyInspection extends BestPracticeInspection {
 
         private static final BestPractice bestPractice = BestPractice.SETUP_A_TEST_NAMING_STRATEGY;
-
-        static {
-            fileListHashMap.put(bestPractice, new HashMap<>());
-        }
 
 
         @Override
@@ -356,10 +340,6 @@ public class InspectionToolProvider implements com.intellij.codeInspection.Inspe
 
         private static final BestPractice bestPractice = BestPractice.TEST_ONLY_PUBLIC_BEHAVIOUR;
 
-        static {
-            fileListHashMap.put(bestPractice, new HashMap<>());
-        }
-
 
         @Override
         public @Nullable
@@ -422,10 +402,6 @@ public class InspectionToolProvider implements com.intellij.codeInspection.Inspe
     private static class CatchExceptionsUsingFrameworkTools extends BestPracticeInspection {
 
         private static final BestPractice bestPractice = BestPractice.CATCH_TESTED_EXCEPTIONS_USING_FRAMEWORK_TOOLS;
-
-        static {
-            fileListHashMap.put(bestPractice, new HashMap<>());
-        }
 
 
         @Override
