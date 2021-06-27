@@ -1,6 +1,8 @@
 package com.testspector.model.checking.java.junit;
 
 import com.intellij.psi.*;
+import com.intellij.psi.search.searches.ReferencesSearch;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.testspector.model.checking.factory.UnitTestFrameworkFactory;
 import com.testspector.model.enums.UnitTestFramework;
 
@@ -40,7 +42,11 @@ public class JUnitUnitTestFrameworkFactory implements UnitTestFrameworkFactory {
                                 psiImportStatement -> JUNIT_ALL_PACKAGES_QUALIFIED_NAMES
                                         .stream()
                                         .anyMatch(junitPackageName -> psiImportStatement.getQualifiedName() != null && psiImportStatement.getQualifiedName().startsWith(junitPackageName))
-                        );
+                        ) ||
+                        Arrays.stream(javaFile.getClasses())
+                                .map(PsiClass::getMethods)
+                                .flatMap(Arrays::stream)
+                                .anyMatch(this::isFromMethod);
 
 
             }
@@ -51,7 +57,9 @@ public class JUnitUnitTestFrameworkFactory implements UnitTestFrameworkFactory {
     private boolean isFromMethod(PsiMethod psiMethod) {
         return Arrays
                 .stream(psiMethod.getModifierList().getAnnotations())
-                .anyMatch(psiAnnotation -> JUNIT_ALL_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()));
+                .anyMatch(psiAnnotation -> JUNIT_ALL_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName())) ||
+                ReferencesSearch.search(psiMethod).findAll().stream().map(reference -> PsiTreeUtil.getParentOfType(reference.getElement(), PsiMethod.class))
+                        .anyMatch(this::isFromMethod);
 
     }
 

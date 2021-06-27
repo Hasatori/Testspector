@@ -2,8 +2,8 @@ package com.testspector.model.checking.java.common;
 
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
-import com.intellij.psi.search.GlobalSearchScope;
-import org.apache.commons.lang3.tuple.Pair;
+import com.intellij.psi.search.searches.ReferencesSearch;
+import com.intellij.psi.util.PsiTreeUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -67,7 +67,7 @@ public class JavaMethodResolver {
     }
 
     public List<PsiMethodCallExpression> allTestedMethodsExpressions(PsiMethod testMethod) {
-        List<PsiMethodCallExpression> assertionMethods =  elementResolver
+        List<PsiMethodCallExpression> assertionMethods = elementResolver
                 .allChildrenOfTypeMeetingConditionWithReferences(
                         testMethod,
                         PsiMethodCallExpression.class,
@@ -93,7 +93,7 @@ public class JavaMethodResolver {
         return result.stream().distinct().collect(Collectors.toList());
     }
 
-    public List<PsiReference> allTestedMethodsFromReference(PsiMethod testMethod){
+    public List<PsiReference> allTestedMethodsFromReference(PsiMethod testMethod) {
         List<PsiMethodCallExpression> assertionMethods = elementResolver
                 .allChildrenOfTypeMeetingConditionWithReferences(
                         testMethod,
@@ -122,11 +122,6 @@ public class JavaMethodResolver {
                 }).collect(Collectors.toList());
         return result.stream().distinct().collect(Collectors.toList());
     }
-    private List<PsiMethod> methodsWithAnnotations(PsiClass psiClass, List<String> annotationQualifiedNames) {
-        return Arrays.stream(psiClass.getMethods())
-                .filter(psiMethod -> methodHasAnyOfAnnotations(psiMethod, annotationQualifiedNames))
-                .collect(Collectors.toList());
-    }
 
     public List<PsiMethod> methodsWithAnnotations(List<PsiElement> fromElements, List<String> annotationQualifiedNames) {
         List<PsiMethod> psiMethods = new ArrayList<>();
@@ -134,17 +129,24 @@ public class JavaMethodResolver {
             if (psiElement instanceof PsiJavaFile) {
                 PsiJavaFile psiJavaFile = (PsiJavaFile) psiElement;
                 psiMethods.addAll(Arrays.stream(psiJavaFile.getClasses())
-                        .map(psiClass -> methodsWithAnnotations(psiClass, annotationQualifiedNames))
+                        .map(psiClass -> methodsWithAnnotations(Collections.singletonList(psiClass), annotationQualifiedNames))
                         .flatMap(Collection::stream)
                         .collect(Collectors.toList()));
             } else if (psiElement instanceof PsiClass) {
                 PsiClass psiClass = (PsiClass) psiElement;
-                psiMethods.addAll(methodsWithAnnotations(psiClass, annotationQualifiedNames));
+                psiMethods.addAll(methodsWithAnnotations(Arrays.stream(psiClass.getMethods()).collect(Collectors.toList()), annotationQualifiedNames));
             } else if (psiElement instanceof PsiMethod) {
                 PsiMethod method = (PsiMethod) psiElement;
-                if (annotationQualifiedNames.stream().anyMatch(method::hasAnnotation) || (annotationQualifiedNames.isEmpty() && method.getAnnotations().length == 0)) {
+                if (methodHasAnyOfAnnotations(method, annotationQualifiedNames)) {
                     psiMethods.add((PsiMethod) psiElement);
                 }
+                psiMethods.addAll(ReferencesSearch.search(method)
+                        .findAll()
+                        .stream()
+                        .map(reference -> PsiTreeUtil.getParentOfType(reference.getElement(), PsiMethod.class))
+                        .map(met -> methodsWithAnnotations(Collections.singletonList(met), annotationQualifiedNames))
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList()));
             }
         }
         return psiMethods;
