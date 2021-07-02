@@ -8,23 +8,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ElementSearchResult<T> {
-    private ElementSearchResult previous;
-    private List<Pair<PsiReferenceExpression, ElementSearchResult>> referencedResults = new ArrayList<>();
+    private ElementSearchResult<T> previous;
+    private List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> referencedResults = new ArrayList<>();
     private List<T> elements = new ArrayList<>();
 
-    public ElementSearchResult getPrevious() {
+    public ElementSearchResult<T> getPrevious() {
         return previous;
     }
 
-    public void setPrevious(ElementSearchResult previous) {
+    public void setPrevious(ElementSearchResult<T> previous) {
         this.previous = previous;
     }
 
-    public List<Pair<PsiReferenceExpression, ElementSearchResult>> getReferencedResults() {
+    public List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> getReferencedResults() {
         return referencedResults;
     }
 
-    public void addReferencedResults(Pair<PsiReferenceExpression, ElementSearchResult> referencedResult) {
+    public void addReferencedResults(Pair<PsiReferenceExpression, ElementSearchResult<T>> referencedResult) {
         this.referencedResults.add(referencedResult);
     }
 
@@ -39,7 +39,7 @@ public class ElementSearchResult<T> {
     public List<T> getAllElements() {
         List<T> result = new ArrayList<>();
         result.addAll(this.getElements());
-        for (Pair<PsiReferenceExpression, ElementSearchResult> referencedResult : this.getReferencedResults()) {
+        for (Pair<PsiReferenceExpression, ElementSearchResult<T>> referencedResult : this.getReferencedResults()) {
             result.addAll(referencedResult.getRight().getAllElements());
         }
 

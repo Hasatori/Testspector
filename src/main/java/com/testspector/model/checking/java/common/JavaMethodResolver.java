@@ -4,6 +4,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -66,34 +67,22 @@ public class JavaMethodResolver {
         return result.stream().distinct().collect(Collectors.toList());
     }
 
-    public List<PsiMethodCallExpression> allTestedMethodsExpressions(PsiMethod testMethod) {
-        List<PsiMethodCallExpression> assertionMethods = elementResolver
+    public ElementSearchResult<PsiMethodCallExpression> allTestedMethodsExpressions(PsiMethod testMethod) {
+        return elementResolver
                 .allChildrenOfTypeMeetingConditionWithReferences(
                         testMethod,
                         PsiMethodCallExpression.class,
-                        (psiMethodCallExpression ->
-                                assertionMethod(psiMethodCallExpression).isPresent()),
-                        contextResolver.isInTestContext())
-                .getAllElements()
-                .stream()
-                .distinct()
-                .collect(Collectors.toList());
-        List<PsiMethodCallExpression> result = assertionMethods.stream()
-                .map(element -> elementResolver
-                        .allChildrenOfTypeWithReferences(
-                                element,
-                                PsiMethodCallExpression.class,
-                                contextResolver.isInTestContext()).getAllElements())
-                .flatMap(Collection::stream)
-                .filter(psiMethodCallExpression -> {
-                    PsiMethod method = psiMethodCallExpression.resolveMethod();
-                    return method != null && contextResolver.isInProductionCodeContext().test(method);
+                        (psiMethodCallExpression -> {
+                            PsiMethod method = psiMethodCallExpression.resolveMethod();
+                            return method != null && contextResolver.isInProductionCodeContext().test(method) &&
+                                    Optional.ofNullable(PsiTreeUtil.getParentOfType(psiMethodCallExpression, PsiMethodCallExpression.class))
+                                            .map(methodExp -> assertionMethod(methodExp).isPresent()).get();
 
-                }).collect(Collectors.toList());
-        return result.stream().distinct().collect(Collectors.toList());
+                        }),
+                        contextResolver.isInTestContext());
     }
 
-    public List<PsiReference> allTestedMethodsFromReference(PsiMethod testMethod) {
+    public ElementSearchResult<PsiReference> allTestedMethodsFromLiteral(PsiMethod testMethod) {
         List<PsiMethodCallExpression> assertionMethods = elementResolver
                 .allChildrenOfTypeMeetingConditionWithReferences(
                         testMethod,
@@ -105,7 +94,7 @@ public class JavaMethodResolver {
                 .stream()
                 .distinct()
                 .collect(Collectors.toList());
-        List<PsiReference> result = assertionMethods
+        HashSet<PsiLiteralExpression> literalExpressionsSet = assertionMethods
                 .stream()
                 .map(assertionMethod -> elementResolver
                         .allChildrenOfTypeWithReferences(
@@ -113,14 +102,36 @@ public class JavaMethodResolver {
                                 PsiLiteralExpression.class,
                                 contextResolver.isInTestContext()).getAllElements())
                 .flatMap(Collection::stream)
-                .map(ReferenceProvidersRegistry::getReferencesFromProviders)
-                .flatMap(Arrays::stream)
-                .filter(reference -> {
-                    PsiElement resolvedElement = reference.resolve();
-                    return resolvedElement instanceof PsiMethod && contextResolver.isInProductionCodeContext().test(resolvedElement);
+                .collect(Collectors.toCollection(HashSet::new));
+        ElementSearchResult<PsiLiteralExpression> literalExpressionElementSearchResult = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+                testMethod,
+                PsiLiteralExpression.class,
+                literalExpression -> literalExpressionsSet.contains(literalExpression),
+                contextResolver.isInTestContext());
 
-                }).collect(Collectors.toList());
-        return result.stream().distinct().collect(Collectors.toList());
+        return fillReferencesFromLiteralExpressions(literalExpressionElementSearchResult);
+    }
+
+
+    private ElementSearchResult<PsiReference> fillReferencesFromLiteralExpressions(ElementSearchResult<PsiLiteralExpression> literalExpressionElementSearchResult) {
+        ElementSearchResult<PsiReference> result = new ElementSearchResult<PsiReference>();
+        result.setElements(literalExpressionElementSearchResult
+                .getElements()
+                .stream()
+                .map(literalExpression -> Arrays.stream(ReferenceProvidersRegistry.getReferencesFromProviders(literalExpression))
+                        .filter(reference -> {
+                            PsiElement resolvedElement = reference.resolve();
+                            return resolvedElement instanceof PsiMethod && contextResolver.isInProductionCodeContext().test(resolvedElement);
+                        })
+                        .collect(Collectors.toList()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
+        for (Pair<PsiReferenceExpression, ElementSearchResult<PsiLiteralExpression>> referencedResult : literalExpressionElementSearchResult.getReferencedResults()) {
+            ElementSearchResult<PsiReference> newReferencedResult = fillReferencesFromLiteralExpressions(referencedResult.getRight());
+            newReferencedResult.setPrevious(result);
+            result.addReferencedResults(Pair.of(referencedResult.getLeft(), newReferencedResult));
+        }
+        return result;
     }
 
     public List<PsiMethod> methodsWithAnnotations(List<PsiElement> fromElements, List<String> annotationQualifiedNames) {

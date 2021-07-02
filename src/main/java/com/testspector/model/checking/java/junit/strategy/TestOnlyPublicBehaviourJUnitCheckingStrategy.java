@@ -1,15 +1,16 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.java.common.ElementSearchResult;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -24,6 +25,24 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     private final JavaElementResolver elementResolver;
     private final JavaMethodResolver methodResolver;
     private final JavaContextIndicator contextIndicator;
+    private static final String DEFAULT_PROBLEM_DESCRIPTION = "Only public behaviour should be tested. Testing 'private','protected' " +
+            "or 'package private' methods leads to problems with maintenance of tests because " +
+            "this private behaviour is likely to be changed very often. " +
+            "In many cases we are refactoring private behaviour without influencing public " +
+            "behaviour of the class, yet this changes will change behaviour of the private method" +
+            " and cause tests to fail.";
+    private static final List<String> DEFAULT_HINTS = Arrays.asList(
+            "There is an exception to this rule and that is in case when private 'method' " +
+                    "is part of the observed behaviour of the system under test. For example " +
+                    "we can have private constructor for class which is part of ORM and its " +
+                    "initialization should not be permitted.",
+            "Remove tests testing private behaviour",
+            "If you really feel that private behaviour is complex enough that there should be " +
+                    "separate test for it, then it is very probable that the system under test is " +
+                    "breaking 'Single Responsibility Principle' and this private behaviour should be " +
+                    "extracted to a separate system"
+    );
+
 
     public TestOnlyPublicBehaviourJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
         this.elementResolver = elementResolver;
@@ -39,47 +58,76 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-
         for (PsiMethod testMethod : methods) {
-            List<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions = methodResolver.allTestedMethodsExpressions(testMethod)
-                    .stream()
-                    .filter(methodCall -> {
-                        PsiMethod testedMethod = methodCall.resolveMethod();
-                        return methodHasModifier(testedMethod, PsiModifier.PROTECTED) ||
-                                isMethodPackagePrivate(testedMethod) ||
-                                methodHasModifier(testedMethod, PsiModifier.PRIVATE);
 
-                    }).collect(Collectors.toList());
-            ;
-            nonPublicTestedMethodsFromMethodCallExpressions.forEach(nonPublicFromMethodCallExpression -> {
-                bestPracticeViolations.add(new BestPracticeViolation(
-                        nonPublicFromMethodCallExpression,
-                        "Not public method called by a method call",
-                        this.getCheckedBestPractice().get(0),
-                        Collections.singletonList(makePublicQuickFix(nonPublicFromMethodCallExpression.resolveMethod(),nonPublicFromMethodCallExpression.getMethodExpression())
-                        )));
-            });
+            ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions = methodResolver.allTestedMethodsExpressions(testMethod);
+            removePublicTestedMethods(nonPublicTestedMethodsFromMethodCallExpressions);
+            nonPublicTestedMethodsFromMethodCallExpressions
+                    .getAllElements()
+                    .forEach(nonPublicFromMethodCallExpression -> {
+                        bestPracticeViolations.add(new BestPracticeViolation(
+                                nonPublicFromMethodCallExpression,
+                                DEFAULT_PROBLEM_DESCRIPTION,
+                                this.getCheckedBestPractice().get(0),
+                                Collections.singletonList(makePublicQuickFix(nonPublicFromMethodCallExpression.resolveMethod(), nonPublicFromMethodCallExpression.getMethodExpression()))
+                                , DEFAULT_HINTS)
+                        );
+                    });
+            bestPracticeViolations.addAll(createBestPracticeViolationFromMethodExpression(nonPublicTestedMethodsFromMethodCallExpressions));
 
-            List<PsiReference> nonPublicTestedMethodsFromReferences = methodResolver.allTestedMethodsFromReference(testMethod)
-                    .stream()
-                    .filter(reference -> {
-                        PsiMethod testedMethod = (PsiMethod) reference.resolve();
-                        return methodHasModifier(testedMethod, PsiModifier.PROTECTED) ||
-                                isMethodPackagePrivate(testedMethod) ||
-                                methodHasModifier(testedMethod, PsiModifier.PRIVATE);
-                    }).collect(Collectors.toList());
-            nonPublicTestedMethodsFromReferences.forEach(reference -> {
-                bestPracticeViolations.add(new BestPracticeViolation(
-                        reference.getElement(),
-                        "Not public method called by a method call",
-                        this.getCheckedBestPractice().get(0),
-                        Collections.singletonList(makePublicQuickFix((PsiMethod) reference.resolve(),reference)
-                        )));
-            });
+            ElementSearchResult<PsiReference> nonPublicTestedMethodsFromReferences = methodResolver.allTestedMethodsFromLiteral(testMethod);
+            removePublicTestedMethodsFromReference(nonPublicTestedMethodsFromReferences);
+            nonPublicTestedMethodsFromReferences
+                    .getAllElements()
+                    .forEach(reference -> {
+                        bestPracticeViolations.add(new BestPracticeViolation(
+                                reference.getElement(),
+                                DEFAULT_PROBLEM_DESCRIPTION,
+                                this.getCheckedBestPractice().get(0),
+                                Collections.singletonList(makePublicQuickFix((PsiMethod) reference.resolve(), reference))
+                                , DEFAULT_HINTS)
+                        );
+                    });
+            bestPracticeViolations.addAll(createBestPracticeViolationFromReferences(nonPublicTestedMethodsFromReferences));
 
         }
 
         return bestPracticeViolations;
+    }
+
+    private void removePublicTestedMethods(ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions) {
+        List<PsiMethodCallExpression> toRemove = new ArrayList<>();
+        toRemove.addAll(nonPublicTestedMethodsFromMethodCallExpressions
+                .getElements()
+                .stream()
+                .filter(methodCall -> {
+                    PsiMethod testedMethod = methodCall.resolveMethod();
+                    return !(methodHasModifier(testedMethod, PsiModifier.PROTECTED) ||
+                            isMethodPackagePrivate(testedMethod) ||
+                            methodHasModifier(testedMethod, PsiModifier.PRIVATE));
+
+                }).collect(Collectors.toList()));
+        nonPublicTestedMethodsFromMethodCallExpressions.getElements().removeAll(toRemove);
+        for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : nonPublicTestedMethodsFromMethodCallExpressions.getReferencedResults()) {
+            removePublicTestedMethods(referencedResult.getRight());
+        }
+    }
+
+    private void removePublicTestedMethodsFromReference(ElementSearchResult<PsiReference> nonPublicTestedMethodsFromReferences) {
+        List<PsiReference> toRemove = new ArrayList<>();
+        toRemove.addAll(nonPublicTestedMethodsFromReferences
+                .getElements()
+                .stream()
+                .filter(reference -> {
+                    PsiMethod testedMethod = (PsiMethod) reference.resolve();
+                    return !(methodHasModifier(testedMethod, PsiModifier.PROTECTED) ||
+                            isMethodPackagePrivate(testedMethod) ||
+                            methodHasModifier(testedMethod, PsiModifier.PRIVATE));
+                }).collect(Collectors.toList()));
+        nonPublicTestedMethodsFromReferences.getElements().removeAll(toRemove);
+        for (Pair<PsiReferenceExpression, ElementSearchResult<PsiReference>> referencedResult : nonPublicTestedMethodsFromReferences.getReferencedResults()) {
+            removePublicTestedMethodsFromReference(referencedResult.getRight());
+        }
     }
 
     private boolean methodHasModifier(PsiMethod method, String modifier) {
@@ -93,21 +141,72 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                 !modifierList.hasModifierProperty(PsiModifier.PROTECTED);
     }
 
-    private Action<BestPracticeViolation> makePublicQuickFix(PsiMethod method,PsiReference psiReference){
-      return new Action<>() {
-          @Override
-          public
-          @NotNull
-          String getName() {
-              return String.format("Make %s public",method.getName());
-          }
+    private List<BestPracticeViolation> createBestPracticeViolationFromMethodExpression(ElementSearchResult<PsiMethodCallExpression> elementSearchResult) {
+        List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        elementSearchResult.getReferencedResults()
+                .forEach(result -> {
+                    List<PsiMethodCallExpression> globalStaticProps = result.getRight().getAllElements();
+                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()){
+                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(),globalStaticProps));
+                    }
+                    bestPracticeViolations.addAll(createBestPracticeViolationFromMethodExpression(result.getRight()));
+                });
+        return bestPracticeViolations;
+    }
 
-          @Override
-          public void execute(BestPracticeViolation bestPracticeViolation) {
-              method.replace(PsiElementFactory.getInstance(method.getProject()).createMethodFromText("public " + method.getText(), null));
-              ((Navigatable) psiReference.resolve().getNavigationElement()).navigate(true);
-          }
-      };
+    private List<BestPracticeViolation> createBestPracticeViolationFromReferences(ElementSearchResult<PsiReference> elementSearchResult) {
+        List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        elementSearchResult.getReferencedResults()
+                .forEach(result -> {
+                    List<PsiElement> globalStaticProps = result.getRight().getAllElements().stream().map(PsiReference::resolve).collect(Collectors.toList());
+                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()){
+                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(),globalStaticProps));
+                    }
+                    bestPracticeViolations.addAll(createBestPracticeViolationFromReferences(result.getRight()));
+                });
+        return bestPracticeViolations;
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<? extends PsiElement> elements) {
+        return new BestPracticeViolation(
+                reference.getElement(),
+                "Following method breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION,
+                getCheckedBestPractice().get(0),
+                elements.stream().map(element -> new Action<BestPracticeViolation>() {
+                    @Override
+                    public String getName() {
+                        return String.format("Go to %s method call in file %s (line %s)"
+                                , element,
+                                element.getContainingFile().getName(),
+                                (PsiDocumentManager.getInstance(element.getProject()).getDocument(element.getContainingFile()).getLineNumber(element.getTextOffset()) + 1));
+                    }
+
+                    @Override
+                    public void execute(BestPracticeViolation bestPracticeViolation) {
+                        ((Navigatable) element.getNavigationElement()).navigate(true);
+                    }
+                }).collect(Collectors.toList())
+                ,DEFAULT_HINTS
+        );
+
+    }
+
+
+    private Action<BestPracticeViolation> makePublicQuickFix(PsiMethod method, PsiReference psiReference) {
+        return new Action<>() {
+            @Override
+            public
+            @NotNull
+            String getName() {
+                return String.format("Make %s public", method.getName());
+            }
+
+            @Override
+            public void execute(BestPracticeViolation bestPracticeViolation) {
+                method.replace(PsiElementFactory.getInstance(method.getProject()).createMethodFromText("public " + method.getText(), null));
+                ((Navigatable) psiReference.resolve().getNavigationElement()).navigate(true);
+            }
+        };
     }
 
     @Override

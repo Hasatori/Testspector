@@ -27,19 +27,19 @@ public class JavaElementResolver {
         return Optional.empty();
     }
 
-    public <T extends PsiElement> ElementSearchResult<T> allChildrenOfTypeMeetingCondition(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition) {
+    public <T> ElementSearchResult<T> allChildrenOfTypeMeetingCondition(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition) {
         return allChildrenOfTypeMeetingConditionWithReferences(new HashSet<>(), null, psiElement, elementType, typeCondition, t -> false);
     }
 
-    public <T extends PsiElement> ElementSearchResult<T> allChildrenOfTypeWithReferences(PsiElement psiElement, Class<T> elementType, Predicate<PsiElement> fromReferencesMeetingCondition) {
+    public <T> ElementSearchResult<T> allChildrenOfTypeWithReferences(PsiElement psiElement, Class<T> elementType, Predicate<PsiElement> fromReferencesMeetingCondition) {
         return allChildrenOfTypeMeetingConditionWithReferences(psiElement, elementType, t -> true, fromReferencesMeetingCondition);
     }
 
-    public <T extends PsiElement> ElementSearchResult<T> allChildrenOfTypeMeetingConditionWithReferences(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
+    public <T> ElementSearchResult<T> allChildrenOfTypeMeetingConditionWithReferences(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
         return allChildrenOfTypeMeetingConditionWithReferences(new HashSet<>(), null,  psiElement, elementType, typeCondition, fromReferencesMeetingCondition);
     }
 
-    private <T extends PsiElement> ElementSearchResult<T> allChildrenOfTypeMeetingConditionWithReferences(HashSet<PsiElement> visitedReferences, ElementSearchResult currentElementSearchResult, PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
+    private <T> ElementSearchResult<T> allChildrenOfTypeMeetingConditionWithReferences(HashSet<PsiElement> visitedReferences, ElementSearchResult<T> currentElementSearchResult, PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
         ElementSearchResult<T> result = currentElementSearchResult;
         if (result == null) {
             result = new ElementSearchResult<>();

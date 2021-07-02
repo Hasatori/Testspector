@@ -1,16 +1,17 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiIdentifier;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.pom.Navigatable;
+import com.intellij.psi.*;
+import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.java.common.ElementSearchResult;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +24,10 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
     private final JavaElementResolver elementResolver;
     private final JavaMethodResolver methodResolver;
     private final JavaContextIndicator contextIndicator;
+
+    private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "The test name is more or less the same as the tested method. " +
+            "This says nothing about tests scenario. You should setup a clear strategy " +
+            "for naming your tests so that the person reading then knows what is tested";
 
     public SetupTestNamingStrategyJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
         this.elementResolver = elementResolver;
@@ -42,29 +47,37 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
             PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();
             if (nameIdentifier != null) {
                 String testMethodName = nameIdentifier.getText();
-                List<PsiMethodCallExpression> allTestedMethod = methodResolver.allTestedMethodsExpressions(testMethod);
-                List<PsiMethodCallExpression> methodsWithAlmostSameName = allTestedMethod
-                        .stream()
-                        .filter(testedMethodCall -> {
-                            PsiMethod testedMethod = testedMethodCall.resolveMethod();
-                            if (testedMethod != null) {
-                                int minRatio = selectMinRatio(testedMethod.getName());
-                                return FuzzySearch.ratio(
-                                        testMethodName.toLowerCase(),
-                                        testedMethod.getName().toLowerCase()) > minRatio;
-                            }
-                            return false;
-                        })
-                        .collect(Collectors.toList());
-                if (methodsWithAlmostSameName.size() >= 1) {
-                    for (PsiMethodCallExpression methodCallExpression : methodsWithAlmostSameName) {
+                ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult = methodResolver.allTestedMethodsExpressions(testMethod);
+                    removeTestedMethodsWithDifferentName(testMethodName, allTestedMethodsResult);
+                    for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getAllElements()) {
                         bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));
                     }
-                }
+                    createBestPracticeViolation(allTestedMethodsResult);
+
             }
         }
 
         return bestPracticeViolations;
+    }
+
+    private void removeTestedMethodsWithDifferentName(String testMethodName, ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult) {
+        List<PsiMethodCallExpression> toRemove = new ArrayList<>();
+        toRemove.addAll(allTestedMethodsResult.getElements().stream()
+                .filter(testedMethodCall -> {
+                    PsiMethod testedMethod = testedMethodCall.resolveMethod();
+                    if (testedMethod != null) {
+                        int minRatio = selectMinRatio(testedMethod.getName());
+                        return FuzzySearch.ratio(
+                                testMethodName.toLowerCase(),
+                                testedMethod.getName().toLowerCase()) > minRatio;
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList()));
+        allTestedMethodsResult.getElements().removeAll(toRemove);
+        for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : allTestedMethodsResult.getReferencedResults()) {
+            removeTestedMethodsWithDifferentName(testMethodName, referencedResult.getRight());
+        }
     }
 
     private int selectMinRatio(String testedMethodName) {
@@ -80,13 +93,43 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
         }
     }
 
+    private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiMethodCallExpression> elementSearchResult) {
+        List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        elementSearchResult.getReferencedResults()
+                .forEach(result -> {
+                    List<PsiMethodCallExpression> assertionMethods = result.getRight().getAllElements();
+                    if (!assertionMethods.isEmpty()) {
+                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), assertionMethods));
+                    }
+                    bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
+                });
+        return bestPracticeViolations;
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiMethodCallExpression> testedMethod) {
+        return new BestPracticeViolation(
+                reference.getElement(),
+                "Following method contains assertion methods that break best practice. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                getCheckedBestPractice().get(0),
+                testedMethod.stream().map(assertionMethod -> new Action<BestPracticeViolation>() {
+                    @Override
+                    public String getName() {
+                        return "Go to assertion method in " + assertionMethod.getContainingFile().getName() + "(line " + (PsiDocumentManager.getInstance(assertionMethod.getProject()).getDocument(assertionMethod.getContainingFile()).getLineNumber(assertionMethod.getTextOffset()) + 1) + ")";
+                    }
+
+                    @Override
+                    public void execute(BestPracticeViolation bestPracticeViolation) {
+                        ((Navigatable) assertionMethod.getNavigationElement()).navigate(true);
+                    }
+                }).collect(Collectors.toList())
+        );
+
+    }
 
     private BestPracticeViolation createBestPracticeViolation(PsiMethodCallExpression methodWithAlmostSameName) {
         return new BestPracticeViolation(
                 methodWithAlmostSameName.getMethodExpression(),
-                "The test name is more or less the same as the tested method. " +
-                        "This says nothing about tests scenario. You should setup a clear strategy " +
-                        "for naming your tests so that the person reading then knows what is tested",
+                DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 null,
                 Arrays.asList(

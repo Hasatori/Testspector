@@ -49,13 +49,13 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                                     ,el-> el instanceof  PsiMethod && methodInTestContext().test(el));
             removeGroupedAssertions(allAssertionMethodsResult);
             List<PsiMethodCallExpression> allAssertionMethods = allAssertionMethodsResult.getAllElements();
-            if (allAssertionMethods.size() > 1) {
+/**/            if (allAssertionMethods.size() > 1) {
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
                     bestPracticeViolations.add(createOnlyOneBestPracticeViolation(testMethod, assertionMethod));
                 }
-
+                bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
             }
-            bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
+
 
         }
         return bestPracticeViolations;

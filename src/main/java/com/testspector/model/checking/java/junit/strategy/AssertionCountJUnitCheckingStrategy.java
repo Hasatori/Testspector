@@ -40,7 +40,7 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
 
     protected void removeGroupedAssertions(ElementSearchResult<PsiMethodCallExpression> allAssertionsSearch) {
         List<PsiMethodCallExpression> toRemove = new ArrayList<>();
-        for (PsiMethodCallExpression assertion : allAssertionsSearch.getAllElements()) {
+        for (PsiMethodCallExpression assertion : allAssertionsSearch.getElements()) {
             toRemove.addAll(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     assertion,
                     PsiMethodCallExpression.class,
@@ -48,8 +48,8 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
                     contextIndicator.isInTestContext())
                     .getAllElements());
         }
-        allAssertionsSearch.getAllElements().removeAll(toRemove);
-        for (Pair<PsiReferenceExpression, ElementSearchResult> referencedResult : allAssertionsSearch.getReferencedResults()) {
+        allAssertionsSearch.getElements().removeAll(toRemove);
+        for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : allAssertionsSearch.getReferencedResults()) {
             removeGroupedAssertions(referencedResult.getRight());
         }
     }
