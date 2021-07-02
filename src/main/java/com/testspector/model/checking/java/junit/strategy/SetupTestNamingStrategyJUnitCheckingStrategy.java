@@ -69,7 +69,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                         int minRatio = selectMinRatio(testedMethod.getName());
                         return FuzzySearch.ratio(
                                 testMethodName.toLowerCase(),
-                                testedMethod.getName().toLowerCase()) > minRatio;
+                                testedMethod.getName().toLowerCase()) < minRatio;
                     }
                     return false;
                 })
