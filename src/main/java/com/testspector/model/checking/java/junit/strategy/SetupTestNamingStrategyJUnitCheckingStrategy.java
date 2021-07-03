@@ -47,7 +47,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
             PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();
             if (nameIdentifier != null) {
                 String testMethodName = nameIdentifier.getText();
-                ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult = methodResolver.allTestedMethodsExpressions(testMethod);
+                ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult = methodResolver.allTestedMethodsMethodCalls(testMethod);
                     removeTestedMethodsWithDifferentName(testMethodName, allTestedMethodsResult);
                     for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getAllElements()) {
                         bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));

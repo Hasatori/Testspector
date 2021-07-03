@@ -60,7 +60,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
 
-            ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions = methodResolver.allTestedMethodsExpressions(testMethod);
+            ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions = methodResolver.allTestedMethodsMethodCalls(testMethod);
             removePublicTestedMethods(nonPublicTestedMethodsFromMethodCallExpressions);
             nonPublicTestedMethodsFromMethodCallExpressions
                     .getAllElements()
@@ -75,7 +75,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                     });
             bestPracticeViolations.addAll(createBestPracticeViolationFromMethodExpression(nonPublicTestedMethodsFromMethodCallExpressions));
 
-            ElementSearchResult<PsiReference> nonPublicTestedMethodsFromReferences = methodResolver.allTestedMethodsFromLiteral(testMethod);
+            ElementSearchResult<PsiReference> nonPublicTestedMethodsFromReferences = methodResolver.allTestedMethodsReferences(testMethod);
             removePublicTestedMethodsFromReference(nonPublicTestedMethodsFromReferences);
             nonPublicTestedMethodsFromReferences
                     .getAllElements()
