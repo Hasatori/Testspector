@@ -64,7 +64,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                             , isConditionalStatement()
                             , el -> el instanceof PsiMethod && methodInTestContext().test(el));
             List<PsiStatement> statements = statementsElementSearchResult
-                    .getAllElements()
+                    .getElementsFromAllLevels()
                     .stream()
                     .filter(partOfAssertionMethod().negate())
                     .collect(Collectors.toList());
@@ -143,7 +143,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
-                    List<PsiStatement> conditionalStatements = result.getRight().getAllElements();
+                    List<PsiStatement> conditionalStatements = result.getRight().getElementsFromAllLevels();
                     if (!conditionalStatements.isEmpty()) {
                         bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), conditionalStatements));
                     }

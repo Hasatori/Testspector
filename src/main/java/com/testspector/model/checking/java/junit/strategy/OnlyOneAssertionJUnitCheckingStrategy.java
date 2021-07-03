@@ -48,7 +48,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                                             .isPresent())
                                     ,el-> el instanceof  PsiMethod && methodInTestContext().test(el));
             removeGroupedAssertions(allAssertionMethodsResult);
-            List<PsiMethodCallExpression> allAssertionMethods = allAssertionMethodsResult.getAllElements();
+            List<PsiMethodCallExpression> allAssertionMethods = allAssertionMethodsResult.getElementsFromAllLevels();
 /**/            if (allAssertionMethods.size() > 1) {
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
                     bestPracticeViolations.add(createOnlyOneBestPracticeViolation(testMethod, assertionMethod));
@@ -87,7 +87,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
-                    List<PsiMethodCallExpression> assertionMethods = result.getRight().getAllElements();
+                    List<PsiMethodCallExpression> assertionMethods = result.getRight().getElementsFromAllLevels();
                     if (!assertionMethods.isEmpty()){
                         bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), assertionMethods));
                     }

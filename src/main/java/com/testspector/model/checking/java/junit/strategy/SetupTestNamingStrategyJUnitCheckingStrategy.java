@@ -49,7 +49,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                 String testMethodName = nameIdentifier.getText();
                 ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult = methodResolver.allTestedMethodsMethodCalls(testMethod);
                     removeTestedMethodsWithDifferentName(testMethodName, allTestedMethodsResult);
-                    for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getAllElements()) {
+                    for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getElementsFromAllLevels()) {
                         bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));
                     }
                     createBestPracticeViolation(allTestedMethodsResult);
@@ -62,7 +62,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
 
     private void removeTestedMethodsWithDifferentName(String testMethodName, ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult) {
         List<PsiMethodCallExpression> toRemove = new ArrayList<>();
-        toRemove.addAll(allTestedMethodsResult.getElements().stream()
+        toRemove.addAll(allTestedMethodsResult.getElementsOfCurrentLevel().stream()
                 .filter(testedMethodCall -> {
                     PsiMethod testedMethod = testedMethodCall.resolveMethod();
                     if (testedMethod != null) {
@@ -74,7 +74,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                     return false;
                 })
                 .collect(Collectors.toList()));
-        allTestedMethodsResult.getElements().removeAll(toRemove);
+        allTestedMethodsResult.getElementsOfCurrentLevel().removeAll(toRemove);
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : allTestedMethodsResult.getReferencedResults()) {
             removeTestedMethodsWithDifferentName(testMethodName, referencedResult.getRight());
         }
@@ -97,7 +97,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
-                    List<PsiMethodCallExpression> assertionMethods = result.getRight().getAllElements();
+                    List<PsiMethodCallExpression> assertionMethods = result.getRight().getElementsFromAllLevels();
                     if (!assertionMethods.isEmpty()) {
                         bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), assertionMethods));
                     }

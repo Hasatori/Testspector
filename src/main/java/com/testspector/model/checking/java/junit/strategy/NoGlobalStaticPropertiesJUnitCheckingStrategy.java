@@ -59,7 +59,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
                                             !(psiField instanceof PsiEnumConstant) && isStaticAndNotFinal().test(psiField)
                                     ),
                                    el-> (el instanceof PsiMethod || el instanceof PsiField) && contextIndicator.isInTestContext().test(el));
-            for (PsiField staticProperty : staticPropertiesResult.getAllElements()) {
+            for (PsiField staticProperty : staticPropertiesResult.getElementsFromAllLevels()) {
                 bestPracticeViolations.add(createBestPracticeViolation(staticProperty));
             }
 
@@ -95,7 +95,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
-                    List<PsiField> globalStaticProps = result.getRight().getAllElements();
+                    List<PsiField> globalStaticProps = result.getRight().getElementsFromAllLevels();
                     if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()){
                         bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(),globalStaticProps));
                     } else if (!globalStaticProps.isEmpty()){

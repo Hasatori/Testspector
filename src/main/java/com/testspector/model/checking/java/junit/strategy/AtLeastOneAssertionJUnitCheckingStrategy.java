@@ -41,7 +41,7 @@ public class AtLeastOneAssertionJUnitCheckingStrategy extends AssertionCountJUni
                             , methodInTestContext());
             removeGroupedAssertions(allAssertionMethodsResult);
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
-            if (allAssertionMethodsResult.getAllElements().isEmpty()) {
+            if (allAssertionMethodsResult.getElementsFromAllLevels().isEmpty()) {
                 bestPracticeViolations.add(createAtLeastOneAssertionBestPracticeViolation(
                         testMethod,
                         methodIdentifier));

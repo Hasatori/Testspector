@@ -63,7 +63,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
             ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions = methodResolver.allTestedMethodsMethodCalls(testMethod);
             removePublicTestedMethods(nonPublicTestedMethodsFromMethodCallExpressions);
             nonPublicTestedMethodsFromMethodCallExpressions
-                    .getAllElements()
+                    .getElementsFromAllLevels()
                     .forEach(nonPublicFromMethodCallExpression -> {
                         bestPracticeViolations.add(new BestPracticeViolation(
                                 nonPublicFromMethodCallExpression,
@@ -78,7 +78,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
             ElementSearchResult<PsiReference> nonPublicTestedMethodsFromReferences = methodResolver.allTestedMethodsReferences(testMethod);
             removePublicTestedMethodsFromReference(nonPublicTestedMethodsFromReferences);
             nonPublicTestedMethodsFromReferences
-                    .getAllElements()
+                    .getElementsFromAllLevels()
                     .forEach(reference -> {
                         bestPracticeViolations.add(new BestPracticeViolation(
                                 reference.getElement(),
@@ -98,7 +98,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     private void removePublicTestedMethods(ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions) {
         List<PsiMethodCallExpression> toRemove = new ArrayList<>();
         toRemove.addAll(nonPublicTestedMethodsFromMethodCallExpressions
-                .getElements()
+                .getElementsOfCurrentLevel()
                 .stream()
                 .filter(methodCall -> {
                     PsiMethod testedMethod = methodCall.resolveMethod();
@@ -107,7 +107,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                             methodHasModifier(testedMethod, PsiModifier.PRIVATE));
 
                 }).collect(Collectors.toList()));
-        nonPublicTestedMethodsFromMethodCallExpressions.getElements().removeAll(toRemove);
+        nonPublicTestedMethodsFromMethodCallExpressions.getElementsOfCurrentLevel().removeAll(toRemove);
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : nonPublicTestedMethodsFromMethodCallExpressions.getReferencedResults()) {
             removePublicTestedMethods(referencedResult.getRight());
         }
@@ -116,7 +116,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     private void removePublicTestedMethodsFromReference(ElementSearchResult<PsiReference> nonPublicTestedMethodsFromReferences) {
         List<PsiReference> toRemove = new ArrayList<>();
         toRemove.addAll(nonPublicTestedMethodsFromReferences
-                .getElements()
+                .getElementsOfCurrentLevel()
                 .stream()
                 .filter(reference -> {
                     PsiMethod testedMethod = (PsiMethod) reference.resolve();
@@ -124,7 +124,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                             isMethodPackagePrivate(testedMethod) ||
                             methodHasModifier(testedMethod, PsiModifier.PRIVATE));
                 }).collect(Collectors.toList()));
-        nonPublicTestedMethodsFromReferences.getElements().removeAll(toRemove);
+        nonPublicTestedMethodsFromReferences.getElementsOfCurrentLevel().removeAll(toRemove);
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiReference>> referencedResult : nonPublicTestedMethodsFromReferences.getReferencedResults()) {
             removePublicTestedMethodsFromReference(referencedResult.getRight());
         }
@@ -145,7 +145,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
-                    List<PsiMethodCallExpression> globalStaticProps = result.getRight().getAllElements();
+                    List<PsiMethodCallExpression> globalStaticProps = result.getRight().getElementsFromAllLevels();
                     if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()){
                         bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(),globalStaticProps));
                     }
@@ -158,7 +158,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
-                    List<PsiElement> globalStaticProps = result.getRight().getAllElements().stream().map(PsiReference::resolve).collect(Collectors.toList());
+                    List<PsiElement> globalStaticProps = result.getRight().getElementsFromAllLevels().stream().map(PsiReference::resolve).collect(Collectors.toList());
                     if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()){
                         bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(),globalStaticProps));
                     }

@@ -1,11 +1,9 @@
 package com.testspector.model.checking.java.common;
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.impl.file.PsiPackageBase;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +45,7 @@ public class JavaElementResolver {
         if (!(psiElement instanceof PsiPackageBase)) {
             for (PsiElement child : psiElement.getChildren()) {
                 if (elementType.isInstance(child) && typeCondition.test(elementType.cast(child))) {
-                    result.getElements().add(elementType.cast(child));
+                    result.getElementsOfCurrentLevel().add(elementType.cast(child));
                 }
                 if (child instanceof PsiReferenceExpression) {
                     PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
@@ -62,11 +60,10 @@ public class JavaElementResolver {
                                     typeCondition,
                                     fromReferencesMeetingCondition)
                                     ;
-                            next.setPrevious(result);
                             if (elementType.isInstance(referencedElement) && typeCondition.test(elementType.cast(referencedElement))) {
-                                next.getElements().add(elementType.cast(referencedElement));
+                                next.getElementsOfCurrentLevel().add(elementType.cast(referencedElement));
                             }
-                            result.addReferencedResults(Pair.of((PsiReferenceExpression)child,next));
+                            result.addReferencedResult(Pair.of((PsiReferenceExpression)child,next));
                         }
                     }
                 }

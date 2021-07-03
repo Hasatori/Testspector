@@ -14,7 +14,6 @@ import com.testspector.model.enums.BestPractice;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.*;
@@ -51,7 +50,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                             testMethod,
                             PsiTryStatement.class,
                             el->  el instanceof  PsiMethod && contextResolver.isInTestContext().test(el) );
-            for (PsiTryStatement psiTryStatement : psiTryStatementsElementSearchResult.getAllElements()) {
+            for (PsiTryStatement psiTryStatement : psiTryStatementsElementSearchResult.getElementsFromAllLevels()) {
                 bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatement));
             }
             bestPracticeViolations.addAll(createBestPracticeViolation(psiTryStatementsElementSearchResult));
@@ -89,7 +88,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
-                    List<PsiTryStatement> tryStatements = result.getRight().getAllElements();
+                    List<PsiTryStatement> tryStatements = result.getRight().getElementsFromAllLevels();
                     if (!tryStatements.isEmpty()){
                         bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), tryStatements));
                     }

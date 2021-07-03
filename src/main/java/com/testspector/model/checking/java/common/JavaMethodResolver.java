@@ -44,7 +44,7 @@ public class JavaMethodResolver {
                         (psiMethodCallExpression ->
                                 assertionMethod(psiMethodCallExpression).isPresent()),
                         contextResolver.isInTestContext())
-                .getAllElements()
+                .getElementsFromAllLevels()
                 .stream()
                 .distinct()
                 .collect(Collectors.toList());
@@ -54,7 +54,7 @@ public class JavaMethodResolver {
                         .allChildrenOfTypeWithReferences(
                                 assertionMethod,
                                 PsiLiteralExpression.class,
-                                contextResolver.isInTestContext()).getAllElements())
+                                contextResolver.isInTestContext()).getElementsFromAllLevels())
                 .flatMap(Collection::stream)
                 .collect(Collectors.toCollection(HashSet::new));
         ElementSearchResult<PsiLiteralExpression> literalExpressionElementSearchResult = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
@@ -69,8 +69,8 @@ public class JavaMethodResolver {
 
     private ElementSearchResult<PsiReference> fillReferencesFromLiteralExpressions(ElementSearchResult<PsiLiteralExpression> literalExpressionElementSearchResult) {
         ElementSearchResult<PsiReference> result = new ElementSearchResult<PsiReference>();
-        result.setElements(literalExpressionElementSearchResult
-                .getElements()
+        result.setElementsOfCurrentLevel(literalExpressionElementSearchResult
+                .getElementsOfCurrentLevel()
                 .stream()
                 .map(literalExpression -> Arrays.stream(ReferenceProvidersRegistry.getReferencesFromProviders(literalExpression))
                         .filter(reference -> {
@@ -82,8 +82,7 @@ public class JavaMethodResolver {
                 .collect(Collectors.toList()));
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiLiteralExpression>> referencedResult : literalExpressionElementSearchResult.getReferencedResults()) {
             ElementSearchResult<PsiReference> newReferencedResult = fillReferencesFromLiteralExpressions(referencedResult.getRight());
-            newReferencedResult.setPrevious(result);
-            result.addReferencedResults(Pair.of(referencedResult.getLeft(), newReferencedResult));
+            result.addReferencedResult(Pair.of(referencedResult.getLeft(), newReferencedResult));
         }
         return result;
     }

@@ -40,15 +40,15 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
 
     protected void removeGroupedAssertions(ElementSearchResult<PsiMethodCallExpression> allAssertionsSearch) {
         List<PsiMethodCallExpression> toRemove = new ArrayList<>();
-        for (PsiMethodCallExpression assertion : allAssertionsSearch.getElements()) {
+        for (PsiMethodCallExpression assertion : allAssertionsSearch.getElementsOfCurrentLevel()) {
             toRemove.addAll(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     assertion,
                     PsiMethodCallExpression.class,
                     psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent(),
                     contextIndicator.isInTestContext())
-                    .getAllElements());
+                    .getElementsFromAllLevels());
         }
-        allAssertionsSearch.getElements().removeAll(toRemove);
+        allAssertionsSearch.getElementsOfCurrentLevel().removeAll(toRemove);
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : allAssertionsSearch.getReferencedResults()) {
             removeGroupedAssertions(referencedResult.getRight());
         }
@@ -66,14 +66,14 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
         List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                 element,
                 PsiReferenceExpression.class)
-                .getAllElements();
+                .getElementsFromAllLevels();
         for (PsiReferenceExpression reference : references) {
             if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     reference.getParent(),
                     PsiMethodCallExpression.class, psiMethodCallExpression1 ->
                             psiMethodCallExpression == psiMethodCallExpression1,
                     contextIndicator.isInTestContext())
-                    .getAllElements()
+                    .getElementsFromAllLevels()
                     .isEmpty()) {
                 return Optional.of(reference);
             }
