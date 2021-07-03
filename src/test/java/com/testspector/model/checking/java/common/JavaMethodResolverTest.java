@@ -239,7 +239,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiReturnStatement returnStatement = (PsiReturnStatement) getterMethod
                 .getBody()
                 .add(this.psiElementFactory.createStatementFromText(String.format("return %s;", fieldName), psiClass));
-        EasyMock.expect(elementResolver.firstImmediateChildIgnoring(
+        EasyMock.expect(elementResolver.firstImmediateChildByQuery(
                 getterMethod.getBody(), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class)))
                 .andReturn(Optional.of(returnStatement)).once();
         EasyMock.replay(elementResolver);
@@ -256,7 +256,7 @@ class JavaMethodResolverTest extends JavaTest {
                 .createMethod("getName", "String", Collections.singletonList("public"));
         PsiStatement ifStatement = (PsiStatement) complexMethod.getBody().add(this.javaTestElementUtil.createIfStatement());
         ifStatement.add(this.psiElementFactory.createStatementFromText("String fieldName = \"name\";", complexMethod));
-        EasyMock.expect(elementResolver.firstImmediateChildIgnoring(
+        EasyMock.expect(elementResolver.firstImmediateChildByQuery(
                 complexMethod.getBody(), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class)))
                 .andReturn(Optional.of(ifStatement)).once();
         EasyMock.replay(elementResolver);

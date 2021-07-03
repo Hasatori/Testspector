@@ -5,10 +5,7 @@ import com.intellij.psi.*;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.common.ElementSearchResult;
-import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.JavaElementResolver;
-import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.*;
 import com.testspector.model.enums.BestPractice;
 
 import java.security.InvalidParameterException;
@@ -57,12 +54,13 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
         for (PsiMethod testMethod : methods) {
+            ElementSearchQuery<PsiStatement> findAllConditionalStatements = new ElementSearchQueryBuilder<PsiStatement>()
+                    .elementOfType(PsiStatement.class)
+                    .whereElement(isConditionalStatement())
+                    .whereReferences(el -> el instanceof PsiMethod && contextResolver.isInTestContext().test(el))
+                    .build();
             ElementSearchResult<PsiStatement> statementsElementSearchResult = elementResolver
-                    .allChildrenOfTypeMeetingConditionWithReferences(
-                            testMethod
-                            , PsiStatement.class
-                            , isConditionalStatement()
-                            , el -> el instanceof PsiMethod && methodInTestContext().test(el));
+                    .allChildrenByQuery(testMethod, findAllConditionalStatements);
             List<PsiStatement> statements = statementsElementSearchResult
                     .getElementsFromAllLevels()
                     .stream()

@@ -13,37 +13,18 @@ import java.util.function.Predicate;
 
 public class JavaElementResolver {
 
-
-    public <T extends PsiElement> ElementSearchResult<T> allChildrenOfTypeMeetingConditionWithReferences(PsiElement psiElement, Class<T> elementType) {
-        return allChildrenOfTypeMeetingConditionWithReferences(psiElement, elementType, t -> true, t -> false);
+    public <T> ElementSearchResult<T> allChildrenByQuery(PsiElement element, ElementSearchQuery<T> query) {
+        return allChildrenByQuery(false, new HashSet<>(), null, null, element, query);
     }
 
-    public Optional<PsiElement> firstImmediateChildIgnoring(PsiElement psiElement, List<Class<? extends PsiElement>> ignoredList) {
-        for (PsiElement child : psiElement.getChildren()) {
-            if (ignoredList.stream().noneMatch(ignored -> ignored.isInstance(child))) {
-                return Optional.of(child);
-            }
-        }
-        return Optional.empty();
-    }
-
-    public <T> ElementSearchResult<T> allChildrenOfTypeMeetingCondition(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition) {
-        return allChildrenOfTypeMeetingConditionWithReferences(true, new HashSet<>(), null,null, psiElement, elementType, typeCondition, t -> false);
-    }
-
-    public <T> ElementSearchResult<T> allChildrenOfTypeWithReferences(PsiElement psiElement, Class<T> elementType, Predicate<PsiElement> fromReferencesMeetingCondition) {
-        return allChildrenOfTypeMeetingConditionWithReferences(psiElement, elementType, t -> true, fromReferencesMeetingCondition);
-    }
-
-    public <T> ElementSearchResult<T> allChildrenOfTypeMeetingConditionWithReferences(PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
-        return allChildrenOfTypeMeetingConditionWithReferences(true,new HashSet<>(), null,null, psiElement, elementType, typeCondition, fromReferencesMeetingCondition);
-    }
-
-    private <T> ElementSearchResult<T> allChildrenOfTypeMeetingConditionWithReferences(boolean recursionStart, HashSet<PsiElement> visitedReferences, List<T> elements,List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> references, PsiElement psiElement, Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> fromReferencesMeetingCondition) {
+    private <T> ElementSearchResult<T> allChildrenByQuery(boolean addRootIfPossible, HashSet<PsiElement> visitedReferences, List<T> elements, List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> references, PsiElement psiElement, ElementSearchQuery<T> elementSearchQuery) {
+        Class<T> elementType = elementSearchQuery.getElementType();
+        Predicate<T> typeCondition = elementSearchQuery.getWhereTypeCondition();
+        Predicate<PsiElement> fromReferencesMeetingCondition = elementSearchQuery.getReferencesCondition();
         List<T> elementsOfTheCurrentLevel = Optional.ofNullable(elements).orElse(new ArrayList<>());
         List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> referencedResults = Optional.ofNullable(references).orElse(new ArrayList<>());
         if (!(psiElement instanceof PsiPackageBase)) {
-            if (!recursionStart && elementType.isInstance(psiElement) && typeCondition.test(elementType.cast(psiElement))){
+            if (addRootIfPossible && elementType.isInstance(psiElement) && typeCondition.test(elementType.cast(psiElement))) {
                 elementsOfTheCurrentLevel.add(elementType.cast(psiElement));
             }
             for (PsiElement child : psiElement.getChildren()) {
@@ -55,28 +36,24 @@ public class JavaElementResolver {
                     if (referencedElement != null && !visitedReferences.contains(referencedElement)) {
                         if (fromReferencesMeetingCondition.test(referencedElement)) {
                             visitedReferences.add(referencedElement);
-                            ElementSearchResult<T> next = allChildrenOfTypeMeetingConditionWithReferences(
-                                    false,
+                            ElementSearchResult<T> next = allChildrenByQuery(
+                                    true,
                                     visitedReferences,
                                     null,
                                     null,
                                     referencedElement,
-                                    elementType,
-                                    typeCondition,
-                                    fromReferencesMeetingCondition);
+                                    elementSearchQuery);
                             referencedResults.add(Pair.of((PsiReferenceExpression) child, next));
                         }
                     }
                 }
-                allChildrenOfTypeMeetingConditionWithReferences(
+                allChildrenByQuery(
                         false,
                         visitedReferences,
                         elementsOfTheCurrentLevel,
                         referencedResults,
                         child,
-                        elementType,
-                        typeCondition,
-                        fromReferencesMeetingCondition);
+                        elementSearchQuery);
             }
         }
         return new ElementSearchResult<>(referencedResults, elementsOfTheCurrentLevel);

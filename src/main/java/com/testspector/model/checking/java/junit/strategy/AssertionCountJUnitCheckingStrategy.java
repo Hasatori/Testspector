@@ -1,11 +1,11 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.psi.PsiReferenceExpression;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
-import com.testspector.model.checking.java.common.ElementSearchResult;
-import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.JavaElementResolver;
-import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.*;
 import com.testspector.model.checking.java.junit.JUnitConstants;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -27,6 +27,7 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
         this.contextIndicator = contextIndicator;
         this.methodResolver = methodResolver;
     }
+
     protected Predicate<PsiElement> methodInTestContext() {
         return (element) ->
                 element instanceof PsiMethod &&
@@ -36,21 +37,24 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
     }
 
     protected ElementSearchResult<PsiMethodCallExpression> removeGroupedAssertions(ElementSearchResult<PsiMethodCallExpression> allAssertionsSearch) {
-        List<PsiMethodCallExpression> notToRemove = new ArrayList<>();
+        List<PsiMethodCallExpression> allElementsOfTheCurrentLevel = new ArrayList<>(allAssertionsSearch.getElementsOfCurrentLevel());
+        List<PsiMethodCallExpression> toRemove = new ArrayList<>();
+        ElementSearchQuery<PsiMethodCallExpression> findAllNotGroupAssertions = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
+                .elementOfType(PsiMethodCallExpression.class)
+                .whereElement(psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent())
+                .whereReferences(contextIndicator.isInTestContext())
+                .build();
         for (PsiMethodCallExpression assertion : allAssertionsSearch.getElementsOfCurrentLevel()) {
-            notToRemove.addAll(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                    assertion,
-                    PsiMethodCallExpression.class,
-                    psiMethodCallExpression -> !methodResolver.assertionMethod(psiMethodCallExpression).isPresent(),
-                    contextIndicator.isInTestContext())
-                    .getElementsFromAllLevels());
+            toRemove.addAll(elementResolver.allChildrenByQuery(assertion, findAllNotGroupAssertions)
+                    .getElementsOfCurrentLevel());
         }
-        List<Pair<PsiReferenceExpression,ElementSearchResult<PsiMethodCallExpression>>> referencedElements = new ArrayList<>();
+        allElementsOfTheCurrentLevel.removeAll(toRemove);
+        List<Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>>> referencedElements = new ArrayList<>();
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : allAssertionsSearch.getReferencedResults()) {
             ElementSearchResult<PsiMethodCallExpression> newReferencedResult = removeGroupedAssertions(referencedResult.getRight());
-            referencedElements.add(Pair.of(referencedResult.getLeft(),newReferencedResult));
+            referencedElements.add(Pair.of(referencedResult.getLeft(), newReferencedResult));
         }
-        return new ElementSearchResult<>(referencedElements, notToRemove);
+        return new ElementSearchResult<>(referencedElements, allElementsOfTheCurrentLevel);
     }
 
     protected Predicate<PsiMethodCallExpression> isAssertionMethodFrom(String qualifiedName) {

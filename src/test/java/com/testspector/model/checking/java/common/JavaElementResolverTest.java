@@ -192,7 +192,7 @@ public class JavaElementResolverTest extends JavaTest {
                 .getBody()
                 .add(this.javaTestElementUtil.createForStatement());
 
-        PsiElement result = javaElementResolver.firstImmediateChildIgnoring(
+        PsiElement result = javaElementResolver.firstImmediateChildByQuery(
                 method.getBody(),
                 Collections.singletonList(PsiJavaToken.class)).get();
 
@@ -204,7 +204,7 @@ public class JavaElementResolverTest extends JavaTest {
         PsiClass psiClass = this.psiElementFactory.createClass("Test");
         PsiModifierList expectedElement = (PsiModifierList) psiClass.getChildren()[0];
 
-        PsiElement result = javaElementResolver.firstImmediateChildIgnoring(
+        PsiElement result = javaElementResolver.firstImmediateChildByQuery(
                 psiClass,
                 Collections.emptyList()).get();
 

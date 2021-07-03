@@ -1,14 +1,14 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.pom.Navigatable;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiTryStatement;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.common.ElementSearchResult;
-import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.JavaElementResolver;
-import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.*;
 import com.testspector.model.enums.BestPractice;
 
 import java.util.ArrayList;
@@ -45,11 +45,12 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
+            ElementSearchQuery<PsiTryStatement> findAllTryStatements = new ElementSearchQueryBuilder<PsiTryStatement>()
+                    .elementOfType(PsiTryStatement.class)
+                    .whereReferences(el -> el instanceof PsiMethod && contextResolver.isInTestContext().test(el))
+                    .build();
             ElementSearchResult<PsiTryStatement> psiTryStatementsElementSearchResult = elementResolver
-                    .allChildrenOfTypeWithReferences(
-                            testMethod,
-                            PsiTryStatement.class,
-                            el->  el instanceof  PsiMethod && contextResolver.isInTestContext().test(el) );
+                    .allChildrenByQuery(testMethod, findAllTryStatements);
             for (PsiTryStatement psiTryStatement : psiTryStatementsElementSearchResult.getElementsFromAllLevels()) {
                 bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatement));
             }
@@ -59,7 +60,6 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         }
         return bestPracticeViolations;
     }
-
 
 
     private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiTryStatement psiTryStatement) {
@@ -84,12 +84,12 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                 null);
     }
 
-    private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiTryStatement> elementSearchResult){
+    private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiTryStatement> elementSearchResult) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
                     List<PsiTryStatement> tryStatements = result.getRight().getElementsFromAllLevels();
-                    if (!tryStatements.isEmpty()){
+                    if (!tryStatements.isEmpty()) {
                         bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), tryStatements));
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
@@ -100,7 +100,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiTryStatement> tryStatements) {
         return new BestPracticeViolation(
                 reference.getElement(),
-                "Following method breaks best practice. "+ DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                "Following method breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 tryStatements.stream().map(tryStatement -> new Action<BestPracticeViolation>() {
                     @Override
