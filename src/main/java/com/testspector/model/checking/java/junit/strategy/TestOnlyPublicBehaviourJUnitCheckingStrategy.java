@@ -61,7 +61,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
         for (PsiMethod testMethod : methods) {
 
             ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions = methodResolver.allTestedMethodsMethodCalls(testMethod);
-            removePublicTestedMethods(nonPublicTestedMethodsFromMethodCallExpressions);
+            nonPublicTestedMethodsFromMethodCallExpressions = removePublicTestedMethods(nonPublicTestedMethodsFromMethodCallExpressions);
             nonPublicTestedMethodsFromMethodCallExpressions
                     .getElementsFromAllLevels()
                     .forEach(nonPublicFromMethodCallExpression -> {
@@ -76,7 +76,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
             bestPracticeViolations.addAll(createBestPracticeViolationFromMethodExpression(nonPublicTestedMethodsFromMethodCallExpressions));
 
             ElementSearchResult<PsiReference> nonPublicTestedMethodsFromReferences = methodResolver.allTestedMethodsReferences(testMethod);
-            removePublicTestedMethodsFromReference(nonPublicTestedMethodsFromReferences);
+            nonPublicTestedMethodsFromReferences = removePublicTestedMethodsFromReference(nonPublicTestedMethodsFromReferences);
             nonPublicTestedMethodsFromReferences
                     .getElementsFromAllLevels()
                     .forEach(reference -> {
@@ -95,39 +95,43 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
         return bestPracticeViolations;
     }
 
-    private void removePublicTestedMethods(ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions) {
-        List<PsiMethodCallExpression> toRemove = new ArrayList<>();
-        toRemove.addAll(nonPublicTestedMethodsFromMethodCallExpressions
+    private ElementSearchResult<PsiMethodCallExpression> removePublicTestedMethods(ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions) {
+        List<PsiMethodCallExpression> notToRemove = new ArrayList<>();
+        notToRemove.addAll(nonPublicTestedMethodsFromMethodCallExpressions
                 .getElementsOfCurrentLevel()
                 .stream()
                 .filter(methodCall -> {
                     PsiMethod testedMethod = methodCall.resolveMethod();
-                    return !(methodHasModifier(testedMethod, PsiModifier.PROTECTED) ||
+                    return methodHasModifier(testedMethod, PsiModifier.PROTECTED) ||
                             isMethodPackagePrivate(testedMethod) ||
-                            methodHasModifier(testedMethod, PsiModifier.PRIVATE));
+                            methodHasModifier(testedMethod, PsiModifier.PRIVATE);
 
                 }).collect(Collectors.toList()));
-        nonPublicTestedMethodsFromMethodCallExpressions.getElementsOfCurrentLevel().removeAll(toRemove);
+        List<Pair<PsiReferenceExpression,ElementSearchResult<PsiMethodCallExpression>>> referencedElements = new ArrayList<>();
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : nonPublicTestedMethodsFromMethodCallExpressions.getReferencedResults()) {
-            removePublicTestedMethods(referencedResult.getRight());
+            ElementSearchResult<PsiMethodCallExpression> newReferencedResult = removePublicTestedMethods(referencedResult.getRight());
+            referencedElements.add(Pair.of(referencedResult.getLeft(),newReferencedResult));
         }
+        return new ElementSearchResult<>(referencedElements, notToRemove);
     }
 
-    private void removePublicTestedMethodsFromReference(ElementSearchResult<PsiReference> nonPublicTestedMethodsFromReferences) {
-        List<PsiReference> toRemove = new ArrayList<>();
-        toRemove.addAll(nonPublicTestedMethodsFromReferences
+    private ElementSearchResult<PsiReference> removePublicTestedMethodsFromReference(ElementSearchResult<PsiReference> nonPublicTestedMethodsFromReferences) {
+        List<PsiReference> notToRemove = new ArrayList<>();
+        notToRemove.addAll(nonPublicTestedMethodsFromReferences
                 .getElementsOfCurrentLevel()
                 .stream()
                 .filter(reference -> {
                     PsiMethod testedMethod = (PsiMethod) reference.resolve();
-                    return !(methodHasModifier(testedMethod, PsiModifier.PROTECTED) ||
+                    return methodHasModifier(testedMethod, PsiModifier.PROTECTED) ||
                             isMethodPackagePrivate(testedMethod) ||
-                            methodHasModifier(testedMethod, PsiModifier.PRIVATE));
+                            methodHasModifier(testedMethod, PsiModifier.PRIVATE);
                 }).collect(Collectors.toList()));
-        nonPublicTestedMethodsFromReferences.getElementsOfCurrentLevel().removeAll(toRemove);
+        List<Pair<PsiReferenceExpression,ElementSearchResult<PsiReference>>> referencedElements = new ArrayList<>();
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiReference>> referencedResult : nonPublicTestedMethodsFromReferences.getReferencedResults()) {
-            removePublicTestedMethodsFromReference(referencedResult.getRight());
+            ElementSearchResult<PsiReference> newReferencedResult = removePublicTestedMethodsFromReference(referencedResult.getRight());
+            referencedElements.add(Pair.of(referencedResult.getLeft(),newReferencedResult));
         }
+        return new ElementSearchResult<>(referencedElements, notToRemove);
     }
 
     private boolean methodHasModifier(PsiMethod method, String modifier) {

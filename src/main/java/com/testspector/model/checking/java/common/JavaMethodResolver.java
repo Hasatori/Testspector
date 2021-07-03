@@ -68,8 +68,7 @@ public class JavaMethodResolver {
 
 
     private ElementSearchResult<PsiReference> fillReferencesFromLiteralExpressions(ElementSearchResult<PsiLiteralExpression> literalExpressionElementSearchResult) {
-        ElementSearchResult<PsiReference> result = new ElementSearchResult<PsiReference>();
-        result.setElementsOfCurrentLevel(literalExpressionElementSearchResult
+        List<PsiReference> elementsOfTheCurrentLevel = literalExpressionElementSearchResult
                 .getElementsOfCurrentLevel()
                 .stream()
                 .map(literalExpression -> Arrays.stream(ReferenceProvidersRegistry.getReferencesFromProviders(literalExpression))
@@ -79,12 +78,13 @@ public class JavaMethodResolver {
                         })
                         .collect(Collectors.toList()))
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+        List<Pair<PsiReferenceExpression,ElementSearchResult<PsiReference>>> referencedElements = new ArrayList<>();
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiLiteralExpression>> referencedResult : literalExpressionElementSearchResult.getReferencedResults()) {
             ElementSearchResult<PsiReference> newReferencedResult = fillReferencesFromLiteralExpressions(referencedResult.getRight());
-            result.addReferencedResult(Pair.of(referencedResult.getLeft(), newReferencedResult));
+            referencedElements.add(Pair.of(referencedResult.getLeft(), newReferencedResult));
         }
-        return result;
+        return new ElementSearchResult<>(referencedElements,elementsOfTheCurrentLevel);
     }
 
     public List<PsiMethod> methodsWithAnnotations(List<PsiElement> fromElements, List<String> annotationQualifiedNames) {

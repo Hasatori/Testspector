@@ -48,11 +48,11 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
             if (nameIdentifier != null) {
                 String testMethodName = nameIdentifier.getText();
                 ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult = methodResolver.allTestedMethodsMethodCalls(testMethod);
-                    removeTestedMethodsWithDifferentName(testMethodName, allTestedMethodsResult);
-                    for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getElementsFromAllLevels()) {
-                        bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));
-                    }
-                    createBestPracticeViolation(allTestedMethodsResult);
+                allTestedMethodsResult = removeTestedMethodsWithDifferentName(testMethodName, allTestedMethodsResult);
+                for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getElementsFromAllLevels()) {
+                    bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));
+                }
+                createBestPracticeViolation(allTestedMethodsResult);
 
             }
         }
@@ -60,24 +60,26 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
         return bestPracticeViolations;
     }
 
-    private void removeTestedMethodsWithDifferentName(String testMethodName, ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult) {
-        List<PsiMethodCallExpression> toRemove = new ArrayList<>();
-        toRemove.addAll(allTestedMethodsResult.getElementsOfCurrentLevel().stream()
+    private ElementSearchResult<PsiMethodCallExpression> removeTestedMethodsWithDifferentName(String testMethodName, ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult) {
+        List<PsiMethodCallExpression> notToRemove = new ArrayList<>();
+        notToRemove.addAll(allTestedMethodsResult.getElementsOfCurrentLevel().stream()
                 .filter(testedMethodCall -> {
                     PsiMethod testedMethod = testedMethodCall.resolveMethod();
                     if (testedMethod != null) {
                         int minRatio = selectMinRatio(testedMethod.getName());
                         return FuzzySearch.ratio(
                                 testMethodName.toLowerCase(),
-                                testedMethod.getName().toLowerCase()) < minRatio;
+                                testedMethod.getName().toLowerCase()) > minRatio;
                     }
                     return false;
                 })
                 .collect(Collectors.toList()));
-        allTestedMethodsResult.getElementsOfCurrentLevel().removeAll(toRemove);
+        List<Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>>> referencedElements = new ArrayList<>();
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : allTestedMethodsResult.getReferencedResults()) {
-            removeTestedMethodsWithDifferentName(testMethodName, referencedResult.getRight());
+            ElementSearchResult<PsiMethodCallExpression> newReferencedResult = removeTestedMethodsWithDifferentName(testMethodName, referencedResult.getRight());
+            referencedElements.add(Pair.of(referencedResult.getLeft(), newReferencedResult));
         }
+        return new ElementSearchResult<>(referencedElements, notToRemove);
     }
 
     private int selectMinRatio(String testedMethodName) {

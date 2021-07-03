@@ -1,9 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.java.common.ElementSearchResult;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -38,20 +35,22 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
                         );
     }
 
-    protected void removeGroupedAssertions(ElementSearchResult<PsiMethodCallExpression> allAssertionsSearch) {
-        List<PsiMethodCallExpression> toRemove = new ArrayList<>();
+    protected ElementSearchResult<PsiMethodCallExpression> removeGroupedAssertions(ElementSearchResult<PsiMethodCallExpression> allAssertionsSearch) {
+        List<PsiMethodCallExpression> notToRemove = new ArrayList<>();
         for (PsiMethodCallExpression assertion : allAssertionsSearch.getElementsOfCurrentLevel()) {
-            toRemove.addAll(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+            notToRemove.addAll(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
                     assertion,
                     PsiMethodCallExpression.class,
-                    psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent(),
+                    psiMethodCallExpression -> !methodResolver.assertionMethod(psiMethodCallExpression).isPresent(),
                     contextIndicator.isInTestContext())
                     .getElementsFromAllLevels());
         }
-        allAssertionsSearch.getElementsOfCurrentLevel().removeAll(toRemove);
+        List<Pair<PsiReferenceExpression,ElementSearchResult<PsiMethodCallExpression>>> referencedElements = new ArrayList<>();
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : allAssertionsSearch.getReferencedResults()) {
-            removeGroupedAssertions(referencedResult.getRight());
+            ElementSearchResult<PsiMethodCallExpression> newReferencedResult = removeGroupedAssertions(referencedResult.getRight());
+            referencedElements.add(Pair.of(referencedResult.getLeft(),newReferencedResult));
         }
+        return new ElementSearchResult<>(referencedElements, notToRemove);
     }
 
     protected Predicate<PsiMethodCallExpression> isAssertionMethodFrom(String qualifiedName) {
