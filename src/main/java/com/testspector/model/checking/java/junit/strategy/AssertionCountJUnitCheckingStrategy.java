@@ -60,30 +60,6 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
                 .orElse(false);
     }
 
-
-    protected Optional<PsiReferenceExpression> firstReferenceToAssertionMethod(PsiElement element,
-                                                                             PsiMethodCallExpression psiMethodCallExpression) {
-        List<PsiReferenceExpression> references = elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                element,
-                PsiReferenceExpression.class)
-                .getElementsFromAllLevels();
-        for (PsiReferenceExpression reference : references) {
-            if (!elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                    reference.getParent(),
-                    PsiMethodCallExpression.class, psiMethodCallExpression1 ->
-                            psiMethodCallExpression == psiMethodCallExpression1,
-                    contextIndicator.isInTestContext())
-                    .getElementsFromAllLevels()
-                    .isEmpty()) {
-                return Optional.of(reference);
-            }
-        }
-        return Optional.empty();
-    }
-
-
-
-
     protected boolean containsHamcrestAssertion(List<PsiMethodCallExpression> allAssertionMethods) {
         return allAssertionMethods
                 .stream()
