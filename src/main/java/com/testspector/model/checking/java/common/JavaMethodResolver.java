@@ -94,6 +94,10 @@ public class JavaMethodResolver {
     }
 
     public List<PsiMethod> methodsWithAnnotations(List<PsiElement> fromElements, List<String> annotationQualifiedNames) {
+        return methodsWithAnnotations(new HashSet<>(), fromElements, annotationQualifiedNames);
+    }
+
+    public List<PsiMethod> methodsWithAnnotations(HashSet<PsiElement> visited, List<PsiElement> fromElements, List<String> annotationQualifiedNames) {
         List<PsiMethod> psiMethods = new ArrayList<>();
         for (PsiElement psiElement : fromElements) {
             if (psiElement instanceof PsiJavaFile) {
@@ -107,16 +111,20 @@ public class JavaMethodResolver {
                 psiMethods.addAll(methodsWithAnnotations(Arrays.stream(psiClass.getMethods()).collect(Collectors.toList()), annotationQualifiedNames));
             } else if (psiElement instanceof PsiMethod) {
                 PsiMethod method = (PsiMethod) psiElement;
+                visited.add(method);
                 if (methodHasAnyOfAnnotations(method, annotationQualifiedNames)) {
                     psiMethods.add((PsiMethod) psiElement);
+                } else if (!visited.contains(method)){
+                    psiMethods.addAll(ReferencesSearch.search(method)
+                            .findAll()
+                            .stream()
+                            .map(reference -> PsiTreeUtil.getParentOfType(reference.getElement(), PsiMethod.class))
+                            .filter(met -> met != null && met != method && contextResolver.isInTestContext().test(met))
+                            .map(met -> methodsWithAnnotations(visited, Collections.singletonList(met), annotationQualifiedNames))
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList()));
                 }
-                psiMethods.addAll(ReferencesSearch.search(method)
-                        .findAll()
-                        .stream()
-                        .map(reference -> PsiTreeUtil.getParentOfType(reference.getElement(), PsiMethod.class))
-                        .map(met -> methodsWithAnnotations(Collections.singletonList(met), annotationQualifiedNames))
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toList()));
+
             }
         }
         return psiMethods;
