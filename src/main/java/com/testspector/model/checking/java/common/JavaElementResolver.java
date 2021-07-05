@@ -5,16 +5,27 @@ import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.impl.file.PsiPackageBase;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class JavaElementResolver {
 
+    private HashMap<PsiElement, HashMap<ElementSearchQuery, ElementSearchResult>> cache = new HashMap<>();
+
     public <T> ElementSearchResult<T> allChildrenByQuery(PsiElement element, ElementSearchQuery<T> query) {
-        return allChildrenByQuery(false, new HashSet<>(), null, null, element, query);
+        HashMap<ElementSearchQuery, ElementSearchResult> resultHashMap = cache.get(element);
+        ElementSearchResult<T> result = null;
+        if (resultHashMap == null) {
+            resultHashMap = new HashMap<>();
+            cache.put(element, resultHashMap);
+        } else {
+            result = resultHashMap.get(query);
+        }
+        if (result == null) {
+            result = allChildrenByQuery(false, new HashSet<>(), null, null, element, query);
+            resultHashMap.put(query, result);
+        }
+        return result;
     }
 
     private <T> ElementSearchResult<T> allChildrenByQuery(boolean addRootIfPossible, HashSet<PsiElement> visitedReferences, List<T> elements, List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> references, PsiElement psiElement, ElementSearchQuery<T> elementSearchQuery) {

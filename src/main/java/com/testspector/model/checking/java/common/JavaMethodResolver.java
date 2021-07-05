@@ -16,33 +16,40 @@ public class JavaMethodResolver {
     private final JavaElementResolver elementResolver;
     private final JavaContextIndicator contextResolver;
 
+    private final ElementSearchQuery<PsiMethodCallExpression> findAllTestedMethodCalls;
+    private final ElementSearchQuery<PsiMethodCallExpression> findAllAssertionMethods;
+    private final ElementSearchQuery<PsiLiteralExpression> findAllLiteralExpressions;
+
     public JavaMethodResolver(JavaElementResolver elementResolver, JavaContextIndicator contextResolver) {
         this.elementResolver = elementResolver;
         this.contextResolver = contextResolver;
-    }
-
-    public ElementSearchResult<PsiMethodCallExpression> allTestedMethodsMethodCalls(PsiMethod testMethod) {
-        ElementSearchQuery<PsiMethodCallExpression> findAllTestedMethodCalls = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
+        findAllTestedMethodCalls = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
                 .elementOfType(PsiMethodCallExpression.class)
                 .whereElement(psiMethodCallExpression -> {
                     PsiMethod method = psiMethodCallExpression.resolveMethod();
                     return method != null && contextResolver.isInProductionCodeContext().test(method) &&
                             Optional.ofNullable(PsiTreeUtil.getParentOfType(psiMethodCallExpression, PsiMethodCallExpression.class))
-                                    .map(methodExp -> assertionMethod(methodExp).isPresent()).get();
+                                    .map(methodExp -> assertionMethod(methodExp).isPresent()).orElse(false);
                 })
                 .whereReferences(contextResolver.isInTestContext())
                 .build();
-
-        return elementResolver.allChildrenByQuery(testMethod, findAllTestedMethodCalls);
-    }
-
-    public ElementSearchResult<PsiReference> allTestedMethodsReferences(PsiMethod testMethod) {
-        ElementSearchQuery<PsiMethodCallExpression> findAllAssertionMethods = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
+        findAllAssertionMethods = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
                 .elementOfType(PsiMethodCallExpression.class)
                 .whereElement(psiMethodCallExpression ->
                         assertionMethod(psiMethodCallExpression).isPresent())
                 .whereReferences(contextResolver.isInTestContext())
                 .build();
+        findAllLiteralExpressions = new ElementSearchQueryBuilder<PsiLiteralExpression>()
+                .elementOfType(PsiLiteralExpression.class)
+                .whereReferences(contextResolver.isInTestContext())
+                .build();
+    }
+
+    public ElementSearchResult<PsiMethodCallExpression> allTestedMethodsMethodCalls(PsiMethod testMethod) {
+        return elementResolver.allChildrenByQuery(testMethod, findAllTestedMethodCalls);
+    }
+
+    public ElementSearchResult<PsiReference> allTestedMethodsReferences(PsiMethod testMethod) {
         List<PsiMethodCallExpression> assertionMethods = elementResolver
                 .allChildrenByQuery(testMethod, findAllAssertionMethods)
                 .getElementsFromAllLevels()
@@ -50,13 +57,10 @@ public class JavaMethodResolver {
                 .distinct()
                 .collect(Collectors.toList());
 
-        ElementSearchQuery<PsiLiteralExpression> findAllLiteralExpressions = new ElementSearchQueryBuilder<PsiLiteralExpression>()
-                .elementOfType(PsiLiteralExpression.class)
-                .whereReferences(contextResolver.isInTestContext())
-                .build();
+
         HashSet<PsiLiteralExpression> literalExpressionsFromAssertions = assertionMethods
                 .stream()
-                .map(assertionMethod -> elementResolver.allChildrenByQuery(assertionMethod,findAllLiteralExpressions).getElementsFromAllLevels())
+                .map(assertionMethod -> elementResolver.allChildrenByQuery(assertionMethod, findAllLiteralExpressions).getElementsFromAllLevels())
                 .flatMap(Collection::stream)
                 .collect(Collectors.toCollection(HashSet::new));
 
@@ -67,7 +71,7 @@ public class JavaMethodResolver {
                 .build();
 
         ElementSearchResult<PsiLiteralExpression> literalExpressionElementSearchResult = elementResolver
-                .allChildrenByQuery(testMethod,findMatchingLiteralExpressions);
+                .allChildrenByQuery(testMethod, findMatchingLiteralExpressions);
 
         return fillReferencesFromLiteralExpressions(literalExpressionElementSearchResult);
     }

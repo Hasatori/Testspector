@@ -28,13 +28,7 @@ public class AtLeastOneAssertionJUnitCheckingStrategy extends AssertionCountJUni
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
-            ElementSearchQuery<PsiMethodCallExpression> queryForAllAssertionMethods = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
-                    .elementOfType(PsiMethodCallExpression.class)
-                    .whereElement(psiMethodCallExpression -> methodResolver
-                            .assertionMethod(psiMethodCallExpression)
-                            .isPresent())
-                    .whereReferences(methodInTestContext())
-                    .build();
+
             ElementSearchResult<PsiMethodCallExpression> allAssertionMethodsResult = elementResolver
                     .allChildrenByQuery(testMethod, queryForAllAssertionMethods);
             allAssertionMethodsResult = removeGroupedAssertions(allAssertionMethodsResult);

@@ -19,7 +19,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
 
     private final JavaElementResolver elementResolver;
     private final JavaContextIndicator contextIndicator;
-
+    private final ElementSearchQuery<PsiField> findAllStaticNotFinalProps;
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Global static properties should not be part of a test. " +
             "Tests are sharing the reference and if some of them would update" +
             " it it might influence behaviour of other tests.";
@@ -34,6 +34,11 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
     public NoGlobalStaticPropertiesJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
         this.elementResolver = elementResolver;
         this.contextIndicator = contextIndicator;
+        findAllStaticNotFinalProps = new ElementSearchQueryBuilder<PsiField>()
+                .elementOfType(PsiField.class)
+                .whereElement(psiField -> !(psiField instanceof PsiEnumConstant) && isStaticAndNotFinal().test(psiField))
+                .whereReferences(el -> (el instanceof PsiMethod || el instanceof PsiField) && contextIndicator.isInTestContext().test(el))
+                .build();
     }
 
     @Override
@@ -46,11 +51,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
         for (PsiMethod testMethod : methods) {
-            ElementSearchQuery<PsiField> findAllStaticNotFinalProps = new ElementSearchQueryBuilder<PsiField>()
-                    .elementOfType(PsiField.class)
-                    .whereElement(psiField -> !(psiField instanceof PsiEnumConstant) && isStaticAndNotFinal().test(psiField))
-                    .whereReferences(el -> (el instanceof PsiMethod || el instanceof PsiField) && contextIndicator.isInTestContext().test(el))
-                    .build();
+
             ElementSearchResult<PsiField> staticPropertiesResult = elementResolver.allChildrenByQuery(
                     testMethod, findAllStaticNotFinalProps);
             for (PsiField staticProperty : staticPropertiesResult.getElementsFromAllLevels()) {

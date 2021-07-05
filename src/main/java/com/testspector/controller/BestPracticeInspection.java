@@ -9,12 +9,14 @@ import com.intellij.psi.PsiFile;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
+import com.testspector.model.checking.factory.BestPracticeCheckingStrategyFactory;
 import com.testspector.model.checking.factory.BestPracticeCheckingStrategyFactoryProvider;
 import com.testspector.model.checking.factory.ProgrammingLanguageFactory;
 import com.testspector.model.checking.factory.UnitTestFrameworkFactoryProvider;
 import com.testspector.model.enums.BestPractice;
 import com.testspector.model.enums.ProgrammingLanguage;
 import com.testspector.model.enums.UnitTestFramework;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 public abstract class BestPracticeInspection extends LocalInspectionTool {
 
     public abstract BestPractice getBestPractice();
+
+    private static Pair<LocalInspectionToolSession, BestPracticeCheckingStrategyFactory> sessionBestPracticeCheckingStrategyFactoryPair = Pair.of(null,null);
 
 
     @Override
@@ -42,6 +46,7 @@ public abstract class BestPracticeInspection extends LocalInspectionTool {
 
             @Override
             public void visitFile(@NotNull PsiFile file) {
+                LocalInspectionToolSession lc = session;
                 Project project = file.getProject();
                 List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
                 Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getService(ProgrammingLanguageFactory.class)
@@ -57,10 +62,18 @@ public abstract class BestPracticeInspection extends LocalInspectionTool {
                             .collect(Collectors.toList());
                     if (unitTestFrameworks.size() > 0) {
                         for (UnitTestFramework unitTestFramework : unitTestFrameworks) {
-                            Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy = project
-                                    .getService(BestPracticeCheckingStrategyFactoryProvider.class)
-                                    .getBestPracticeCheckingStrategyFactory(optionalProgrammingLanguage.get(), unitTestFramework)
-                                    .map(bestPracticeCheckingStrategyFactory -> bestPracticeCheckingStrategyFactory.getBestPracticeCheckingStrategy(getBestPractice()));
+                            Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy;
+                            if (session == sessionBestPracticeCheckingStrategyFactoryPair.getLeft()) {
+                                optionalBestPracticeCheckingStrategy = Optional.ofNullable(sessionBestPracticeCheckingStrategyFactoryPair.getRight().getBestPracticeCheckingStrategy(getBestPractice()));
+                            } else {
+                                optionalBestPracticeCheckingStrategy = project
+                                        .getService(BestPracticeCheckingStrategyFactoryProvider.class)
+                                        .getBestPracticeCheckingStrategyFactory(optionalProgrammingLanguage.get(), unitTestFramework)
+                                        .map(bestPracticeCheckingStrategyFactory -> {
+                                            sessionBestPracticeCheckingStrategyFactoryPair = Pair.of(session, bestPracticeCheckingStrategyFactory);
+                                            return bestPracticeCheckingStrategyFactory.getBestPracticeCheckingStrategy(getBestPractice());
+                                        });
+                            }
                             if (optionalBestPracticeCheckingStrategy.isPresent()) {
                                 List<BestPracticeViolation> foundViolations = optionalBestPracticeCheckingStrategy
                                         .get()

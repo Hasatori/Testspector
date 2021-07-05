@@ -61,8 +61,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
     }
 
     private ElementSearchResult<PsiMethodCallExpression> removeTestedMethodsWithDifferentName(String testMethodName, ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult) {
-        List<PsiMethodCallExpression> notToRemove = new ArrayList<>();
-        notToRemove.addAll(allTestedMethodsResult.getElementsOfCurrentLevel().stream()
+        List<PsiMethodCallExpression> notToRemove = new ArrayList<>(allTestedMethodsResult.getElementsOfCurrentLevel().stream()
                 .filter(testedMethodCall -> {
                     PsiMethod testedMethod = testedMethodCall.resolveMethod();
                     if (testedMethod != null) {

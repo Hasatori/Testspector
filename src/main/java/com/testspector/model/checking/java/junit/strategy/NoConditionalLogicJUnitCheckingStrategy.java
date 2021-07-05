@@ -34,7 +34,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
     private final JavaElementResolver elementResolver;
     private final JavaContextIndicator contextResolver;
     private final JavaMethodResolver methodResolver;
-
+    private final ElementSearchQuery<PsiStatement> findAllConditionalStatements;
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Conditional logic should not be part of the test " +
             "method, it makes test hard to understand, read and maintain.";
 
@@ -42,6 +42,11 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         this.elementResolver = elementResolver;
         this.contextResolver = contextResolver;
         this.methodResolver = methodResolver;
+        findAllConditionalStatements = new ElementSearchQueryBuilder<PsiStatement>()
+                .elementOfType(PsiStatement.class)
+                .whereElement(isConditionalStatement())
+                .whereReferences(el -> el instanceof PsiMethod && contextResolver.isInTestContext().test(el))
+                .build();
     }
 
     @Override
@@ -54,11 +59,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
         for (PsiMethod testMethod : methods) {
-            ElementSearchQuery<PsiStatement> findAllConditionalStatements = new ElementSearchQueryBuilder<PsiStatement>()
-                    .elementOfType(PsiStatement.class)
-                    .whereElement(isConditionalStatement())
-                    .whereReferences(el -> el instanceof PsiMethod && contextResolver.isInTestContext().test(el))
-                    .build();
+
             ElementSearchResult<PsiStatement> statementsElementSearchResult = elementResolver
                     .allChildrenByQuery(testMethod, findAllConditionalStatements);
             List<PsiStatement> statements = statementsElementSearchResult

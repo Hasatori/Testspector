@@ -40,14 +40,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
         for (PsiMethod testMethod : methods) {
             ElementSearchResult<PsiMethodCallExpression> allAssertionMethodsResult =
                     elementResolver.allChildrenByQuery(
-                            testMethod,
-                            new ElementSearchQueryBuilder<PsiMethodCallExpression>()
-                                    .elementOfType(PsiMethodCallExpression.class)
-                                    .whereElement(psiMethodCallExpression -> methodResolver
-                                            .assertionMethod(psiMethodCallExpression)
-                                            .isPresent())
-                                    .whereReferences(el -> el instanceof PsiMethod && methodInTestContext().test(el))
-                                    .build());
+                            testMethod,queryForAllAssertionMethods);
             allAssertionMethodsResult = removeGroupedAssertions(allAssertionMethodsResult);
             List<PsiMethodCallExpression> allAssertionMethods = allAssertionMethodsResult.getElementsFromAllLevels();
             if (allAssertionMethods.size() > 1) {

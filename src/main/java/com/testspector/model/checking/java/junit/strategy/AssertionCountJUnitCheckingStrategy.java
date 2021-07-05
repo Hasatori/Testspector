@@ -20,12 +20,25 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
     protected final JavaElementResolver elementResolver;
     protected final JavaContextIndicator contextIndicator;
     protected final JavaMethodResolver methodResolver;
-
+    protected final ElementSearchQuery<PsiMethodCallExpression> queryForAllAssertionMethods;
+    private final ElementSearchQuery<PsiMethodCallExpression> findAllNotGroupAssertions;
 
     public AssertionCountJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
         this.elementResolver = elementResolver;
         this.contextIndicator = contextIndicator;
         this.methodResolver = methodResolver;
+        queryForAllAssertionMethods = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
+                .elementOfType(PsiMethodCallExpression.class)
+                .whereElement(psiMethodCallExpression -> methodResolver
+                        .assertionMethod(psiMethodCallExpression)
+                        .isPresent())
+                .whereReferences(methodInTestContext())
+                .build();
+        findAllNotGroupAssertions = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
+                .elementOfType(PsiMethodCallExpression.class)
+                .whereElement(psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent())
+                .whereReferences(contextIndicator.isInTestContext())
+                .build();
     }
 
     protected Predicate<PsiElement> methodInTestContext() {
@@ -39,11 +52,7 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
     protected ElementSearchResult<PsiMethodCallExpression> removeGroupedAssertions(ElementSearchResult<PsiMethodCallExpression> allAssertionsSearch) {
         List<PsiMethodCallExpression> allElementsOfTheCurrentLevel = new ArrayList<>(allAssertionsSearch.getElementsOfCurrentLevel());
         List<PsiMethodCallExpression> toRemove = new ArrayList<>();
-        ElementSearchQuery<PsiMethodCallExpression> findAllNotGroupAssertions = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
-                .elementOfType(PsiMethodCallExpression.class)
-                .whereElement(psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent())
-                .whereReferences(contextIndicator.isInTestContext())
-                .build();
+
         for (PsiMethodCallExpression assertion : allAssertionsSearch.getElementsOfCurrentLevel()) {
             toRemove.addAll(elementResolver.allChildrenByQuery(assertion, findAllNotGroupAssertions)
                     .getElementsOfCurrentLevel());

@@ -23,7 +23,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     private final JavaElementResolver elementResolver;
     private final JavaContextIndicator contextResolver;
     private final JavaMethodResolver methodResolver;
-
+    private final ElementSearchQuery<PsiTryStatement> findAllTryStatements;
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Tests should not contain try catch block. " +
             "These blocks are redundant and make test harder to read and understand. " +
             "In some cases it might even lead to never failing tests " +
@@ -33,6 +33,10 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         this.elementResolver = elementResolver;
         this.contextResolver = contextResolver;
         this.methodResolver = methodResolver;
+        findAllTryStatements = new ElementSearchQueryBuilder<PsiTryStatement>()
+                .elementOfType(PsiTryStatement.class)
+                .whereReferences(el -> el instanceof PsiMethod && contextResolver.isInTestContext().test(el))
+                .build();
     }
 
 
@@ -45,10 +49,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
-            ElementSearchQuery<PsiTryStatement> findAllTryStatements = new ElementSearchQueryBuilder<PsiTryStatement>()
-                    .elementOfType(PsiTryStatement.class)
-                    .whereReferences(el -> el instanceof PsiMethod && contextResolver.isInTestContext().test(el))
-                    .build();
+
             ElementSearchResult<PsiTryStatement> psiTryStatementsElementSearchResult = elementResolver
                     .allChildrenByQuery(testMethod, findAllTryStatements);
             for (PsiTryStatement psiTryStatement : psiTryStatementsElementSearchResult.getElementsFromAllLevels()) {
