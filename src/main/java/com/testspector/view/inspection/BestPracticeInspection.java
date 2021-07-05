@@ -1,4 +1,4 @@
-package com.testspector.controller;
+package com.testspector.view.inspection;
 
 
 import com.intellij.codeInspection.*;
@@ -6,18 +6,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiFile;
+import com.testspector.controller.TestspectorController;
 import com.testspector.model.checking.Action;
-import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.factory.BestPracticeCheckingStrategyFactory;
-import com.testspector.model.checking.factory.BestPracticeCheckingStrategyFactoryProvider;
-import com.testspector.model.checking.factory.ProgrammingLanguageFactory;
-import com.testspector.model.checking.factory.UnitTestFrameworkFactoryProvider;
 import com.testspector.model.enums.BestPractice;
-import com.testspector.model.enums.ProgrammingLanguage;
-import com.testspector.model.enums.UnitTestFramework;
-import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,14 +24,39 @@ import java.util.stream.Collectors;
 
 public abstract class BestPracticeInspection extends LocalInspectionTool {
 
+    @NotNull
     public abstract BestPractice getBestPractice();
-
-    private static Pair<LocalInspectionToolSession, BestPracticeCheckingStrategyFactory> sessionBestPracticeCheckingStrategyFactoryPair = Pair.of(null,null);
-
 
     @Override
     public boolean isEnabledByDefault() {
         return true;
+    }
+
+    @NotNull
+    @Override
+    public @Nls(capitalization = Nls.Capitalization.Sentence)
+    String [] getGroupPath() {
+        return new String[]{"Testspector"};
+    }
+    @Override
+    public @NonNls
+    @Nullable
+    String getGroupKey() {
+        return null;
+    }
+
+    @Override
+    public @NonNls
+    @NotNull
+    String getShortName() {
+        return getBestPractice().name();
+    }
+
+    @Override
+    public @Nls(capitalization = Nls.Capitalization.Sentence)
+    @NotNull
+    String getDisplayName() {
+        return getBestPractice().getDisplayName();
     }
 
     @Override
@@ -46,47 +67,12 @@ public abstract class BestPracticeInspection extends LocalInspectionTool {
 
             @Override
             public void visitFile(@NotNull PsiFile file) {
-                LocalInspectionToolSession lc = session;
                 Project project = file.getProject();
-                List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
-                Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getService(ProgrammingLanguageFactory.class)
-                        .getProgrammingLanguage(file);
-                if (optionalProgrammingLanguage.isPresent()) {
-                    List<UnitTestFramework> unitTestFrameworks = project
-                            .getService(UnitTestFrameworkFactoryProvider.class)
-                            .geUnitTestFrameworkFactory(optionalProgrammingLanguage.get())
-                            .stream()
-                            .map(unitTestFrameworkFactory -> unitTestFrameworkFactory.getUnitTestFramework(file))
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .collect(Collectors.toList());
-                    if (unitTestFrameworks.size() > 0) {
-                        for (UnitTestFramework unitTestFramework : unitTestFrameworks) {
-                            Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy;
-                            if (session == sessionBestPracticeCheckingStrategyFactoryPair.getLeft()) {
-                                optionalBestPracticeCheckingStrategy = Optional.ofNullable(sessionBestPracticeCheckingStrategyFactoryPair.getRight().getBestPracticeCheckingStrategy(getBestPractice()));
-                            } else {
-                                optionalBestPracticeCheckingStrategy = project
-                                        .getService(BestPracticeCheckingStrategyFactoryProvider.class)
-                                        .getBestPracticeCheckingStrategyFactory(optionalProgrammingLanguage.get(), unitTestFramework)
-                                        .map(bestPracticeCheckingStrategyFactory -> {
-                                            sessionBestPracticeCheckingStrategyFactoryPair = Pair.of(session, bestPracticeCheckingStrategyFactory);
-                                            return bestPracticeCheckingStrategyFactory.getBestPracticeCheckingStrategy(getBestPractice());
-                                        });
-                            }
-                            if (optionalBestPracticeCheckingStrategy.isPresent()) {
-                                List<BestPracticeViolation> foundViolations = optionalBestPracticeCheckingStrategy
-                                        .get()
-                                        .checkBestPractices(file);
-                                bestPracticeViolations.addAll(foundViolations);
-                            }
-                        }
-                    }
-                }
+                List<BestPracticeViolation> bestPracticeViolations = project.getService(TestspectorController.class).inspectFile(file, getBestPractice(), session);
                 HashMap<PsiElement, List<ProblemDescriptor>> problemDescriptorsHashMap = new HashMap<>();
                 bestPracticeViolations.forEach(bestPracticeViolation -> {
-                    String problemDescriptionTemplate = String.format("<html>" +
-                                    "<p>%s</p>" +
+                    String problemDescriptionTemplate = String.format(
+                                    "<html><p>%s</p>" +
                                     "%s" +
                                     "<a href=\"%s\">Get more information about the rule</a></html>",
                             bestPracticeViolation.getProblemDescription(),
