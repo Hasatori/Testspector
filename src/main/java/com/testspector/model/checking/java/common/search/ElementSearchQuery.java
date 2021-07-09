@@ -1,4 +1,4 @@
-package com.testspector.model.checking.java.common;
+package com.testspector.model.checking.java.common.search;
 
 import com.intellij.psi.PsiElement;
 
@@ -12,7 +12,7 @@ public class ElementSearchQuery<T> {
 
     private final Predicate<PsiElement> referencesCondition;
 
-    public ElementSearchQuery(Class<T> elementType,Predicate<T> typeCondition,Predicate<PsiElement> referencesCondition) {
+     ElementSearchQuery(Class<T> elementType,Predicate<T> typeCondition,Predicate<PsiElement> referencesCondition) {
         this.elementType = elementType;
         this.whereTypeCondition = typeCondition;
         this.referencesCondition = referencesCondition;

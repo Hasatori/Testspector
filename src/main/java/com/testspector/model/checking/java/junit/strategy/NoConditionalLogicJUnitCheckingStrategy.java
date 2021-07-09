@@ -1,15 +1,21 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
-import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.common.*;
+import com.testspector.model.checking.java.common.JavaContextIndicator;
+import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.search.ElementSearchEngine;
+import com.testspector.model.checking.java.common.search.ElementSearchResult;
+import com.testspector.model.checking.java.common.search.QueriesRepository;
+import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.enums.BestPractice;
 
 import java.security.InvalidParameterException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -18,6 +24,11 @@ import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_TE
 
 public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
+    private static final String IF_STATEMENT_STRING = "if";
+    private static final String FOR_STATEMENT_STRING = "for";
+    private static final String FOR_EACH_STATEMENT_STRING = "forEach";
+    private static final String WHILE_STATEMENT_STRING = "while";
+    private static final String SWITCH_STATEMENT_STRING = "switch";
     private static final List<Class<? extends PsiStatement>> SUPPORTED_STATEMENT_CLASSES = Collections.unmodifiableList(Arrays.asList(
             PsiIfStatement.class,
             PsiWhileStatement.class,
@@ -25,28 +36,17 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             PsiForStatement.class,
             PsiForeachStatement.class
     ));
-    private static final String IF_STATEMENT_STRING = "if";
-    private static final String FOR_STATEMENT_STRING = "for";
-    private static final String FOR_EACH_STATEMENT_STRING = "forEach";
-    private static final String WHILE_STATEMENT_STRING = "while";
-    private static final String SWITCH_STATEMENT_STRING = "switch";
-
-    private final JavaElementResolver elementResolver;
+    private final ElementSearchEngine elementSearchEngine;
     private final JavaContextIndicator contextResolver;
     private final JavaMethodResolver methodResolver;
-    private final ElementSearchQuery<PsiStatement> findAllConditionalStatements;
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Conditional logic should not be part of the test " +
             "method, it makes test hard to understand, read and maintain.";
 
-    public NoConditionalLogicJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
-        this.elementResolver = elementResolver;
+    public NoConditionalLogicJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
+        this.elementSearchEngine = elementSearchEngine;
         this.contextResolver = contextResolver;
         this.methodResolver = methodResolver;
-        findAllConditionalStatements = new ElementSearchQueryBuilder<PsiStatement>()
-                .elementOfType(PsiStatement.class)
-                .whereElement(isConditionalStatement())
-                .whereReferences(el -> el instanceof PsiMethod && contextResolver.isInTestContext().test(el))
-                .build();
+
     }
 
     @Override
@@ -60,8 +60,8 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
 
         for (PsiMethod testMethod : methods) {
 
-            ElementSearchResult<PsiStatement> statementsElementSearchResult = elementResolver
-                    .allChildrenByQuery(testMethod, findAllConditionalStatements);
+            ElementSearchResult<PsiStatement> statementsElementSearchResult = elementSearchEngine
+                    .findByQuery(testMethod, QueriesRepository.FIND_ALL_CONDITIONAL_STATEMENTS);
             List<PsiStatement> statements = statementsElementSearchResult
                     .getElementsFromAllLevels()
                     .stream()
@@ -76,17 +76,6 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
 
         }
         return bestPracticeViolations;
-    }
-
-    Predicate<PsiElement> methodInTestContext() {
-        return (element) -> element instanceof PsiMethod && contextResolver.isInTestContext().test(element);
-    }
-
-    Predicate<PsiStatement> isConditionalStatement() {
-        return psiStatement -> SUPPORTED_STATEMENT_CLASSES
-                .stream()
-                .anyMatch(supportedStatement ->
-                        supportedStatement.isInstance(psiStatement));
     }
 
     Predicate<PsiStatement> partOfAssertionMethod() {
@@ -151,25 +140,14 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         return bestPracticeViolations;
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiStatement> tryStatements) {
+    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiStatement> statements) {
         return new BestPracticeViolation(
                 reference.getElement(),
                 "Following method contains conditional logic. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
-                tryStatements.stream().map(tryStatement -> new Action<BestPracticeViolation>() {
-                    @Override
-                    public String getName() {
-                        return String.format("Go to %s statement in file %s (line %s)"
-                                , statementString(tryStatement),
-                                tryStatement.getContainingFile().getName(),
-                                (PsiDocumentManager.getInstance(tryStatement.getProject()).getDocument(tryStatement.getContainingFile()).getLineNumber(tryStatement.getTextOffset()) + 1));
-                    }
-
-                    @Override
-                    public void execute(BestPracticeViolation bestPracticeViolation) {
-                        ((Navigatable) tryStatement.getNavigationElement()).navigate(true);
-                    }
-                }).collect(Collectors.toList())
+                statements.stream()
+                        .map(statement -> new NavigateElementAction(String.format("%s statement", statementString(statement)), statement))
+                        .collect(Collectors.toList())
         );
 
     }
@@ -191,22 +169,7 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
                 conditionalStatement,
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
-                Collections.singletonList(new Action<>() {
-                                              @Override
-                                              public String getName() {
-                                                  return "Navigate " + conditionalStatement.toString() + " in " + conditionalStatement.getContainingFile().getName();
-                                              }
-
-                                              @Override
-                                              public void execute(BestPracticeViolation bestPracticeViolation) {
-                                                  Optional<PsiElement> optionalNavigationElement = Optional.ofNullable(bestPracticeViolation.getElement().getNavigationElement());
-                                                  if (optionalNavigationElement.isPresent() && optionalNavigationElement.get() instanceof Navigatable
-                                                          && ((Navigatable) optionalNavigationElement.get()).canNavigate()) {
-                                                      ((Navigatable) optionalNavigationElement.get()).navigate(true);
-                                                  }
-                                              }
-                                          }
-                ),
+                new ArrayList<>(),
                 hints
         );
     }

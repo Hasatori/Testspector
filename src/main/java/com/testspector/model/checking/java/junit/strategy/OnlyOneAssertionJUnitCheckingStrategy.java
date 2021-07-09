@@ -1,14 +1,16 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.pom.Navigatable;
-import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiReference;
-import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.common.*;
+import com.testspector.model.checking.java.common.JavaContextIndicator;
+import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.search.ElementSearchEngine;
+import com.testspector.model.checking.java.common.search.ElementSearchResult;
+import com.testspector.model.checking.java.common.search.QueriesRepository;
 import com.testspector.model.checking.java.junit.JUnitConstants;
+import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.enums.BestPractice;
 
 import java.util.ArrayList;
@@ -24,8 +26,8 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
             "one assertion fails other will not be executed and " +
             "therefore you will not get overview of all problems.";
 
-    public OnlyOneAssertionJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
-        super(elementResolver, contextIndicator, methodResolver);
+    public OnlyOneAssertionJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
+        super(elementSearchEngine, contextIndicator, methodResolver);
     }
 
 
@@ -39,8 +41,8 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
             ElementSearchResult<PsiMethodCallExpression> allAssertionMethodsResult =
-                    elementResolver.allChildrenByQuery(
-                            testMethod,queryForAllAssertionMethods);
+                    elementSearchEngine.findByQuery(
+                            testMethod, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS);
             allAssertionMethodsResult = removeGroupedAssertions(allAssertionMethodsResult);
             List<PsiMethodCallExpression> allAssertionMethods = allAssertionMethodsResult.getElementsFromAllLevels();
             if (allAssertionMethods.size() > 1) {
@@ -93,17 +95,9 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                 reference.getElement(),
                 "Following method breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
-                assertionMethods.stream().map(assertionMethod -> new Action<BestPracticeViolation>() {
-                    @Override
-                    public String getName() {
-                        return "Go to assertion method in " + assertionMethod.getContainingFile().getName() + "(line " + (PsiDocumentManager.getInstance(assertionMethod.getProject()).getDocument(assertionMethod.getContainingFile()).getLineNumber(assertionMethod.getTextOffset()) + 1) + ")";
-                    }
-
-                    @Override
-                    public void execute(BestPracticeViolation bestPracticeViolation) {
-                        ((Navigatable) assertionMethod.getNavigationElement()).navigate(true);
-                    }
-                }).collect(Collectors.toList())
+                assertionMethods.stream()
+                        .map(assertionMethod -> new NavigateElementAction("assertion method", assertionMethod))
+                        .collect(Collectors.toList())
         );
 
     }

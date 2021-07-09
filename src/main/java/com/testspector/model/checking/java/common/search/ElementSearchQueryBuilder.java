@@ -1,45 +1,45 @@
-package com.testspector.model.checking.java.common;
+package com.testspector.model.checking.java.common.search;
 
 import com.intellij.psi.PsiElement;
 
 import java.util.function.Predicate;
 
-public class ElementSearchQueryBuilder<T> {
+ class ElementSearchQueryBuilder<T> {
 
     private Class<T> searchedElementType;
     private Predicate<T> typeCondition;
     private Predicate<PsiElement> referencesCondition;
 
 
-    public ElementSearchQueryBuilder<T> elementOfType(Class<T> searchedElementType) {
+     ElementSearchQueryBuilder<T> elementOfType(Class<T> searchedElementType) {
         this.searchedElementType = searchedElementType;
         this.typeCondition = (el) -> true;
         return this;
     }
 
-    public ElementSearchQueryBuilder<T> whereElement(Predicate<T> typeCondition) {
+     ElementSearchQueryBuilder<T> whereElement(Predicate<T> typeCondition) {
         this.typeCondition = typeCondition;
         return this;
     }
 
 
-    public ElementSearchQueryBuilder<T> withoutReferences() {
+     ElementSearchQueryBuilder<T> withoutReferences() {
         this.referencesCondition = (element) -> false;
         return this;
     }
 
-    public ElementSearchQueryBuilder<T> withReferences() {
+     ElementSearchQueryBuilder<T> withReferences() {
         this.referencesCondition = (element) -> true;
         return this;
     }
 
-    public ElementSearchQueryBuilder<T> whereReferences(Predicate<PsiElement> referencesCondition) {
+     ElementSearchQueryBuilder<T> whereReferences(Predicate<PsiElement> referencesCondition) {
         this.referencesCondition = referencesCondition;
         return this;
     }
 
 
-    public ElementSearchQuery<T> build() {
+     ElementSearchQuery<T> build() {
 
         if (searchedElementType == null) {
             throw new IllegalStateException("Searched element type was not set!");

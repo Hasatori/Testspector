@@ -7,11 +7,8 @@ import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.enums.BestPractice;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class JUnitTestMethodBestPracticeCheckingStrategyAdapter implements BestPracticeCheckingStrategy<PsiElement> {
 

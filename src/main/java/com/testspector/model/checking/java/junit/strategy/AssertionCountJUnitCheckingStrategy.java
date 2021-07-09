@@ -1,11 +1,14 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiReferenceExpression;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
-import com.testspector.model.checking.java.common.*;
+import com.testspector.model.checking.java.common.JavaContextIndicator;
+import com.testspector.model.checking.java.common.search.ElementSearchEngine;
+import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.search.ElementSearchResult;
+import com.testspector.model.checking.java.common.search.QueriesRepository;
 import com.testspector.model.checking.java.junit.JUnitConstants;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -17,36 +20,14 @@ import java.util.function.Predicate;
 
 public abstract class AssertionCountJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
-    protected final JavaElementResolver elementResolver;
+    protected final ElementSearchEngine elementSearchEngine;
     protected final JavaContextIndicator contextIndicator;
     protected final JavaMethodResolver methodResolver;
-    protected final ElementSearchQuery<PsiMethodCallExpression> queryForAllAssertionMethods;
-    private final ElementSearchQuery<PsiMethodCallExpression> findAllNotGroupAssertions;
 
-    public AssertionCountJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
-        this.elementResolver = elementResolver;
+    public AssertionCountJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
+        this.elementSearchEngine = elementSearchEngine;
         this.contextIndicator = contextIndicator;
         this.methodResolver = methodResolver;
-        queryForAllAssertionMethods = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
-                .elementOfType(PsiMethodCallExpression.class)
-                .whereElement(psiMethodCallExpression -> methodResolver
-                        .assertionMethod(psiMethodCallExpression)
-                        .isPresent())
-                .whereReferences(methodInTestContext())
-                .build();
-        findAllNotGroupAssertions = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
-                .elementOfType(PsiMethodCallExpression.class)
-                .whereElement(psiMethodCallExpression -> methodResolver.assertionMethod(psiMethodCallExpression).isPresent())
-                .whereReferences(contextIndicator.isInTestContext())
-                .build();
-    }
-
-    protected Predicate<PsiElement> methodInTestContext() {
-        return (element) ->
-                element instanceof PsiMethod &&
-                        (
-                                contextIndicator.isInTestContext().test(element)
-                        );
     }
 
     protected ElementSearchResult<PsiMethodCallExpression> removeGroupedAssertions(ElementSearchResult<PsiMethodCallExpression> allAssertionsSearch) {
@@ -54,7 +35,7 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
         List<PsiMethodCallExpression> toRemove = new ArrayList<>();
 
         for (PsiMethodCallExpression assertion : allAssertionsSearch.getElementsOfCurrentLevel()) {
-            toRemove.addAll(elementResolver.allChildrenByQuery(assertion, findAllNotGroupAssertions)
+            toRemove.addAll(elementSearchEngine.findByQuery(assertion, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS)
                     .getElementsOfCurrentLevel());
         }
         allElementsOfTheCurrentLevel.removeAll(toRemove);

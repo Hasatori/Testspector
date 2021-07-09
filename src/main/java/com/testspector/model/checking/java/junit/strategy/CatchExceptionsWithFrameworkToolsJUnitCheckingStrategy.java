@@ -1,39 +1,40 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.pom.Navigatable;
-import com.intellij.psi.*;
-import com.intellij.psi.search.searches.ReferencesSearch;
-import com.intellij.psi.util.PsiTreeUtil;
-import com.testspector.model.checking.Action;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiTryStatement;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.common.*;
+import com.testspector.model.checking.java.common.JavaContextIndicator;
+import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.search.ElementSearchEngine;
+import com.testspector.model.checking.java.common.search.ElementSearchResult;
+import com.testspector.model.checking.java.common.search.QueriesRepository;
+import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
+import com.testspector.model.checking.java.junit.strategy.action.RemoveTryCatchStatementAction;
 import com.testspector.model.enums.BestPractice;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.*;
 
 public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
-    private final JavaElementResolver elementResolver;
+    private final ElementSearchEngine elementSearchEngine;
     private final JavaContextIndicator contextResolver;
     private final JavaMethodResolver methodResolver;
-    private final ElementSearchQuery<PsiTryStatement> findAllTryStatements;
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Tests should not contain try catch block. " +
             "These blocks are redundant and make test harder to read and understand. " +
             "In some cases it might even lead to never failing tests " +
             "if we are not handling the exception properly.";
 
-    public CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
-        this.elementResolver = elementResolver;
+    public CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
+        this.elementSearchEngine = elementSearchEngine;
         this.contextResolver = contextResolver;
         this.methodResolver = methodResolver;
-        findAllTryStatements = new ElementSearchQueryBuilder<PsiTryStatement>()
-                .elementOfType(PsiTryStatement.class)
-                .whereReferences(el -> el instanceof PsiMethod && contextResolver.isInTestContext().test(el))
-                .build();
     }
 
 
@@ -47,8 +48,8 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
 
-            ElementSearchResult<PsiTryStatement> psiTryStatementsElementSearchResult = elementResolver
-                    .allChildrenByQuery(testMethod, findAllTryStatements);
+            ElementSearchResult<PsiTryStatement> psiTryStatementsElementSearchResult = elementSearchEngine
+                    .findByQuery(testMethod, QueriesRepository.FIND_ALL_TRY_STATEMENTS);
             for (PsiTryStatement psiTryStatement : psiTryStatementsElementSearchResult.getElementsFromAllLevels()) {
                 bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatement));
             }
@@ -78,38 +79,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                 psiTryStatement,
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 this.getCheckedBestPractice().get(0),
-                Collections.singletonList(new Action<>() {
-                    @Override
-                    public String getName() {
-                        if (Optional.ofNullable(psiTryStatement.getTryBlock()).map(tryBlock -> tryBlock.getStatements().length > 0).isPresent()) {
-                            return "Remove try catch block and catch exception at method level";
-                        }
-                        return "Remove try catch block";
-                    }
-
-                    @Override
-                    public void execute(BestPracticeViolation bestPracticeViolation) {
-                        if (Optional.ofNullable(psiTryStatement.getTryBlock()).map(tryBlock -> tryBlock.getStatements().length > 0).isPresent()) {
-                            Optional.ofNullable(PsiTreeUtil.getParentOfType(psiTryStatement, PsiMethod.class)).ifPresent(method -> addThrowsListToAllReferencedMethods(PsiElementFactory.getInstance(psiTryStatement.getProject()), method));
-                            Optional.ofNullable(psiTryStatement.getTryBlock()).map(PsiCodeBlock::getLBrace).ifPresent(PsiElement::delete);
-                            Optional.ofNullable(psiTryStatement.getTryBlock()).map(PsiCodeBlock::getRBrace).ifPresent(PsiElement::delete);
-                            psiTryStatement.replace(psiTryStatement.getTryBlock());
-                        } else {
-                            psiTryStatement.delete();
-                        }
-
-
-                    }
-                }));
-    }
-
-    private void addThrowsListToAllReferencedMethods(PsiElementFactory psiElementFactory, PsiMethod method) {
-        method.getThrowsList().replace(psiElementFactory.createReferenceList(new PsiJavaCodeReferenceElement[]{psiElementFactory.createReferenceFromText("Exception", null)}));
-        ReferencesSearch.search(method)
-                .findAll()
-                .stream().map(reference -> PsiTreeUtil.getParentOfType(reference.getElement(), PsiMethod.class))
-                .filter(Objects::nonNull)
-                .forEach(met -> addThrowsListToAllReferencedMethods(psiElementFactory, met));
+                Collections.singletonList(new RemoveTryCatchStatementAction(psiTryStatement)));
     }
 
     private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiTryStatement> elementSearchResult) {
@@ -130,21 +100,9 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                 reference.getElement(),
                 "Following method breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
-                tryStatements.stream().map(tryStatement -> new Action<BestPracticeViolation>() {
-                    @Override
-                    public String getName() {
-                        return "Go to try catch statement in "
-                                + tryStatement.getContainingFile().getName() + "(line " +
-                                (Optional.ofNullable(PsiDocumentManager.getInstance(tryStatement.getProject()).getDocument(tryStatement.getContainingFile()))
-                                        .map(file -> file.getLineNumber(tryStatement.getTextOffset()))
-                                        .orElse(0) + 1) + ")";
-                    }
-
-                    @Override
-                    public void execute(BestPracticeViolation bestPracticeViolation) {
-                        ((Navigatable) tryStatement.getNavigationElement()).navigate(true);
-                    }
-                }).collect(Collectors.toList())
+                tryStatements.stream()
+                        .map(tryStatement -> new NavigateElementAction("try catch statement", tryStatement))
+                        .collect(Collectors.toList())
         );
 
     }

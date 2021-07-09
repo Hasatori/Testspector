@@ -1,17 +1,16 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
-import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.java.common.ElementSearchResult;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.JavaElementResolver;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.search.ElementSearchEngine;
+import com.testspector.model.checking.java.common.search.ElementSearchResult;
+import com.testspector.model.checking.java.junit.strategy.action.MakeMethodPublicAction;
+import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.enums.BestPractice;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
 
-    private final JavaElementResolver elementResolver;
+    private final ElementSearchEngine elementSearchEngine;
     private final JavaMethodResolver methodResolver;
     private final JavaContextIndicator contextIndicator;
     private static final String DEFAULT_PROBLEM_DESCRIPTION = "Only public behaviour should be tested. Testing 'private','protected' " +
@@ -44,8 +43,8 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     );
 
 
-    public TestOnlyPublicBehaviourJUnitCheckingStrategy(JavaElementResolver elementResolver, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
-        this.elementResolver = elementResolver;
+    public TestOnlyPublicBehaviourJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
+        this.elementSearchEngine = elementSearchEngine;
         this.methodResolver = methodResolver;
         this.contextIndicator = contextIndicator;
     }
@@ -69,7 +68,9 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                                 nonPublicFromMethodCallExpression,
                                 DEFAULT_PROBLEM_DESCRIPTION,
                                 this.getCheckedBestPractice().get(0),
-                                Collections.singletonList(makePublicQuickFix(nonPublicFromMethodCallExpression.resolveMethod(), nonPublicFromMethodCallExpression.getMethodExpression()))
+                                Collections.singletonList(nonPublicFromMethodCallExpression.resolveMethod() != null ?
+                                        new MakeMethodPublicAction(nonPublicFromMethodCallExpression.resolveMethod()) :
+                                        null)
                                 , DEFAULT_HINTS)
                         );
                     });
@@ -84,7 +85,9 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                                 reference.getElement(),
                                 DEFAULT_PROBLEM_DESCRIPTION,
                                 this.getCheckedBestPractice().get(0),
-                                Collections.singletonList(makePublicQuickFix((PsiMethod) reference.resolve(), reference))
+                                Collections.singletonList(reference.resolve() != null ?
+                                        new MakeMethodPublicAction((PsiMethod) reference.resolve()) :
+                                        null)
                                 , DEFAULT_HINTS)
                         );
                     });
@@ -106,10 +109,10 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                             methodHasModifier(testedMethod, PsiModifier.PRIVATE));
 
                 }).collect(Collectors.toList());
-        List<Pair<PsiReferenceExpression,ElementSearchResult<PsiMethodCallExpression>>> referencedElements = new ArrayList<>();
+        List<Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>>> referencedElements = new ArrayList<>();
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : nonPublicTestedMethodsFromMethodCallExpressions.getReferencedResults()) {
             ElementSearchResult<PsiMethodCallExpression> newReferencedResult = removePublicTestedMethods(referencedResult.getRight());
-            referencedElements.add(Pair.of(referencedResult.getLeft(),newReferencedResult));
+            referencedElements.add(Pair.of(referencedResult.getLeft(), newReferencedResult));
         }
         return new ElementSearchResult<>(referencedElements, notToRemove);
     }
@@ -124,10 +127,10 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                             isMethodPackagePrivate(testedMethod) ||
                             methodHasModifier(testedMethod, PsiModifier.PRIVATE));
                 }).collect(Collectors.toList());
-        List<Pair<PsiReferenceExpression,ElementSearchResult<PsiReference>>> referencedElements = new ArrayList<>();
+        List<Pair<PsiReferenceExpression, ElementSearchResult<PsiReference>>> referencedElements = new ArrayList<>();
         for (Pair<PsiReferenceExpression, ElementSearchResult<PsiReference>> referencedResult : nonPublicTestedMethodsFromReferences.getReferencedResults()) {
             ElementSearchResult<PsiReference> newReferencedResult = removePublicTestedMethodsFromReference(referencedResult.getRight());
-            referencedElements.add(Pair.of(referencedResult.getLeft(),newReferencedResult));
+            referencedElements.add(Pair.of(referencedResult.getLeft(), newReferencedResult));
         }
         return new ElementSearchResult<>(referencedElements, notToRemove);
     }
@@ -148,8 +151,12 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
                     List<PsiMethodCallExpression> globalStaticProps = result.getRight().getElementsFromAllLevels();
-                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()){
-                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(),globalStaticProps));
+                    if (!globalStaticProps.isEmpty()) {
+                        if (result.getLeft().getParent() instanceof PsiMethodCallExpression) {
+                            bestPracticeViolations.add(createBestPracticeViolation("Following method breaks best practice. ", result.getLeft(), globalStaticProps));
+                        } else {
+                            bestPracticeViolations.add(createBestPracticeViolation("", result.getLeft(), globalStaticProps));
+                        }
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolationFromMethodExpression(result.getRight()));
                 });
@@ -161,8 +168,12 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
                     List<PsiElement> globalStaticProps = result.getRight().getElementsFromAllLevels().stream().map(PsiReference::resolve).collect(Collectors.toList());
-                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()){
-                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(),globalStaticProps));
+                    if (!globalStaticProps.isEmpty()) {
+                        if (result.getLeft().getParent() instanceof PsiMethodCallExpression) {
+                            bestPracticeViolations.add(createBestPracticeViolation("Following method breaks best practice. ", result.getLeft(), globalStaticProps));
+                        } else {
+                            bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), globalStaticProps));
+                        }
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolationFromReferences(result.getRight()));
                 });
@@ -170,45 +181,20 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
     }
 
     private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<? extends PsiElement> elements) {
-        return new BestPracticeViolation(
-                reference.getElement(),
-                "Following method breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION,
-                getCheckedBestPractice().get(0),
-                elements.stream().map(element -> new Action<BestPracticeViolation>() {
-                    @Override
-                    public String getName() {
-                        return String.format("Go to %s method call in file %s (line %s)"
-                                , element,
-                                element.getContainingFile().getName(),
-                                (PsiDocumentManager.getInstance(element.getProject()).getDocument(element.getContainingFile()).getLineNumber(element.getTextOffset()) + 1));
-                    }
-
-                    @Override
-                    public void execute(BestPracticeViolation bestPracticeViolation) {
-                        ((Navigatable) element.getNavigationElement()).navigate(true);
-                    }
-                }).collect(Collectors.toList())
-                ,DEFAULT_HINTS
-        );
-
+        return createBestPracticeViolation("", reference, elements);
     }
 
+    private BestPracticeViolation createBestPracticeViolation(String problemDescriptionPrefix, PsiReference reference, List<? extends PsiElement> elements) {
+        return new BestPracticeViolation(
+                reference.getElement(),
+                problemDescriptionPrefix + DEFAULT_PROBLEM_DESCRIPTION,
+                getCheckedBestPractice().get(0),
+                elements.stream()
+                        .map(testedMethod -> new NavigateElementAction("method call", testedMethod))
+                        .collect(Collectors.toList())
+                , DEFAULT_HINTS
+        );
 
-    private Action<BestPracticeViolation> makePublicQuickFix(PsiMethod method, PsiReference psiReference) {
-        return new Action<>() {
-            @Override
-            public
-            @NotNull
-            String getName() {
-                return String.format("Make %s public", method.getName());
-            }
-
-            @Override
-            public void execute(BestPracticeViolation bestPracticeViolation) {
-                method.replace(PsiElementFactory.getInstance(method.getProject()).createMethodFromText("public " + method.getText(), null));
-                ((Navigatable) psiReference.resolve().getNavigationElement()).navigate(true);
-            }
-        };
     }
 
     @Override

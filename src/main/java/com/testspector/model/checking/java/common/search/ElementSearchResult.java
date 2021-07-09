@@ -1,4 +1,4 @@
-package com.testspector.model.checking.java.common;
+package com.testspector.model.checking.java.common.search;
 
 import com.intellij.psi.PsiReferenceExpression;
 import org.apache.commons.lang3.tuple.Pair;
