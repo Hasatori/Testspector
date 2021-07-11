@@ -1,9 +1,12 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiKeyword;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiMethodCallExpression;
+import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
-import com.testspector.model.checking.RelatedElementWrapper;
+import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -11,9 +14,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -29,12 +32,11 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
 
     @BeforeEach
     public void beforeEach() {
-        this.strategy = new SetupTestNamingStrategyJUnitCheckingStrategy(elementResolver, methodResolver, contextIndicator);
+        this.strategy = new SetupTestNamingStrategyJUnitCheckingStrategy(elementSearchEngine, methodResolver, contextIndicator);
     }
 
     @ParameterizedTest
     @CsvSource(value = {
-            "'getName' | 'getName'            | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
             "'getName' | 'testGetName'        | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
             "'getName' | 'getNameTest'        | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
             "'getName' | 'test_GetName'       | '" + ALMOST_SAME_NAME_PROBLEM_DESCRIPTION + "'",
@@ -46,25 +48,19 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
         // Given
         PsiMethod testedMethod = this.javaTestElementUtil
                 .createMethod(testedMethodName, "String", Collections.singletonList(PsiKeyword.PUBLIC));
-        PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) this.psiElementFactory.createExpressionFromText(String.format("%s()", testedMethodName), null);
         PsiMethod testMethod = this.javaTestElementUtil.createTestMethod(testName, Collections.singletonList("@org.junit.Test"));
         testMethod = (PsiMethod) testClass.add(testMethod);
-        EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).anyTimes();
-        EasyMock.replay(contextIndicator);
-        EasyMock.expect(methodResolver
-                .allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
-        EasyMock.expect(elementResolver
-                .allChildrenOfTypeMeetingConditionWithReferences(testMethod, PsiReferenceExpression.class))
-                .andReturn(Collections.singletonList(testedMethodCall.getMethodExpression())).times(1);
-        EasyMock.expect(elementResolver
-                .allChildrenOfTypeMeetingConditionWithReferences(EasyMock.eq(testedMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.eq(contextIndicator.isInTestContext())))
-                .andReturn(Collections.singletonList(testedMethodCall)).times(1);
-        EasyMock.replay(elementResolver, methodResolver);
+        testedMethod = (PsiMethod) testClass.add(testedMethod);
+        PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) this.psiElementFactory
+                .createExpressionFromText(String.format("%s()", testedMethodName), testedMethod);
+        testedMethodCall = (PsiMethodCallExpression) testMethod.getBody().add(testedMethodCall);
+        EasyMock.expect(methodResolver.allTestedMethodsMethodCalls(testMethod))
+                .andReturn(new ElementSearchResult<>(new ArrayList<>(), Collections.singletonList(testedMethodCall)))
+                .times(1);
+        EasyMock.replay(methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
-                        String.format("%s#%s", testMethod.getContainingClass().getQualifiedName(), testMethod.getName()),
-                        testMethod,
-                        testMethod.getNameIdentifier().getTextRange(),
+                        testedMethodCall.getMethodExpression(),
                         problemDescription,
                         Arrays.asList(
                                 "Possible strategy: 'doingSomeOperationGeneratesSomeResult'",
@@ -75,20 +71,13 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
                                 "Chosen naming strategy is subjective. The key thing to remember is that name " +
                                         "of the test should say: What is tests, What are the conditions, What is expected result"
                         ),
-                        Arrays.asList(
-                                new RelatedElementWrapper(testedMethodName, new HashMap<PsiElement, String>() {{
-                                    put(testedMethodCall.getMethodExpression(), "simple method call from test");
-                                    put(testedMethod, "method call in production code");
-                                }}))));
+                        new ArrayList<>()));
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);
         //Then
         assertAll(
                 () -> Assert.assertSame("Incorrect number of found violations", 1, foundViolations.size()),
-                () -> assertThat(foundViolations.get(0)).as("Checking first found violation").isEqualToIgnoringGivenFields(expectedViolations.get(0), "relatedElementsWrapper"),
-                () -> Assert.assertSame("Incorrect number of related elements for first violation", 1, foundViolations.get(0).getRelatedElements().size()),
-                () -> assertThat(foundViolations.get(0).getRelatedElements().get(0)).as("Checking first related element in the first violation").isEqualToComparingFieldByField(expectedViolations.get(0).getRelatedElements().get(0))
-        );
+                () -> assertThat(foundViolations.get(0)).as("Checking first found violation").usingRecursiveComparison().isEqualTo(expectedViolations.get(0)));
     }
 
 
@@ -107,7 +96,9 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
                 .createExpressionFromText(String.format("%s()", testedMethodName), null);
         PsiMethod testMethod = this.javaTestElementUtil.createTestMethod(testName, Collections.singletonList("@org.junit.Test"));
         testMethod = (PsiMethod) testClass.add(testMethod);
-        EasyMock.expect(methodResolver.allTestedMethods(testMethod)).andReturn(Collections.singletonList(testedMethod)).times(1);
+        EasyMock.expect(methodResolver.allTestedMethodsMethodCalls(testMethod))
+                .andReturn(new ElementSearchResult<>(new ArrayList<>(), Collections.singletonList(testedMethodCall)))
+                .times(1);
         EasyMock.replay(methodResolver);
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);
@@ -115,17 +106,13 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
         Assert.assertSame("Incorrect number of found violations", 0, foundViolations.size());
     }
 
-    private BestPracticeViolation createBestPracticeViolation(String name, PsiElement testMethodElement, TextRange testMethodTextRange, String problemDescription, List<String> hints, List<RelatedElementWrapper> relatedElementsWrapper) {
+    private BestPracticeViolation createBestPracticeViolation(PsiElement element, String problemDescription, List<String> hints, List<Action<BestPracticeViolation>> actions) {
         return new BestPracticeViolation(
-                name,
-                testMethodElement,
-                testMethodTextRange,
+                element,
                 problemDescription,
                 BestPractice.SETUP_A_TEST_NAMING_STRATEGY,
-                hints,
-                relatedElementsWrapper,
-
-                reference);
+                actions,
+                hints);
     }
 
 }

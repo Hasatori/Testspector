@@ -65,7 +65,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                     .getElementsFromAllLevels()
                     .forEach(nonPublicFromMethodCallExpression -> {
                         bestPracticeViolations.add(new BestPracticeViolation(
-                                nonPublicFromMethodCallExpression,
+                                nonPublicFromMethodCallExpression.getMethodExpression(),
                                 DEFAULT_PROBLEM_DESCRIPTION,
                                 this.getCheckedBestPractice().get(0),
                                 Collections.singletonList(nonPublicFromMethodCallExpression.resolveMethod() != null ?

@@ -24,7 +24,6 @@ public class ElementSearchResult<T> {
         return elements;
     }
 
-
     public List<T> getElementsFromAllLevels() {
         List<T> result = new ArrayList<>();
         result.addAll(this.getElementsOfCurrentLevel());

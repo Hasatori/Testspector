@@ -58,20 +58,11 @@ public final class QueriesRepository {
             .whereReferences(CONTEXT_INDICATOR.isInTestContext())
             .build();
 
-    public static final ElementSearchQuery<PsiField> FIND_ALL_STATIC_NOT_FINAL_PROPS = new ElementSearchQueryBuilder<PsiField>()
+    public static final ElementSearchQuery<PsiField> FIND_ALL_STATIC_PROPS = new ElementSearchQueryBuilder<PsiField>()
             .elementOfType(PsiField.class)
-            .whereElement(psiField -> !(psiField instanceof PsiEnumConstant) && isStaticAndNotFinal().test(psiField))
+            .whereElement(psiField -> !(psiField instanceof PsiEnumConstant))
             .whereReferences(el -> (el instanceof PsiMethod || el instanceof PsiField) && CONTEXT_INDICATOR.isInTestContext().test(el))
             .build();
 
-    private static Predicate<PsiField> isStaticAndNotFinal() {
-        return psiField -> {
-            PsiModifierList modifierList = psiField.getModifierList();
-            if (modifierList != null) {
-                return modifierList.hasModifierProperty(PsiModifier.STATIC) && !modifierList.hasExplicitModifier(PsiModifier.FINAL);
-            }
-            return false;
-        };
-    }
 
 }

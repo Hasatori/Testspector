@@ -1,6 +1,9 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.*;
+import com.intellij.psi.PsiIdentifier;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.psi.PsiReference;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -10,13 +13,14 @@ import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.enums.BestPractice;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.testspector.model.checking.java.common.search.ElementSearchResultUtils.filterResult;
 
 public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
@@ -47,7 +51,16 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
             if (nameIdentifier != null) {
                 String testMethodName = nameIdentifier.getText();
                 ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult = methodResolver.allTestedMethodsMethodCalls(testMethod);
-                allTestedMethodsResult = removeTestedMethodsWithDifferentName(testMethodName, allTestedMethodsResult);
+                allTestedMethodsResult = filterResult(testedMethodCall -> {
+                    PsiMethod testedMethod = testedMethodCall.resolveMethod();
+                    if (testedMethod != null) {
+                        int minRatio = selectMinRatio(testedMethod.getName());
+                        return FuzzySearch.ratio(
+                                testMethodName.toLowerCase(),
+                                testedMethod.getName().toLowerCase()) > minRatio;
+                    }
+                    return false;
+                }, allTestedMethodsResult);
                 for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getElementsFromAllLevels()) {
                     bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));
                 }
@@ -57,26 +70,6 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
         }
 
         return bestPracticeViolations;
-    }
-
-    private ElementSearchResult<PsiMethodCallExpression> removeTestedMethodsWithDifferentName(String testMethodName, ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult) {
-        List<PsiMethodCallExpression> notToRemove = allTestedMethodsResult.getElementsOfCurrentLevel().stream()
-                .filter(testedMethodCall -> {
-                    PsiMethod testedMethod = testedMethodCall.resolveMethod();
-                    if (testedMethod != null) {
-                        int minRatio = selectMinRatio(testedMethod.getName());
-                        return FuzzySearch.ratio(
-                                testMethodName.toLowerCase(),
-                                testedMethod.getName().toLowerCase()) > minRatio;
-                    }
-                    return false;
-                }).collect(Collectors.toList());
-        List<Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>>> referencedElements = new ArrayList<>();
-        for (Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>> referencedResult : allTestedMethodsResult.getReferencedResults()) {
-            ElementSearchResult<PsiMethodCallExpression> newReferencedResult = removeTestedMethodsWithDifferentName(testMethodName, referencedResult.getRight());
-            referencedElements.add(Pair.of(referencedResult.getLeft(), newReferencedResult));
-        }
-        return new ElementSearchResult<>(referencedElements, notToRemove);
     }
 
     private int selectMinRatio(String testedMethodName) {
@@ -131,7 +124,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPractic
                 methodWithAlmostSameName.getMethodExpression(),
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
-                null,
+                new ArrayList<>(),
                 Arrays.asList(
                         "Possible strategy: 'doingSomeOperationGeneratesSomeResult'",
                         "Possible strategy: 'someResultOccursUnderSomeCondition'",

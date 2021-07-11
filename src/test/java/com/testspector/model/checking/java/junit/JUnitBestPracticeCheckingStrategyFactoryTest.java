@@ -15,6 +15,6 @@ class JUnitBestPracticeCheckingStrategyFactoryTest {
 
         BestPracticeCheckingStrategy<PsiElement> optionalBestPracticeCheckingStrategy = jUnitBestPracticeCheckingStrategyFactory.getBestPracticeCheckingStrategy();
 
-        assertTrue(optionalBestPracticeCheckingStrategy instanceof JUnitTestMethodBestPracticeCheckingStrategyAdapter);
+        assertTrue(optionalBestPracticeCheckingStrategy instanceof JUnitGroupBestPracticeCheckingStrategy);
     }
 }

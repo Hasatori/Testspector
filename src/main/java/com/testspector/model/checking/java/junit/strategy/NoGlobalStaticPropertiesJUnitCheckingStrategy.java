@@ -1,9 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.*;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -18,7 +15,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static com.testspector.model.checking.java.common.search.ElementSearchResultUtils.filterResult;
 
 public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
@@ -52,7 +52,8 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
         for (PsiMethod testMethod : methods) {
 
             ElementSearchResult<PsiField> staticPropertiesResult = elementSearchEngine.findByQuery(
-                    testMethod, QueriesRepository.FIND_ALL_STATIC_NOT_FINAL_PROPS);
+                    testMethod, QueriesRepository.FIND_ALL_STATIC_PROPS);
+            staticPropertiesResult = filterResult(isStaticAndNotFinal(), staticPropertiesResult);
             for (PsiField staticProperty : staticPropertiesResult.getElementsFromAllLevels()) {
                 bestPracticeViolations.add(createBestPracticeViolation(staticProperty));
             }
@@ -63,12 +64,23 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
 
         return bestPracticeViolations;
     }
+
+    private static Predicate<PsiField> isStaticAndNotFinal() {
+        return psiField -> {
+            PsiModifierList modifierList = psiField.getModifierList();
+            if (modifierList != null) {
+                return modifierList.hasModifierProperty(PsiModifier.STATIC) && !modifierList.hasExplicitModifier(PsiModifier.FINAL);
+            }
+            return false;
+        };
+    }
+
     private BestPracticeViolation createBestPracticeViolation(PsiField staticProperty) {
         return new BestPracticeViolation(
                 staticProperty,
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
-                null,
+                new ArrayList<>(),
                 hints);
     }
 

@@ -7,12 +7,13 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.checking.java.common.search.QueriesRepository;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.common.JavaConstants.ASSERTION_CLASSES_CLASS_PATHS;
+import static com.testspector.model.checking.java.common.search.ElementSearchResultUtils.mapResult;
 
 public class JavaMethodResolver {
 
@@ -28,34 +29,27 @@ public class JavaMethodResolver {
     public ElementSearchResult<PsiMethodCallExpression> allTestedMethodsMethodCalls(PsiMethod testMethod) {
         ElementSearchResult<PsiMethodCallExpression> assertionMethods = elementSearchEngine
                 .findByQuery(testMethod, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS);
-        return elementSearchEngine.mapResultUsingQuery(assertionMethods, QueriesRepository.FIND_ALL_TESTED_METHOD_CALL_EXPRESSIONS);
+        return mapResult(
+                assertionMethods,
+                psiMethodCallExpression -> elementSearchEngine.findByQuery(psiMethodCallExpression, QueriesRepository.FIND_ALL_TESTED_METHOD_CALL_EXPRESSIONS)
+        );
     }
 
     public ElementSearchResult<PsiReference> allTestedMethodsReferences(PsiMethod testMethod) {
         ElementSearchResult<PsiMethodCallExpression> assertionMethods = elementSearchEngine
                 .findByQuery(testMethod, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS);
-        ElementSearchResult<PsiLiteralExpression> literalExpressionElementSearchResult = elementSearchEngine.mapResultUsingQuery(assertionMethods, QueriesRepository.FIND_ALL_LITERAL_EXPRESSIONS);
-        return fillReferencesFromLiteralExpressions(literalExpressionElementSearchResult);
-    }
-
-    private ElementSearchResult<PsiReference> fillReferencesFromLiteralExpressions(ElementSearchResult<PsiLiteralExpression> literalExpressionElementSearchResult) {
-        List<PsiReference> elementsOfTheCurrentLevel = literalExpressionElementSearchResult
-                .getElementsOfCurrentLevel()
-                .stream()
-                .map(literalExpression -> Arrays.stream(ReferenceProvidersRegistry.getReferencesFromProviders(literalExpression))
-                        .filter(reference -> {
-                            PsiElement resolvedElement = reference.resolve();
-                            return resolvedElement instanceof PsiMethod && contextResolver.isInProductionCodeContext().test(resolvedElement);
-                        })
-                        .collect(Collectors.toList()))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-        List<Pair<PsiReferenceExpression, ElementSearchResult<PsiReference>>> referencedElements = new ArrayList<>();
-        for (Pair<PsiReferenceExpression, ElementSearchResult<PsiLiteralExpression>> referencedResult : literalExpressionElementSearchResult.getReferencedResults()) {
-            ElementSearchResult<PsiReference> newReferencedResult = fillReferencesFromLiteralExpressions(referencedResult.getRight());
-            referencedElements.add(Pair.of(referencedResult.getLeft(), newReferencedResult));
-        }
-        return new ElementSearchResult<>(referencedElements, elementsOfTheCurrentLevel);
+        ElementSearchResult<PsiLiteralExpression> literalExpressionElementSearchResult = mapResult(
+                assertionMethods,
+                literalExpression -> elementSearchEngine.findByQuery(literalExpression, QueriesRepository.FIND_ALL_LITERAL_EXPRESSIONS)
+        );
+        Function<PsiLiteralExpression, ElementSearchResult<PsiReference>> mappingFunction = literalExpression ->
+                new ElementSearchResult<>(new ArrayList<>(),
+                        Arrays.stream(ReferenceProvidersRegistry.getReferencesFromProviders(literalExpression))
+                                .filter(reference -> {
+                                    PsiElement resolvedElement = reference.resolve();
+                                    return resolvedElement instanceof PsiMethod && contextResolver.isInProductionCodeContext().test(resolvedElement);
+                                }).collect(Collectors.toList()));
+        return mapResult(literalExpressionElementSearchResult, mappingFunction);
     }
 
     public List<PsiMethod> methodsWithAnnotations(List<PsiElement> fromElements, List<String> annotationQualifiedNames) {

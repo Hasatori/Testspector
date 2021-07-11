@@ -73,7 +73,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                 assertionMethod.getMethodExpression(),
                 message,
                 BestPractice.ONLY_ONE_ASSERTION,
-                null,
+                new ArrayList<>(),
                 hints);
     }
 

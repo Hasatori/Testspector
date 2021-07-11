@@ -6,7 +6,9 @@ import com.intellij.psi.impl.file.PsiPackageBase;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class ElementSearchEngine {
 
@@ -80,28 +82,5 @@ public class ElementSearchEngine {
             }
         }
         return new ElementSearchResult<>(referencedResults, elementsOfTheCurrentLevel);
-    }
-
-    public <T> ElementSearchResult<T> concat(List<ElementSearchResult<T>> results) {
-        List<T> currentLevelElements = new ArrayList<>();
-        List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> currentLevelReferences = new ArrayList<>();
-        for (ElementSearchResult<T> result : results) {
-            currentLevelElements.addAll(result.getElementsOfCurrentLevel());
-            currentLevelReferences.addAll(result.getReferencedResults());
-        }
-        return new ElementSearchResult<T>(currentLevelReferences, currentLevelElements);
-    }
-
-
-    public <T, R extends PsiElement> ElementSearchResult<T> mapResultUsingQuery(ElementSearchResult<R> assertionMethodsSearchResult, ElementSearchQuery<T> mappingQuery) {
-        List<ElementSearchResult<T>> result = new ArrayList<>();
-        for (R methodCall : assertionMethodsSearchResult.getElementsOfCurrentLevel()) {
-            result.add(findByQuery(methodCall, mappingQuery));
-        }
-        for (Pair<PsiReferenceExpression, ElementSearchResult<R>> referencedResult : assertionMethodsSearchResult.getReferencedResults()) {
-            ElementSearchResult<T> testedMethodsSearch = mapResultUsingQuery(referencedResult.getRight(), mappingQuery);
-            result.add(new ElementSearchResult<>(Collections.singletonList(Pair.of(referencedResult.getLeft(), testedMethodsSearch)), new ArrayList<>()));
-        }
-        return concat(result);
     }
 }

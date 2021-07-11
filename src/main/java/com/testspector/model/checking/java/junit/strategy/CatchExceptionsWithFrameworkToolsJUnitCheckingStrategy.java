@@ -79,7 +79,8 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
                 psiTryStatement,
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 this.getCheckedBestPractice().get(0),
-                Collections.singletonList(new RemoveTryCatchStatementAction(psiTryStatement)));
+                Collections.singletonList(new RemoveTryCatchStatementAction(psiTryStatement)),
+                hints);
     }
 
     private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiTryStatement> elementSearchResult) {

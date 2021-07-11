@@ -1,4 +1,4 @@
-package com.testspector.model.checking.java.common;
+package com.testspector.model.checking.java.common.search;
 
 import com.intellij.lang.Language;
 import com.intellij.psi.*;
@@ -14,43 +14,53 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-public class JavaElementResolverTest extends JavaTest {
+public class ElementSearchEngineTest extends JavaTest {
 
 
-    private JavaElementResolver javaElementResolver;
+    private ElementSearchEngine javaElementResolver;
+    private static final ElementSearchQuery<PsiTryStatement> FIND_ALL_TRY_STATEMENTS = new ElementSearchQueryBuilder<PsiTryStatement>()
+            .elementOfType(PsiTryStatement.class)
+            .withReferences()
+            .build();
+    private static final ElementSearchQuery<PsiIfStatement> FIND_ALL_IF_STATEMENTS = new ElementSearchQueryBuilder<PsiIfStatement>()
+            .elementOfType(PsiIfStatement.class)
+            .withReferences()
+            .build();
 
     @BeforeEach
     public void beforeEach() {
-        this.javaElementResolver = new JavaElementResolver();
+        this.javaElementResolver = new ElementSearchEngine();
     }
 
     @Test
-    public void allChildrenOfType_searchingForIfStatementAndElementContainsTwo_ShouldReturnListWithTwoIfStatements() {
+    public void allChildrenOfType_searchingForIfStatementAndElementContainsTwo_ShouldReturnElementSearchResultWithTwoIfStatements() {
         PsiMethod method = this.javaTestElementUtil.createMethod("testMethod", "String", Collections.singletonList("public"));
         PsiIfStatement firstPsiIfStatement = (PsiIfStatement) method.add(this.psiElementFactory.createStatementFromText("if(true){}", null));
         PsiIfStatement secondPsiIfStatement = (PsiIfStatement) firstPsiIfStatement.getChildren()[4].getChildren()[0].add(this.psiElementFactory.createStatementFromText("if(true){}", null));
 
-        List<PsiIfStatement> result = javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(method, PsiIfStatement.class);
+        ElementSearchResult<PsiIfStatement> result = javaElementResolver.findByQuery(method, FIND_ALL_IF_STATEMENTS);
+        List<PsiIfStatement> statements = result.getElementsFromAllLevels();
 
         assertAll(
-                () -> assertSame("First if statement was not found!", firstPsiIfStatement, result.get(0)),
-                () -> assertSame("Second if statement was not found!", secondPsiIfStatement, result.get(1))
+                () -> assertSame("Only two if statements should have been found!", 2, statements.size()),
+                () -> assertSame("First if statement was not found!", firstPsiIfStatement, statements.get(0)),
+                () -> assertSame("Second if statement was not found!", secondPsiIfStatement, statements.get(1))
         );
     }
 
     @Test
-    public void allChildrenOfType_searchingForTryStatementAndElementContainsNone_ShouldReturnEmptyList() {
+    public void allChildrenOfType_searchingForTryStatementAndElementContainsNone_ShouldReturnEmptySearchResult() {
         PsiMethod method = this.javaTestElementUtil.createMethod("testMethod", "String", Collections.singletonList("public"));
         PsiIfStatement firstPsiIfStatement = (PsiIfStatement) method.add(this.psiElementFactory.createStatementFromText("if(true){}", null));
         firstPsiIfStatement.getChildren()[4].getChildren()[0].add(this.psiElementFactory.createStatementFromText("if(true){}", null));
 
-        List<PsiTryStatement> result = javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(method, PsiTryStatement.class);
+        ElementSearchResult<PsiTryStatement> result = javaElementResolver.findByQuery(method, FIND_ALL_TRY_STATEMENTS);
 
-        assertTrue(result.isEmpty());
+        assertTrue(result.getElementsFromAllLevels().isEmpty());
     }
 
     @Test
-    public void allChildrenOfType_searchingForTryStatementWithReferencesFromMethodsAndOneTryStatementIsInTheReferencedMethod_ShouldReturnTryStatement() {
+    public void allChildrenOfType_searchingForTryStatementWithReferencesFromMethodsAndOneTryStatementIsInTheReferencedMethod_ShouldReturnElementSearchWithOneTryStatement() {
         PsiClass psiClass = this.psiElementFactory.createClass("Test");
         PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil.createMethod("testMethod", "String", Collections.singletonList("public")));
         String referencedMethodName = "referencedMethod";
@@ -59,19 +69,16 @@ public class JavaElementResolverTest extends JavaTest {
                 .createStatementFromText("try {}catch (Exception e){}", null));
         searchStartElement.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
 
-        List<PsiTryStatement> result = javaElementResolver.allChildrenOfTypeWithReferences(
-                searchStartElement,
-                PsiTryStatement.class,
-                (element -> element instanceof PsiMethod));
+        ElementSearchResult<PsiTryStatement> result = javaElementResolver.findByQuery(searchStartElement, FIND_ALL_TRY_STATEMENTS);
 
         assertAll(
-                () -> assertSame("Only one try statement should be found!", 1, result.size()),
-                () -> assertSame(psiTryStatement, result.get(0))
+                () -> assertSame("Only one try statement should be found!", 1, result.getElementsFromAllLevels().size()),
+                () -> assertSame(psiTryStatement, result.getElementsFromAllLevels().get(0))
         );
     }
 
     @Test
-    public void allChildrenOfType_searchingForSwitchStatementWithReferencesFromMethodsAndReferencedMethodContainsOneAndUsesRecursionCallToItself_ShouldReturnSwitchStatement() {
+    public void allChildrenOfType_searchingForSwitchStatementWithReferencesFromMethodsAndReferencedMethodContainsOneAndUsesRecursionCallToItself_ShouldReturnElementSearchWithOneSwitchStatement() {
         PsiClass psiClass = this.psiElementFactory.createClass("Test");
         PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil
                 .createMethod("testMethod", "String", Collections.singletonList("public")));
@@ -84,15 +91,17 @@ public class JavaElementResolverTest extends JavaTest {
                 .createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
         searchStartElement.getBody().add(this.psiElementFactory
                 .createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
+        ElementSearchQuery<PsiSwitchStatement> findAllSwitchStatements = new ElementSearchQueryBuilder<PsiSwitchStatement>()
+                .elementOfType(PsiSwitchStatement.class)
+                .withReferences()
+                .build();
 
-        List<PsiSwitchStatement> result = javaElementResolver.allChildrenOfTypeWithReferences(
-                searchStartElement,
-                PsiSwitchStatement.class,
-                (element -> element instanceof PsiMethod));
+        ElementSearchResult<PsiSwitchStatement> result = javaElementResolver.findByQuery(
+                searchStartElement, findAllSwitchStatements);
 
         assertAll(
-                () -> assertSame("Only one switch statement should be found!", 1, result.size()),
-                () -> assertSame(psiSwitchStatement, result.get(0))
+                () -> assertSame("Only one switch statement should be found!", 1, result.getElementsFromAllLevels().size()),
+                () -> assertSame(psiSwitchStatement, result.getElementsFromAllLevels().get(0))
         );
     }
 
@@ -104,18 +113,19 @@ public class JavaElementResolverTest extends JavaTest {
         String referencedMethodName = "referencedMethod";
         psiClass.add(this.javaTestElementUtil.createMethod(referencedMethodName, "String", Collections.singletonList("public")));
         searchStartElement.getBody().add(this.psiElementFactory.createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
+        ElementSearchQuery<PsiMethod> findAllMethodsWithReferencesFromSpecificClasses = new ElementSearchQueryBuilder<PsiMethod>()
+                .elementOfType(PsiMethod.class)
+                .whereReferences(element -> element instanceof PsiMethod &&
+                        "com.org".equals(((PsiMethod) element).getContainingClass().getQualifiedName()))
+                .build();
 
-        List<PsiMethod> result = javaElementResolver.allChildrenOfTypeWithReferences(
-                searchStartElement,
-                PsiMethod.class,
-                (element -> element instanceof PsiMethod &&
-                        "com.org".equals(((PsiMethod) element).getContainingClass().getQualifiedName())));
+        ElementSearchResult<PsiMethod> result = javaElementResolver.findByQuery(searchStartElement, findAllMethodsWithReferencesFromSpecificClasses);
 
-        assertTrue(result.isEmpty());
+        assertTrue(result.getElementsFromAllLevels().isEmpty());
     }
 
     @Test
-    public void allChildrenOfType_searchingForForStatementWhichContainsIfStatementWithReferencesFromMethodsWhichNameStartsWithAssertAndReferencedMethodContainsOne_ShouldReturnForStatement() {
+    public void allChildrenOfType_searchingForForStatementWhichContainsIfStatementWithReferencesFromMethodsWhichNameStartsWithAssertAndReferencedMethodContainsOne_ShouldReturnElementSearchWithOneForStatement() {
         PsiClass psiClass = this.psiElementFactory.createClass("Test");
         PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil
                 .createMethod("testMethod", "String", Collections.singletonList("public")));
@@ -128,16 +138,21 @@ public class JavaElementResolverTest extends JavaTest {
         psiForStatement.getBody().getChildren()[0].add(this.javaTestElementUtil.createIfStatement());
         searchStartElement.getBody().add(this.psiElementFactory
                 .createExpressionFromText(String.format("%s()", referencedMethodName), psiClass));
+        ElementSearchQuery<PsiForStatement> findForStatementWhichContainsIfStatementWithReferencesFromMethodsWhichNameStartsWithAssert =
+                new ElementSearchQueryBuilder<PsiForStatement>()
+                        .elementOfType(PsiForStatement.class)
+                        .whereElement((forStatement) -> javaElementResolver.findByQuery(forStatement, FIND_ALL_IF_STATEMENTS).getElementsFromAllLevels().size() > 0)
+                        .whereReferences(element -> element instanceof PsiMethod && ((PsiMethod) element).getName().startsWith("assert"))
+                        .build();
 
-        List<PsiForStatement> result = javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(
+        ElementSearchResult<PsiForStatement> result = javaElementResolver.findByQuery(
                 searchStartElement,
-                PsiForStatement.class,
-                (forStatement) -> javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(forStatement, PsiIfStatement.class).size() > 0,
-                (element -> element instanceof PsiMethod && ((PsiMethod) element).getName().startsWith("assert")));
+                findForStatementWhichContainsIfStatementWithReferencesFromMethodsWhichNameStartsWithAssert
+        );
 
         assertAll(
-                () -> assertSame("Only one try statement should be found!", 1, result.size()),
-                () -> assertSame(psiForStatement, result.get(0))
+                () -> assertSame("Only one try statement should be found!", 1, result.getElementsFromAllLevels().size()),
+                () -> assertSame(psiForStatement, result.getElementsFromAllLevels().get(0))
         );
     }
 
@@ -146,16 +161,19 @@ public class JavaElementResolverTest extends JavaTest {
         PsiMethod searchStartElement = this.javaTestElementUtil
                 .createMethod("testMethod", "String", Collections.singletonList("public"));
         searchStartElement.getBody().add(this.javaTestElementUtil.createForStatement());
+        ElementSearchQuery<PsiForStatement> findAllForStatementsWhichContainsIfStatements = new ElementSearchQueryBuilder<PsiForStatement>()
+                .elementOfType(PsiForStatement.class)
+                .whereElement(forStatement ->
+                        javaElementResolver.findByQuery(forStatement, FIND_ALL_IF_STATEMENTS)
+                                .getElementsFromAllLevels()
+                                .size() > 0)
+                .whereReferences(element -> element instanceof PsiMethod)
+                .build();
 
-        List<PsiForStatement> result = javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                searchStartElement,
-                PsiForStatement.class,
-                (forStatement) -> javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                        forStatement,
-                        PsiIfStatement.class).size() > 0,
-                (element -> element instanceof PsiMethod));
+        ElementSearchResult<PsiForStatement> result = javaElementResolver.findByQuery(
+                searchStartElement, findAllForStatementsWhichContainsIfStatements);
 
-        assertTrue(result.isEmpty());
+        assertTrue(result.getElementsFromAllLevels().isEmpty());
     }
 
     @Test
@@ -164,53 +182,26 @@ public class JavaElementResolverTest extends JavaTest {
         PsiMethod searchStartElement = (PsiMethod) psiClass.add(this.javaTestElementUtil
                 .createMethod("testMethod", "String", Collections.singletonList("public")));
         searchStartElement.getBody().add(this.psiElementFactory.createExpressionFromText("reference()", psiClass));
+        ElementSearchQuery<PsiForStatement> findAllForStatementsWithReferencesFromAssertMethods = new ElementSearchQueryBuilder<PsiForStatement>()
+                .elementOfType(PsiForStatement.class)
+                .whereReferences(element -> element instanceof PsiMethod && ((PsiMethod) element).getName().startsWith("assert"))
+                .build();
 
-        List<PsiForStatement> result = javaElementResolver.allChildrenOfTypeWithReferences(
-                searchStartElement,
-                PsiForStatement.class,
-                (element -> element instanceof PsiMethod && ((PsiMethod) element).getName().startsWith("assert")));
+        ElementSearchResult<PsiForStatement> result = javaElementResolver.findByQuery(
+                searchStartElement, findAllForStatementsWithReferencesFromAssertMethods);
 
-        assertTrue(result.isEmpty());
+        assertTrue(result.getElementsFromAllLevels().isEmpty());
     }
 
     @Test
     public void allChildrenOfType_searchingForIfStatementInPsiPackageBase_ShouldReturnEmptyList() {
         PsiPackageBase searchStartElement = createSomePsiPackageBase();
 
-        List<PsiForStatement> result = javaElementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                searchStartElement,
-                PsiForStatement.class);
+        ElementSearchResult<PsiIfStatement> result = javaElementResolver.findByQuery(
+                searchStartElement, FIND_ALL_IF_STATEMENTS);
 
-        assertTrue(result.isEmpty());
+        assertTrue(result.getElementsFromAllLevels().isEmpty());
     }
-
-    @Test
-    public void firstImmediateChildIgnoring_IgnoringPsiJavaTokenAndFirstImmediateChildIsForStatement_ShouldReturnForStatement() {
-        PsiMethod method = this.javaTestElementUtil
-                .createMethod("TestMethod", "String", Collections.singletonList("public"));
-        PsiForStatement firstPsiForStatement = (PsiForStatement) method
-                .getBody()
-                .add(this.javaTestElementUtil.createForStatement());
-
-        PsiElement result = javaElementResolver.firstImmediateChildByQuery(
-                method.getBody(),
-                Collections.singletonList(PsiJavaToken.class)).get();
-
-        assertSame(firstPsiForStatement, result);
-    }
-
-    @Test
-    public void firstImmediateChildIgnoring_IgnoredListEmptyTokenAndFirstImmediateChildIsPsiModifierList_ShouldReturnPsiModifierList() {
-        PsiClass psiClass = this.psiElementFactory.createClass("Test");
-        PsiModifierList expectedElement = (PsiModifierList) psiClass.getChildren()[0];
-
-        PsiElement result = javaElementResolver.firstImmediateChildByQuery(
-                psiClass,
-                Collections.emptyList()).get();
-
-        assertSame(expectedElement, result);
-    }
-
 
     private PsiPackageBase createSomePsiPackageBase() {
         return new PsiPackageBase(getPsiManager(), "com.test") {

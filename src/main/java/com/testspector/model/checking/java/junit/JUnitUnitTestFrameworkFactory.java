@@ -20,8 +20,8 @@ public class JUnitUnitTestFrameworkFactory implements UnitTestFrameworkFactory {
 
     private final JavaContextIndicator contextIndicator;
 
-    public JUnitUnitTestFrameworkFactory() {
-        this.contextIndicator = new JavaContextIndicator();
+    public JUnitUnitTestFrameworkFactory(JavaContextIndicator javaContextIndicator) {
+        this.contextIndicator = javaContextIndicator;
     }
 
     @Override

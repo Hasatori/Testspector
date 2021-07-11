@@ -5,7 +5,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiJavaFile;
 import com.testspector.model.checking.java.JavaTest;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.JavaElementResolver;
+import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,7 @@ import java.util.List;
 
 public abstract class JUnitStrategyTest extends JavaTest {
 
-    protected JavaElementResolver elementResolver;
+    protected ElementSearchEngine elementSearchEngine;
     protected JavaContextIndicator contextIndicator;
     protected JavaMethodResolver methodResolver;
     protected PsiJavaFile testJavaFile;
@@ -32,7 +32,7 @@ public abstract class JUnitStrategyTest extends JavaTest {
     ));
     @BeforeEach
     public final void strategyTestSetup() {
-        this.elementResolver = EasyMock.mock(JavaElementResolver.class);
+        this.elementSearchEngine = EasyMock.mock(ElementSearchEngine.class);
         this.contextIndicator = EasyMock.mock(JavaContextIndicator.class);
         this.methodResolver = EasyMock.mock(JavaMethodResolver.class);
         String fileName = "Test";
