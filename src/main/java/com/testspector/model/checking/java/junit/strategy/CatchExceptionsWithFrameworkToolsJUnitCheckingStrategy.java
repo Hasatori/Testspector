@@ -85,14 +85,15 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         List<String> hints = new ArrayList<>();
         List<Action<BestPracticeViolation>> actions = new ArrayList<>();
         ElementSearchResult<PsiMethodCallExpression> methodCallsThrowingAnyException = elementSearchEngine.findByQuery(psiTryStatement.getTryBlock(), QueriesRepository.FIND_ALL_METHOD_CALL_EXPRESSIONS_THROWING_ANY_EXCEPTION_WITHOUT_REFERENCES);
-        List<PsiType> caughtTypes = catchTypesContainingAssertions(psiTryStatement);
+        List<PsiType> caughtTypes = Arrays.stream(psiTryStatement.getCatchSections()).map(PsiCatchSection::getCatchType).collect(Collectors.toList());
+        List<PsiType> caughtTypesWithAssertions = catchTypesContainingAssertions(psiTryStatement);
         if (noMethodCallThrowsAnyOfCaughtExceptions(methodCallsThrowingAnyException, caughtTypes)) {
             actions.add(new RemoveTryCatchStatementAction(psiTryStatement, false));
         } else if (catchTypesContainingAssertions(psiTryStatement).isEmpty()) {
             actions.add(new RemoveTryCatchStatementAction(psiTryStatement, true));
         } else {
             HashMap<PsiType, List<PsiMethodCallExpression>> exceptionTestMethodsMap = new HashMap<>();
-            caughtTypes.forEach(catchType -> methodCallsThrowingAnyException.getElementsOfCurrentLevel().forEach(methodCallThrowingException -> {
+            caughtTypesWithAssertions.forEach(catchType -> methodCallsThrowingAnyException.getElementsOfCurrentLevel().forEach(methodCallThrowingException -> {
                 if (Optional.ofNullable(methodCallThrowingException.resolveMethod())
                         .map(PsiMethod::getThrowsList)
                         .map(psiReferenceList -> Arrays.asList(psiReferenceList.getReferencedTypes()))
