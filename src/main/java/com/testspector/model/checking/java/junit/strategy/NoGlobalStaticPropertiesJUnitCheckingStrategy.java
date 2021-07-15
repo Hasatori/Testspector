@@ -8,6 +8,7 @@ import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.checking.java.common.search.QueriesRepository;
+import com.testspector.model.checking.java.junit.strategy.action.MakeFieldFinal;
 import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.enums.BestPractice;
 
@@ -80,7 +81,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
                 staticProperty,
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
-                new ArrayList<>(),
+                Collections.singletonList(new MakeFieldFinal(staticProperty)),
                 hints);
     }
 
