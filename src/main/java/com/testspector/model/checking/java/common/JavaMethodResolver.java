@@ -31,7 +31,7 @@ public class JavaMethodResolver {
                 .findByQuery(testMethod, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS);
         return mapResult(
                 assertionMethods,
-                psiMethodCallExpression -> elementSearchEngine.findByQuery(psiMethodCallExpression, QueriesRepository.FIND_ALL_TESTED_METHOD_CALL_EXPRESSIONS)
+                psiMethodCallExpression -> elementSearchEngine.findByQuery(psiMethodCallExpression, QueriesRepository.FIND_ALL_PRODUCTION_CODE_METHOD_CALL_EXPRESSIONS)
         );
     }
 

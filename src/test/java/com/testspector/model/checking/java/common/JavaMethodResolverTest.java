@@ -3,7 +3,6 @@ package com.testspector.model.checking.java.common;
 import com.intellij.psi.*;
 import com.testspector.model.checking.java.JavaTest;
 import com.testspector.model.checking.java.common.search.ElementSearchEngine;
-import com.testspector.model.checking.java.common.search.ElementSearchQuery;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.checking.java.common.search.QueriesRepository;
 import org.easymock.EasyMock;
@@ -280,7 +279,7 @@ class JavaMethodResolverTest extends JavaTest {
         ElementSearchResult<PsiMethodCallExpression> expectedResult = new ElementSearchResult<>(new ArrayList<>(), Collections.singletonList(assertionMethodCall));
         EasyMock.expect(elementSearchEngine
                 .findByQuery(
-                        EasyMock.eq(assertionMethodCall), EasyMock.eq(QueriesRepository.FIND_ALL_TESTED_METHOD_CALL_EXPRESSIONS)))
+                        EasyMock.eq(assertionMethodCall), EasyMock.eq(QueriesRepository.FIND_ALL_PRODUCTION_CODE_METHOD_CALL_EXPRESSIONS)))
                 .andReturn(expectedResult).times(1);
         EasyMock.replay(elementSearchEngine);
 
@@ -303,7 +302,7 @@ class JavaMethodResolverTest extends JavaTest {
         ElementSearchResult<PsiMethodCallExpression> expectedResult = new ElementSearchResult<>(new ArrayList<>(), Collections.singletonList(methodCall));
         ElementSearchResult<PsiMethodCallExpression> query = new ElementSearchResult<>(new ArrayList<>(), new ArrayList<>());
         EasyMock.expect(elementSearchEngine.findByQuery(EasyMock.eq(testMethod), EasyMock.eq(QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS))).andReturn(expectedResult).times(1);
-        EasyMock.expect(elementSearchEngine.findByQuery(EasyMock.eq(testMethod), EasyMock.eq(QueriesRepository.FIND_ALL_TESTED_METHOD_CALL_EXPRESSIONS))).andReturn(expectedResult).times(1);
+        EasyMock.expect(elementSearchEngine.findByQuery(EasyMock.eq(testMethod), EasyMock.eq(QueriesRepository.FIND_ALL_PRODUCTION_CODE_METHOD_CALL_EXPRESSIONS))).andReturn(expectedResult).times(1);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element -> true)).anyTimes();
         EasyMock.replay(elementSearchEngine, contextIndicator);
 

@@ -49,7 +49,7 @@ public final class QueriesRepository {
             .whereReferences(el ->!(el instanceof PsiClass) && CONTEXT_INDICATOR.isInTestContext().test(el))
             .build();
 
-    public static final ElementSearchQuery<PsiMethodCallExpression> FIND_ALL_TESTED_METHOD_CALL_EXPRESSIONS = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
+    public static final ElementSearchQuery<PsiMethodCallExpression> FIND_ALL_PRODUCTION_CODE_METHOD_CALL_EXPRESSIONS = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
             .elementOfType(PsiMethodCallExpression.class)
             .whereElement(psiMethodCallExpression -> {
                 PsiMethod methodFromAssertion = psiMethodCallExpression.resolveMethod();
