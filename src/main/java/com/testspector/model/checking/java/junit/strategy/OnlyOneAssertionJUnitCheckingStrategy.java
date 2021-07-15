@@ -47,7 +47,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                             testMethod, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS);
             allAssertionMethodsResult = removeGroupedAssertions(allAssertionMethodsResult);
             List<PsiMethodCallExpression> allAssertionMethods = allAssertionMethodsResult.getElementsFromAllLevels();
-            boolean isJunit5TestMethod = isJUnit5TestMethod(testMethod);
+            boolean areJUnit5ClassesAvailable = areJUnit5ClassesAvailable(testMethod);
             if (allAssertionMethods.size() > 0 && isJUnit4ExpectedTest(testMethod)) {
                 bestPracticeViolations.add(new BestPracticeViolation(
                         Arrays.stream(testMethod.getAnnotations()).filter(psiAnnotation -> psiAnnotation.hasQualifiedName(JUnitConstants.JUNIT4_TEST_QUALIFIED_NAME)).findFirst().orElse(null),
@@ -57,13 +57,13 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                         new ArrayList<>()
                 ));
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
-                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, isJunit5TestMethod, allAssertionMethods));
+                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, areJUnit5ClassesAvailable, allAssertionMethods));
                 }
                 bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
             } else if (allAssertionMethods.size() > 1) {
 
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
-                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, isJunit5TestMethod, allAssertionMethods));
+                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, areJUnit5ClassesAvailable, allAssertionMethods));
                 }
                 bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
             }
@@ -73,11 +73,11 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
 
 
     private BestPracticeViolation createDefaultOnlyOneBestPracticeViolation(PsiMethod testMethod,
-                                                                            PsiMethodCallExpression assertionMethod, int otherAssertionsCount, boolean isJunit5TestMethod, List<PsiMethodCallExpression> allAssertions) {
+                                                                            PsiMethodCallExpression assertionMethod, int otherAssertionsCount, boolean areJUnit5ClassesAvailable, List<PsiMethodCallExpression> allAssertions) {
         List<String> hints = new ArrayList<>();
         List<Action<BestPracticeViolation>> actions = new ArrayList<>();
         String message = "There are " + otherAssertionsCount + " other assertions." + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE;
-        if (isJunit5TestMethod) {
+        if (areJUnit5ClassesAvailable) {
             hints.add(String.format(
                     "You are using JUnit5 so it can be solved " +
                             "by wrapping multiple assertions into %s.assertAll() method",

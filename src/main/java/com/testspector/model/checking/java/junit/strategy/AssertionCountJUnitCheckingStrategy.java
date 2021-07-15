@@ -4,10 +4,13 @@ import com.intellij.lang.jvm.annotation.JvmAnnotationClassValue;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.PsiType;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.PsiTypesUtil;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.checking.java.common.search.QueriesRepository;
 import com.testspector.model.checking.java.junit.JUnitConstants;
@@ -18,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+
+import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH;
 
 public abstract class AssertionCountJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
@@ -60,12 +65,17 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
                 .anyMatch(isAssertionMethodFrom(JUnitConstants.HAMCREST_ASSERTIONS_CLASS_PATH));
     }
 
+    protected boolean areJUnit5ClassesAvailable(PsiMethod method) {
+       return PsiTypesUtil.getPsiClass(PsiType.getTypeByName(JUNIT5_ASSERTIONS_CLASS_PATH, method.getProject(), GlobalSearchScope.allScope(method.getProject()))) != null;
+    }
+
     protected boolean isJUnit5TestMethod(PsiMethod testMethod) {
         return Arrays
                 .stream(testMethod.getAnnotations())
                 .anyMatch(psiAnnotation ->
                         JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()));
     }
+
     protected boolean isJUnit4ExpectedTest(PsiMethod testMethod) {
         return Arrays.stream(testMethod.getAnnotations())
                 .anyMatch(psiAnnotation -> psiAnnotation.hasQualifiedName(JUnitConstants.JUNIT4_TEST_QUALIFIED_NAME) &&
