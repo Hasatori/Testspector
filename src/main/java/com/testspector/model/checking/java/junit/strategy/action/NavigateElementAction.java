@@ -1,13 +1,11 @@
 package com.testspector.model.checking.java.junit.strategy.action;
 
 import com.intellij.pom.Navigatable;
-import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
-
-import java.util.Optional;
+import com.testspector.model.checking.java.common.ElementUtils;
 
 public class NavigateElementAction implements Action<BestPracticeViolation> {
 
@@ -20,9 +18,7 @@ public class NavigateElementAction implements Action<BestPracticeViolation> {
         this.name = String.format("Go to %s in file %s ( line %s)",
                 elementName,
                 containingFile.getName(),
-                Optional.ofNullable(PsiDocumentManager.getInstance(element.getProject()).getDocument(containingFile))
-                        .map(file -> file.getLineNumber(element.getTextOffset()))
-                        .orElse(0) + 1);
+                ElementUtils.getElementLineNumber(element).orElse(0));
         this.element = element;
     }
 
