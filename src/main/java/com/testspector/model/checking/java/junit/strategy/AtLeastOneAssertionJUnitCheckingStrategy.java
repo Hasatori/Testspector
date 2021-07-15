@@ -1,19 +1,19 @@
 package com.testspector.model.checking.java.junit.strategy;
 
+import com.intellij.lang.jvm.annotation.JvmAnnotationClassValue;
 import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.checking.java.common.search.QueriesRepository;
+import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.enums.BestPractice;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class AtLeastOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCheckingStrategy {
 
@@ -32,12 +32,10 @@ public class AtLeastOneAssertionJUnitCheckingStrategy extends AssertionCountJUni
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
-
             ElementSearchResult<PsiMethodCallExpression> allAssertionMethodsResult = elementSearchEngine
                     .findByQuery(testMethod, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS);
-            allAssertionMethodsResult = removeGroupedAssertions(allAssertionMethodsResult);
             PsiIdentifier methodIdentifier = testMethod.getNameIdentifier();
-            if (allAssertionMethodsResult.getElementsFromAllLevels().isEmpty()) {
+            if (allAssertionMethodsResult.getElementsFromAllLevels().isEmpty() && !isJUnit4ExpectedTest(testMethod)) {
                 bestPracticeViolations.add(createAtLeastOneAssertionBestPracticeViolation(
                         methodIdentifier));
             }

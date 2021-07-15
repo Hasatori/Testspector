@@ -1,8 +1,7 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.*;
+import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -13,10 +12,7 @@ import com.testspector.model.checking.java.junit.JUnitConstants;
 import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.enums.BestPractice;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCheckingStrategy {
@@ -45,9 +41,21 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                             testMethod, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS);
             allAssertionMethodsResult = removeGroupedAssertions(allAssertionMethodsResult);
             List<PsiMethodCallExpression> allAssertionMethods = allAssertionMethodsResult.getElementsFromAllLevels();
-            if (allAssertionMethods.size() > 1) {
+            if (allAssertionMethods.size() > 0 && isJUnit4ExpectedTest(testMethod)) {
+                bestPracticeViolations.add(new BestPracticeViolation(
+                        Arrays.stream(testMethod.getAnnotations()).filter(psiAnnotation -> psiAnnotation.hasQualifiedName(JUnitConstants.JUNIT4_TEST_QUALIFIED_NAME)).findFirst().orElse(null),
+                        "This test is with attribute \"expected\" which is assertion on it own but on the top of that there are some assertion methods in the test",
+                        BestPractice.ONLY_ONE_ASSERTION,
+                        new ArrayList<>(),
+                        new ArrayList<>()
+                ));
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
-                    bestPracticeViolations.add(createOnlyOneBestPracticeViolation(testMethod, assertionMethod));
+                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, allAssertionMethods));
+                }
+                bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
+            } else if (allAssertionMethods.size() > 1) {
+                for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
+                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, allAssertionMethods));
                 }
                 bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
             }
@@ -56,8 +64,8 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
     }
 
 
-    private BestPracticeViolation createOnlyOneBestPracticeViolation(PsiMethod testMethod,
-                                                                     PsiMethodCallExpression assertionMethod) {
+    private BestPracticeViolation createDefaultOnlyOneBestPracticeViolation(PsiMethod testMethod,
+                                                                            PsiMethodCallExpression assertionMethod, int otherAssertionsCount, List<PsiMethodCallExpression> allAssertions) {
         List<String> hints = new ArrayList<>();
         String message = DEFAULT_PROBLEM_DESCRIPTION_MESSAGE;
         if (isJUnit5TestMethod(testMethod)) {

@@ -1,5 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
+import com.intellij.lang.jvm.annotation.JvmAnnotationClassValue;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiReferenceExpression;
@@ -64,6 +65,18 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
                 .stream(testMethod.getAnnotations())
                 .anyMatch(psiAnnotation ->
                         JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()));
+    }
+    protected boolean isJUnit4ExpectedTest(PsiMethod testMethod) {
+        return Arrays.stream(testMethod.getAnnotations())
+                .anyMatch(psiAnnotation -> psiAnnotation.hasQualifiedName(JUnitConstants.JUNIT4_TEST_QUALIFIED_NAME) &&
+                        psiAnnotation.getAttributes().stream().anyMatch(jvmAnnotationAttribute ->
+                                "expected".equals(jvmAnnotationAttribute.getAttributeName()) &&
+                                        Optional.ofNullable(jvmAnnotationAttribute.getAttributeValue())
+                                                .filter(attributeValue -> attributeValue instanceof JvmAnnotationClassValue)
+                                                .isPresent()
+                        )
+                );
+
     }
 
 }
