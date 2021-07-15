@@ -7,6 +7,7 @@ import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
+import com.testspector.model.checking.java.common.search.ElementSearchResultUtils;
 import com.testspector.model.checking.java.common.search.QueriesRepository;
 import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.enums.BestPractice;
@@ -59,19 +60,12 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
 
         for (PsiMethod testMethod : methods) {
-
             ElementSearchResult<PsiStatement> statementsElementSearchResult = elementSearchEngine
                     .findByQuery(testMethod, QueriesRepository.FIND_ALL_CONDITIONAL_STATEMENTS);
-            List<PsiStatement> statements = statementsElementSearchResult
-                    .getElementsFromAllLevels()
-                    .stream()
-                    .filter(partOfAssertionMethod().negate())
-                    .collect(Collectors.toList());
-            statements = statements.stream().distinct().collect(Collectors.toList());
-            for (PsiStatement statement : statements) {
+            statementsElementSearchResult = ElementSearchResultUtils.filterResult(partOfAssertionMethod().negate(), statementsElementSearchResult);
+            for (PsiStatement statement : statementsElementSearchResult.getElementsFromAllLevels()) {
                 bestPracticeViolations.add(createBestPracticeViolation(testMethod, statement));
             }
-
             bestPracticeViolations.addAll(createBestPracticeViolation(statementsElementSearchResult));
 
         }
