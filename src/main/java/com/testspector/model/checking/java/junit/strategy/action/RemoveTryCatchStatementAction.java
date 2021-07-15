@@ -6,6 +6,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -33,20 +34,27 @@ public class RemoveTryCatchStatementAction implements Action<BestPracticeViolati
     @Override
     public void execute(BestPracticeViolation bestPracticeViolation) {
         if (catchStatementAtMethodLevel) {
-            Optional.ofNullable(PsiTreeUtil.getParentOfType(tryStatement, PsiMethod.class)).ifPresent(method -> addThrowsListToAllReferencedMethods(PsiElementFactory.getInstance(tryStatement.getProject()), method));
+            Optional.ofNullable(PsiTreeUtil.getParentOfType(tryStatement, PsiMethod.class)).ifPresent(method -> addThrowsListToAllReferencedMethods(new HashSet<>(), PsiElementFactory.getInstance(tryStatement.getProject()), method));
         }
         Optional.ofNullable(tryStatement.getTryBlock()).map(PsiCodeBlock::getLBrace).ifPresent(PsiElement::delete);
         Optional.ofNullable(tryStatement.getTryBlock()).map(PsiCodeBlock::getRBrace).ifPresent(PsiElement::delete);
         tryStatement.replace(tryStatement.getTryBlock());
     }
 
-    private void addThrowsListToAllReferencedMethods(PsiElementFactory psiElementFactory, PsiMethod method) {
-        method.getThrowsList().replace(psiElementFactory.createReferenceList(new PsiJavaCodeReferenceElement[]{psiElementFactory.createReferenceFromText("Exception", null)}));
-        ReferencesSearch.search(method)
-                .findAll()
-                .stream().map(reference -> PsiTreeUtil.getParentOfType(reference.getElement(), PsiMethod.class))
-                .filter(Objects::nonNull)
-                .forEach(met -> addThrowsListToAllReferencedMethods(psiElementFactory, met));
+    private void addThrowsListToAllReferencedMethods(HashSet<PsiMethod> visitedMethods, PsiElementFactory psiElementFactory, PsiMethod method) {
+        if (!visitedMethods.contains(method)) {
+            visitedMethods.add(method);
+            method.getThrowsList().replace(psiElementFactory.createReferenceList(new PsiJavaCodeReferenceElement[]{psiElementFactory.createReferenceFromText("Exception", null)}));
+            ReferencesSearch.search(method)
+                    .findAll()
+                    .stream().map(reference -> PsiTreeUtil.getParentOfType(reference.getElement(), PsiMethod.class))
+                    .filter(Objects::nonNull)
+                    .forEach(met ->
+                            {
+                                addThrowsListToAllReferencedMethods(visitedMethods, psiElementFactory, met);
+                            }
+                    );
+        }
     }
 
 }
