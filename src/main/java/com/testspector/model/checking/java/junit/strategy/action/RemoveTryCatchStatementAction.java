@@ -15,10 +15,9 @@ public class RemoveTryCatchStatementAction implements Action<BestPracticeViolati
     private final PsiTryStatement tryStatement;
     private final boolean catchStatementAtMethodLevel;
 
-    public RemoveTryCatchStatementAction(PsiTryStatement tryStatement) {
-        this.catchStatementAtMethodLevel = Optional.ofNullable(tryStatement.getTryBlock())
-                .map(tryBlock -> tryBlock.getStatements().length > 0).orElse(false);
-        if (catchStatementAtMethodLevel) {
+    public RemoveTryCatchStatementAction(PsiTryStatement tryStatement, boolean catchStatementAtMethodLevel) {
+        this.catchStatementAtMethodLevel = catchStatementAtMethodLevel;
+        if (this.catchStatementAtMethodLevel) {
             this.name = "Remove try catch block and catch exception at method level";
         } else {
             this.name = "Remove try catch block";
@@ -35,12 +34,10 @@ public class RemoveTryCatchStatementAction implements Action<BestPracticeViolati
     public void execute(BestPracticeViolation bestPracticeViolation) {
         if (catchStatementAtMethodLevel) {
             Optional.ofNullable(PsiTreeUtil.getParentOfType(tryStatement, PsiMethod.class)).ifPresent(method -> addThrowsListToAllReferencedMethods(PsiElementFactory.getInstance(tryStatement.getProject()), method));
-            Optional.ofNullable(tryStatement.getTryBlock()).map(PsiCodeBlock::getLBrace).ifPresent(PsiElement::delete);
-            Optional.ofNullable(tryStatement.getTryBlock()).map(PsiCodeBlock::getRBrace).ifPresent(PsiElement::delete);
-            tryStatement.replace(tryStatement.getTryBlock());
-        } else {
-            tryStatement.delete();
         }
+        Optional.ofNullable(tryStatement.getTryBlock()).map(PsiCodeBlock::getLBrace).ifPresent(PsiElement::delete);
+        Optional.ofNullable(tryStatement.getTryBlock()).map(PsiCodeBlock::getRBrace).ifPresent(PsiElement::delete);
+        tryStatement.replace(tryStatement.getTryBlock());
     }
 
     private void addThrowsListToAllReferencedMethods(PsiElementFactory psiElementFactory, PsiMethod method) {

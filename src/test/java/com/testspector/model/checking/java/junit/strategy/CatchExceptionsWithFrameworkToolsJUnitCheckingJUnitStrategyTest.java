@@ -54,7 +54,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
                                 " redundant and make test harder to read and understand." +
                                 " In some cases it might even lead to never failing tests if we " +
                                 "are not handling the exception properly.",
-                        Collections.singletonList(new RemoveTryCatchStatementAction(tryStatement)),
+                        Collections.singletonList(new RemoveTryCatchStatementAction(tryStatement,false)),
                         Arrays.asList(
                                 "If catching an exception is not part of a test then just delete it.",
                                 "If catching an exception is part of a test then since you are using JUnit5 it can be solved " +
@@ -89,7 +89,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
                         "Tests should not contain try catch block. These blocks are " +
                                 "redundant and make test harder to read and understand. In some cases " +
                                 "it might even lead to never failing tests if we are not handling the exception properly.",
-                        Collections.singletonList(new RemoveTryCatchStatementAction(tryStatement)),
+                        Collections.singletonList(new RemoveTryCatchStatementAction(tryStatement,false)),
                         Arrays.asList(
                                 "If catching an exception is not part of a test then just delete it.",
                                 "If catching an exception is part of a test then since you are using JUnit4 " +

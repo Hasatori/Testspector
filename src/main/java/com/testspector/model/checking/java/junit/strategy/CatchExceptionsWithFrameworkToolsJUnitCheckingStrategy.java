@@ -1,8 +1,9 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiReference;
-import com.intellij.psi.PsiTryStatement;
+import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.PsiTypesUtil;
+import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -12,14 +13,15 @@ import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.checking.java.common.search.QueriesRepository;
 import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.checking.java.junit.strategy.action.RemoveTryCatchStatementAction;
+import com.testspector.model.checking.java.junit.strategy.action.ReplaceTryCatchWithAssertThrows;
+import com.testspector.model.checking.java.junit.strategy.action.TestExceptionUsingExpectedJUnit4Test;
 import com.testspector.model.enums.BestPractice;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.testspector.model.checking.java.junit.JUnitConstants.*;
+import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT4_TEST_QUALIFIED_NAMES;
+import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH;
 
 public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
 
@@ -60,27 +62,78 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy implements B
         return bestPracticeViolations;
     }
 
+    private boolean noMethodCallThrowsAnyOfCaughtExceptions(ElementSearchResult<PsiMethodCallExpression> productionMethodCalls, List<PsiType> caughtTypes) {
+        return productionMethodCalls
+                .getElementsFromAllLevels()
+                .stream()
+                .map(PsiCall::resolveMethod)
+                .filter(Objects::nonNull)
+                .noneMatch(method -> Arrays.stream(method.getThrowsList().getReferencedTypes())
+                        .anyMatch(psiClassType -> caughtTypes.stream().anyMatch(psiClassType::isAssignableFrom)));
+    }
+
+    private List<PsiType> catchTypesContainingAssertions(PsiTryStatement psiTryStatement) {
+        return Arrays.stream(psiTryStatement.getCatchSections())
+                .filter(psiCatchSection -> elementSearchEngine
+                        .findByQuery(psiCatchSection, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS)
+                        .getElementsFromAllLevels().size() > 0)
+                .map(PsiCatchSection::getCatchType)
+                .collect(Collectors.toList());
+    }
 
     private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiTryStatement psiTryStatement) {
         List<String> hints = new ArrayList<>();
-        hints.add("If catching an exception is not part of a test then just delete it.");
-        if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)) {
-            hints.add(String.format("If catching an exception is part of a test " +
-                            "then since you are using JUnit5 it can be solved by using %s.assertThrows() method"
-                    , JUNIT5_ASSERTIONS_CLASS_PATH));
+        List<Action<BestPracticeViolation>> actions = new ArrayList<>();
+        ElementSearchResult<PsiMethodCallExpression> methodCallsThrowingAnyException = elementSearchEngine.findByQuery(psiTryStatement.getTryBlock(), QueriesRepository.FIND_ALL_METHOD_CALL_EXPRESSIONS_THROWING_ANY_EXCEPTION_WITHOUT_REFERENCES);
+        List<PsiType> caughtTypes = catchTypesContainingAssertions(psiTryStatement);
+        if (noMethodCallThrowsAnyOfCaughtExceptions(methodCallsThrowingAnyException, caughtTypes)) {
+            actions.add(new RemoveTryCatchStatementAction(psiTryStatement, false));
+        } else if (catchTypesContainingAssertions(psiTryStatement).isEmpty()) {
+            actions.add(new RemoveTryCatchStatementAction(psiTryStatement, true));
+        } else {
+            HashMap<PsiType, List<PsiMethodCallExpression>> exceptionTestMethodsMap = new HashMap<>();
+            caughtTypes.forEach(catchType -> methodCallsThrowingAnyException.getElementsOfCurrentLevel().forEach(methodCallThrowingException -> {
+                if (Optional.ofNullable(methodCallThrowingException.resolveMethod())
+                        .map(PsiMethod::getThrowsList)
+                        .map(psiReferenceList -> Arrays.asList(psiReferenceList.getReferencedTypes()))
+                        .stream()
+                        .anyMatch(psiClassTypes -> psiClassTypes.stream().anyMatch(catchType::isAssignableFrom))) {
+                    List<PsiMethodCallExpression> methodCallExpressions = Optional
+                            .ofNullable(exceptionTestMethodsMap.get(catchType))
+                            .orElse(new ArrayList<>());
+                    boolean contains = false;
+                    for (Map.Entry<PsiType, List<PsiMethodCallExpression>> entry : exceptionTestMethodsMap.entrySet()) {
+                        PsiType key = entry.getKey();
+                        List<PsiMethodCallExpression> value = entry.getValue();
+                        contains = value.contains(methodCallThrowingException);
+                        if (contains) {
+                            break;
+                        }
+                    }
+                    if (!contains) {
+                        methodCallExpressions.add(methodCallThrowingException);
+                        exceptionTestMethodsMap.put(catchType, methodCallExpressions);
+                    }
+                }
+            }));
+            if (exceptionTestMethodsMap.isEmpty()) {
+                actions.add(new RemoveTryCatchStatementAction(psiTryStatement, true));
+            } else if (PsiTypesUtil.getPsiClass(PsiType.getTypeByName(JUNIT5_ASSERTIONS_CLASS_PATH, psiTryStatement.getProject(), GlobalSearchScope.allScope(psiTryStatement.getProject()))) != null) {
+                actions.add(new ReplaceTryCatchWithAssertThrows(psiTryStatement, exceptionTestMethodsMap));
+            } else if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)) {
+                if (exceptionTestMethodsMap.size() > 1) {
+                    actions.add(new TestExceptionUsingExpectedJUnit4Test(testMethod, psiTryStatement, exceptionTestMethodsMap.keySet().stream().findFirst().get()));
+                }
+            }
         }
-        if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)) {
-            hints.add(String.format(
-                    "If catching an exception is part of a test then since you are using JUnit4 " +
-                            "it can be solved by using @%s.Test(expected = Exception.class) for the test method"
-                    , JUNIT4_ASSERTIONS_CLASS_PATH));
-        }
-        return new BestPracticeViolation(
+        return new
+                BestPracticeViolation(
                 psiTryStatement,
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 this.getCheckedBestPractice().get(0),
-                Collections.singletonList(new RemoveTryCatchStatementAction(psiTryStatement)),
-                hints);
+                actions,
+                hints
+        );
     }
 
     private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiTryStatement> elementSearchResult) {
