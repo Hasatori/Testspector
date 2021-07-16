@@ -44,6 +44,7 @@ By default, all inspections are enabled and the severity level is set to **Warni
 ![configuration.png](./doc/configuration_general_settings.png)
 
 It is possible to suppress inspections for a certain part of the code. For example for methods or classes. For that purpose annotation ``@SuppressWarnings({"INSPECTION_NAME"})`` can be used. An example for suppressing inspection **AT_LEAST_ONE_ASSERTION** can be seen below.
+
 ![configuration_without_suppress.png](./doc/configuration_without_suppress.png)
 ![configuration_with_suppress.png](./doc/configuration_with_suppress.png)
 
@@ -52,8 +53,11 @@ It is possible to suppress inspections for a certain part of the code. For examp
 By default inspections are invoked automatically once user opens a file or makes some changes to it. Identified problems are highlighted in the code and if user hovers them description of the problem is provided. Except for descriptions there are sometimes hints how to solve the issue and in some cases use is even provided with action which will automatically fix the issue. 
 Description also contains link to the  ![Documentation](./doc/Practices.md) where is broken best practice described in detail. 
 Example can be seen below. There is a test that contains redundant try catch block. 
+
 ![usage_try_catch_problem_description.png](./doc/usage_try_catch_problem_description.png)
+
 Catching the exception is not part of the test, it makes test harder to read and makes it longer. It can be removed and exception can be caught at method level. 
+
 ![usage_try_catch_action_to_fix.png](./doc/usage_try_catch_action_to_fix.png) ![usage_try_catch_fixed.png](./doc/usage_try_catch_fixed.png)
 
 ## Invoke inspection manually
