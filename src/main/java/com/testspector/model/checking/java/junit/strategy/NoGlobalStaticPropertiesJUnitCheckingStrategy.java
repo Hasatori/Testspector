@@ -106,7 +106,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
                 reference.getElement(),
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
-                null,
+                Collections.singletonList(new MakeFieldFinal((PsiField) reference.resolve())),
                 hints);
     }
 

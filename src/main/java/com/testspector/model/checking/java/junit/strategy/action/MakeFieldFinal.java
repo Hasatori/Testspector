@@ -1,6 +1,7 @@
 package com.testspector.model.checking.java.junit.strategy.action;
 
 import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiModifier;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
 
@@ -17,11 +18,12 @@ public class MakeFieldFinal implements Action<BestPracticeViolation> {
 
     @Override
     public String getName() {
-        return "make final";
+        return String.format("make %s final", psifield.getName());
     }
 
     @Override
     public void execute(BestPracticeViolation bestPracticeViolation) {
-        Optional.ofNullable(psifield.getModifierList()).ifPresent((modifierList) -> modifierList.setModifierProperty("final", true));
+        Optional.ofNullable(psifield.getModifierList()).ifPresent((modifierList) -> modifierList.setModifierProperty(PsiModifier.FINAL, true));
+        new NavigateElementAction(psifield.getName(), psifield).execute(bestPracticeViolation);
     }
 }
