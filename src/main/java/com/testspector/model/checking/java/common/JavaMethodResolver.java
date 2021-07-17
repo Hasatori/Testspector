@@ -98,7 +98,7 @@ public class JavaMethodResolver {
 
     public Optional<PsiMethod> assertionMethod(PsiMethod method) {
         if ((method.getContainingClass() != null && ASSERTION_CLASSES_CLASS_PATHS.contains(method.getContainingClass().getQualifiedName()))
-                || (method.getName().toLowerCase().contains("assert") && elementSearchEngine.findByQuery(method, QueriesRepository.FIND_ASSERTION_THROW_STATEMENTS).getElementsFromAllLevels().size() > 0)) {
+                || (method.getName().toLowerCase().contains("assert") && elementSearchEngine.findByQuery(method, QueriesRepository.FIND_ASSERTION_THROW_STATEMENTS_IN_CUSTOM_ASSERTIONS).getElementsFromAllLevels().size() > 0)) {
             return Optional.of(method);
         }
         return Optional.empty();

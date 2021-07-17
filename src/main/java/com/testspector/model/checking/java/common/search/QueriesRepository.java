@@ -2,6 +2,7 @@ package com.testspector.model.checking.java.common.search;
 
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
 
@@ -35,12 +36,19 @@ public final class QueriesRepository {
         return new JavaMethodResolver(elementSearchEngine(), contextIndicator());
     }
 
+    private static final ElementSearchQuery<PsiMethodCallExpression> FIND_ASSERTION_METHOD_CALL_EXPRESSIONS = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
+            .elementOfType(PsiMethodCallExpression.class)
+            .whereElement(psiMethodCallExpression -> methodResolver().assertionMethod(psiMethodCallExpression).isPresent())
+            .withoutReferences()
+            .build();
 
     public static final ElementSearchQuery<PsiMethodCallExpression> FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
             .elementOfType(PsiMethodCallExpression.class)
-            .whereElement(psiMethodCallExpression -> methodResolver().assertionMethod(psiMethodCallExpression).isPresent())
+            .whereElement(psiMethodCallExpression ->  methodResolver().assertionMethod(psiMethodCallExpression).isPresent() || elementSearchEngine().findByQuery(psiMethodCallExpression, FIND_ASSERTION_METHOD_CALL_EXPRESSIONS).getElementsFromAllLevels().size() > 0)
             .whereReferences(el -> !(el instanceof PsiClass) && contextIndicator().isInTestContext().test(el))
+            .onlyFirstMatch()
             .build();
+
 
     public static final ElementSearchQuery<PsiLiteralExpression> FIND_ALL_LITERAL_EXPRESSIONS = new ElementSearchQueryBuilder<PsiLiteralExpression>()
             .elementOfType(PsiLiteralExpression.class)
@@ -66,7 +74,7 @@ public final class QueriesRepository {
                 PsiMethod methodFromAssertion = psiMethodCallExpression.resolveMethod();
                 return methodFromAssertion != null && contextIndicator().isInProductionCodeContext().test(methodFromAssertion);
             })
-            .whereReferences(contextIndicator().isInTestContext())
+            .whereReferences(el -> !(el instanceof PsiClass) && contextIndicator().isInTestContext().test(el))
             .build();
 
     public static final ElementSearchQuery<PsiMethodCallExpression> FIND_ALL_METHOD_CALL_EXPRESSIONS_THROWING_ANY_EXCEPTION_WITHOUT_REFERENCES = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
@@ -84,14 +92,17 @@ public final class QueriesRepository {
             .whereReferences(el -> (el instanceof PsiMethod || el instanceof PsiField) && contextIndicator().isInTestContext().test(el))
             .build();
 
-    public static final ElementSearchQuery<PsiThrowStatement> FIND_ASSERTION_THROW_STATEMENTS = new ElementSearchQueryBuilder<PsiThrowStatement>()
+    public static final ElementSearchQuery<PsiThrowStatement> FIND_ASSERTION_THROW_STATEMENTS_IN_CUSTOM_ASSERTIONS = new ElementSearchQueryBuilder<PsiThrowStatement>()
             .elementOfType(PsiThrowStatement.class)
             .whereElement(psiThrowStatement -> Optional.ofNullable(psiThrowStatement.getException())
                     .map(PsiExpression::getType)
-                    .filter(psiType -> "java.lang.AssertionError"
-                            .equals(Optional.ofNullable(((PsiClassReferenceType) psiType).resolve())
-                                    .map(PsiClass::getQualifiedName).orElse("")))
+                    .filter(psiType -> psiType instanceof PsiClassReferenceType)
+                    .filter(psiType -> PsiType
+                            .getTypeByName("java.lang.AssertionError",
+                                    ((PsiClassReferenceType) psiType).getReference().getProject(),
+                                    GlobalSearchScope.allScope(((PsiClassReferenceType) psiType).getReference().getProject()))
+                            .isAssignableFrom(psiType))
                     .isPresent())
-            .whereReferences(el -> !(el instanceof PsiClass))
+            .whereReferences(el -> (el instanceof PsiMethod) && (((PsiMethod) el).getName().toLowerCase().contains("assert") || ((PsiMethod) el).getName().toLowerCase().contains("fail")))
             .build();
 }
