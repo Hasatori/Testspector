@@ -1,10 +1,9 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.lang.jvm.annotation.JvmAnnotationClassValue;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiReferenceExpression;
-import com.intellij.psi.PsiType;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTypesUtil;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
@@ -24,16 +23,11 @@ import java.util.function.Predicate;
 
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH;
 
-public abstract class AssertionCountJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
+public abstract class AssertionCountJUnitCheckingStrategy extends JUnitBestPracticeCheckingStrategy {
 
-    protected final ElementSearchEngine elementSearchEngine;
-    protected final JavaContextIndicator contextIndicator;
-    protected final JavaMethodResolver methodResolver;
 
     public AssertionCountJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
-        this.elementSearchEngine = elementSearchEngine;
-        this.contextIndicator = contextIndicator;
-        this.methodResolver = methodResolver;
+        super(elementSearchEngine, contextIndicator, methodResolver);
     }
 
     protected ElementSearchResult<PsiMethodCallExpression> removeGroupedAssertions(ElementSearchResult<PsiMethodCallExpression> allAssertionsSearch) {
@@ -41,8 +35,16 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
         List<PsiMethodCallExpression> toRemove = new ArrayList<>();
 
         for (PsiMethodCallExpression assertion : allAssertionsSearch.getElementsOfCurrentLevel()) {
-            toRemove.addAll(elementSearchEngine.findByQuery(assertion, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS)
-                    .getElementsOfCurrentLevel());
+            if (Optional.ofNullable(assertion.resolveMethod())
+                    .filter(method ->
+                            "assertAll".equals(method.getName()) &&
+                                    Optional.ofNullable(method.getContainingClass())
+                                            .map(PsiClass::getQualifiedName).stream()
+                                            .anyMatch(name -> name.equals(JUNIT5_ASSERTIONS_CLASS_PATH)))
+                    .isPresent()) {
+                toRemove.addAll(elementSearchEngine.findByQuery(assertion, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS)
+                        .getElementsOfCurrentLevel());
+            }
         }
         allElementsOfTheCurrentLevel.removeAll(toRemove);
         List<Pair<PsiReferenceExpression, ElementSearchResult<PsiMethodCallExpression>>> referencedElements = new ArrayList<>();
@@ -65,28 +67,5 @@ public abstract class AssertionCountJUnitCheckingStrategy implements BestPractic
                 .anyMatch(isAssertionMethodFrom(JUnitConstants.HAMCREST_ASSERTIONS_CLASS_PATH));
     }
 
-    protected boolean areJUnit5ClassesAvailable(PsiMethod method) {
-       return PsiTypesUtil.getPsiClass(PsiType.getTypeByName(JUNIT5_ASSERTIONS_CLASS_PATH, method.getProject(), GlobalSearchScope.allScope(method.getProject()))) != null;
-    }
-
-    protected boolean isJUnit5TestMethod(PsiMethod testMethod) {
-        return Arrays
-                .stream(testMethod.getAnnotations())
-                .anyMatch(psiAnnotation ->
-                        JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES.contains(psiAnnotation.getQualifiedName()));
-    }
-
-    protected boolean isJUnit4ExpectedTest(PsiMethod testMethod) {
-        return Arrays.stream(testMethod.getAnnotations())
-                .anyMatch(psiAnnotation -> psiAnnotation.hasQualifiedName(JUnitConstants.JUNIT4_TEST_QUALIFIED_NAME) &&
-                        psiAnnotation.getAttributes().stream().anyMatch(jvmAnnotationAttribute ->
-                                "expected".equals(jvmAnnotationAttribute.getAttributeName()) &&
-                                        Optional.ofNullable(jvmAnnotationAttribute.getAttributeValue())
-                                                .filter(attributeValue -> attributeValue instanceof JvmAnnotationClassValue)
-                                                .isPresent()
-                        )
-                );
-
-    }
 
 }
