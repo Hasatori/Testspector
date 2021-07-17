@@ -4,8 +4,8 @@ import com.intellij.psi.PsiElement;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.factory.BestPracticeCheckingStrategyFactory;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
-import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
+import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.junit.strategy.*;
 import com.testspector.model.enums.BestPractice;
 
@@ -23,9 +23,9 @@ public class JUnitBestPracticeCheckingStrategyFactory implements BestPracticeChe
             new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new OnlyOneAssertionJUnitCheckingStrategy(elementSearchEngine, contextIndicator, methodResolver), methodResolver),
             new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(elementSearchEngine, contextIndicator, methodResolver), methodResolver),
             new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new NoConditionalLogicJUnitCheckingStrategy(elementSearchEngine, contextIndicator, methodResolver), methodResolver),
-            new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new NoGlobalStaticPropertiesJUnitCheckingStrategy(elementSearchEngine, methodResolver, contextIndicator), methodResolver),
-            new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new SetupTestNamingStrategyJUnitCheckingStrategy(elementSearchEngine, methodResolver, contextIndicator), methodResolver),
-            new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new TestOnlyPublicBehaviourJUnitCheckingStrategy(elementSearchEngine, methodResolver, contextIndicator), methodResolver)
+            new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new NoGlobalStaticPropertiesJUnitCheckingStrategy(elementSearchEngine, contextIndicator, methodResolver), methodResolver),
+            new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new SetupTestNamingStrategyJUnitCheckingStrategy(elementSearchEngine, contextIndicator, methodResolver), methodResolver),
+            new JUnitTestMethodBestPracticeCheckingStrategyAdapter(new TestOnlyPublicBehaviourJUnitCheckingStrategy(elementSearchEngine, contextIndicator, methodResolver), methodResolver)
     );
 
     @Override

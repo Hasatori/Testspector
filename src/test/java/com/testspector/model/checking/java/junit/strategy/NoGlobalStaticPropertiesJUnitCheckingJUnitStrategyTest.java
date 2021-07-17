@@ -30,7 +30,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
 
     @BeforeEach
     public void beforeEach() {
-        this.strategy = new NoGlobalStaticPropertiesJUnitCheckingStrategy(elementSearchEngine, methodResolver, contextIndicator);
+        this.strategy = new NoGlobalStaticPropertiesJUnitCheckingStrategy(elementSearchEngine, contextIndicator, methodResolver);
     }
 
     @Test

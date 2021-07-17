@@ -1,10 +1,7 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.*;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.util.PsiTypesUtil;
 import com.testspector.model.checking.Action;
-import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -17,10 +14,7 @@ import com.testspector.model.enums.BestPractice;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT4_TEST_QUALIFIED_NAMES;
-import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH;
-
-public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends  JUnitBestPracticeCheckingStrategy {
+public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUnitBestPracticeCheckingStrategy {
 
 
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Tests should not contain try catch block. " +

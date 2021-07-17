@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH;
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES;
 
-public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
+public class NoConditionalLogicJUnitCheckingStrategy extends JUnitBestPracticeCheckingStrategy {
 
     private static final String IF_STATEMENT_STRING = "if";
     private static final String FOR_STATEMENT_STRING = "for";
@@ -37,18 +37,13 @@ public class NoConditionalLogicJUnitCheckingStrategy implements BestPracticeChec
             PsiForStatement.class,
             PsiForeachStatement.class
     ));
-    private final ElementSearchEngine elementSearchEngine;
-    private final JavaContextIndicator contextResolver;
-    private final JavaMethodResolver methodResolver;
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Conditional logic should not be part of the test " +
             "method, it makes test hard to understand, read and maintain.";
 
-    public NoConditionalLogicJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextResolver, JavaMethodResolver methodResolver) {
-        this.elementSearchEngine = elementSearchEngine;
-        this.contextResolver = contextResolver;
-        this.methodResolver = methodResolver;
-
+    public NoConditionalLogicJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
+        super(elementSearchEngine, contextIndicator, methodResolver);
     }
+
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {

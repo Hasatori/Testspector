@@ -18,12 +18,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
+public class TestOnlyPublicBehaviourJUnitCheckingStrategy extends JUnitBestPracticeCheckingStrategy {
 
-
-    private final ElementSearchEngine elementSearchEngine;
-    private final JavaMethodResolver methodResolver;
-    private final JavaContextIndicator contextIndicator;
     private static final String DEFAULT_PROBLEM_DESCRIPTION = "Only public behaviour should be tested. Testing 'private','protected' " +
             "or 'package private' methods leads to problems with maintenance of tests because " +
             "this private behaviour is likely to be changed very often. " +
@@ -42,12 +38,10 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy implements BestPractic
                     "extracted to a separate system"
     );
 
-
-    public TestOnlyPublicBehaviourJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
-        this.elementSearchEngine = elementSearchEngine;
-        this.methodResolver = methodResolver;
-        this.contextIndicator = contextIndicator;
+    public TestOnlyPublicBehaviourJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
+        super(elementSearchEngine, contextIndicator, methodResolver);
     }
+
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {

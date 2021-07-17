@@ -25,7 +25,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingJUnitStrategyTest extends JUnit
 
     @BeforeEach
     public void beforeEach() {
-        this.strategy = new TestOnlyPublicBehaviourJUnitCheckingStrategy(elementSearchEngine, methodResolver, contextIndicator);
+        this.strategy = new TestOnlyPublicBehaviourJUnitCheckingStrategy(elementSearchEngine, contextIndicator,methodResolver);
     }
 
     @ParameterizedTest

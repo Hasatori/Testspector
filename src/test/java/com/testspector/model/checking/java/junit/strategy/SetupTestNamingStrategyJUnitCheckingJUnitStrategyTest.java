@@ -32,7 +32,7 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
 
     @BeforeEach
     public void beforeEach() {
-        this.strategy = new SetupTestNamingStrategyJUnitCheckingStrategy(elementSearchEngine, methodResolver, contextIndicator);
+        this.strategy = new SetupTestNamingStrategyJUnitCheckingStrategy(elementSearchEngine, contextIndicator, methodResolver);
     }
 
     @ParameterizedTest

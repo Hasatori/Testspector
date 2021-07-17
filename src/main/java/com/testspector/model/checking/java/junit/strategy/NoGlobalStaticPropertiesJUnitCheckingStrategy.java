@@ -21,10 +21,8 @@ import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.common.search.ElementSearchResultUtils.filterResult;
 
-public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
+public class NoGlobalStaticPropertiesJUnitCheckingStrategy  extends JUnitBestPracticeCheckingStrategy {
 
-    private final ElementSearchEngine elementSearchEngine;
-    private final JavaContextIndicator contextIndicator;
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Global static properties should not be part of a test. " +
             "Tests are sharing the reference and if some of them would update" +
             " it it might influence behaviour of other tests.";
@@ -36,10 +34,10 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy implements BestPracti
             "If the property is mutable then delete static modifier " +
                     "and make property reference unique for each test.");
 
-    public NoGlobalStaticPropertiesJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
-        this.elementSearchEngine = elementSearchEngine;
-        this.contextIndicator = contextIndicator;
+    public NoGlobalStaticPropertiesJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
+        super(elementSearchEngine, contextIndicator, methodResolver);
     }
+
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {

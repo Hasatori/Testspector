@@ -22,21 +22,16 @@ import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.common.search.ElementSearchResultUtils.filterResult;
 
-public class SetupTestNamingStrategyJUnitCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
-
-    private final ElementSearchEngine elementSearchEngine;
-    private final JavaMethodResolver methodResolver;
-    private final JavaContextIndicator contextIndicator;
+public class SetupTestNamingStrategyJUnitCheckingStrategy extends JUnitBestPracticeCheckingStrategy {
 
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "The test name is more or less the same as the tested method. " +
             "This says nothing about tests scenario. You should setup a clear strategy " +
             "for naming your tests so that the person reading then knows what is tested";
 
-    public SetupTestNamingStrategyJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaMethodResolver methodResolver, JavaContextIndicator contextIndicator) {
-        this.elementSearchEngine = elementSearchEngine;
-        this.methodResolver = methodResolver;
-        this.contextIndicator = contextIndicator;
+    public SetupTestNamingStrategyJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
+        super(elementSearchEngine, contextIndicator, methodResolver);
     }
+
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(PsiMethod method) {
