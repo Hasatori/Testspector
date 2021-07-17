@@ -6,9 +6,7 @@ import com.intellij.psi.impl.file.PsiPackageBase;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class ElementSearchEngine {
 
@@ -51,34 +49,37 @@ public class ElementSearchEngine {
             for (PsiElement child : psiElement.getChildren()) {
                 if (elementType.isInstance(child) && typeCondition.test(elementType.cast(child))) {
                     elementsOfTheCurrentLevel.add(elementType.cast(child));
-                }
-                if (child instanceof PsiReferenceExpression) {
-                    PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
-                    Optional.ofNullable(visitedElementsMap.get(referencedElement)).ifPresent(result -> referencedResults.add(Pair.of((PsiReferenceExpression) child, result)));
-                    if (referencedElement != null && !visitedElements.contains(referencedElement)) {
-                        visitedElements.add(referencedElement);
-                        if (fromReferencesMeetingCondition.test(referencedElement)) {
-                            ElementSearchResult<T> next = findByQuery(
-                                    true,
-                                    visitedElementsMap,
-                                    visitedElements,
-                                    null,
-                                    null,
-                                    referencedElement,
-                                    elementSearchQuery);
-                            visitedElementsMap.put(referencedElement, next);
-                            referencedResults.add(Pair.of((PsiReferenceExpression) child, next));
-                        }
+                    if (elementSearchQuery.isOnlyFirstMatch()){
+                        return new ElementSearchResult<>(referencedResults, elementsOfTheCurrentLevel);
                     }
                 }
-                findByQuery(
-                        false,
-                        visitedElementsMap,
-                        visitedElements,
-                        elementsOfTheCurrentLevel,
-                        referencedResults,
-                        child,
-                        elementSearchQuery);
+                    if (child instanceof PsiReferenceExpression) {
+                        PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
+                        Optional.ofNullable(visitedElementsMap.get(referencedElement)).ifPresent(result -> referencedResults.add(Pair.of((PsiReferenceExpression) child, result)));
+                        if (referencedElement != null && !visitedElements.contains(referencedElement)) {
+                            visitedElements.add(referencedElement);
+                            if (fromReferencesMeetingCondition.test(referencedElement)) {
+                                ElementSearchResult<T> next = findByQuery(
+                                        true,
+                                        visitedElementsMap,
+                                        visitedElements,
+                                        null,
+                                        null,
+                                        referencedElement,
+                                        elementSearchQuery);
+                                visitedElementsMap.put(referencedElement, next);
+                                referencedResults.add(Pair.of((PsiReferenceExpression) child, next));
+                            }
+                        }
+                    }
+                    findByQuery(
+                            false,
+                            visitedElementsMap,
+                            visitedElements,
+                            elementsOfTheCurrentLevel,
+                            referencedResults,
+                            child,
+                            elementSearchQuery);
             }
         }
         return new ElementSearchResult<>(referencedResults, elementsOfTheCurrentLevel);

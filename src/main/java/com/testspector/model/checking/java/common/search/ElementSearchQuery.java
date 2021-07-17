@@ -12,11 +12,14 @@ public class ElementSearchQuery<T> {
 
     private final Predicate<PsiElement> referencesCondition;
 
-     ElementSearchQuery(Class<T> elementType,Predicate<T> typeCondition,Predicate<PsiElement> referencesCondition) {
+    private final boolean onlyFirstMatch;
+
+     ElementSearchQuery(Class<T> elementType, Predicate<T> typeCondition, Predicate<PsiElement> referencesCondition, boolean onlyFirstMatch) {
         this.elementType = elementType;
         this.whereTypeCondition = typeCondition;
         this.referencesCondition = referencesCondition;
-    }
+         this.onlyFirstMatch = onlyFirstMatch;
+     }
 
     public Class<T> getElementType() {
         return elementType;
@@ -28,5 +31,9 @@ public class ElementSearchQuery<T> {
 
     public Predicate<PsiElement> getReferencesCondition() {
         return referencesCondition;
+    }
+
+    public boolean isOnlyFirstMatch() {
+        return onlyFirstMatch;
     }
 }
