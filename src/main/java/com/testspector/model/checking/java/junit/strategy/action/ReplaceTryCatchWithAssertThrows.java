@@ -41,9 +41,9 @@ public class ReplaceTryCatchWithAssertThrows implements Action<BestPracticeViola
                                         .isPresent();
                                 String expressionText;
                                 if (isDefaultImportStatement) {
-                                    expressionText = String.format("Assertions.assertThrows(%s.class,()->%s)", psiType.getPresentableText(), psiMethodCallExpressions.stream().map(PsiElement::getText).collect(Collectors.joining(";\n")));
+                                    expressionText = String.format("Assertions.assertThrows(%s.class,()->{%s})", psiType.getPresentableText(), psiMethodCallExpressions.stream().map(PsiElement::getText).collect(Collectors.joining(";\n","",";")));
                                 } else {
-                                    expressionText = String.format("assertThrows(%s.class,()->%s)", psiType.getPresentableText(), psiMethodCallExpressions.stream().map(PsiElement::getText).collect(Collectors.joining(";\n")));
+                                    expressionText = String.format("assertThrows(%s.class,()->{%s})", psiType.getPresentableText(), psiMethodCallExpressions.stream().map(PsiElement::getText).collect(Collectors.joining(";\n","",";")));
                                     boolean isStaticImportStatement = Optional.ofNullable(javaFile.getImportList())
                                             .filter(importList -> Arrays.stream(importList.getImportStaticStatements()).anyMatch(psiImportStatement -> "import static org.junit.jupiter.api.Assertions.assertThrows;".equals(psiImportStatement.getText())))
                                             .isPresent();
