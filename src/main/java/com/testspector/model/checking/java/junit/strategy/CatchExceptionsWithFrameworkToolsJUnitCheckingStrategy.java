@@ -20,7 +20,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Tests should not contain try catch block. " +
             "These blocks are redundant and make test harder to read and understand. " +
             "In some cases it might even lead to never failing tests " +
-            "if we are not handling the exception properly.";
+            "if is the exception is not handled properly.";
 
     public CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
         super(elementSearchEngine, contextIndicator, methodResolver);

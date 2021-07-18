@@ -55,17 +55,4 @@ public abstract class AssertionCountJUnitCheckingStrategy extends JUnitBestPract
         return new ElementSearchResult<>(referencedElements, allElementsOfTheCurrentLevel);
     }
 
-    protected Predicate<PsiMethodCallExpression> isAssertionMethodFrom(String qualifiedName) {
-        return psiMethodCallExpression -> Optional.of(psiMethodCallExpression.getMethodExpression())
-                .map(psiClass -> psiClass.getQualifiedName().contains(qualifiedName))
-                .orElse(false);
-    }
-
-    protected boolean containsHamcrestAssertion(List<PsiMethodCallExpression> allAssertionMethods) {
-        return allAssertionMethods
-                .stream()
-                .anyMatch(isAssertionMethodFrom(JUnitConstants.HAMCREST_ASSERTIONS_CLASS_PATH));
-    }
-
-
 }

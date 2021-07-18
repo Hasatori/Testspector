@@ -15,10 +15,7 @@ import com.testspector.model.checking.java.junit.strategy.action.NavigateElement
 import com.testspector.model.checking.java.junit.strategy.action.WrapAllAssertionsIntoAssertAll;
 import com.testspector.model.enums.BestPractice;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCheckingStrategy {
@@ -48,6 +45,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
             allAssertionMethodsResult = removeGroupedAssertions(allAssertionMethodsResult);
             List<PsiMethodCallExpression> allAssertionMethods = allAssertionMethodsResult.getElementsFromAllLevels();
             boolean areJUnit5ClassesAvailable = areJUnit5ClassesAvailable(testMethod);
+            boolean isHamcrestAvailable = isHamcrestAvailable(testMethod);
             if (allAssertionMethods.size() > 0 && isJUnit4ExpectedTest(testMethod)) {
                 bestPracticeViolations.add(new BestPracticeViolation(
                         Arrays.stream(testMethod.getAnnotations()).filter(psiAnnotation -> psiAnnotation.hasQualifiedName(JUnitConstants.JUNIT4_TEST_QUALIFIED_NAME)).findFirst().orElse(null),
@@ -57,13 +55,13 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                         new ArrayList<>()
                 ));
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
-                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, areJUnit5ClassesAvailable, allAssertionMethods));
+                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, areJUnit5ClassesAvailable, isHamcrestAvailable, allAssertionMethods));
                 }
                 bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
             } else if (allAssertionMethods.size() > 1) {
 
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
-                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, areJUnit5ClassesAvailable, allAssertionMethods));
+                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, areJUnit5ClassesAvailable, isHamcrestAvailable, allAssertionMethods));
                 }
                 bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
             }
@@ -73,10 +71,10 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
 
 
     private BestPracticeViolation createDefaultOnlyOneBestPracticeViolation(PsiMethod testMethod,
-                                                                            PsiMethodCallExpression assertionMethod, int otherAssertionsCount, boolean areJUnit5ClassesAvailable, List<PsiMethodCallExpression> allAssertions) {
+                                                                            PsiMethodCallExpression assertionMethod, int otherAssertionsCount, boolean areJUnit5ClassesAvailable, boolean isHamcrestAvailable, List<PsiMethodCallExpression> allAssertions) {
         List<String> hints = new ArrayList<>();
         List<Action<BestPracticeViolation>> actions = new ArrayList<>();
-        String message = "There are " + otherAssertionsCount + " other assertions." + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE;
+        String message = DEFAULT_PROBLEM_DESCRIPTION_MESSAGE + "There are " + otherAssertionsCount + " other assertion method calls in this test.";
         if (areJUnit5ClassesAvailable) {
             hints.add(String.format(
                     "You are using JUnit5 so it can be solved " +
@@ -84,7 +82,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                     JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH));
             actions.add(new WrapAllAssertionsIntoAssertAll(testMethod, allAssertions));
         }
-        if (containsHamcrestAssertion(Arrays.asList(assertionMethod))) {
+        if (isHamcrestAvailable) {
             hints.add("You can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers");
         }
         return new BestPracticeViolation(

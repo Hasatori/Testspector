@@ -147,8 +147,6 @@ public class NoConditionalLogicJUnitCheckingStrategy extends JUnitBestPracticeCh
                 SUPPORTED_STATEMENT_CLASSES
                         .stream()
                         .map(this::statementString).collect(Collectors.joining(", "))));
-        hints.add("Acceptable place where conditional logic can be are custom assertions," +
-                " where base on inputs we decide if we throw exception or not");
         if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)) {
             hints.add(String.format("You are using JUnit5 so the problem can be solved by " +
                             "using data driven approach and generating each scenario using %s",

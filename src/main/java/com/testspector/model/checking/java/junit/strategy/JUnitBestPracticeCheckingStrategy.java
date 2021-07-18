@@ -16,8 +16,7 @@ import com.testspector.model.checking.java.junit.JUnitConstants;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT4_ASSERTIONS_CLASS_PATH;
-import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH;
+import static com.testspector.model.checking.java.junit.JUnitConstants.*;
 
 public abstract class JUnitBestPracticeCheckingStrategy implements BestPracticeCheckingStrategy<PsiMethod> {
     protected final ElementSearchEngine elementSearchEngine;
@@ -33,7 +32,7 @@ public abstract class JUnitBestPracticeCheckingStrategy implements BestPracticeC
     protected boolean areJUnit5ClassesAvailable(PsiMethod method) {
         Module module = ProjectRootManager.getInstance(method.getProject()).getFileIndex().getModuleForFile(method.getContainingFile().getVirtualFile());
         if (module != null) {
-            return PsiTypesUtil.getPsiClass(PsiType.getTypeByName(JUNIT5_ASSERTIONS_CLASS_PATH, method.getProject(), GlobalSearchScope.moduleScope(module))) != null;
+            return PsiTypesUtil.getPsiClass(PsiType.getTypeByName(JUNIT5_ASSERTIONS_CLASS_PATH, method.getProject(), GlobalSearchScope.moduleWithLibrariesScope(module))) != null;
         }
         return false;
     }
@@ -41,7 +40,15 @@ public abstract class JUnitBestPracticeCheckingStrategy implements BestPracticeC
     protected boolean areJUnit4ClassesAvailable(PsiMethod method) {
         Module module = ProjectRootManager.getInstance(method.getProject()).getFileIndex().getModuleForFile(method.getContainingFile().getVirtualFile());
         if (module != null) {
-            return PsiTypesUtil.getPsiClass(PsiType.getTypeByName(JUNIT4_ASSERTIONS_CLASS_PATH, method.getProject(), GlobalSearchScope.moduleScope(module))) != null;
+            return PsiTypesUtil.getPsiClass(PsiType.getTypeByName(JUNIT4_ASSERTIONS_CLASS_PATH, method.getProject(), GlobalSearchScope.moduleWithLibrariesScope(module))) != null;
+        }
+        return false;
+    }
+
+    protected boolean isHamcrestAvailable(PsiMethod method) {
+        Module module = ProjectRootManager.getInstance(method.getProject()).getFileIndex().getModuleForFile(method.getContainingFile().getVirtualFile());
+        if (module != null) {
+            return PsiTypesUtil.getPsiClass(PsiType.getTypeByName(HAMCREST_ASSERTIONS_CLASS_PATH, method.getProject(), GlobalSearchScope.moduleWithLibrariesScope(module))) != null;
         }
         return false;
     }
