@@ -87,7 +87,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy extends JUnitBestPract
                     List<PsiMethodCallExpression> assertionMethods = result.getRight().getElementsFromAllLevels();
                     if (!assertionMethods.isEmpty()) {
                         if (result.getLeft().getParent() instanceof PsiMethodCallExpression) {
-                            bestPracticeViolations.add(createBestPracticeViolation("Following method breaks best practice. ", result.getLeft(), assertionMethods));
+                            bestPracticeViolations.add(createBestPracticeViolation("Following method contains code that breaks best practice. ", result.getLeft(), assertionMethods));
                         } else {
                             bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), assertionMethods));
                         }

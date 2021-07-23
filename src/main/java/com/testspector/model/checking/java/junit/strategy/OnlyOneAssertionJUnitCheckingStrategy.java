@@ -77,13 +77,13 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
         String message = DEFAULT_PROBLEM_DESCRIPTION_MESSAGE + "There are " + otherAssertionsCount + " other assertion method calls in this test.";
         if (areJUnit5ClassesAvailable) {
             hints.add(String.format(
-                    "You are using JUnit5 so it can be solved " +
+                    "You use JUnit5 so it can be solved " +
                             "by wrapping multiple assertions into %s.assertAll() method",
                     JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH));
             actions.add(new WrapAllAssertionsIntoAssertAll(testMethod, allAssertions));
         }
         if (isHamcrestAvailable) {
-            hints.add("You can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers");
+            hints.add("You can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers to test each property");
         }
         return new BestPracticeViolation(
                 assertionMethod.getMethodExpression(),
@@ -109,7 +109,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
     private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiMethodCallExpression> assertionMethods) {
         return new BestPracticeViolation(
                 reference.getElement(),
-                "Following method breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                "Following method contains code that breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 assertionMethods.stream()
                         .map(assertionMethod -> new NavigateElementAction("assertion method", assertionMethod))

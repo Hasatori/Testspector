@@ -37,8 +37,8 @@ public class NoConditionalLogicJUnitCheckingStrategy extends JUnitBestPracticeCh
             PsiForStatement.class,
             PsiForeachStatement.class
     ));
-    private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Conditional logic should not be part of the test " +
-            "method, it makes test hard to understand, read and maintain.";
+    private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Conditional logic in the form of if, else, for, or while should not be part of part of the test code. " +
+            "It generally increases the complexity of the test method, making it difficult to read and makes it very difficult to determine what is actually being tested.";
 
     public NoConditionalLogicJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
         super(elementSearchEngine, contextIndicator, methodResolver);

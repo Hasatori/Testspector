@@ -20,22 +20,16 @@ import java.util.stream.Collectors;
 
 public class TestOnlyPublicBehaviourJUnitCheckingStrategy extends JUnitBestPracticeCheckingStrategy {
 
-    private static final String DEFAULT_PROBLEM_DESCRIPTION = "Only public behaviour should be tested. Testing 'private','protected' " +
-            "or 'package private' methods leads to problems with maintenance of tests because " +
-            "this private behaviour is likely to be changed very often. " +
-            "In many cases we are refactoring private behaviour without influencing public " +
-            "behaviour of the class, yet this changes will change behaviour of the private method" +
-            " and cause tests to fail.";
+    private static final String DEFAULT_PROBLEM_DESCRIPTION = "It is recommended to always test only the public behaviour of the system under test, which is expressed through public methods. " +
+            "Private methods are often updated, deleted or added regardless of if public behaviour of a system under test has changed. " +
+            "Private methods are only a helper tool for the public behaviour of the tested system. " +
+            "Testing them leads to dependencies between the code and the tests, and in the long run, it makes it hard to maintain the tests and even the slightest change will require an update to the tests.";
     private static final List<String> DEFAULT_HINTS = Arrays.asList(
-            "There is an exception to this rule and that is in case when private 'method' " +
-                    "is part of the observed behaviour of the system under test. For example " +
-                    "we can have private constructor for class which is part of ORM and its " +
-                    "initialization should not be permitted.",
             "Remove tests testing private behaviour",
             "If you really feel that private behaviour is complex enough that there should be " +
                     "separate test for it, then it is very probable that the system under test is " +
                     "breaking 'Single Responsibility Principle' and this private behaviour should be " +
-                    "extracted to a separate system"
+                    "extracted into to a separate class"
     );
 
     public TestOnlyPublicBehaviourJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
@@ -147,7 +141,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy extends JUnitBestPract
                     List<PsiMethodCallExpression> globalStaticProps = result.getRight().getElementsFromAllLevels();
                     if (!globalStaticProps.isEmpty()) {
                         if (result.getLeft().getParent() instanceof PsiMethodCallExpression) {
-                            bestPracticeViolations.add(createBestPracticeViolation("Following method breaks best practice. ", result.getLeft(), globalStaticProps));
+                            bestPracticeViolations.add(createBestPracticeViolation("Following method contains code that breaks best practice. ", result.getLeft(), globalStaticProps));
                         } else {
                             bestPracticeViolations.add(createBestPracticeViolation("", result.getLeft(), globalStaticProps));
                         }
@@ -164,7 +158,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy extends JUnitBestPract
                     List<PsiElement> globalStaticProps = result.getRight().getElementsFromAllLevels().stream().map(PsiReference::resolve).collect(Collectors.toList());
                     if (!globalStaticProps.isEmpty()) {
                         if (result.getLeft().getParent() instanceof PsiMethodCallExpression) {
-                            bestPracticeViolations.add(createBestPracticeViolation("Following method breaks best practice. ", result.getLeft(), globalStaticProps));
+                            bestPracticeViolations.add(createBestPracticeViolation("Following method contains code that breaks best practice. ", result.getLeft(), globalStaticProps));
                         } else {
                             bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), globalStaticProps));
                         }

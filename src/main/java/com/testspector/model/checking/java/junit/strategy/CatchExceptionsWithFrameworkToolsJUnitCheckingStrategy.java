@@ -17,10 +17,8 @@ import java.util.stream.Collectors;
 public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUnitBestPracticeCheckingStrategy {
 
 
-    private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Tests should not contain try catch block. " +
-            "These blocks are redundant and make test harder to read and understand. " +
-            "In some cases it might even lead to never failing tests " +
-            "if is the exception is not handled properly.";
+    private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "It is not recommended to test exceptions by using try and catch block. " +
+            "Using the blocks only is redundant and it make test method bigger and makes it harder to read and understand it.";
 
     public CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {
         super(elementSearchEngine, contextIndicator, methodResolver);
@@ -107,7 +105,8 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
                 actions.add(new TestExceptionUsingExpectedJUnit4Test(testMethod, psiTryStatement, exceptionTestMethodsMap.keySet().stream().findFirst().get()));
             }
         }
-
+        hints.add("If throwing an exception is not part of the test delete the try catch and catch exception at method level");
+        hints.add("Instead it is recommended to use methods or tools provided by testing frameworks and testing libraries. For example annotation @expectException for testing framework JUnit version 4 or assertThrows method in JUnit version 5");
         return new
                 BestPracticeViolation(
                 psiTryStatement,
@@ -134,7 +133,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
     private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiTryStatement> tryStatements) {
         return new BestPracticeViolation(
                 reference.getElement(),
-                "Following method breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                "Following method contains code that breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 tryStatements.stream()
                         .map(tryStatement -> new NavigateElementAction("try catch statement", tryStatement))
