@@ -56,7 +56,10 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
                 .map(PsiCall::resolveMethod)
                 .filter(Objects::nonNull)
                 .noneMatch(method -> Arrays.stream(method.getThrowsList().getReferencedTypes())
-                        .anyMatch(psiClassType -> caughtTypes.stream().anyMatch(psiClassType::isAssignableFrom)));
+                        .anyMatch(psiClassType -> caughtTypes
+                                .stream()
+                                .filter(Objects::nonNull)
+                                .anyMatch(psiClassType::isAssignableFrom)));
     }
 
     private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiTryStatement psiTryStatement,boolean usingJUnit5,boolean usingJUnit4) {
@@ -94,12 +97,14 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
                 }
             }
         }));
-        if (usingJUnit5) {
-            actions.add(new ReplaceTryCatchWithAssertThrows(psiTryStatement, exceptionTestMethodsMap));
-            actions.add(new ReplaceTryCatchWithAssertDoesNotThrow(psiTryStatement));
-        } else if (usingJUnit4) {
-            if (exceptionTestMethodsMap.size() > 1) {
-                actions.add(new TestExceptionUsingExpectedJUnit4Test(testMethod, psiTryStatement, exceptionTestMethodsMap.keySet().stream().findFirst().get()));
+        if (!exceptionTestMethodsMap.isEmpty()){
+            if (usingJUnit5) {
+                actions.add(new ReplaceTryCatchWithAssertThrows(psiTryStatement, exceptionTestMethodsMap));
+                actions.add(new ReplaceTryCatchWithAssertDoesNotThrow(psiTryStatement));
+            } else if (usingJUnit4) {
+                if (exceptionTestMethodsMap.size() > 1) {
+                    actions.add(new TestExceptionUsingExpectedJUnit4Test(testMethod, psiTryStatement, exceptionTestMethodsMap.keySet().stream().findFirst().get()));
+                }
             }
         }
         hints.add("If throwing an exception is not part of the test delete the try catch and catch exception at method level");

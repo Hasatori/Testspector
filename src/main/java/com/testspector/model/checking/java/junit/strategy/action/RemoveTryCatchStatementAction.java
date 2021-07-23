@@ -1,6 +1,8 @@
 package com.testspector.model.checking.java.junit.strategy.action;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
+import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.testspector.model.checking.Action;
@@ -33,12 +35,14 @@ public class RemoveTryCatchStatementAction implements Action<BestPracticeViolati
 
     @Override
     public void execute(BestPracticeViolation bestPracticeViolation) {
+        Project project = tryStatement.getProject();
         if (catchStatementAtMethodLevel) {
             Optional.ofNullable(PsiTreeUtil.getParentOfType(tryStatement, PsiMethod.class)).ifPresent(method -> addThrowsListToAllReferencedMethods(new HashSet<>(), PsiElementFactory.getInstance(tryStatement.getProject()), method));
         }
         Optional.ofNullable(tryStatement.getTryBlock()).map(PsiCodeBlock::getLBrace).ifPresent(PsiElement::delete);
         Optional.ofNullable(tryStatement.getTryBlock()).map(PsiCodeBlock::getRBrace).ifPresent(PsiElement::delete);
-        tryStatement.replace(tryStatement.getTryBlock());
+        CodeStyleManager.getInstance(project).reformat( tryStatement.replace(tryStatement.getTryBlock()));
+
     }
 
     private void addThrowsListToAllReferencedMethods(HashSet<PsiMethod> visitedMethods, PsiElementFactory psiElementFactory, PsiMethod method) {

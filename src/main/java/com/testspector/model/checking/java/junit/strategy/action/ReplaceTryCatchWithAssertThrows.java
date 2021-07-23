@@ -1,6 +1,7 @@
 package com.testspector.model.checking.java.junit.strategy.action;
 
 import com.intellij.psi.*;
+import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTypesUtil;
 import com.testspector.model.checking.Action;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 public class ReplaceTryCatchWithAssertThrows implements Action<BestPracticeViolation> {
 
     private final PsiTryStatement psiTryStatement;
-    private final HashMap<PsiType,List<PsiMethodCallExpression>> exceptionMethodCallsMap;
+    private final HashMap<PsiType, List<PsiMethodCallExpression>> exceptionMethodCallsMap;
 
     public ReplaceTryCatchWithAssertThrows(PsiTryStatement psiTryStatement, HashMap<PsiType, List<PsiMethodCallExpression>> exceptionMethodCallsMap) {
         this.psiTryStatement = psiTryStatement;
@@ -41,9 +42,9 @@ public class ReplaceTryCatchWithAssertThrows implements Action<BestPracticeViola
                                         .isPresent();
                                 String expressionText;
                                 if (isDefaultImportStatement) {
-                                    expressionText = String.format("Assertions.assertThrows(%s.class,()->{%s})", psiType.getPresentableText(), psiMethodCallExpressions.stream().map(PsiElement::getText).collect(Collectors.joining(";\n","",";")));
+                                    expressionText = String.format("Assertions.assertThrows(%s.class,()->{%s})", psiType.getPresentableText(), psiMethodCallExpressions.stream().map(PsiElement::getText).collect(Collectors.joining(";\n", "", ";")));
                                 } else {
-                                    expressionText = String.format("assertThrows(%s.class,()->{%s})", psiType.getPresentableText(), psiMethodCallExpressions.stream().map(PsiElement::getText).collect(Collectors.joining(";\n","",";")));
+                                    expressionText = String.format("assertThrows(%s.class,()->{%s})", psiType.getPresentableText(), psiMethodCallExpressions.stream().map(PsiElement::getText).collect(Collectors.joining(";\n", "", ";")));
                                     boolean isStaticImportStatement = Optional.ofNullable(javaFile.getImportList())
                                             .filter(importList -> Arrays.stream(importList.getImportStaticStatements()).anyMatch(psiImportStatement -> "import static org.junit.jupiter.api.Assertions.assertThrows;".equals(psiImportStatement.getText())))
                                             .isPresent();
@@ -51,21 +52,28 @@ public class ReplaceTryCatchWithAssertThrows implements Action<BestPracticeViola
                                         javaFile.getImportList().add(PsiElementFactory.getInstance(psiTryStatement.getProject()).createImportStaticStatement(PsiTypesUtil.getPsiClass(PsiType.getTypeByName("org.junit.jupiter.api.Assertions", psiTryStatement.getProject(), GlobalSearchScope.allScope(psiTryStatement.getProject()))), "assertThrows"));
                                     }
                                 }
-                                elements.add(PsiElementFactory.getInstance(psiTryStatement.getProject()).createExpressionFromText(expressionText, null));
-                                elements.add(PsiElementFactory.getInstance(psiTryStatement.getProject()).createStatementFromText(";\n", null));
+                                elements.add(PsiElementFactory.getInstance(javaFile.getProject()).createExpressionFromText(expressionText, null));
+                                elements.add(PsiElementFactory.getInstance(javaFile.getProject()).createStatementFromText(";\n", null));
                             } else {
-                                elements.add(statement);
+                                elements.add(PsiElementFactory.getInstance(javaFile.getProject()).createStatementFromText(statement.getText(), null));
                             }
                         }
                     })));
             PsiElement toAdd = null;
+            int startOffset=0;
+            int endOffset=0;
             for (int i = 0; i < elements.size(); i++) {
                 if (i == 0) {
                     toAdd = psiTryStatement.replace(elements.get(i));
+                    startOffset = toAdd.getTextOffset();
                 } else {
                     toAdd = toAdd.add(elements.get(i));
                 }
+                if (i == elements.size()-1){
+                    endOffset = toAdd.getTextRange().getEndOffset();
+                }
             }
+            CodeStyleManager.getInstance(psiFile.getProject()).reformatText(psiFile,startOffset,endOffset);
 
         }
     }

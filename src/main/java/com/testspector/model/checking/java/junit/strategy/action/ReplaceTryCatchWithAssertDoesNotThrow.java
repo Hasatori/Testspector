@@ -40,7 +40,7 @@ public class ReplaceTryCatchWithAssertDoesNotThrow implements Action<BestPractic
         } else {
             expressionText = String.format("assertDoesNotThrow(()->{%s})", statements.stream().map(PsiElement::getText).collect(Collectors.joining("")));
             boolean isStaticImportStatement = Optional.ofNullable(javaFile.getImportList())
-                    .map(importList -> Arrays.stream(importList.getImportStaticStatements()).anyMatch(psiImportStatement -> "import static org.junit.jupiter.api.Assertions.assertThrows;".equals(psiImportStatement.getText())))
+                    .map(importList -> Arrays.stream(importList.getImportStaticStatements()).anyMatch(psiImportStatement -> "import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;".equals(psiImportStatement.getText())))
                     .orElse(false);
             if (!isStaticImportStatement) {
                 javaFile.getImportList().add(PsiElementFactory.getInstance(psiTryStatement.getProject()).createImportStaticStatement(PsiTypesUtil.getPsiClass(PsiType.getTypeByName("org.junit.jupiter.api.Assertions", psiTryStatement.getProject(), GlobalSearchScope.allScope(psiTryStatement.getProject()))), "assertThrows"));
