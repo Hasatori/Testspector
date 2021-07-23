@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static com.testspector.model.checking.java.junit.JUnitConstants.ASSERT_ALL_METHOD_NAME;
 import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH;
 
 public abstract class AssertionCountJUnitCheckingStrategy extends JUnitBestPracticeCheckingStrategy {
@@ -37,7 +38,7 @@ public abstract class AssertionCountJUnitCheckingStrategy extends JUnitBestPract
         for (PsiMethodCallExpression assertion : allAssertionsSearch.getElementsOfCurrentLevel()) {
             if (Optional.ofNullable(assertion.resolveMethod())
                     .filter(method ->
-                            "assertAll".equals(method.getName()) &&
+                            ASSERT_ALL_METHOD_NAME.equals(method.getName()) &&
                                     Optional.ofNullable(method.getContainingClass())
                                             .map(PsiClass::getQualifiedName).stream()
                                             .anyMatch(name -> name.equals(JUNIT5_ASSERTIONS_CLASS_PATH)))
