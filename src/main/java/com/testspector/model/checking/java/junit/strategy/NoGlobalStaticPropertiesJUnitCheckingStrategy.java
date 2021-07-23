@@ -1,7 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.*;
-import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -9,6 +8,7 @@ import com.testspector.model.checking.java.common.search.ElementSearchEngine;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.checking.java.common.search.QueriesRepository;
 import com.testspector.model.checking.java.junit.strategy.action.MakeFieldFinal;
+import com.testspector.model.checking.java.junit.strategy.action.RemoveStaticModifierFromField;
 import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.enums.BestPractice;
 
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import static com.testspector.model.checking.java.common.search.ElementSearchResultUtils.filterResult;
 
-public class NoGlobalStaticPropertiesJUnitCheckingStrategy  extends JUnitBestPracticeCheckingStrategy {
+public class NoGlobalStaticPropertiesJUnitCheckingStrategy extends JUnitBestPracticeCheckingStrategy {
 
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Global static properties should not be part of a test. " +
             "Tests are sharing the reference and if some of them would update" +
@@ -79,7 +79,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy  extends JUnitBestPra
                 staticProperty,
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
-                Collections.singletonList(new MakeFieldFinal(staticProperty)),
+                Arrays.asList(new RemoveStaticModifierFromField(staticProperty),new MakeFieldFinal(staticProperty)),
                 hints);
     }
 
@@ -104,7 +104,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy  extends JUnitBestPra
                 reference.getElement(),
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
-                Collections.singletonList(new MakeFieldFinal((PsiField) reference.resolve())),
+                Arrays.asList(new RemoveStaticModifierFromField((PsiField) reference.resolve()), new MakeFieldFinal((PsiField) reference.resolve())),
                 hints);
     }
 
