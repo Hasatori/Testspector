@@ -70,6 +70,8 @@ class JavaMethodResolverTest extends JavaTest {
          assertMethod = (PsiMethod) psiClass.add(assertMethod);
          EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).once();
          EasyMock.expect(contextIndicator.isInProductionCodeContext()).andReturn((element -> false)).once();
+         EasyMock.expect(elementSearchEngine.findByQuery(assertMethod, QueriesRepository.FIND_ASSERTION_THROW_STATEMENTS_IN_CUSTOM_ASSERTIONS))
+                 .andReturn(new ElementSearchResult<>(new ArrayList<>(),Collections.singletonList(throwStatement))).times(1);
          EasyMock.replay(contextIndicator, elementSearchEngine);
 
          JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);

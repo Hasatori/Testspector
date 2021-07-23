@@ -29,6 +29,13 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
 
     private CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy strategy;
 
+  private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "It is not recommended to test exceptions by using try and catch block. " +
+            "Using the blocks only is redundant and it make test method bigger and makes it harder to read and understand it.";
+  private static final List<String> DEFAULT_HINTS = List.of(
+          "If throwing an exception is not part of the test delete the try catch and catch exception at method level",
+          "Instead it is recommended to use methods or tools provided by testing frameworks and testing libraries. " +
+          "For example annotation @expectException for testing framework JUnit version 4 or assertThrows method in JUnit version 5");
+
     @BeforeEach
     public void beforeEach() {
         this.strategy = new CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy(elementSearchEngine, contextIndicator, methodResolver);
@@ -46,19 +53,15 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
                 .andReturn(new ElementSearchResult<>(new ArrayList<>(), Collections.singletonList(tryStatement))).times(1);
         EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(true).once();
         EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)).andReturn(false).once();
+        EasyMock.expect(elementSearchEngine.findByQuery(tryStatement.getTryBlock(), QueriesRepository.FIND_ALL_METHOD_CALL_EXPRESSIONS_THROWING_ANY_EXCEPTION_WITHOUT_REFERENCES))
+                .andReturn(new ElementSearchResult<>(new ArrayList<>(),new ArrayList<>()));
         EasyMock.replay(elementSearchEngine, methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
                         tryStatement,
-                        "Tests should not contain try catch block. These blocks are" +
-                                " redundant and make test harder to read and understand." +
-                                " In some cases it might even lead to never failing tests if we " +
-                                "are not handling the exception properly.",
+                        DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                         Collections.singletonList(new RemoveTryCatchStatementAction(tryStatement,false)),
-                        Arrays.asList(
-                                "If catching an exception is not part of a test then just delete it.",
-                                "If catching an exception is part of a test then since you are using JUnit5 it can be solved " +
-                                        "by using org.junit.jupiter.api.Assertions.assertThrows() method")));
+                       DEFAULT_HINTS));
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);
 
@@ -82,19 +85,15 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingJUnitStrategyTest ext
                 .andReturn(new ElementSearchResult<>(new ArrayList<>(), Arrays.asList(tryStatement))).times(1);
         EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(false).once();
         EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT4_TEST_QUALIFIED_NAMES)).andReturn(true).once();
+        EasyMock.expect(elementSearchEngine.findByQuery(tryStatement.getTryBlock(), QueriesRepository.FIND_ALL_METHOD_CALL_EXPRESSIONS_THROWING_ANY_EXCEPTION_WITHOUT_REFERENCES))
+                .andReturn(new ElementSearchResult<>(new ArrayList<>(),new ArrayList<>()));
         EasyMock.replay(elementSearchEngine, methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
                         tryStatement,
-                        "Tests should not contain try catch block. These blocks are " +
-                                "redundant and make test harder to read and understand. In some cases " +
-                                "it might even lead to never failing tests if we are not handling the exception properly.",
+                        DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                         Collections.singletonList(new RemoveTryCatchStatementAction(tryStatement,false)),
-                        Arrays.asList(
-                                "If catching an exception is not part of a test then just delete it.",
-                                "If catching an exception is part of a test then since you are using JUnit4 " +
-                                        "it can be solved by using" +
-                                        " @org.junit.Assert.Test(expected = Exception.class) for the test method")
+                       DEFAULT_HINTS
                 ));
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);

@@ -55,13 +55,13 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                         new ArrayList<>()
                 ));
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
-                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, areJUnit5ClassesAvailable, isHamcrestAvailable, allAssertionMethods));
+                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, areJUnit5ClassesAvailable, isHamcrestAvailable, allAssertionMethods));
                 }
                 bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
             } else if (allAssertionMethods.size() > 1) {
 
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
-                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, allAssertionMethods.size() - 1, areJUnit5ClassesAvailable, isHamcrestAvailable, allAssertionMethods));
+                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod,  areJUnit5ClassesAvailable, isHamcrestAvailable, allAssertionMethods));
                 }
                 bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
             }
@@ -71,10 +71,10 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
 
 
     private BestPracticeViolation createDefaultOnlyOneBestPracticeViolation(PsiMethod testMethod,
-                                                                            PsiMethodCallExpression assertionMethod, int otherAssertionsCount, boolean areJUnit5ClassesAvailable, boolean isHamcrestAvailable, List<PsiMethodCallExpression> allAssertions) {
+                                                                            PsiMethodCallExpression assertionMethod, boolean areJUnit5ClassesAvailable, boolean isHamcrestAvailable, List<PsiMethodCallExpression> allAssertions) {
         List<String> hints = new ArrayList<>();
         List<Action<BestPracticeViolation>> actions = new ArrayList<>();
-        String message = DEFAULT_PROBLEM_DESCRIPTION_MESSAGE + "There are " + otherAssertionsCount + " other assertion method calls in this test.";
+        String message = DEFAULT_PROBLEM_DESCRIPTION_MESSAGE;
         if (areJUnit5ClassesAvailable) {
             hints.add(String.format(
                     "You use JUnit5 so it can be solved " +

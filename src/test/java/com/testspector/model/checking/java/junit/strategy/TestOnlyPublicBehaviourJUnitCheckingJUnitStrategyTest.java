@@ -1,6 +1,9 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiKeyword;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiMethodCallExpression;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
@@ -11,9 +14,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -29,12 +35,8 @@ public class TestOnlyPublicBehaviourJUnitCheckingJUnitStrategyTest extends JUnit
     }
 
     @ParameterizedTest
-    @CsvSource(value = {
-            "'private'         | 'private'",
-            "'protected'       | 'protected'",
-            "'package private' | ''"
-    }, delimiter = '|')
-    public void checkBestPractices_TestTestsPrivateBehaviourViaMethodCall_OneViolationReportingAboutTestingPrivateBehaviourShouldBeReturned(String expectedRelatedElementQualifierName, String testedMethodAccessQualifier) {
+    @ValueSource(strings = {"private", "protected", ""})
+    public void checkBestPractices_TestTestsPrivateBehaviourViaMethodCall_OneViolationReportingAboutTestingPrivateBehaviourShouldBeReturned(String testedMethodAccessQualifier) {
         // Given
         PsiMethod testMethod = this.javaTestElementUtil
                 .createTestMethod("testMethod", Collections.singletonList("@Test"));
@@ -55,22 +57,16 @@ public class TestOnlyPublicBehaviourJUnitCheckingJUnitStrategyTest extends JUnit
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
                         testedMethodCall.getMethodExpression(),
-                        "Only public behaviour should be tested. Testing 'private','protected' " +
-                                "or 'package private' methods leads to problems with maintenance of tests because " +
-                                "this private behaviour is likely to be changed very often. " +
-                                "In many cases we are refactoring private behaviour without influencing public " +
-                                "behaviour of the class, yet this changes will change behaviour of the private method " +
-                                "and cause tests to fail.",
+                        "It is recommended to always test only the public behaviour of the system under test, which is expressed through public methods. " +
+                                "Private methods are often updated, deleted or added regardless of if public behaviour of a system under test has changed. " +
+                                "Private methods are only a helper tool for the public behaviour of the tested system. " +
+                                "Testing them leads to dependencies between the code and the tests, and in the long run, it makes it hard to maintain the tests and even the slightest change will require an update to the tests.",
                         Arrays.asList(
-                                "There is an exception to this rule and that is in case when private 'method' is " +
-                                        "part of the observed behaviour of the system under test. For example we " +
-                                        "can have private constructor for class which is part of ORM and its " +
-                                        "initialization should not be permitted.",
                                 "Remove tests testing private behaviour",
                                 "If you really feel that private behaviour is complex enough that there should " +
-                                        "be separate test for it, then it is very probable that the system under" +
+                                        "be a separate test for it, then it is very probable that the system under" +
                                         " test is breaking 'Single Responsibility Principle' and this private " +
-                                        "behaviour should be extracted to a separate system"
+                                        "behaviour should probably be extracted into a separate class"
                         ),Collections.singletonList(new MakeMethodPublicAction(testedMethod))));
 
         // When

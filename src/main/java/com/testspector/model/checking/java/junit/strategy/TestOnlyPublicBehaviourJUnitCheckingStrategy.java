@@ -26,10 +26,10 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy extends JUnitBestPract
             "Testing them leads to dependencies between the code and the tests, and in the long run, it makes it hard to maintain the tests and even the slightest change will require an update to the tests.";
     private static final List<String> DEFAULT_HINTS = Arrays.asList(
             "Remove tests testing private behaviour",
-            "If you really feel that private behaviour is complex enough that there should be " +
-                    "separate test for it, then it is very probable that the system under test is " +
-                    "breaking 'Single Responsibility Principle' and this private behaviour should be " +
-                    "extracted into to a separate class"
+            "If you really feel that private behaviour is complex enough that there should " +
+                    "be a separate test for it, then it is very probable that the system under" +
+                    " test is breaking 'Single Responsibility Principle' and this private " +
+                    "behaviour should probably be extracted into a separate class"
     );
 
     public TestOnlyPublicBehaviourJUnitCheckingStrategy(ElementSearchEngine elementSearchEngine, JavaContextIndicator contextIndicator, JavaMethodResolver methodResolver) {

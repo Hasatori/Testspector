@@ -32,7 +32,7 @@ public class OnlyOneAssertionJUnitCheckingStrategyTest extends JUnitStrategyTest
     }
 
     @Test
-    public void checkBestPractices_Junit5TestMethodWithTwoHamcrestAssertionsWhichAreNotGrouped_OneViolationReportingAboutThatOnlyOneAssertionShouldBeInTheTestShouldBeReturnedAndShouldContainHintRecommendingUsingJUnit5GroupAssertionOrHamcrest() {
+    public void checkBestPractices_Junit5TestMethodWithTwoHamcrestAssertionsWhichAreNotGrouped_OneViolationReportingAboutThatOnlyOneAssertionShouldBeInTheTestShouldBeReturned() {
         // Given
         String testMethodName = "testWithOneAssertion";
         String assertMethodText = "org.hamcrest.MatcherAssert.assertThat(null,null )";
@@ -100,12 +100,11 @@ public class OnlyOneAssertionJUnitCheckingStrategyTest extends JUnitStrategyTest
                 element,
                 "Test should fail for only one reason. " +
                         "Using multiple assertions in JUnit leads to that if " +
-                        "one assertion fails other will not be executed and therefore" +
-                        " you will not get overview of all problems.",
+                        "one assertion fails other will not be executed and " +
+                        "therefore you will not get overview of all problems.",
                 BestPractice.ONLY_ONE_ASSERTION,
                 actions,
-                Arrays.asList("You are using JUnit5 so it can be solved by wrapping multiple assertions into org.junit.jupiter.api.Assertions.assertAll() method",
-                        "You can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers")
+                Collections.emptyList()
         );
     }
 

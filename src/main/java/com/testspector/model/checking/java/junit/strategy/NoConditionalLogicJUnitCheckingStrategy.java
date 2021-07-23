@@ -30,13 +30,7 @@ public class NoConditionalLogicJUnitCheckingStrategy extends JUnitBestPracticeCh
     private static final String FOR_EACH_STATEMENT_STRING = "forEach";
     private static final String WHILE_STATEMENT_STRING = "while";
     private static final String SWITCH_STATEMENT_STRING = "switch";
-    private static final List<Class<? extends PsiStatement>> SUPPORTED_STATEMENT_CLASSES = Collections.unmodifiableList(Arrays.asList(
-            PsiIfStatement.class,
-            PsiWhileStatement.class,
-            PsiSwitchStatement.class,
-            PsiForStatement.class,
-            PsiForeachStatement.class
-    ));
+    private static final List<Class<? extends PsiStatement>> SUPPORTED_STATEMENT_CLASSES = List.of(PsiIfStatement.class, PsiWhileStatement.class, PsiSwitchStatement.class, PsiForStatement.class, PsiForeachStatement.class);
     private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Conditional logic in the form of if, else, for, or while should not be part of part of the test code. " +
             "It generally increases the complexity of the test method, making it difficult to read and makes it very difficult to determine what is actually being tested.";
 
@@ -147,7 +141,7 @@ public class NoConditionalLogicJUnitCheckingStrategy extends JUnitBestPracticeCh
                 SUPPORTED_STATEMENT_CLASSES
                         .stream()
                         .map(this::statementString).collect(Collectors.joining(", "))));
-        if (methodResolver.methodHasAnyOfAnnotations(testMethod, JUNIT5_TEST_QUALIFIED_NAMES)) {
+        if (areJUnit5ClassesAvailable(testMethod)) {
             hints.add(String.format("You are using JUnit5 so the problem can be solved by " +
                             "using data driven approach and generating each scenario using %s",
                     JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH));

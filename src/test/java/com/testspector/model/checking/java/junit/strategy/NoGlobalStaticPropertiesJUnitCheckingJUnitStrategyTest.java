@@ -8,6 +8,8 @@ import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.checking.java.common.search.QueriesRepository;
+import com.testspector.model.checking.java.junit.strategy.action.MakeFieldFinal;
+import com.testspector.model.checking.java.junit.strategy.action.RemoveStaticModifierFromField;
 import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.Assertions;
@@ -41,8 +43,6 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
                 .createFieldFromText(String.format("private static String %s = \"VALUE\"", constantName), testClass));
         PsiMethod testMethod = this.javaTestElementUtil.createTestMethod("testMethod", Collections.singletonList("@Test"));
         testMethod = (PsiMethod) testClass.add(testMethod);
-        PsiMethodCallExpression methodCallingTheConstant = (PsiMethodCallExpression) psiElementFactory
-                .createExpressionFromText(String.format("Assert.assertEquals(%s,\"Test\")", constantName), null);
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).times(2);
         EasyMock.replay(contextIndicator);
         EasyMock.expect(elementSearchEngine
@@ -53,14 +53,14 @@ public class NoGlobalStaticPropertiesJUnitCheckingJUnitStrategyTest extends JUni
                 createBestPracticeViolation(
                         staticNotFinalStringConstant,
                         "Global static properties should not be part of a test. " +
-                                "Tests are sharing the reference and if some of them would update it " +
-                                "it might influence behaviour of other tests.",
+                                "Tests are sharing the reference and if some of them would update" +
+                                " it it might influence behaviour of other tests.",
                         Arrays.asList(
                                 "If the property is immutable e.g.,String, Integer, Byte, Character etc. then " +
                                         "you can add 'final' identifier so that tests can not change reference",
                                 "If the property is mutable then delete static modifier and make property reference" +
                                         " unique for each test."),
-                        new ArrayList<>()));
+                        Arrays.asList(new RemoveStaticModifierFromField(staticNotFinalStringConstant),new MakeFieldFinal(staticNotFinalStringConstant))));
 
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testMethod);

@@ -63,7 +63,6 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
         List<String> hints = new ArrayList<>();
         List<Action<BestPracticeViolation>> actions = new ArrayList<>();
         ElementSearchResult<PsiMethodCallExpression> methodCallsThrowingAnyException = elementSearchEngine.findByQuery(psiTryStatement.getTryBlock(), QueriesRepository.FIND_ALL_METHOD_CALL_EXPRESSIONS_THROWING_ANY_EXCEPTION_WITHOUT_REFERENCES);
-        ElementSearchResult<PsiMethodCallExpression> assertions = elementSearchEngine.findByQuery(testMethod, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS);
         List<PsiType> caughtTypes = Arrays.stream(psiTryStatement.getCatchSections()).map(PsiCatchSection::getCatchType).collect(Collectors.toList());
         if (noMethodCallThrowsAnyOfCaughtExceptions(methodCallsThrowingAnyException, caughtTypes)) {
             actions.add(new RemoveTryCatchStatementAction(psiTryStatement, false));
@@ -95,9 +94,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
                 }
             }
         }));
-        if (exceptionTestMethodsMap.isEmpty()) {
-            actions.add(new RemoveTryCatchStatementAction(psiTryStatement, true));
-        } else if (usingJUnit5) {
+        if (usingJUnit5) {
             actions.add(new ReplaceTryCatchWithAssertThrows(psiTryStatement, exceptionTestMethodsMap));
             actions.add(new ReplaceTryCatchWithAssertDoesNotThrow(psiTryStatement));
         } else if (usingJUnit4) {

@@ -1,6 +1,9 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiKeyword;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiStatement;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
@@ -25,6 +28,11 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
 
     private NoConditionalLogicJUnitCheckingStrategy strategy;
 
+    private static final String DEFAULT_PROBLEM_DESCRIPTION_MESSAGE = "Conditional logic in the form of if, else, for, or while should not be part of part of the test code. " +
+            "It generally increases the complexity of the test method, making it difficult to read and makes it very difficult to determine what is actually being tested.";
+    private static final List<String> DEFAULT_HINTS = Collections.singletonList("Remove statements [ if, while, switch, for, forEach ] and create " +
+            "separate test scenario for each branch");
+
     private static Stream<Arguments> provideAllSupportedStatementStringDefinitions() {
         return Stream.of(
                 Arguments.of("if", "if(true){}else if(false){}"),
@@ -33,6 +41,7 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
                 Arguments.of("while", "while(true){}"),
                 Arguments.of("switch", "switch (integer) {case 1:\"Test1\"; default:\"Test2\";}"));
     }
+
     @BeforeEach
     public void beforeEach() {
         this.strategy = new NoConditionalLogicJUnitCheckingStrategy(elementSearchEngine, contextIndicator, methodResolver);
@@ -54,10 +63,6 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
         PsiStatement testMethodStatement = (PsiStatement) testMethodWithStatement
                 .getBody()
                 .add(this.psiElementFactory.createStatementFromText(statementStringDefinition, null));
-        PsiMethodCallExpression helperMethodCall = (PsiMethodCallExpression) testMethodWithStatement
-                .getBody()
-                .add(this.psiElementFactory.createExpressionFromText(String.format("%s()", helperMethodName), null));
-        helperMethodWithStatement = (PsiMethod) testClass.add(helperMethodWithStatement);
         testMethodWithStatement = (PsiMethod) testClass.add(testMethodWithStatement);
         EasyMock.expect(elementSearchEngine
                 .findByQuery(EasyMock.eq(testMethodWithStatement), EasyMock.eq(QueriesRepository.FIND_ALL_CONDITIONAL_STATEMENTS)))
@@ -68,26 +73,14 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
         List<BestPracticeViolation> expectedViolations = Arrays.asList(
                 createBestPracticeViolation(
                         testMethodStatement,
-                        "Conditional logic should not be part of the test method, it " +
-                                "makes test hard to understand, read and maintain.",
-                        Arrays.asList("Remove statements [ if, while, switch, for, forEach ] and create " +
-                                        "separate test scenario for each branch",
-                                "Acceptable place where conditional logic can be are custom assertions, " +
-                                        "where base on inputs we decide if we throw exception or not",
-                                "You are using JUnit5 so the problem can be solved by using data driven " +
-                                        "approach and generating each scenario using org.junit.jupiter.params.ParameterizedTest"),
+                        DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                        DEFAULT_HINTS,
                         new ArrayList<>()
                 ),
                 createBestPracticeViolation(
                         testMethodStatement,
-                        "Conditional logic should not be part of the test method, it " +
-                                "makes test hard to understand, read and maintain.",
-                        Arrays.asList("Remove statements [ if, while, switch, for, forEach ] and create " +
-                                        "separate test scenario for each branch",
-                                "Acceptable place where conditional logic can be are custom assertions, " +
-                                        "where base on inputs we decide if we throw exception or not",
-                                "You are using JUnit5 so the problem can be solved by using data driven " +
-                                        "approach and generating each scenario using org.junit.jupiter.params.ParameterizedTest"),
+                        DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                        DEFAULT_HINTS,
                         new ArrayList<>()
                 ));
 
