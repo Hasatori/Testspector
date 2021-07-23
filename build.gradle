@@ -47,10 +47,10 @@ patchPluginXml {
             "<ul>" +
                     "<li>Checking of the best practices updated:" +
                         "<ul>" +
-                            "<li>Is part of standard IntelliJ inspections now<li>" +
+                            "<li>Is part of standard IntelliJ inspections now</li>" +
                             "<li>Some inspections contain an action that can fix the issue</li>" +
-                            "<li>Fully configurable, inspections can be disabled or surpressed for methods or classes<li>" +
-                            "<li>Inspection can still be invoked for any file or folder which is part of the Intellij project. In such case processing runs in the background and results are presented in native IntelliJ problems report." +
+                            "<li>Fully configurable, inspections can be disabled or surpressed for methods or classes</li>" +
+                            "<li>Inspection can still be invoked for any file or folder which is part of the Intellij project. In such case processing runs in the background and results are presented in native IntelliJ problems report.</li>" +
                         "</ul>" +
                     "</li>" +
                     "<li>Added support for:" +
