@@ -61,17 +61,6 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
                         .anyMatch(psiClassType -> caughtTypes.stream().anyMatch(psiClassType::isAssignableFrom)));
     }
 
-    private boolean catchTypesContainAssertFail(PsiTryStatement psiTryStatement) {
-        return Arrays.stream(psiTryStatement.getCatchSections())
-                .anyMatch(psiCatchSection -> elementSearchEngine
-                        .findByQuery(psiCatchSection, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS)
-                        .getElementsFromAllLevels().stream().anyMatch(psiMethodCallExpression -> Optional
-                                .ofNullable(psiMethodCallExpression.resolveMethod())
-                                .map(PsiMethod::getName)
-                                .map(name -> name.toLowerCase().contains("fail"))
-                                .isPresent()));
-    }
-
     private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiTryStatement psiTryStatement,boolean usingJUnit5,boolean usingJUnit4) {
         List<String> hints = new ArrayList<>();
         List<Action<BestPracticeViolation>> actions = new ArrayList<>();
