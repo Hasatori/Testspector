@@ -18,12 +18,11 @@ public class MakeFieldFinal implements Action<BestPracticeViolation> {
 
     @Override
     public String getName() {
-        return String.format("make %s final", psifield.getName());
+        return "make final";
     }
 
     @Override
     public void execute(BestPracticeViolation bestPracticeViolation) {
         Optional.ofNullable(psifield.getModifierList()).ifPresent((modifierList) -> modifierList.setModifierProperty(PsiModifier.FINAL, true));
-        new NavigateElementAction(psifield.getName(), psifield).execute(bestPracticeViolation);
     }
 }
