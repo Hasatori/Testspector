@@ -73,6 +73,7 @@ public class JavaMethodResolver {
                 if (methodHasAnyOfAnnotations(method, annotationQualifiedNames)) {
                     psiMethods.add((PsiMethod) psiElement);
                 } else if (!visited.contains(method)) {
+                    visited.add(method);
                     psiMethods.addAll(ReferencesSearch.search(method)
                             .findAll()
                             .stream()
@@ -82,7 +83,7 @@ public class JavaMethodResolver {
                             .flatMap(Collection::stream)
                             .collect(Collectors.toList()));
                 }
-                visited.add(method);
+
             }
         }
         return psiMethods;
