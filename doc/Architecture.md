@@ -9,11 +9,9 @@ The solution is based on the MVC architecture:
 
 ![architecture detail](./Class_diagram_global_detailed.png)
 
-### Datil architecture design
+### Detail architecture design
 
 ![architecture detail](./Class_diagram_global_detailed_factories.png)
-
-![architecture detail](./Class_diagram_global_detailed_view.png)
 
 ## Architecture implementation for the JUnit testing framework
 
