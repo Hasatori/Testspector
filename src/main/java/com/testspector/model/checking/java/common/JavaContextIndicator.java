@@ -3,6 +3,7 @@ package com.testspector.model.checking.java.common;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
 
 import java.util.Optional;
@@ -29,8 +30,9 @@ public class JavaContextIndicator {
     }
 
     private Optional<VirtualFile> getVirtualFileFromElement(PsiElement element) {
+        PsiFile file = element.getContainingFile();
+        if (file instanceof PsiJavaFile){
         PsiJavaFile psiJavaFile = (PsiJavaFile) element.getContainingFile();
-        if (psiJavaFile != null) {
             VirtualFile virtualFile = psiJavaFile.getVirtualFile();
             if (virtualFile != null) {
                 return Optional.of(virtualFile);

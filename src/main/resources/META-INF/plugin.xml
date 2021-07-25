@@ -9,16 +9,13 @@
     </description>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
-    <depends>JavaScript</depends>
-    <depends>JavaScriptDebugger</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="com.testspector.view.TestLineMarkerFactory"/>
         <projectService serviceImplementation="com.testspector.controller.TestspectorController" />
         <projectService serviceImplementation="com.testspector.model.checking.factory.InspectionInvocationLineResolveStrategyFactory" />
         <projectService serviceImplementation="com.testspector.model.checking.factory.UnitTestFrameworkFactoryProvider" />
         <projectService serviceImplementation="com.testspector.model.checking.factory.BestPracticeCheckingStrategyFactoryProvider" />
         <projectService serviceImplementation="com.testspector.model.checking.factory.ProgrammingLanguageFactory" />
+        <inspectionToolProvider implementation="com.testspector.controller.InspectionToolProvider"/>
     </extensions>
 
     <actions>
