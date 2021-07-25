@@ -2,6 +2,9 @@ package com.testspector.model.checking.java.common;
 
 import com.intellij.psi.*;
 import com.testspector.model.checking.java.JavaTest;
+import com.testspector.model.checking.java.common.search.ElementSearchEngine;
+import com.testspector.model.checking.java.common.search.ElementSearchResult;
+import com.testspector.model.checking.java.common.search.QueriesRepository;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,22 +12,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 
 class JavaMethodResolverTest extends JavaTest {
 
-    private JavaElementResolver elementResolver;
+    private ElementSearchEngine elementSearchEngine;
     private JavaContextIndicator contextIndicator;
 
     @BeforeEach
     public void beforeEach() {
-        this.elementResolver = EasyMock.mock(JavaElementResolver.class);
+        this.elementSearchEngine = EasyMock.mock(ElementSearchEngine.class);
         this.contextIndicator = EasyMock.mock(JavaContextIndicator.class);
     }
 
@@ -47,38 +48,37 @@ class JavaMethodResolverTest extends JavaTest {
                 .createExpressionFromText(String.format("%s()", libraryAssertionMethodName), psiClass);
         assertMethod = (PsiMethod) psiClass.add(assertMethod);
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         PsiMethod foundMethod = javaMethodResolver.assertionMethod(assertionMethodCall).get();
 
         Assert.assertSame(assertMethod, foundMethod);
     }
 
-    @Test
-    public void resolveAssertMethod_methodCallReferencingCustomAssertionMethodInTestSource_ShouldResolve() {
-        String className = "Test";
-        PsiJavaFile psiJavaFile = this.javaTestElementUtil
-                .createFile(className, "com.testspector", Collections.emptyList(), Collections.emptyList());
-        PsiClass psiClass = (PsiClass) psiJavaFile.add(this.psiElementFactory.createClass(className));
-        String customAssertionMethodName = "customAssertionMethod";
-        PsiThrowStatement throwStatement = (PsiThrowStatement) this.psiElementFactory
-                .createStatementFromText("throw new AssertionError()", null);
-        PsiMethod assertMethod = this.psiElementFactory
-                .createMethodFromText(createCustomAssertionMethod(customAssertionMethodName, throwStatement), null);
-        PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) psiElementFactory
-                .createExpressionFromText(String.format("%s()", customAssertionMethodName), psiClass);
-        assertMethod = (PsiMethod) psiClass.add(assertMethod);
-        EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).once();
-        EasyMock.expect(elementResolver.allChildrenOfTypeMeetingConditionWithReferences(
-                EasyMock.eq(assertMethod), EasyMock.eq(PsiThrowStatement.class), EasyMock.anyObject(), EasyMock.anyObject()))
-                .andReturn(Collections.singletonList(throwStatement));
-        EasyMock.expect(contextIndicator.isInProductionCodeContext()).andReturn((element -> false)).once();
-        EasyMock.replay(contextIndicator, elementResolver);
+     @Test
+     public void resolveAssertMethod_methodCallReferencingCustomAssertionMethodInTestSource_ShouldResolve() {
+         String className = "Test";
+         PsiJavaFile psiJavaFile = this.javaTestElementUtil
+                 .createFile(className, "com.testspector", Collections.emptyList(), Collections.emptyList());
+         PsiClass psiClass = (PsiClass) psiJavaFile.add(this.psiElementFactory.createClass(className));
+         String customAssertionMethodName = "customAssertionMethod";
+         PsiThrowStatement throwStatement = (PsiThrowStatement) this.psiElementFactory
+                 .createStatementFromText("throw new AssertionError()", null);
+         PsiMethod assertMethod = this.psiElementFactory
+                 .createMethodFromText(createCustomAssertionMethod(customAssertionMethodName, throwStatement), null);
+         PsiMethodCallExpression testedMethodCall = (PsiMethodCallExpression) psiElementFactory
+                 .createExpressionFromText(String.format("%s()", customAssertionMethodName), psiClass);
+         assertMethod = (PsiMethod) psiClass.add(assertMethod);
+         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element) -> true).once();
+         EasyMock.expect(contextIndicator.isInProductionCodeContext()).andReturn((element -> false)).once();
+         EasyMock.expect(elementSearchEngine.findByQuery(assertMethod, QueriesRepository.FIND_ASSERTION_THROW_STATEMENTS_IN_CUSTOM_ASSERTIONS))
+                 .andReturn(new ElementSearchResult<>(new ArrayList<>(),Collections.singletonList(throwStatement))).times(1);
+         EasyMock.replay(contextIndicator, elementSearchEngine);
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
-        PsiMethod foundMethod = javaMethodResolver.assertionMethod(testedMethodCall).get();
+         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
+         PsiMethod foundMethod = javaMethodResolver.assertionMethod(testedMethodCall).get();
 
-        Assert.assertSame(assertMethod, foundMethod);
-    }
+         Assert.assertSame(assertMethod, foundMethod);
+     }
 
     @Test
     public void resolveAssertMethod_assertionMethodCallThatReferencesNullMethod_ShouldNotResolve() {
@@ -89,7 +89,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiMethodCallExpression assertionMethodCall = (PsiMethodCallExpression) psiElementFactory
                 .createExpressionFromText(String.format("%s()", "assertionMethod"), psiClass);
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         Optional<PsiMethod> optionalFoundMethod = javaMethodResolver.assertionMethod(assertionMethodCall);
 
         Assert.assertFalse(optionalFoundMethod.isPresent());
@@ -107,7 +107,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiMethod someMethod2 = (PsiMethod) psiClass.add(this.javaTestElementUtil
                 .createTestMethod("method2", Collections.singletonList("@" + annotations.get(0))));
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiJavaFile), annotations);
 
         assertAll(
@@ -126,7 +126,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiMethod someMethod = (PsiMethod) psiClass.add(this.javaTestElementUtil
                 .createMethod("method1", "void", Collections.singletonList(PsiKeyword.PUBLIC)));
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiJavaFile), Collections.emptyList());
 
         assertSame(someMethod, resolvedMethods.get(0));
@@ -142,7 +142,7 @@ class JavaMethodResolverTest extends JavaTest {
         psiClass.add(this.javaTestElementUtil
                 .createMethod("method1", "void", Collections.singletonList(PsiKeyword.PUBLIC)));
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiJavaFile), annotations);
 
         assertTrue(resolvedMethods.isEmpty());
@@ -161,7 +161,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiMethod someMethod2 = (PsiMethod) psiClass.add(this.javaTestElementUtil
                 .createTestMethod("method2", Collections.singletonList("@" + annotations.get(0))));
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiClass), annotations);
 
         assertAll(
@@ -179,7 +179,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiClass psiClass = (PsiClass) psiJavaFile.add(this.psiElementFactory.createClass(className));
         psiClass.add(this.javaTestElementUtil.createMethod("method1", "void", Collections.singletonList(PsiKeyword.PUBLIC)));
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiClass), annotations);
 
         assertTrue(resolvedMethods.isEmpty());
@@ -190,7 +190,7 @@ class JavaMethodResolverTest extends JavaTest {
         List<String> annotations = Arrays.asList("org.junit.Test");
         PsiMethod someMethod = this.javaTestElementUtil.createTestMethod("method1", Collections.singletonList("@" + annotations.get(0)));
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(someMethod), annotations);
 
         assertSame(someMethod, resolvedMethods.get(0));
@@ -200,7 +200,7 @@ class JavaMethodResolverTest extends JavaTest {
     public void resolveMethodsWithAnnotations_methodsWithoutAnnotationsRequiredAndElementsContainOneMethodWithoutAnnotation_ShouldResolveOneMethod() {
         PsiMethod someMethod = this.javaTestElementUtil.createMethod("method1", "void", Collections.singletonList(PsiKeyword.PUBLIC));
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(someMethod), Collections.emptyList());
 
         assertSame(someMethod, resolvedMethods.get(0));
@@ -211,7 +211,7 @@ class JavaMethodResolverTest extends JavaTest {
         List<String> annotations = Arrays.asList("org.junit.Test");
         PsiMethod someMethod = this.javaTestElementUtil.createMethod("method1", "void", Collections.singletonList(PsiKeyword.PUBLIC));
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(someMethod), annotations);
 
         assertTrue(resolvedMethods.isEmpty());
@@ -222,7 +222,7 @@ class JavaMethodResolverTest extends JavaTest {
         List<String> annotations = Arrays.asList("org.junit.Test");
         PsiIfStatement psiIfStatement = this.javaTestElementUtil.createIfStatement();
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiIfStatement), annotations);
 
         assertTrue(resolvedMethods.isEmpty());
@@ -234,17 +234,10 @@ class JavaMethodResolverTest extends JavaTest {
         String fieldName = "name";
         PsiField field = (PsiField) psiClass.add(this.psiElementFactory
                 .createFieldFromText(String.format("private String %s;", fieldName), psiClass));
-        PsiMethod getterMethod = (PsiMethod) psiClass.add(this.javaTestElementUtil
-                .createMethod("getName", "String", Collections.singletonList("public")));
-        PsiReturnStatement returnStatement = (PsiReturnStatement) getterMethod
-                .getBody()
-                .add(this.psiElementFactory.createStatementFromText(String.format("return %s;", fieldName), psiClass));
-        EasyMock.expect(elementResolver.firstImmediateChildIgnoring(
-                getterMethod.getBody(), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class)))
-                .andReturn(Optional.of(returnStatement)).once();
-        EasyMock.replay(elementResolver);
+        PsiMethod getterMethod = (PsiMethod) psiClass.add(this.psiElementFactory.createMethodFromText(
+                "public String getName(){return name;}", psiClass));
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
         boolean result = javaMethodResolver.isGetter(getterMethod);
 
         assertTrue(result);
@@ -256,12 +249,8 @@ class JavaMethodResolverTest extends JavaTest {
                 .createMethod("getName", "String", Collections.singletonList("public"));
         PsiStatement ifStatement = (PsiStatement) complexMethod.getBody().add(this.javaTestElementUtil.createIfStatement());
         ifStatement.add(this.psiElementFactory.createStatementFromText("String fieldName = \"name\";", complexMethod));
-        EasyMock.expect(elementResolver.firstImmediateChildIgnoring(
-                complexMethod.getBody(), Arrays.asList(PsiJavaToken.class, PsiWhiteSpace.class)))
-                .andReturn(Optional.of(ifStatement)).once();
-        EasyMock.replay(elementResolver);
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
         boolean result = javaMethodResolver.isGetter(complexMethod);
 
         assertFalse(result);
@@ -285,23 +274,21 @@ class JavaMethodResolverTest extends JavaTest {
         EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element -> true)).times(3);
         EasyMock.expect(contextIndicator.isInProductionCodeContext()).andReturn((element -> true)).times(2);
         EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver
-                .allChildrenOfTypeMeetingConditionWithReferences(
-                        EasyMock.eq(testMethod), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
-                .andReturn(Collections.singletonList(assertionMethodCall)).times(1);
-        EasyMock.expect(elementResolver
-                .allChildrenOfTypeWithReferences(
-                        EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject()))
-                .andReturn(Collections.singletonList(testedMethodCall)).times(1);
-        EasyMock.expect(elementResolver
-                .allChildrenOfTypeWithReferences(EasyMock.eq(assertionMethodCall), EasyMock.eq(PsiLiteralExpression.class), EasyMock.anyObject()))
-                .andReturn(Collections.emptyList()).times(1);
-        EasyMock.replay(elementResolver);
+        EasyMock.expect(elementSearchEngine
+                .findByQuery(
+                        EasyMock.eq(testMethod), EasyMock.eq(QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS)))
+                .andReturn(new ElementSearchResult<>(new ArrayList<>(), Collections.singletonList(assertionMethodCall))).times(1);
+        ElementSearchResult<PsiMethodCallExpression> expectedResult = new ElementSearchResult<>(new ArrayList<>(), Collections.singletonList(assertionMethodCall));
+        EasyMock.expect(elementSearchEngine
+                .findByQuery(
+                        EasyMock.eq(assertionMethodCall), EasyMock.eq(QueriesRepository.FIND_ALL_PRODUCTION_CODE_METHOD_CALL_EXPRESSIONS)))
+                .andReturn(expectedResult).times(1);
+        EasyMock.replay(elementSearchEngine);
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
-        List<PsiMethod> result = javaMethodResolver.allTestedMethods(testMethod);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
+        ElementSearchResult<PsiMethodCallExpression> result = javaMethodResolver.allTestedMethodsMethodCalls(testMethod);
 
-        assertSame(testedMethod, result.get(0));
+        assertThat(expectedResult).usingRecursiveComparison().isEqualTo(result);
     }
 
     @Test
@@ -309,22 +296,22 @@ class JavaMethodResolverTest extends JavaTest {
         PsiJavaFile psiJavaFile = this.javaTestElementUtil
                 .createFile("Test", "com.testspector", Collections.emptyList(), Collections.emptyList());
         PsiClass testClass = (PsiClass) psiJavaFile.add(this.psiElementFactory.createClass("Test"));
+        String methodName = "TestMethod";
         PsiMethod testMethod = (PsiMethod) testClass.add(this.javaTestElementUtil
-                .createTestMethod("TestMethod", Collections.singletonList("@org.junit.Test")));
+                .createTestMethod(methodName, Collections.singletonList("@org.junit.Test")));
+        PsiMethodCallExpression methodCall = (PsiMethodCallExpression) psiElementFactory
+                .createExpressionFromText(String.format("%s()", methodName), testClass);
+        ElementSearchResult<PsiMethodCallExpression> expectedResult = new ElementSearchResult<>(new ArrayList<>(), Collections.singletonList(methodCall));
+        ElementSearchResult<PsiMethodCallExpression> query = new ElementSearchResult<>(new ArrayList<>(), new ArrayList<>());
+        EasyMock.expect(elementSearchEngine.findByQuery(EasyMock.eq(testMethod), EasyMock.eq(QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS))).andReturn(expectedResult).times(1);
+        EasyMock.expect(elementSearchEngine.findByQuery(EasyMock.eq(testMethod), EasyMock.eq(QueriesRepository.FIND_ALL_PRODUCTION_CODE_METHOD_CALL_EXPRESSIONS))).andReturn(expectedResult).times(1);
+        EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element -> true)).anyTimes();
+        EasyMock.replay(elementSearchEngine, contextIndicator);
 
-        EasyMock.expect(contextIndicator.isInTestContext()).andReturn((element -> true)).times(1);
-        EasyMock.expect(contextIndicator.isInProductionCodeContext()).andReturn((element -> true)).times(2);
-        EasyMock.replay(contextIndicator);
-        EasyMock.expect(elementResolver
-                .allChildrenOfTypeMeetingConditionWithReferences(
-                        EasyMock.eq(testMethod), EasyMock.eq(PsiMethodCallExpression.class), EasyMock.anyObject(), EasyMock.anyObject()))
-                .andReturn(Collections.emptyList()).times(1);
-        EasyMock.replay(elementResolver);
+        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(new ElementSearchEngine(), new JavaContextIndicator());
+        ElementSearchResult<PsiMethodCallExpression> result = javaMethodResolver.allTestedMethodsMethodCalls(testMethod);
 
-        JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementResolver, contextIndicator);
-        List<PsiMethod> result = javaMethodResolver.allTestedMethods(testMethod);
-
-        assertTrue(result.isEmpty());
+        assertTrue(result.getElementsFromAllLevels().isEmpty());
     }
 
 

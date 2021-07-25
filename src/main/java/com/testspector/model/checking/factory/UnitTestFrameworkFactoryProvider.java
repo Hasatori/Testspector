@@ -1,5 +1,6 @@
 package com.testspector.model.checking.factory;
 
+import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.junit.JUnitUnitTestFrameworkFactory;
 import com.testspector.model.enums.ProgrammingLanguage;
 
@@ -11,7 +12,7 @@ public class UnitTestFrameworkFactoryProvider {
     public List<UnitTestFrameworkFactory> geUnitTestFrameworkFactory(ProgrammingLanguage programmingLanguage) {
         List<UnitTestFrameworkFactory> factories = new ArrayList<>();
         if (programmingLanguage == ProgrammingLanguage.JAVA) {
-            factories.add(new JUnitUnitTestFrameworkFactory());
+            factories.add(new JUnitUnitTestFrameworkFactory(new JavaContextIndicator()));
         }
         return factories;
     }
