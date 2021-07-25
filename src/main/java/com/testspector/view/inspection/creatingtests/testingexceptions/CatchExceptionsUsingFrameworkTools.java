@@ -1,7 +1,6 @@
 package com.testspector.view.inspection.creatingtests.testingexceptions;
 
 import com.testspector.model.enums.BestPractice;
-import com.testspector.view.inspection.BestPracticeInspection;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,10 +12,11 @@ public class CatchExceptionsUsingFrameworkTools extends TestingExceptionsInspect
     @Nls
     String getStaticDescription() {
         return String.format(
-                "<p>Tests should not contain try catch block. " +
-                "These blocks are redundant it is inflating the test method and make test harder to read and understand. </p>" +
-                "<br/>" +
-                "<a href=\"%s\">Get more information about the rule</a>"
+                "<p>It is not recommended to test exceptions by using try and catch block. " +
+                        "Using the blocks only is redundant and it make test method bigger and makes it harder to read and understand test. " +
+                        "This approach can lead to so-called Never failing tests which happens in case when we forget to fail test in case when exception has not been thrown.</p>" +
+                        "<br/>" +
+                        "<a href=\"%s\">Get more information about the rule</a>"
                 , getBestPractice().getWebPageHyperlink());
     }
 
