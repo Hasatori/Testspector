@@ -1,6 +1,7 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -53,7 +54,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy extends JUnitBestPract
                     .getElementsFromAllLevels()
                     .forEach(nonPublicFromMethodCallExpression -> {
                         bestPracticeViolations.add(new BestPracticeViolation(
-                                nonPublicFromMethodCallExpression.getMethodExpression(),
+                                getReferenceExpressionIdentifier(nonPublicFromMethodCallExpression.getMethodExpression()),
                                 DEFAULT_PROBLEM_DESCRIPTION,
                                 this.getCheckedBestPractice().get(0),
                                 Collections.singletonList(nonPublicFromMethodCallExpression.resolveMethod() != null ?
@@ -139,12 +140,8 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy extends JUnitBestPract
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
                     List<PsiMethodCallExpression> globalStaticProps = result.getRight().getElementsFromAllLevels();
-                    if (!globalStaticProps.isEmpty()) {
-                        if (result.getLeft().getParent() instanceof PsiMethodCallExpression) {
-                            bestPracticeViolations.add(createBestPracticeViolation("Following method contains code that breaks best practice. ", result.getLeft(), globalStaticProps));
-                        } else {
-                            bestPracticeViolations.add(createBestPracticeViolation("", result.getLeft(), globalStaticProps));
-                        }
+                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()) {
+                        bestPracticeViolations.add(createBestPracticeViolation(getMethodCallExpressionIdentifier((PsiMethodCallExpression) result.getLeft().getParent()), globalStaticProps));
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolationFromMethodExpression(result.getRight()));
                 });
@@ -156,26 +153,18 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy extends JUnitBestPract
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
                     List<PsiElement> globalStaticProps = result.getRight().getElementsFromAllLevels().stream().map(PsiReference::resolve).collect(Collectors.toList());
-                    if (!globalStaticProps.isEmpty()) {
-                        if (result.getLeft().getParent() instanceof PsiMethodCallExpression) {
-                            bestPracticeViolations.add(createBestPracticeViolation("Following method contains code that breaks best practice. ", result.getLeft(), globalStaticProps));
-                        } else {
-                            bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), globalStaticProps));
-                        }
+                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()) {
+                        bestPracticeViolations.add(createBestPracticeViolation(getMethodCallExpressionIdentifier((PsiMethodCallExpression) result.getLeft().getParent()), globalStaticProps));
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolationFromReferences(result.getRight()));
                 });
         return bestPracticeViolations;
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<? extends PsiElement> elements) {
-        return createBestPracticeViolation("", reference, elements);
-    }
-
-    private BestPracticeViolation createBestPracticeViolation(String problemDescriptionPrefix, PsiReference reference, List<? extends PsiElement> elements) {
+    private BestPracticeViolation createBestPracticeViolation(PsiElement element, List<? extends PsiElement> elements) {
         return new BestPracticeViolation(
-                reference.getElement(),
-                problemDescriptionPrefix + DEFAULT_PROBLEM_DESCRIPTION,
+                element,
+                "Following method breaks best practice."+ DEFAULT_PROBLEM_DESCRIPTION,
                 getCheckedBestPractice().get(0),
                 elements.stream()
                         .map(testedMethod -> new NavigateElementAction("method call", testedMethod))

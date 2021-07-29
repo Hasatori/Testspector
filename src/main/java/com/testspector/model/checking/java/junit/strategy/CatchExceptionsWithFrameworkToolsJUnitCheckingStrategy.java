@@ -1,6 +1,7 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -124,17 +125,17 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
                     List<PsiTryStatement> tryStatements = result.getRight().getElementsFromAllLevels();
-                    if (!tryStatements.isEmpty()) {
-                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), tryStatements));
+                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !tryStatements.isEmpty()) {
+                        bestPracticeViolations.add(createBestPracticeViolation(getMethodCallExpressionIdentifier((PsiMethodCallExpression) result.getLeft().getParent()), tryStatements));
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
                 });
         return bestPracticeViolations;
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiTryStatement> tryStatements) {
+    private BestPracticeViolation createBestPracticeViolation(PsiElement element, List<PsiTryStatement> tryStatements) {
         return new BestPracticeViolation(
-                reference.getElement(),
+                element,
                 "Following method contains code that breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 tryStatements.stream()

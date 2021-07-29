@@ -3,9 +3,9 @@ package com.testspector.model.checking.java.junit.strategy;
 import com.intellij.lang.jvm.annotation.JvmAnnotationClassValue;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiType;
+import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiTypesUtil;
 import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -64,5 +64,13 @@ public abstract class JUnitBestPracticeCheckingStrategy implements BestPracticeC
                         )
                 );
 
+    }
+
+    protected PsiIdentifier getReferenceExpressionIdentifier(PsiReferenceExpression psiReferenceExpression){
+        return PsiTreeUtil.getChildOfType(psiReferenceExpression,PsiIdentifier.class);
+    }
+
+    protected PsiIdentifier getMethodCallExpressionIdentifier(PsiMethodCallExpression methodCallExpression){
+        return PsiTreeUtil.getChildOfType(PsiTreeUtil.getChildOfType(methodCallExpression, PsiReferenceExpression.class),PsiIdentifier.class);
     }
 }

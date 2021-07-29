@@ -7,6 +7,7 @@ import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.search.ElementSearchResult;
 import com.testspector.model.checking.java.common.search.QueriesRepository;
+import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.enums.BestPractice;
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -56,8 +57,8 @@ public class OnlyOneAssertionJUnitCheckingStrategyTest extends JUnitStrategyTest
                 .andReturn(new ElementSearchResult<>(new ArrayList<>(), new ArrayList<>())).times(1);
         EasyMock.replay(elementSearchEngine);
         List<BestPracticeViolation> expectedViolations = Arrays.asList(
-                createBasicViolation(firstAssertionMethodCall.getMethodExpression(), new ArrayList<>()),
-                createBasicViolation(secondAssertionMethodCall.getMethodExpression(), new ArrayList<>())
+                createBasicViolation(firstAssertionMethodCall.getMethodExpression(), Collections.singletonList(new NavigateElementAction("assertion method",secondAssertionMethodCall))),
+                createBasicViolation(secondAssertionMethodCall.getMethodExpression(), Collections.singletonList(new NavigateElementAction("assertion method",firstAssertionMethodCall)))
         );
         // When
         List<BestPracticeViolation> foundViolations = strategy.checkBestPractices(testWithTwoNonGroupedAssertions);

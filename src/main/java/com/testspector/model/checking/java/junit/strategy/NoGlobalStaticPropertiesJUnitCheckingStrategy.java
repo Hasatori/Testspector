@@ -1,6 +1,7 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -90,7 +91,7 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy extends JUnitBestPrac
                 .forEach(result -> {
                     List<PsiField> globalStaticProps = result.getRight().getElementsFromAllLevels();
                     if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !globalStaticProps.isEmpty()) {
-                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), globalStaticProps));
+                        bestPracticeViolations.add(createBestPracticeViolation(getMethodCallExpressionIdentifier((PsiMethodCallExpression) result.getLeft().getParent()), globalStaticProps));
                     } else if (!globalStaticProps.isEmpty()) {
                         bestPracticeViolations.add(createBestPracticeViolation(result.getLeft()));
                     }
@@ -108,9 +109,9 @@ public class NoGlobalStaticPropertiesJUnitCheckingStrategy extends JUnitBestPrac
                 hints);
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiField> staticProperties) {
+    private BestPracticeViolation createBestPracticeViolation(PsiElement element, List<PsiField> staticProperties) {
         return new BestPracticeViolation(
-                reference.getElement(),
+                element,
                 "Following method contains global static properties. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 staticProperties.stream()
