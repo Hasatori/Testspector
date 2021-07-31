@@ -58,7 +58,7 @@
 
 >> [Catch tested exceptions using framework or library tools](#catch-tested-exceptions-using-framework-or-library-tools)
 
->> [Set general level for the test exception](#set-general-level-for-the-test-exception)
+>> [Set exception on the top of the hierarchy](#set-exception-on-the-top-of-the-hierarchy)
 
 >   [Conditional logic](#conditional-logic)
 
@@ -403,7 +403,7 @@ Best practices regarding testing exceptions are as follows:
 
 -   Catch tested exceptions using framework or library tools
 
--   Set general level for the test exception
+-   Set exception on the top of the hierarchy
 
 ### Catch tested exceptions using framework or library tools
 
@@ -412,7 +412,7 @@ It is not recommended to test exceptions by using *try* and *catch* block. Using
 Instead it is recommended to use methods or tools provided by testing frameworks and testing libraries. For example annotation @expectException for testing framework JUnit version 4 or ExpectedException for testing framework
 *Visual Studio Test System.* By using this method we ensure that test is easier to read and understand and we also ensure that the test will behave correctly in all occasions.
 
-### Set general level for the test exception
+### Set exception on the top of the hierarchy
 
 In cases where throwing an exception is not part of the test but is a possible product of one of the executed methods, we should again not use *try catch* blocks, but the exception should be caught by the test method itself. The reason is again improving the readability of the test code by reducing its length and also ensuring correct behaviour in case of exception thrown. The exception will thus be caught
 by the test framework itself and the test will fail.

@@ -7,6 +7,7 @@ import com.testspector.view.inspection.creatingtests.conditionallogic.NoConditio
 import com.testspector.view.inspection.creatingtests.independence.NoGlobalStaticProperties;
 import com.testspector.view.inspection.creatingtests.namingconventions.SetupTestNamingStrategyInspection;
 import com.testspector.view.inspection.creatingtests.testingexceptions.CatchExceptionsUsingFrameworkTools;
+import com.testspector.view.inspection.creatingtests.testingexceptions.SetGeneralLevelForTestException;
 import com.testspector.view.inspection.definingtests.codecoverage.TestOnlyPublicBehaviourInspection;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,6 +23,7 @@ public class InspectionToolProvider implements com.intellij.codeInspection.Inspe
                 SetupTestNamingStrategyInspection.class,
                 TestOnlyPublicBehaviourInspection.class,
                 CatchExceptionsUsingFrameworkTools.class,
+                SetGeneralLevelForTestException.class,
                 NoGlobalStaticProperties.class
         };
     }

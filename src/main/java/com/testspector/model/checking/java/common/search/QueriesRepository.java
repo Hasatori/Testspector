@@ -60,6 +60,12 @@ public final class QueriesRepository {
             .whereReferences(el -> !(el instanceof PsiClass) && contextIndicator().isInTestContext().test(el))
             .build();
 
+    public static final ElementSearchQuery<PsiMethod> FIND_ALL_METHODS_THAT_THROWS_EXCEPTIONS_IN_TESTS = new ElementSearchQueryBuilder<PsiMethod>()
+            .elementOfType(PsiMethod.class)
+            .whereElement(method-> method.getThrowsList().getReferenceElements().length > 0)
+            .whereReferences(el -> !(el instanceof PsiClass) && contextIndicator().isInTestContext().test(el))
+            .build();
+
     public static final ElementSearchQuery<PsiStatement> FIND_ALL_CONDITIONAL_STATEMENTS = new ElementSearchQueryBuilder<PsiStatement>()
             .elementOfType(PsiStatement.class)
             .whereElement(psiStatement -> SUPPORTED_STATEMENT_CLASSES

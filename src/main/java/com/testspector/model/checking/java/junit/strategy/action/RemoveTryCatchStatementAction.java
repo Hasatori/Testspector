@@ -37,28 +37,12 @@ public class RemoveTryCatchStatementAction implements Action<BestPracticeViolati
     public void execute(BestPracticeViolation bestPracticeViolation) {
         Project project = tryStatement.getProject();
         if (catchStatementAtMethodLevel) {
-            Optional.ofNullable(PsiTreeUtil.getParentOfType(tryStatement, PsiMethod.class)).ifPresent(method -> addThrowsListToAllReferencedMethods(new HashSet<>(), PsiElementFactory.getInstance(tryStatement.getProject()), method));
+            Optional.ofNullable(PsiTreeUtil.getParentOfType(tryStatement, PsiMethod.class)).ifPresent(method -> new MakeMethodAndReferencesCatchGeneralLevelException(method).execute(bestPracticeViolation));
         }
         Optional.ofNullable(tryStatement.getTryBlock()).map(PsiCodeBlock::getLBrace).ifPresent(PsiElement::delete);
         Optional.ofNullable(tryStatement.getTryBlock()).map(PsiCodeBlock::getRBrace).ifPresent(PsiElement::delete);
         CodeStyleManager.getInstance(project).reformat( tryStatement.replace(tryStatement.getTryBlock()));
 
-    }
-
-    private void addThrowsListToAllReferencedMethods(HashSet<PsiMethod> visitedMethods, PsiElementFactory psiElementFactory, PsiMethod method) {
-        if (!visitedMethods.contains(method)) {
-            visitedMethods.add(method);
-            method.getThrowsList().replace(psiElementFactory.createReferenceList(new PsiJavaCodeReferenceElement[]{psiElementFactory.createReferenceFromText("Exception", null)}));
-            ReferencesSearch.search(method)
-                    .findAll()
-                    .stream().map(reference -> PsiTreeUtil.getParentOfType(reference.getElement(), PsiMethod.class))
-                    .filter(Objects::nonNull)
-                    .forEach(met ->
-                            {
-                                addThrowsListToAllReferencedMethods(visitedMethods, psiElementFactory, met);
-                            }
-                    );
-        }
     }
 
 }

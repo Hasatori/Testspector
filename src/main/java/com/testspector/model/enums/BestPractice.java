@@ -23,7 +23,8 @@ public enum BestPractice {
     NO_GLOBAL_STATIC_PROPERTIES("No global static properties", "","do-not-use-global-static-properties"),
     SETUP_A_TEST_NAMING_STRATEGY("Setup a test naming strategy", "","setup-a-test-naming-strategy"),
     CATCH_TESTED_EXCEPTIONS_USING_FRAMEWORK_TOOLS("Catch tested exceptions using framework or library tools", "","catch-tested-exceptions-using-framework-or-library-tools"),
-    NO_CONDITIONAL_LOGIC("No conditional logic", "","do-not-use-if-switch-for-or-while-blocks-in-a-test");
+    NO_CONDITIONAL_LOGIC("No conditional logic", "","do-not-use-if-switch-for-or-while-blocks-in-a-test"),
+    SET_EXCEPTION_CLASS_ON_THE_TOP_OF_THE_HIERARCHY("Set exception on the top of the hierarchy", "","set-exception-on-the-top-of-the-hierarchy");
 
     static {
         ONLY_ONE_ASSERTION.relatedRules = Collections.singletonList(AT_LEAST_ONE_ASSERTION);
