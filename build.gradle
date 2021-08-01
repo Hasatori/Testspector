@@ -28,7 +28,7 @@ intellij {
 }
 patchPluginXml {
     sinceBuild="193"
-    untilBuild = "212"
+    untilBuild = "213"
     description(
             "<p>Testspector is an IntelliJ IDEA plugin that helps developers with writing unit tests. It contains a dataset of best practices that should be followed when writing unit tests. " +
                     "The unit tests are checked against the dataset and any violation is reported to the user. The user is provided with a description of the problem, hints on how to solve it and also parts of code causing the problem. " +
@@ -43,24 +43,7 @@ patchPluginXml {
                  "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#catch-tested-exceptions-using-framework-or-library-tools\">Catch tested exceptions using framework tools</a></li>" +
                 "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#do-not-use-if-switch-for-or-while-blocks-in-a-test\">No conditional logic</a></li>" +
             "</ul>")
-    changeNotes(
-            "<ul>" +
-                    "<li>Checking of the best practices updated:" +
-                        "<ul>" +
-                            "<li>Is part of standard IntelliJ inspections now</li>" +
-                            "<li>Some inspections contain an action that can fix the issue</li>" +
-                            "<li>Fully configurable, inspections can be disabled or surpressed for methods or classes</li>" +
-                            "<li>Inspection can still be invoked for any file or folder which is part of the Intellij project. In such case processing runs in the background and results are presented in native IntelliJ problems report.</li>" +
-                        "</ul>" +
-                    "</li>" +
-                    "<li>Added support for:" +
-                        "<ul>" +
-                            "<li>IntelliJ IDEA Community</li>" +
-                            "<li>IntelliJ IDEA Educational</li>" +
-                            "<li>Android Studio</li>" +
-                        "</ul>" +
-                    "</li>" +
-            "</ul>")
+    changeNotes("<p>Support for IntelliJ IDEA Ultimate version 2021.2 and IntelliJ IDEA Community Edition version 2021.2 was added</p>")
 }
 
 publishPlugin {
