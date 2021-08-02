@@ -33,11 +33,11 @@ The architecture of the plugin was designed in a way that supports implementatio
 The plugin currently supports following IntelliJ products:
 * IntelliJ IDEA Educational — 2019.3 — 2021.1.3
 
-* IntelliJ IDEA Ultimate — 2019.3 — 2021.1.3
+* IntelliJ IDEA Ultimate — 2019.3 — 2021.2
 
-* IntelliJ IDEA Community — 2019.3 — 2021.1.3
+* IntelliJ IDEA Community — 2019.3 — 2021.2
 
-* Android Studio — build 193.0 — 212.0
+* Android Studio — build 193.0 — 213.0
 
 # Install
 Install the plugin by going to ``Settings -> Plugins -> Browse repositories`` and then search for **Testspector**.
