@@ -22,66 +22,77 @@ public class ElementSearchEngine {
             result = resultHashMap.get(query);
         }
         if (result == null) {
-            result = findByQuery(false, new HashMap<>(), new HashSet<>(), null, null, element, query);
+            result = findByQuery(new HashMap<>(), new HashSet<>(), null, null, element, query);
             resultHashMap.put(query, result);
         }
         return result;
     }
 
     private <T> ElementSearchResult<T> findByQuery(
-            boolean addRootIfPossible,
-            HashMap<PsiElement,
-                    ElementSearchResult<T>> visitedElementsMap,
+            HashMap<PsiElement, ElementSearchResult<T>> visitedElementsMap,
             HashSet<PsiElement> visitedElements,
-            List<T> elements,
-            List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> references,
+            List<T> elementsOfTheCurrentLevel,
+            List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> referencedResults,
             PsiElement psiElement,
             ElementSearchQuery<T> elementSearchQuery) {
         Class<T> elementType = elementSearchQuery.getElementType();
         Predicate<T> typeCondition = elementSearchQuery.getWhereTypeCondition();
-        Predicate<PsiElement> fromReferencesMeetingCondition = elementSearchQuery.getReferencesCondition();
-        List<T> elementsOfTheCurrentLevel = Optional.ofNullable(elements).orElse(new ArrayList<>());
-        List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> referencedResults = Optional.ofNullable(references).orElse(new ArrayList<>());
+        elementsOfTheCurrentLevel = Optional.ofNullable(elementsOfTheCurrentLevel).orElse(new ArrayList<>());
+        referencedResults = Optional.ofNullable(referencedResults).orElse(new ArrayList<>());
         if (!(psiElement instanceof PsiPackageBase)) {
-            if (addRootIfPossible && elementType.isInstance(psiElement) && typeCondition.test(elementType.cast(psiElement))) {
-                elementsOfTheCurrentLevel.add(elementType.cast(psiElement));
-            }
             for (PsiElement child : psiElement.getChildren()) {
                 if (elementType.isInstance(child) && typeCondition.test(elementType.cast(child))) {
                     elementsOfTheCurrentLevel.add(elementType.cast(child));
-                    if (elementSearchQuery.isOnlyFirstMatch()){
+                    if (elementSearchQuery.isOnlyFirstMatch()) {
                         return new ElementSearchResult<>(referencedResults, elementsOfTheCurrentLevel);
                     }
                 }
-                    if (child instanceof PsiReferenceExpression) {
-                        PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
-                        Optional.ofNullable(visitedElementsMap.get(referencedElement)).ifPresent(result -> referencedResults.add(Pair.of((PsiReferenceExpression) child, result)));
-                        if (referencedElement != null && !visitedElements.contains(referencedElement)) {
-                            visitedElements.add(referencedElement);
-                            if (fromReferencesMeetingCondition.test(referencedElement)) {
-                                ElementSearchResult<T> next = findByQuery(
-                                        true,
-                                        visitedElementsMap,
-                                        visitedElements,
-                                        null,
-                                        null,
-                                        referencedElement,
-                                        elementSearchQuery);
-                                visitedElementsMap.put(referencedElement, next);
-                                referencedResults.add(Pair.of((PsiReferenceExpression) child, next));
-                            }
-                        }
-                    }
-                    findByQuery(
-                            false,
+                if (child instanceof PsiReferenceExpression) {
+                    addReferences(
+                            child,
+                            referencedResults,
                             visitedElementsMap,
                             visitedElements,
                             elementsOfTheCurrentLevel,
-                            referencedResults,
-                            child,
-                            elementSearchQuery);
+                            elementSearchQuery
+                    );
+                }
+                findByQuery(
+                        visitedElementsMap,
+                        visitedElements,
+                        elementsOfTheCurrentLevel,
+                        referencedResults,
+                        child,
+                        elementSearchQuery);
             }
         }
         return new ElementSearchResult<>(referencedResults, elementsOfTheCurrentLevel);
+    }
+
+    private <T> void addReferences(PsiElement child, List<Pair<PsiReferenceExpression, ElementSearchResult<T>>> referencedResults,
+                                   HashMap<PsiElement, ElementSearchResult<T>> visitedElementsMap,
+                                   HashSet<PsiElement> visitedElements, List<T> elementsOfTheCurrentLevel,
+                                   ElementSearchQuery<T> elementSearchQuery) {
+        Class<T> elementType = elementSearchQuery.getElementType();
+        Predicate<T> typeCondition = elementSearchQuery.getWhereTypeCondition();
+        PsiElement referencedElement = ((PsiReferenceExpression) child).resolve();
+        Optional.ofNullable(visitedElementsMap.get(referencedElement)).ifPresent(result -> referencedResults.add(Pair.of((PsiReferenceExpression) child, result)));
+        if (referencedElement != null && !visitedElements.contains(referencedElement)) {
+            visitedElements.add(referencedElement);
+            if (elementSearchQuery.getReferencesCondition().test(referencedElement)) {
+                if (elementType.isInstance(referencedElement) && typeCondition.test(elementType.cast(referencedElement))) {
+                    elementsOfTheCurrentLevel.add(elementType.cast(referencedElement));
+                }
+                ElementSearchResult<T> next = findByQuery(
+                        visitedElementsMap,
+                        visitedElements,
+                        null,
+                        null,
+                        referencedElement,
+                        elementSearchQuery);
+                visitedElementsMap.put(referencedElement, next);
+                referencedResults.add(Pair.of((PsiReferenceExpression) child, next));
+            }
+        }
     }
 }

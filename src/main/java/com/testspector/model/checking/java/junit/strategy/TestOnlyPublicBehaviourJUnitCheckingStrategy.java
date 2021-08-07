@@ -1,8 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.*;
-import com.intellij.psi.util.PsiTreeUtil;
-import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -47,44 +45,44 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy extends JUnitBestPract
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
         for (PsiMethod testMethod : methods) {
-
             ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions = methodResolver.allTestedMethodsMethodCalls(testMethod);
             nonPublicTestedMethodsFromMethodCallExpressions = removePublicTestedMethods(nonPublicTestedMethodsFromMethodCallExpressions);
-            nonPublicTestedMethodsFromMethodCallExpressions
-                    .getElementsFromAllLevels()
-                    .forEach(nonPublicFromMethodCallExpression -> {
-                        bestPracticeViolations.add(new BestPracticeViolation(
-                                getReferenceExpressionIdentifier(nonPublicFromMethodCallExpression.getMethodExpression()),
-                                DEFAULT_PROBLEM_DESCRIPTION,
-                                this.getCheckedBestPractice().get(0),
-                                Collections.singletonList(nonPublicFromMethodCallExpression.resolveMethod() != null ?
-                                        new MakeMethodPublicAction(nonPublicFromMethodCallExpression.resolveMethod()) :
-                                        null)
-                                , DEFAULT_HINTS)
-                        );
-                    });
+            nonPublicTestedMethodsFromMethodCallExpressions.getElementsFromAllLevels()
+                    .forEach(nonPublicFromMethodCallExpression -> bestPracticeViolations.add(createBestPracticeViolation(nonPublicFromMethodCallExpression)
+                    ));
             bestPracticeViolations.addAll(createBestPracticeViolationFromMethodExpression(nonPublicTestedMethodsFromMethodCallExpressions));
-
             ElementSearchResult<PsiReference> nonPublicTestedMethodsFromReferences = methodResolver.allTestedMethodsReferences(testMethod);
             nonPublicTestedMethodsFromReferences = removePublicTestedMethodsFromReference(nonPublicTestedMethodsFromReferences);
-            nonPublicTestedMethodsFromReferences
-                    .getElementsFromAllLevels()
-                    .forEach(reference -> {
-                        bestPracticeViolations.add(new BestPracticeViolation(
-                                reference.getElement(),
-                                DEFAULT_PROBLEM_DESCRIPTION,
-                                this.getCheckedBestPractice().get(0),
-                                Collections.singletonList(reference.resolve() != null ?
-                                        new MakeMethodPublicAction((PsiMethod) reference.resolve()) :
-                                        null)
-                                , DEFAULT_HINTS)
-                        );
-                    });
+            nonPublicTestedMethodsFromReferences.getElementsFromAllLevels()
+                    .forEach(reference -> bestPracticeViolations.add(createBestPracticeViolation(reference)
+                    ));
             bestPracticeViolations.addAll(createBestPracticeViolationFromReferences(nonPublicTestedMethodsFromReferences));
 
         }
 
         return bestPracticeViolations;
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiMethodCallExpression nonPublicFromMethodCallExpression) {
+        return new BestPracticeViolation(
+                getReferenceExpressionIdentifier(nonPublicFromMethodCallExpression.getMethodExpression()),
+                DEFAULT_PROBLEM_DESCRIPTION,
+                this.getCheckedBestPractice().get(0),
+                Collections.singletonList(nonPublicFromMethodCallExpression.resolveMethod() != null ?
+                        new MakeMethodPublicAction(nonPublicFromMethodCallExpression.resolveMethod()) :
+                        null)
+                , DEFAULT_HINTS);
+    }
+
+    private BestPracticeViolation createBestPracticeViolation(PsiReference reference) {
+        return new BestPracticeViolation(
+                reference.getElement(),
+                DEFAULT_PROBLEM_DESCRIPTION,
+                this.getCheckedBestPractice().get(0),
+                Collections.singletonList(reference.resolve() != null ?
+                        new MakeMethodPublicAction((PsiMethod) reference.resolve()) :
+                        null)
+                , DEFAULT_HINTS);
     }
 
     private ElementSearchResult<PsiMethodCallExpression> removePublicTestedMethods(ElementSearchResult<PsiMethodCallExpression> nonPublicTestedMethodsFromMethodCallExpressions) {
@@ -164,7 +162,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingStrategy extends JUnitBestPract
     private BestPracticeViolation createBestPracticeViolation(PsiElement element, List<? extends PsiElement> elements) {
         return new BestPracticeViolation(
                 element,
-                "Following method breaks best practice."+ DEFAULT_PROBLEM_DESCRIPTION,
+                "Following method breaks best practice." + DEFAULT_PROBLEM_DESCRIPTION,
                 getCheckedBestPractice().get(0),
                 elements.stream()
                         .map(testedMethod -> new NavigateElementAction("method call", testedMethod))

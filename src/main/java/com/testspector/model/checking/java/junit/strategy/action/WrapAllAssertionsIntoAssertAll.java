@@ -39,8 +39,7 @@ public class WrapAllAssertionsIntoAssertAll implements Action<BestPracticeViolat
                             .isPresent();
                     if (!isDefaultImportStatement) {
                         Optional.ofNullable(file.getImportList()).ifPresent(importList ->
-                                importList.add(PsiElementFactory.getInstance(project)
-                                        .createImportStatement(PsiTypesUtil.getPsiClass(PsiType.getTypeByName("org.junit.jupiter.api.Assertions", project, GlobalSearchScope.allScope(project))))));
+                                importList.add(PsiElementFactory.getInstance(project).createImportStatement(getAssertionsPsiClass(project))));
                     }
                     String expressionText = String.format(
                             "Assertions.assertAll(\n%s\n)", allAssertionMethodCalls.stream().distinct().map(assertionMethod -> String.format("() -> %s", assertionMethod.getText())).collect(Collectors.joining(",\n")));
@@ -48,5 +47,9 @@ public class WrapAllAssertionsIntoAssertAll implements Action<BestPracticeViolat
                     psiCodeBlock.add(PsiElementFactory.getInstance(testMethod.getProject()).createStatementFromText(";", null));
                     allAssertionMethodCalls.forEach(PsiElement::delete);
                 });
+    }
+
+    private PsiClass getAssertionsPsiClass(Project project) {
+        return PsiTypesUtil.getPsiClass(PsiType.getTypeByName("org.junit.jupiter.api.Assertions", project, GlobalSearchScope.allScope(project)));
     }
 }

@@ -71,12 +71,13 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
         return bestPracticeViolations;
     }
 
-
     private BestPracticeViolation createDefaultOnlyOneBestPracticeViolation(PsiMethod testMethod,
-                                                                            PsiMethodCallExpression assertionMethod, boolean areJUnit5ClassesAvailable, boolean isHamcrestAvailable, List<PsiMethodCallExpression> allAssertions) {
+                                                                            PsiMethodCallExpression assertionMethod,
+                                                                            boolean areJUnit5ClassesAvailable,
+                                                                            boolean isHamcrestAvailable,
+                                                                            List<PsiMethodCallExpression> allAssertions) {
         List<String> hints = new ArrayList<>();
         List<Action<BestPracticeViolation>> actions = new ArrayList<>();
-        String message = DEFAULT_PROBLEM_DESCRIPTION_MESSAGE;
         if (areJUnit5ClassesAvailable) {
             hints.add(String.format(
                     "You use JUnit5 so it can be solved " +
@@ -93,7 +94,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
         }
         return new BestPracticeViolation(
                 assertionMethod.getMethodExpression(),
-                message,
+                DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 BestPractice.ONLY_ONE_ASSERTION,
                 actions,
                 hints);
@@ -105,7 +106,9 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                 .forEach(result -> {
                     List<PsiMethodCallExpression> assertionMethods = result.getRight().getElementsFromAllLevels();
                     if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !assertionMethods.isEmpty()) {
-                        bestPracticeViolations.add(createBestPracticeViolation(PsiTreeUtil.getChildOfType(PsiTreeUtil.getChildOfType(result.getLeft().getParent(), PsiReferenceExpression.class), PsiIdentifier.class),  assertionMethods));
+                        bestPracticeViolations.add(createBestPracticeViolation(PsiTreeUtil.getChildOfType(
+                                PsiTreeUtil.getChildOfType(result.getLeft().getParent(), PsiReferenceExpression.class), PsiIdentifier.class),
+                                assertionMethods));
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
                 });
