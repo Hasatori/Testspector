@@ -35,9 +35,10 @@ public abstract class BestPracticeInspection extends LocalInspectionTool {
     @NotNull
     @Override
     public @Nls(capitalization = Nls.Capitalization.Sentence)
-    String [] getGroupPath() {
+    String[] getGroupPath() {
         return new String[]{"Testspector"};
     }
+
     @Override
     public @NonNls
     @Nullable
@@ -68,71 +69,88 @@ public abstract class BestPracticeInspection extends LocalInspectionTool {
             @Override
             public void visitFile(@NotNull PsiFile file) {
                 Project project = file.getProject();
-                List<BestPracticeViolation> bestPracticeViolations = project.getService(TestspectorController.class).inspectFile(file, getBestPractice(), session);
+                List<BestPracticeViolation> bestPracticeViolations = project.getService(TestspectorController.class)
+                        .inspectFile(file, getBestPractice(), session);
                 HashMap<PsiElement, List<ProblemDescriptor>> problemDescriptorsHashMap = new HashMap<>();
-                bestPracticeViolations.forEach(bestPracticeViolation -> {
-                    String problemDescriptionTemplate = String.format(
-                                    "<html><p>%s</p>" +
-                                    "%s" +
-                                    "<a href=\"%s\">Get more information about the rule</a></html>",
-                            bestPracticeViolation.getProblemDescription(),
-                            Optional.ofNullable(bestPracticeViolation.getHints()).isPresent() && !bestPracticeViolation.getHints().isEmpty() ? bestPracticeViolation.getHints().stream().map(hint -> String.format("<li>%s</li>", hint))
-                                    .collect(Collectors.joining("\n", "<h4>Hints</h4><ul>", "</ul>")) : "",
-                            bestPracticeViolation.getViolatedBestPractice().getWebPageHyperlink());
-
-                    List<Action<BestPracticeViolation>> actions = Optional.ofNullable(bestPracticeViolation.getActions()).orElse(new ArrayList<>());
-                    PsiElement element = bestPracticeViolation.getElement();
-                    PsiFile relatedElementFile = Optional.ofNullable(bestPracticeViolation.getElement()).map(PsiElement::getContainingFile).orElse(null);
-                    if (relatedElementFile != null) {
-                        if (relatedElementFile == file) {
-                            List<ProblemDescriptor> problemDescriptors = problemDescriptorsHashMap.computeIfAbsent(element, k -> new ArrayList<>());
-                            if (problemDescriptors.stream().noneMatch(problemDescriptor -> problemDescriptionTemplate.equals(problemDescriptor.getDescriptionTemplate()))) {
-                                if (bestPracticeViolation.getStartElement() != null && bestPracticeViolation.getEndElement() != null) {
-                                    problemDescriptors.add(InspectionManager.getInstance(project).createProblemDescriptor(
-                                            bestPracticeViolation.getStartElement(),
-                                            bestPracticeViolation.getEndElement(),
-                                            problemDescriptionTemplate, ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
-                                            isOnTheFly,
-                                            createQuickFixes(actions, bestPracticeViolation).toArray(new LocalQuickFix[0])));
-
-                                } else {
-                                    problemDescriptors.add(InspectionManager.getInstance(project).createProblemDescriptor(
-                                            element,
-                                            problemDescriptionTemplate,
-                                            isOnTheFly,
-                                            createQuickFixes(actions, bestPracticeViolation).toArray(new LocalQuickFix[0]),
-                                            ProblemHighlightType.GENERIC_ERROR_OR_WARNING));
-
-                                }
-                            }
+                for (BestPracticeViolation bestPracticeViolation : bestPracticeViolations) {
+                    String problemDescriptionTemplate = createDescriptionTemplate(bestPracticeViolation);
+                    PsiFile relatedElementFile = Optional.ofNullable(bestPracticeViolation.getElement())
+                            .map(PsiElement::getContainingFile)
+                            .orElse(null);
+                    if (relatedElementFile == file) {
+                        List<ProblemDescriptor> problemDescriptors = problemDescriptorsHashMap
+                                .computeIfAbsent(bestPracticeViolation.getElement(), k -> new ArrayList<>());
+                        if (!alreadyContainsProblemDescription(problemDescriptionTemplate, problemDescriptors)) {
+                            problemDescriptors.add(createProblemDescriptor(project, bestPracticeViolation, problemDescriptionTemplate, isOnTheFly));
                         }
                     }
-
-                });
+                }
                 problemDescriptorsHashMap.forEach((psiElement, problemDescriptors) -> problemDescriptors.forEach(holder::registerProblem));
             }
-
-            ;
         };
+    }
 
+    private ProblemDescriptor createProblemDescriptor(Project project, BestPracticeViolation bestPracticeViolation, String problemDescriptionTemplate, boolean isOnTheFly) {
+        List<Action<BestPracticeViolation>> actions = Optional.ofNullable(bestPracticeViolation.getActions()).orElse(new ArrayList<>());
+        ProblemDescriptor problemDescriptor;
+        if (bestPracticeViolation.getStartElement() != null && bestPracticeViolation.getEndElement() != null) {
+            problemDescriptor = InspectionManager.getInstance(project).createProblemDescriptor(
+                    bestPracticeViolation.getStartElement(),
+                    bestPracticeViolation.getEndElement(),
+                    problemDescriptionTemplate,
+                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
+                    isOnTheFly,
+                    createQuickFixes(actions, bestPracticeViolation).toArray(new LocalQuickFix[0]));
+
+        } else {
+            problemDescriptor = InspectionManager.getInstance(project).createProblemDescriptor(
+                    bestPracticeViolation.getElement(),
+                    problemDescriptionTemplate,
+                    isOnTheFly,
+                    createQuickFixes(actions, bestPracticeViolation).toArray(new LocalQuickFix[0]),
+                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+        }
+        return problemDescriptor;
+    }
+
+    private boolean alreadyContainsProblemDescription(String problemDescription, List<ProblemDescriptor> problemDescriptors) {
+        return problemDescriptors
+                .stream()
+                .anyMatch(problemDescriptor -> problemDescription.equals(problemDescriptor.getDescriptionTemplate()));
+    }
+
+    private String createDescriptionTemplate(BestPracticeViolation bestPracticeViolation) {
+        String hintsSection = "";
+        if (Optional.ofNullable(bestPracticeViolation.getHints()).isPresent() && !bestPracticeViolation.getHints().isEmpty()) {
+            hintsSection = bestPracticeViolation.getHints().stream().map(hint -> String.format("<li>%s</li>", hint))
+                    .collect(Collectors.joining("\n", "<h4>Hints</h4><ul>", "</ul>"));
+        }
+        return String.format("<html>" +
+                        "<p>%s</p>" +
+                        "%s" +
+                        "<a href=\"%s\">Get more information about the rule</a>"
+                        + "</html>",
+                bestPracticeViolation.getProblemDescription(),
+                hintsSection,
+                bestPracticeViolation.getViolatedBestPractice().getWebPageHyperlink()
+        );
     }
 
     private List<LocalQuickFix> createQuickFixes(List<Action<BestPracticeViolation>> actions, BestPracticeViolation bestPracticeViolation) {
         return actions.stream()
-                .map(action -> {
-                    return new LocalQuickFix() {
-                        @Override
-                        public
-                        @NotNull
-                        String getFamilyName() {
-                            return action.getName();
-                        }
+                .map(action -> new LocalQuickFix() {
+                    @Override
+                    public
+                    @NotNull
+                    String getFamilyName() {
+                        return action.getName();
+                    }
 
-                        @Override
-                        public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor problemDescriptor) {
-                            action.execute(bestPracticeViolation);
-                        }
-                    };
+                    @Override
+                    public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor problemDescriptor) {
+                        action.execute(bestPracticeViolation);
+                    }
                 }).collect(Collectors.toList());
     }
 
