@@ -20,12 +20,4 @@ public class BestPracticeCheckingStrategyFactoryProvider {
         return Optional.empty();
     }
 
-    public List<ProgrammingLanguage> getSupportedProgrammingLanguages() {
-        return Collections.singletonList(ProgrammingLanguage.JAVA);
-    }
-
-    public List<UnitTestFramework> getSupportedUnitTestFrameworks() {
-        return Collections.singletonList(UnitTestFramework.JUNIT);
-    }
-
 }

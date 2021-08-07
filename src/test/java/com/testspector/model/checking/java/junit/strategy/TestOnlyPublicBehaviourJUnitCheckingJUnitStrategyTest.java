@@ -56,7 +56,7 @@ public class TestOnlyPublicBehaviourJUnitCheckingJUnitStrategyTest extends JUnit
 
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
-                        testedMethodCall.getMethodExpression(),
+                        testedMethodCall.getMethodExpression().getChildren()[1],
                         "It is recommended to always test only the public behaviour of the system under test, which is expressed through public methods. " +
                                 "Private methods are often updated, deleted or added regardless of if public behaviour of a system under test has changed. " +
                                 "Private methods are only a helper tool for the public behaviour of the tested system. " +

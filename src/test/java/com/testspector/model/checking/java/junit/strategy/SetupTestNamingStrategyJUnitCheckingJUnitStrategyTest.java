@@ -60,7 +60,7 @@ public class SetupTestNamingStrategyJUnitCheckingJUnitStrategyTest extends JUnit
         EasyMock.replay(methodResolver);
         List<BestPracticeViolation> expectedViolations = Collections.singletonList(
                 createBestPracticeViolation(
-                        testedMethodCall.getMethodExpression(),
+                        testedMethodCall.getMethodExpression().getChildren()[1],
                         problemDescription,
                         Arrays.asList(
                                 "Possible strategy: 'doingSomeOperationGeneratesSomeResult'",

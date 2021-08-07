@@ -1,8 +1,7 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -15,7 +14,10 @@ import com.testspector.model.checking.java.junit.strategy.action.NavigateElement
 import com.testspector.model.checking.java.junit.strategy.action.WrapAllAssertionsIntoAssertAll;
 import com.testspector.model.enums.BestPractice;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCheckingStrategy {
@@ -61,7 +63,7 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
             } else if (allAssertionMethods.size() > 1) {
 
                 for (PsiMethodCallExpression assertionMethod : allAssertionMethods) {
-                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod,  areJUnit5ClassesAvailable, isHamcrestAvailable, allAssertionMethods));
+                    bestPracticeViolations.add(createDefaultOnlyOneBestPracticeViolation(testMethod, assertionMethod, areJUnit5ClassesAvailable, isHamcrestAvailable, allAssertionMethods));
                 }
                 bestPracticeViolations.addAll(createBestPracticeViolation(allAssertionMethodsResult));
             }
@@ -69,12 +71,13 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
         return bestPracticeViolations;
     }
 
-
     private BestPracticeViolation createDefaultOnlyOneBestPracticeViolation(PsiMethod testMethod,
-                                                                            PsiMethodCallExpression assertionMethod, boolean areJUnit5ClassesAvailable, boolean isHamcrestAvailable, List<PsiMethodCallExpression> allAssertions) {
+                                                                            PsiMethodCallExpression assertionMethod,
+                                                                            boolean areJUnit5ClassesAvailable,
+                                                                            boolean isHamcrestAvailable,
+                                                                            List<PsiMethodCallExpression> allAssertions) {
         List<String> hints = new ArrayList<>();
         List<Action<BestPracticeViolation>> actions = new ArrayList<>();
-        String message = DEFAULT_PROBLEM_DESCRIPTION_MESSAGE;
         if (areJUnit5ClassesAvailable) {
             hints.add(String.format(
                     "You use JUnit5 so it can be solved " +
@@ -82,12 +85,16 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
                     JUnitConstants.JUNIT5_ASSERTIONS_CLASS_PATH));
             actions.add(new WrapAllAssertionsIntoAssertAll(testMethod, allAssertions));
         }
+        actions.addAll(allAssertions
+                .stream()
+                .filter(assertion -> assertion != assertionMethod).map(assertion -> new NavigateElementAction("assertion method", assertion))
+                .collect(Collectors.toList()));
         if (isHamcrestAvailable) {
             hints.add("You can use hamcrest org.hamcrest.core.Every or org.hamcrest.core.AllOf matchers to test each property");
         }
         return new BestPracticeViolation(
                 assertionMethod.getMethodExpression(),
-                message,
+                DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 BestPractice.ONLY_ONE_ASSERTION,
                 actions,
                 hints);
@@ -98,17 +105,19 @@ public class OnlyOneAssertionJUnitCheckingStrategy extends AssertionCountJUnitCh
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
                     List<PsiMethodCallExpression> assertionMethods = result.getRight().getElementsFromAllLevels();
-                    if (!assertionMethods.isEmpty()) {
-                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), assertionMethods));
+                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !assertionMethods.isEmpty()) {
+                        bestPracticeViolations.add(createBestPracticeViolation(PsiTreeUtil.getChildOfType(
+                                PsiTreeUtil.getChildOfType(result.getLeft().getParent(), PsiReferenceExpression.class), PsiIdentifier.class),
+                                assertionMethods));
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
                 });
         return bestPracticeViolations;
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiMethodCallExpression> assertionMethods) {
+    private BestPracticeViolation createBestPracticeViolation(PsiElement element, List<PsiMethodCallExpression> assertionMethods) {
         return new BestPracticeViolation(
-                reference.getElement(),
+                element,
                 "Following method contains code that breaks best practice. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 assertionMethods.stream()

@@ -1,7 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.*;
-import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -11,17 +10,16 @@ import com.testspector.model.checking.java.common.search.ElementSearchResultUtil
 import com.testspector.model.checking.java.common.search.QueriesRepository;
 import com.testspector.model.checking.java.junit.strategy.action.NavigateElementAction;
 import com.testspector.model.enums.BestPractice;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_PARAMETERIZED_TEST_ABSOLUTE_PATH;
-import static com.testspector.model.checking.java.junit.JUnitConstants.JUNIT5_TEST_QUALIFIED_NAMES;
+import static com.testspector.model.checking.java.junit.JUnitConstants.*;
 
 public class NoConditionalLogicJUnitCheckingStrategy extends JUnitBestPracticeCheckingStrategy {
 
@@ -52,6 +50,7 @@ public class NoConditionalLogicJUnitCheckingStrategy extends JUnitBestPracticeCh
             ElementSearchResult<PsiStatement> statementsElementSearchResult = elementSearchEngine
                     .findByQuery(testMethod, QueriesRepository.FIND_ALL_CONDITIONAL_STATEMENTS);
             statementsElementSearchResult = ElementSearchResultUtils.filterResult(partOfAssertionMethod().negate(), statementsElementSearchResult);
+            statementsElementSearchResult = removeGroupedConditionalStatements(statementsElementSearchResult);
             for (PsiStatement statement : statementsElementSearchResult.getElementsFromAllLevels()) {
                 bestPracticeViolations.add(createBestPracticeViolation(testMethod, statement));
             }
@@ -66,12 +65,30 @@ public class NoConditionalLogicJUnitCheckingStrategy extends JUnitBestPracticeCh
             PsiElement element = psiStatement.getParent();
             while (element != null) {
                 if (element instanceof PsiMethod) {
-                    return methodResolver.assertionMethod((PsiMethod) element).isPresent();
+                    return methodResolver.tryToGetAssertionMethod((PsiMethod) element).isPresent();
                 }
                 element = element.getContext();
             }
             return false;
         };
+    }
+
+    protected ElementSearchResult<PsiStatement> removeGroupedConditionalStatements(ElementSearchResult<PsiStatement> allStatements) {
+        List<PsiStatement> allElementsOfTheCurrentLevel = new ArrayList<>(allStatements.getElementsOfCurrentLevel());
+        List<PsiStatement> toRemove = new ArrayList<>();
+
+        for (PsiStatement psiStatement: allStatements.getElementsOfCurrentLevel()) {
+                toRemove.addAll(elementSearchEngine
+                        .findByQuery(psiStatement, QueriesRepository.FIND_ALL_CONDITIONAL_STATEMENTS)
+                        .getElementsFromAllLevels());
+        }
+        allElementsOfTheCurrentLevel.removeAll(toRemove);
+        List<Pair<PsiReferenceExpression, ElementSearchResult<PsiStatement>>> referencedElements = new ArrayList<>();
+        for (Pair<PsiReferenceExpression, ElementSearchResult<PsiStatement>> referencedResult : allStatements.getReferencedResults()) {
+            ElementSearchResult<PsiStatement> newReferencedResult = removeGroupedConditionalStatements(referencedResult.getRight());
+            referencedElements.add(Pair.of(referencedResult.getLeft(), newReferencedResult));
+        }
+        return new ElementSearchResult<>(referencedElements, allElementsOfTheCurrentLevel);
     }
 
     private String statementString(PsiStatement statement) {
@@ -115,17 +132,17 @@ public class NoConditionalLogicJUnitCheckingStrategy extends JUnitBestPracticeCh
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
                     List<PsiStatement> conditionalStatements = result.getRight().getElementsFromAllLevels();
-                    if (!conditionalStatements.isEmpty()) {
-                        bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), conditionalStatements));
+                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !conditionalStatements.isEmpty()) {
+                        bestPracticeViolations.add(createBestPracticeViolation(getMethodCallExpressionIdentifier((PsiMethodCallExpression) result.getLeft().getParent()), conditionalStatements));
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
                 });
         return bestPracticeViolations;
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiStatement> statements) {
+    private BestPracticeViolation createBestPracticeViolation(PsiElement element, List<PsiStatement> statements) {
         return new BestPracticeViolation(
-                reference.getElement(),
+                element,
                 "Following method contains conditional logic. " + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 statements.stream()

@@ -1,10 +1,8 @@
 package com.testspector.model.checking.java.junit.strategy;
 
-import com.intellij.psi.PsiIdentifier;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiReference;
-import com.testspector.model.checking.BestPracticeCheckingStrategy;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
 import com.testspector.model.checking.java.common.JavaMethodResolver;
@@ -41,30 +39,31 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy extends JUnitBestPract
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        methods = methods.stream().filter(method -> method.getNameIdentifier() != null).collect(Collectors.toList());
         for (PsiMethod testMethod : methods) {
-            PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();
-            if (nameIdentifier != null) {
-                String testMethodName = nameIdentifier.getText();
-                ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult = methodResolver.allTestedMethodsMethodCalls(testMethod);
-                allTestedMethodsResult = filterResult(testedMethodCall -> {
-                    PsiMethod testedMethod = testedMethodCall.resolveMethod();
-                    if (testedMethod != null) {
-                        int minRatio = selectMinRatio(testedMethod.getName());
-                        return FuzzySearch.ratio(
-                                testMethodName.toLowerCase(),
-                                testedMethod.getName().toLowerCase()) > minRatio;
-                    }
-                    return false;
-                }, allTestedMethodsResult);
-                for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getElementsFromAllLevels()) {
-                    bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));
-                }
-                bestPracticeViolations.addAll(createBestPracticeViolation(allTestedMethodsResult));
-
+            ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult = methodResolver.allTestedMethodsMethodCalls(testMethod);
+            allTestedMethodsResult = filterMethodsWithNameTooSimilarToTestMethod(testMethod,allTestedMethodsResult);
+            for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getElementsFromAllLevels()) {
+                bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));
             }
+            bestPracticeViolations.addAll(createBestPracticeViolation(allTestedMethodsResult));
         }
 
         return bestPracticeViolations;
+    }
+
+    private ElementSearchResult<PsiMethodCallExpression> filterMethodsWithNameTooSimilarToTestMethod(PsiMethod testMethod, ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult){
+        String testMethodName = testMethod.getNameIdentifier().getText();
+       return filterResult(testedMethodCall -> {
+            PsiMethod testedMethod = testedMethodCall.resolveMethod();
+            if (testedMethod != null) {
+                int minRatio = selectMinRatio(testedMethod.getName());
+                return FuzzySearch.ratio(
+                        testMethodName.toLowerCase(),
+                        testedMethod.getName().toLowerCase()) > minRatio;
+            }
+            return false;
+        }, allTestedMethodsResult);
     }
 
     private int selectMinRatio(String testedMethodName) {
@@ -85,27 +84,18 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy extends JUnitBestPract
         elementSearchResult.getReferencedResults()
                 .forEach(result -> {
                     List<PsiMethodCallExpression> assertionMethods = result.getRight().getElementsFromAllLevels();
-                    if (!assertionMethods.isEmpty()) {
-                        if (result.getLeft().getParent() instanceof PsiMethodCallExpression) {
-                            bestPracticeViolations.add(createBestPracticeViolation("Following method contains code that breaks best practice. ", result.getLeft(), assertionMethods));
-                        } else {
-                            bestPracticeViolations.add(createBestPracticeViolation(result.getLeft(), assertionMethods));
-                        }
+                    if (result.getLeft().getParent() instanceof PsiMethodCallExpression && !assertionMethods.isEmpty()) {
+                        bestPracticeViolations.add(createBestPracticeViolation(getMethodCallExpressionIdentifier((PsiMethodCallExpression) result.getLeft().getParent()), assertionMethods));
                     }
                     bestPracticeViolations.addAll(createBestPracticeViolation(result.getRight()));
                 });
         return bestPracticeViolations;
     }
 
-
-    private BestPracticeViolation createBestPracticeViolation(PsiReference reference, List<PsiMethodCallExpression> elements) {
-        return createBestPracticeViolation("", reference, elements);
-    }
-
-    private BestPracticeViolation createBestPracticeViolation(String descriptionPrefix, PsiReference reference, List<PsiMethodCallExpression> testedMethods) {
+    private BestPracticeViolation createBestPracticeViolation(PsiElement element, List<PsiMethodCallExpression> testedMethods) {
         return new BestPracticeViolation(
-                reference.getElement(),
-                descriptionPrefix + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                element,
+                "Following method breaks best practice." + DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 testedMethods.stream()
                         .map(testedMethod -> new NavigateElementAction("method call", testedMethod))
@@ -116,7 +106,7 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy extends JUnitBestPract
 
     private BestPracticeViolation createBestPracticeViolation(PsiMethodCallExpression methodWithAlmostSameName) {
         return new BestPracticeViolation(
-                methodWithAlmostSameName.getMethodExpression(),
+                getMethodCallExpressionIdentifier(methodWithAlmostSameName),
                 DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
                 getCheckedBestPractice().get(0),
                 new ArrayList<>(),
