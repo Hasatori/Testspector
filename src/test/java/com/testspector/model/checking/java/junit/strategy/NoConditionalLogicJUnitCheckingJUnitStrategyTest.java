@@ -71,7 +71,7 @@ public class NoConditionalLogicJUnitCheckingJUnitStrategyTest extends JUnitStrat
                 .findByQuery(EasyMock.isA(PsiStatement.class), EasyMock.eq(QueriesRepository.FIND_ALL_CONDITIONAL_STATEMENTS)))
                 .andReturn(new ElementSearchResult<>(new ArrayList<>(),new ArrayList<>())).times(2);
         EasyMock.expect(methodResolver.methodHasAnyOfAnnotations(testMethodWithStatement, JUNIT5_TEST_QUALIFIED_NAMES)).andReturn(true).times(2);
-        EasyMock.expect(methodResolver.assertionMethod(EasyMock.anyObject(PsiMethod.class))).andReturn(Optional.empty()).times(2);
+        EasyMock.expect(methodResolver.tryToGetAssertionMethod(EasyMock.anyObject(PsiMethod.class))).andReturn(Optional.empty()).times(2);
         EasyMock.replay(elementSearchEngine, methodResolver);
         List<BestPracticeViolation> expectedViolations = Arrays.asList(
                 createBestPracticeViolation(

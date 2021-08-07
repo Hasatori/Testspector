@@ -16,7 +16,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -66,7 +65,7 @@ public class NoConditionalLogicJUnitCheckingStrategy extends JUnitBestPracticeCh
             PsiElement element = psiStatement.getParent();
             while (element != null) {
                 if (element instanceof PsiMethod) {
-                    return methodResolver.assertionMethod((PsiMethod) element).isPresent();
+                    return methodResolver.tryToGetAssertionMethod((PsiMethod) element).isPresent();
                 }
                 element = element.getContext();
             }

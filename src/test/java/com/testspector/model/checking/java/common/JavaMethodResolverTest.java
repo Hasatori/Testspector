@@ -49,7 +49,7 @@ class JavaMethodResolverTest extends JavaTest {
         assertMethod = (PsiMethod) psiClass.add(assertMethod);
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        PsiMethod foundMethod = javaMethodResolver.assertionMethod(assertionMethodCall).get();
+        PsiMethod foundMethod = javaMethodResolver.tryToGetAssertionMethod(assertionMethodCall).get();
 
         Assert.assertSame(assertMethod, foundMethod);
     }
@@ -75,7 +75,7 @@ class JavaMethodResolverTest extends JavaTest {
          EasyMock.replay(contextIndicator, elementSearchEngine);
 
          JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-         PsiMethod foundMethod = javaMethodResolver.assertionMethod(testedMethodCall).get();
+         PsiMethod foundMethod = javaMethodResolver.tryToGetAssertionMethod(testedMethodCall).get();
 
          Assert.assertSame(assertMethod, foundMethod);
      }
@@ -90,7 +90,7 @@ class JavaMethodResolverTest extends JavaTest {
                 .createExpressionFromText(String.format("%s()", "assertionMethod"), psiClass);
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        Optional<PsiMethod> optionalFoundMethod = javaMethodResolver.assertionMethod(assertionMethodCall);
+        Optional<PsiMethod> optionalFoundMethod = javaMethodResolver.tryToGetAssertionMethod(assertionMethodCall);
 
         Assert.assertFalse(optionalFoundMethod.isPresent());
     }
@@ -108,7 +108,7 @@ class JavaMethodResolverTest extends JavaTest {
                 .createTestMethod("method2", Collections.singletonList("@" + annotations.get(0))));
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiJavaFile), annotations);
+        List<PsiMethod> resolvedMethods = javaMethodResolver.getMethodsWithAnnotations(Arrays.asList(psiJavaFile), annotations);
 
         assertAll(
                 () -> assertSame("First method was not resolved!", someMethod1, resolvedMethods.get(0)),
@@ -127,7 +127,7 @@ class JavaMethodResolverTest extends JavaTest {
                 .createMethod("method1", "void", Collections.singletonList(PsiKeyword.PUBLIC)));
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiJavaFile), Collections.emptyList());
+        List<PsiMethod> resolvedMethods = javaMethodResolver.getMethodsWithAnnotations(Arrays.asList(psiJavaFile), Collections.emptyList());
 
         assertSame(someMethod, resolvedMethods.get(0));
     }
@@ -143,7 +143,7 @@ class JavaMethodResolverTest extends JavaTest {
                 .createMethod("method1", "void", Collections.singletonList(PsiKeyword.PUBLIC)));
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiJavaFile), annotations);
+        List<PsiMethod> resolvedMethods = javaMethodResolver.getMethodsWithAnnotations(Arrays.asList(psiJavaFile), annotations);
 
         assertTrue(resolvedMethods.isEmpty());
     }
@@ -162,7 +162,7 @@ class JavaMethodResolverTest extends JavaTest {
                 .createTestMethod("method2", Collections.singletonList("@" + annotations.get(0))));
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiClass), annotations);
+        List<PsiMethod> resolvedMethods = javaMethodResolver.getMethodsWithAnnotations(Arrays.asList(psiClass), annotations);
 
         assertAll(
                 () -> assertSame("First method was not resolved!", someMethod1, resolvedMethods.get(0)),
@@ -180,7 +180,7 @@ class JavaMethodResolverTest extends JavaTest {
         psiClass.add(this.javaTestElementUtil.createMethod("method1", "void", Collections.singletonList(PsiKeyword.PUBLIC)));
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiClass), annotations);
+        List<PsiMethod> resolvedMethods = javaMethodResolver.getMethodsWithAnnotations(Arrays.asList(psiClass), annotations);
 
         assertTrue(resolvedMethods.isEmpty());
     }
@@ -191,7 +191,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiMethod someMethod = this.javaTestElementUtil.createTestMethod("method1", Collections.singletonList("@" + annotations.get(0)));
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(someMethod), annotations);
+        List<PsiMethod> resolvedMethods = javaMethodResolver.getMethodsWithAnnotations(Arrays.asList(someMethod), annotations);
 
         assertSame(someMethod, resolvedMethods.get(0));
     }
@@ -201,7 +201,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiMethod someMethod = this.javaTestElementUtil.createMethod("method1", "void", Collections.singletonList(PsiKeyword.PUBLIC));
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(someMethod), Collections.emptyList());
+        List<PsiMethod> resolvedMethods = javaMethodResolver.getMethodsWithAnnotations(Arrays.asList(someMethod), Collections.emptyList());
 
         assertSame(someMethod, resolvedMethods.get(0));
     }
@@ -212,7 +212,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiMethod someMethod = this.javaTestElementUtil.createMethod("method1", "void", Collections.singletonList(PsiKeyword.PUBLIC));
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(someMethod), annotations);
+        List<PsiMethod> resolvedMethods = javaMethodResolver.getMethodsWithAnnotations(Arrays.asList(someMethod), annotations);
 
         assertTrue(resolvedMethods.isEmpty());
     }
@@ -223,7 +223,7 @@ class JavaMethodResolverTest extends JavaTest {
         PsiIfStatement psiIfStatement = this.javaTestElementUtil.createIfStatement();
 
         JavaMethodResolver javaMethodResolver = new JavaMethodResolver(elementSearchEngine, contextIndicator);
-        List<PsiMethod> resolvedMethods = javaMethodResolver.methodsWithAnnotations(Arrays.asList(psiIfStatement), annotations);
+        List<PsiMethod> resolvedMethods = javaMethodResolver.getMethodsWithAnnotations(Arrays.asList(psiIfStatement), annotations);
 
         assertTrue(resolvedMethods.isEmpty());
     }

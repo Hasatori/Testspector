@@ -40,7 +40,8 @@ public abstract class AssertionCountJUnitCheckingStrategy extends JUnitBestPract
                     .filter(method ->
                             ASSERT_ALL_METHOD_NAME.equals(method.getName()) &&
                                     Optional.ofNullable(method.getContainingClass())
-                                            .map(PsiClass::getQualifiedName).stream()
+                                            .map(PsiClass::getQualifiedName)
+                                            .stream()
                                             .anyMatch(name -> name.equals(JUNIT5_ASSERTIONS_CLASS_PATH)))
                     .isPresent()) {
                 toRemove.addAll(elementSearchEngine.findByQuery(assertion, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS)
