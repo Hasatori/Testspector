@@ -32,26 +32,8 @@ public class JUnitTestMethodBestPracticeCheckingStrategyAdapter implements BestP
 
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiElement> psiElements) {
-        psiElements = psiElements.stream()
-                .filter(element -> {
-                    if (element instanceof PsiMethod) {
-                        PsiMethod method = (PsiMethod) element;
-                        return Arrays.stream(method.getAnnotations()).noneMatch(this::isIntegrationTag) && !isIntegrationTest((PsiJavaFile) element.getContainingFile());
-                    }
-                    if (!(element instanceof PsiClass)) {
-                        PsiFile file = element.getContainingFile();
-                        if (file instanceof PsiJavaFile) {
-                            return Arrays.stream(((PsiJavaFile) file).getClasses()).map(psiClass -> Arrays.asList(psiClass.getAnnotations())).flatMap(Collection::stream).noneMatch(this::isIntegrationTag)
-                                    && !isIntegrationTest((PsiJavaFile) file);
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        return Arrays.stream(((PsiClass) element).getAnnotations()).noneMatch(this::isIntegrationTag) &&
-                                !isIntegrationTest((PsiJavaFile) element.getContainingFile());
-                    }
-                }).collect(Collectors.toList());
-        List<PsiMethod> methods = methodResolver.methodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES)
+        psiElements = filterOutElementsRelatedToIntegrationTests(psiElements);
+        List<PsiMethod> methods = methodResolver.getMethodsWithAnnotations(psiElements, JUnitConstants.JUNIT_ALL_TEST_QUALIFIED_NAMES)
                 .stream()
                 .filter(method -> Arrays.stream(method.getAnnotations()).noneMatch(this::isIntegrationTag))
                 .collect(Collectors.toList());
@@ -64,14 +46,36 @@ public class JUnitTestMethodBestPracticeCheckingStrategyAdapter implements BestP
         return decoratedMethodSpecificStrategy.getCheckedBestPractice();
     }
 
-    private boolean isIntegrationTest(PsiJavaFile file) {
+    private List<PsiElement> filterOutElementsRelatedToIntegrationTests(List<PsiElement> psiElements) {
+        return psiElements.stream()
+                .filter(element -> {
+                    if (element instanceof PsiMethod) {
+                        PsiMethod method = (PsiMethod) element;
+                        return Arrays.stream(method.getAnnotations()).noneMatch(this::isIntegrationTag) && isNotIntegrationTest((PsiJavaFile) element.getContainingFile());
+                    }
+                    if (!(element instanceof PsiClass)) {
+                        PsiFile file = element.getContainingFile();
+                        if (file instanceof PsiJavaFile) {
+                            return Arrays.stream(((PsiJavaFile) file).getClasses()).map(psiClass -> Arrays.asList(psiClass.getAnnotations())).flatMap(Collection::stream).noneMatch(this::isIntegrationTag)
+                                    && isNotIntegrationTest((PsiJavaFile) file);
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return Arrays.stream(((PsiClass) element).getAnnotations()).noneMatch(this::isIntegrationTag) &&
+                                isNotIntegrationTest((PsiJavaFile) element.getContainingFile());
+                    }
+                }).collect(Collectors.toList());
+    }
 
-        return file.getName().matches(".*IT\\.java") ||
-                "it".equalsIgnoreCase(file.getPackageName()) ||
-                file.getPackageName().matches("(it\\..*)") ||
-                file.getPackageName().matches("(.*\\.it\\..*)") ||
-                file.getPackageName().matches("(.*\\.it)") ||
-                Optional.ofNullable(ProjectRootManager.getInstance(file.getProject()).getFileIndex().getModuleForFile(file.getVirtualFile()))
+    private boolean isNotIntegrationTest(PsiJavaFile file) {
+
+        return !file.getName().matches(".*IT\\.java") &&
+                !"it".equalsIgnoreCase(file.getPackageName()) &&
+                !file.getPackageName().matches("(it\\..*)") &&
+                !file.getPackageName().matches("(.*\\.it\\..*)") &&
+                !file.getPackageName().matches("(.*\\.it)") &&
+                !Optional.ofNullable(ProjectRootManager.getInstance(file.getProject()).getFileIndex().getModuleForFile(file.getVirtualFile()))
                         .map(Module::getName)
                         .map(name -> name.split("_")[0])
                         .map(val -> "it".equalsIgnoreCase(val) || val.contains("integration"))

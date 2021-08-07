@@ -23,10 +23,6 @@ public class InspectTestAction extends AnAction {
     }
 
     @Override
-    public void update(AnActionEvent e) {
-    }
-
-    @Override
     public boolean isDumbAware() {
         return false;
     }

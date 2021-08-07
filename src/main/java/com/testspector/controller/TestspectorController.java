@@ -39,10 +39,19 @@ public final class TestspectorController {
 
     public void initializeTestspector(VirtualFile virtualFile) {
         InspectionProfileImpl inspectionProfile = InspectionProjectProfileManager.getInstance(this.project).getCurrentProfile();
-        List<ScopeToolState> scopeToolStates = inspectionProfile.getAllTools().stream().filter(scopeToolState -> (scopeToolState.getTool().getTool() instanceof BestPracticeInspection) && scopeToolState.isEnabled()).collect(Collectors.toList());
+        List<ScopeToolState> scopeToolStates = inspectionProfile
+                .getAllTools()
+                .stream()
+                .filter(scopeToolState -> (scopeToolState.getTool().getTool() instanceof BestPracticeInspection) && scopeToolState.isEnabled())
+                .collect(Collectors.toList());
         FileDocumentManager.getInstance().saveAllDocuments();
         final GlobalInspectionContextImpl inspectionContext = ((InspectionManagerEx) InspectionManager.getInstance(project)).createNewGlobalContext();
-        InspectionToolsSupplier inspectionToolsSupplier = new InspectionToolsSupplier.Simple(scopeToolStates.stream().map(ScopeToolState::getTool).collect(Collectors.toList()));
+        InspectionToolsSupplier inspectionToolsSupplier = new InspectionToolsSupplier.Simple(
+                scopeToolStates
+                        .stream()
+                        .map(ScopeToolState::getTool)
+                        .collect(Collectors.toList())
+        );
         inspectionProfile = new InspectionProfileImpl("Testspector", inspectionToolsSupplier, inspectionProfile);
         inspectionContext.setExternalProfile(inspectionProfile);
         AnalysisScope scope = new AnalysisScope(project, Collections.singletonList(virtualFile));
@@ -58,37 +67,44 @@ public final class TestspectorController {
         Optional<ProgrammingLanguage> optionalProgrammingLanguage = project.getService(ProgrammingLanguageFactory.class)
                 .getProgrammingLanguage(file);
         if (optionalProgrammingLanguage.isPresent()) {
-            List<UnitTestFramework> unitTestFrameworks = project
-                    .getService(UnitTestFrameworkFactoryProvider.class)
-                    .geUnitTestFrameworkFactory(optionalProgrammingLanguage.get())
-                    .stream()
-                    .map(unitTestFrameworkFactory -> unitTestFrameworkFactory.getUnitTestFramework(file))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toList());
-            if (unitTestFrameworks.size() > 0) {
-                for (UnitTestFramework unitTestFramework : unitTestFrameworks) {
-                    Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy;
-                    if (session == sessionBestPracticeCheckingStrategyFactoryPair.getLeft()) {
-                        optionalBestPracticeCheckingStrategy = Optional.ofNullable(sessionBestPracticeCheckingStrategyFactoryPair.getRight().getBestPracticeCheckingStrategy(bestPractice));
-                    } else {
-                        optionalBestPracticeCheckingStrategy = project
-                                .getService(BestPracticeCheckingStrategyFactoryProvider.class)
-                                .getBestPracticeCheckingStrategyFactory(optionalProgrammingLanguage.get(), unitTestFramework)
-                                .map(bestPracticeCheckingStrategyFactory -> {
-                                    sessionBestPracticeCheckingStrategyFactoryPair = Pair.of(session, bestPracticeCheckingStrategyFactory);
-                                    return bestPracticeCheckingStrategyFactory.getBestPracticeCheckingStrategy(bestPractice);
-                                });
-                    }
-                    if (optionalBestPracticeCheckingStrategy.isPresent()) {
-                        List<BestPracticeViolation> foundViolations = optionalBestPracticeCheckingStrategy
-                                .get()
-                                .checkBestPractices(file);
-                        bestPracticeViolations.addAll(foundViolations);
-                    }
-                }
+            ProgrammingLanguage programmingLanguage = optionalProgrammingLanguage.get();
+            List<UnitTestFramework> unitTestFrameworks = gatherUnitTestFrameworks(file, programmingLanguage);
+            for (UnitTestFramework unitTestFramework : unitTestFrameworks) {
+                Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy =
+                        tryToGetCheckingStrategy(session, bestPractice, unitTestFramework, programmingLanguage);
+                List<BestPracticeViolation> foundViolations = optionalBestPracticeCheckingStrategy
+                        .map(checkingStrategy -> checkingStrategy.checkBestPractices(file))
+                        .orElse(new ArrayList<>());
+                bestPracticeViolations.addAll(foundViolations);
             }
         }
         return bestPracticeViolations;
+    }
+
+    private List<UnitTestFramework> gatherUnitTestFrameworks(PsiFile file, ProgrammingLanguage programmingLanguage) {
+        return project
+                .getService(UnitTestFrameworkFactoryProvider.class)
+                .geUnitTestFrameworkFactory(programmingLanguage)
+                .stream()
+                .map(unitTestFrameworkFactory -> unitTestFrameworkFactory.getUnitTestFramework(file))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
+
+    private Optional<BestPracticeCheckingStrategy<PsiElement>> tryToGetCheckingStrategy(LocalInspectionToolSession session, BestPractice bestPractice, UnitTestFramework unitTestFramework, ProgrammingLanguage programmingLanguage) {
+        Optional<BestPracticeCheckingStrategy<PsiElement>> optionalBestPracticeCheckingStrategy;
+        if (session == sessionBestPracticeCheckingStrategyFactoryPair.getLeft()) {
+            optionalBestPracticeCheckingStrategy = Optional.ofNullable(sessionBestPracticeCheckingStrategyFactoryPair.getRight().getBestPracticeCheckingStrategy(bestPractice));
+        } else {
+            optionalBestPracticeCheckingStrategy = project
+                    .getService(BestPracticeCheckingStrategyFactoryProvider.class)
+                    .getBestPracticeCheckingStrategyFactory(programmingLanguage, unitTestFramework)
+                    .map(bestPracticeCheckingStrategyFactory -> {
+                        sessionBestPracticeCheckingStrategyFactoryPair = Pair.of(session, bestPracticeCheckingStrategyFactory);
+                        return bestPracticeCheckingStrategyFactory.getBestPracticeCheckingStrategy(bestPractice);
+                    });
+        }
+        return optionalBestPracticeCheckingStrategy;
     }
 }

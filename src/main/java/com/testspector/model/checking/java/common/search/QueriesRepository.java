@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public final class QueriesRepository {
 
-    private static final List<Class<? extends PsiStatement>> SUPPORTED_STATEMENT_CLASSES = Collections.unmodifiableList(Arrays.asList(
+    private static final List<Class<? extends PsiStatement>> CONDITIONAL_STATEMENT_CLASSES = Collections.unmodifiableList(Arrays.asList(
             PsiIfStatement.class,
             PsiWhileStatement.class,
             PsiSwitchStatement.class,
@@ -38,13 +38,16 @@ public final class QueriesRepository {
 
     private static final ElementSearchQuery<PsiMethodCallExpression> FIND_ASSERTION_METHOD_CALL_EXPRESSIONS = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
             .elementOfType(PsiMethodCallExpression.class)
-            .whereElement(psiMethodCallExpression -> methodResolver().assertionMethod(psiMethodCallExpression).isPresent())
+            .whereElement(psiMethodCallExpression -> methodResolver().tryToGetAssertionMethod(psiMethodCallExpression).isPresent())
             .withoutReferences()
             .build();
 
     public static final ElementSearchQuery<PsiMethodCallExpression> FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS = new ElementSearchQueryBuilder<PsiMethodCallExpression>()
             .elementOfType(PsiMethodCallExpression.class)
-            .whereElement(psiMethodCallExpression ->  methodResolver().assertionMethod(psiMethodCallExpression).isPresent() || elementSearchEngine().findByQuery(psiMethodCallExpression, FIND_ASSERTION_METHOD_CALL_EXPRESSIONS).getElementsFromAllLevels().size() > 0)
+            .whereElement(psiMethodCallExpression ->
+                    methodResolver().tryToGetAssertionMethod(psiMethodCallExpression).isPresent() ||
+                            elementSearchEngine().findByQuery(psiMethodCallExpression, FIND_ASSERTION_METHOD_CALL_EXPRESSIONS)
+                                    .getElementsFromAllLevels().size() > 0)
             .whereReferences(el -> !(el instanceof PsiClass) && contextIndicator().isInTestContext().test(el))
             .onlyFirstMatch()
             .build();
@@ -68,7 +71,7 @@ public final class QueriesRepository {
 
     public static final ElementSearchQuery<PsiStatement> FIND_ALL_CONDITIONAL_STATEMENTS = new ElementSearchQueryBuilder<PsiStatement>()
             .elementOfType(PsiStatement.class)
-            .whereElement(psiStatement -> SUPPORTED_STATEMENT_CLASSES
+            .whereElement(psiStatement -> CONDITIONAL_STATEMENT_CLASSES
                     .stream()
                     .anyMatch(supportedStatement -> supportedStatement.isInstance(psiStatement)))
             .whereReferences(el -> !(el instanceof PsiClass) && contextIndicator().isInTestContext().test(el))

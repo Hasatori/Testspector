@@ -29,9 +29,10 @@ public class JavaMethodResolver {
     public ElementSearchResult<PsiMethodCallExpression> allTestedMethodsMethodCalls(PsiMethod testMethod) {
         ElementSearchResult<PsiMethodCallExpression> assertionMethods = elementSearchEngine
                 .findByQuery(testMethod, QueriesRepository.FIND_ALL_ASSERTION_METHOD_CALL_EXPRESSIONS);
-        return mapResult(
-                assertionMethods,
-                psiMethodCallExpression -> elementSearchEngine.findByQuery(psiMethodCallExpression, QueriesRepository.FIND_ALL_PRODUCTION_CODE_METHOD_CALL_EXPRESSIONS)
+        return mapResult(assertionMethods, psiMethodCallExpression -> elementSearchEngine.findByQuery(
+                psiMethodCallExpression,
+                QueriesRepository.FIND_ALL_PRODUCTION_CODE_METHOD_CALL_EXPRESSIONS
+                )
         );
     }
 
@@ -52,22 +53,22 @@ public class JavaMethodResolver {
         return mapResult(literalExpressionElementSearchResult, mappingFunction);
     }
 
-    public List<PsiMethod> methodsWithAnnotations(List<PsiElement> fromElements, List<String> annotationQualifiedNames) {
-        return methodsWithAnnotations(new HashSet<>(), fromElements, annotationQualifiedNames);
+    public List<PsiMethod> getMethodsWithAnnotations(List<PsiElement> fromElements, List<String> annotationQualifiedNames) {
+        return getMethodsWithAnnotations(new HashSet<>(), fromElements, annotationQualifiedNames);
     }
 
-    public List<PsiMethod> methodsWithAnnotations(HashSet<PsiElement> visited, List<PsiElement> fromElements, List<String> annotationQualifiedNames) {
+    public List<PsiMethod> getMethodsWithAnnotations(HashSet<PsiElement> visited, List<PsiElement> fromElements, List<String> annotationQualifiedNames) {
         List<PsiMethod> psiMethods = new ArrayList<>();
         for (PsiElement psiElement : fromElements) {
             if (psiElement instanceof PsiJavaFile) {
                 PsiJavaFile psiJavaFile = (PsiJavaFile) psiElement;
                 psiMethods.addAll(Arrays.stream(psiJavaFile.getClasses())
-                        .map(psiClass -> methodsWithAnnotations(Collections.singletonList(psiClass), annotationQualifiedNames))
+                        .map(psiClass -> getMethodsWithAnnotations(Collections.singletonList(psiClass), annotationQualifiedNames))
                         .flatMap(Collection::stream)
                         .collect(Collectors.toList()));
             } else if (psiElement instanceof PsiClass) {
                 PsiClass psiClass = (PsiClass) psiElement;
-                psiMethods.addAll(methodsWithAnnotations(Arrays.stream(psiClass.getMethods()).collect(Collectors.toList()), annotationQualifiedNames));
+                psiMethods.addAll(getMethodsWithAnnotations(Arrays.stream(psiClass.getMethods()).collect(Collectors.toList()), annotationQualifiedNames));
             } else if (psiElement instanceof PsiMethod) {
                 PsiMethod method = (PsiMethod) psiElement;
                 if (methodHasAnyOfAnnotations(method, annotationQualifiedNames)) {
@@ -79,7 +80,7 @@ public class JavaMethodResolver {
                             .stream()
                             .map(reference -> PsiTreeUtil.getParentOfType(reference.getElement(), PsiMethod.class))
                             .filter(met -> met != null && met != method && contextResolver.isInTestContext().test(met))
-                            .map(met -> methodsWithAnnotations(visited, Collections.singletonList(met), annotationQualifiedNames))
+                            .map(met -> getMethodsWithAnnotations(visited, Collections.singletonList(met), annotationQualifiedNames))
                             .flatMap(Collection::stream)
                             .collect(Collectors.toList()));
                 }
@@ -89,20 +90,32 @@ public class JavaMethodResolver {
         return psiMethods;
     }
 
-    public Optional<PsiMethod> assertionMethod(PsiMethodCallExpression psiMethodCallExpression) {
+    public Optional<PsiMethod> tryToGetAssertionMethod(PsiMethodCallExpression psiMethodCallExpression) {
         PsiMethod assertionMethodCandidate = psiMethodCallExpression.resolveMethod();
         if (assertionMethodCandidate != null) {
-            return assertionMethod(assertionMethodCandidate);
+            return tryToGetAssertionMethod(assertionMethodCandidate);
         }
         return Optional.empty();
     }
 
-    public Optional<PsiMethod> assertionMethod(PsiMethod method) {
-        if ((method.getContainingClass() != null && ASSERTION_CLASSES_CLASS_PATHS.contains(method.getContainingClass().getQualifiedName()))
-                || (method.getName().toLowerCase().contains("assert") && elementSearchEngine.findByQuery(method, QueriesRepository.FIND_ASSERTION_THROW_STATEMENTS_IN_CUSTOM_ASSERTIONS).getElementsFromAllLevels().size() > 0)) {
+    public Optional<PsiMethod> tryToGetAssertionMethod(PsiMethod method) {
+        if (isAssertionMethodFromLibrary(method) || isCustomAssertionMethod(method)) {
             return Optional.of(method);
         }
         return Optional.empty();
+    }
+
+    private boolean isAssertionMethodFromLibrary(PsiMethod method) {
+        return method.getContainingClass() != null &&
+                ASSERTION_CLASSES_CLASS_PATHS.contains(method.getContainingClass().getQualifiedName());
+    }
+
+    private boolean isCustomAssertionMethod(PsiMethod method) {
+        return (method.getName().toLowerCase().contains("assert") &&
+                elementSearchEngine.findByQuery(
+                        method,
+                        QueriesRepository.FIND_ASSERTION_THROW_STATEMENTS_IN_CUSTOM_ASSERTIONS
+                ).getElementsFromAllLevels().size() > 0);
     }
 
     public boolean isGetter(PsiMethod method) {
@@ -119,7 +132,6 @@ public class JavaMethodResolver {
                 }
             }
         }
-
         return false;
     }
 
