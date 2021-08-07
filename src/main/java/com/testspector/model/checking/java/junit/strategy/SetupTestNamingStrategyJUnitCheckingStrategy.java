@@ -1,7 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.testspector.model.checking.BestPracticeViolation;
@@ -40,30 +39,31 @@ public class SetupTestNamingStrategyJUnitCheckingStrategy extends JUnitBestPract
     @Override
     public List<BestPracticeViolation> checkBestPractices(List<PsiMethod> methods) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
+        methods = methods.stream().filter(method -> method.getNameIdentifier() != null).collect(Collectors.toList());
         for (PsiMethod testMethod : methods) {
-            PsiIdentifier nameIdentifier = testMethod.getNameIdentifier();
-            if (nameIdentifier != null) {
-                String testMethodName = nameIdentifier.getText();
-                ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult = methodResolver.allTestedMethodsMethodCalls(testMethod);
-                allTestedMethodsResult = filterResult(testedMethodCall -> {
-                    PsiMethod testedMethod = testedMethodCall.resolveMethod();
-                    if (testedMethod != null) {
-                        int minRatio = selectMinRatio(testedMethod.getName());
-                        return FuzzySearch.ratio(
-                                testMethodName.toLowerCase(),
-                                testedMethod.getName().toLowerCase()) > minRatio;
-                    }
-                    return false;
-                }, allTestedMethodsResult);
-                for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getElementsFromAllLevels()) {
-                    bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));
-                }
-                bestPracticeViolations.addAll(createBestPracticeViolation(allTestedMethodsResult));
-
+            ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult = methodResolver.allTestedMethodsMethodCalls(testMethod);
+            allTestedMethodsResult = filterMethodsWithNameTooSimilarToTestMethod(testMethod,allTestedMethodsResult);
+            for (PsiMethodCallExpression methodCallExpression : allTestedMethodsResult.getElementsFromAllLevels()) {
+                bestPracticeViolations.add(createBestPracticeViolation(methodCallExpression));
             }
+            bestPracticeViolations.addAll(createBestPracticeViolation(allTestedMethodsResult));
         }
 
         return bestPracticeViolations;
+    }
+
+    private ElementSearchResult<PsiMethodCallExpression> filterMethodsWithNameTooSimilarToTestMethod(PsiMethod testMethod, ElementSearchResult<PsiMethodCallExpression> allTestedMethodsResult){
+        String testMethodName = testMethod.getNameIdentifier().getText();
+       return filterResult(testedMethodCall -> {
+            PsiMethod testedMethod = testedMethodCall.resolveMethod();
+            if (testedMethod != null) {
+                int minRatio = selectMinRatio(testedMethod.getName());
+                return FuzzySearch.ratio(
+                        testMethodName.toLowerCase(),
+                        testedMethod.getName().toLowerCase()) > minRatio;
+            }
+            return false;
+        }, allTestedMethodsResult);
     }
 
     private int selectMinRatio(String testedMethodName) {

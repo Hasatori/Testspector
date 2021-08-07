@@ -1,7 +1,6 @@
 package com.testspector.model.checking.java.junit.strategy;
 
 import com.intellij.psi.*;
-import com.intellij.psi.util.PsiTreeUtil;
 import com.testspector.model.checking.Action;
 import com.testspector.model.checking.BestPracticeViolation;
 import com.testspector.model.checking.java.common.JavaContextIndicator;
@@ -41,7 +40,7 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
             boolean usingJUnit5 = areJUnit5ClassesAvailable(testMethod);
             boolean usingJUnit4 = areJUnit4ClassesAvailable(testMethod);
             for (PsiTryStatement psiTryStatement : psiTryStatementsElementSearchResult.getElementsFromAllLevels()) {
-                bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatement,usingJUnit5,usingJUnit4));
+                bestPracticeViolations.add(createBestPracticeViolation(testMethod, psiTryStatement, usingJUnit5, usingJUnit4));
             }
             bestPracticeViolations.addAll(createBestPracticeViolation(psiTryStatementsElementSearchResult));
 
@@ -63,16 +62,43 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
                                 .anyMatch(psiClassType::isAssignableFrom)));
     }
 
-    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiTryStatement psiTryStatement,boolean usingJUnit5,boolean usingJUnit4) {
+    private BestPracticeViolation createBestPracticeViolation(PsiMethod testMethod, PsiTryStatement psiTryStatement, boolean usingJUnit5, boolean usingJUnit4) {
         List<String> hints = new ArrayList<>();
         List<Action<BestPracticeViolation>> actions = new ArrayList<>();
-        ElementSearchResult<PsiMethodCallExpression> methodCallsThrowingAnyException = elementSearchEngine.findByQuery(psiTryStatement.getTryBlock(), QueriesRepository.FIND_ALL_METHOD_CALL_EXPRESSIONS_THROWING_ANY_EXCEPTION_WITHOUT_REFERENCES);
+        ElementSearchResult<PsiMethodCallExpression> methodCallsThrowingAnyException = elementSearchEngine.findByQuery(
+                psiTryStatement.getTryBlock(),
+                QueriesRepository.FIND_ALL_METHOD_CALL_EXPRESSIONS_THROWING_ANY_EXCEPTION_WITHOUT_REFERENCES);
         List<PsiType> caughtTypes = Arrays.stream(psiTryStatement.getCatchSections()).map(PsiCatchSection::getCatchType).collect(Collectors.toList());
         if (noMethodCallThrowsAnyOfCaughtExceptions(methodCallsThrowingAnyException, caughtTypes)) {
             actions.add(new RemoveTryCatchStatementAction(psiTryStatement, false));
         } else {
             actions.add(new RemoveTryCatchStatementAction(psiTryStatement, true));
         }
+        HashMap<PsiType, List<PsiMethodCallExpression>> exceptionTestMethodsMap = gatherMethodsForExceptions(caughtTypes, methodCallsThrowingAnyException);
+
+        if (!exceptionTestMethodsMap.isEmpty()) {
+            if (usingJUnit5) {
+                actions.add(new ReplaceTryCatchWithAssertThrows(psiTryStatement, exceptionTestMethodsMap));
+                actions.add(new ReplaceTryCatchWithAssertDoesNotThrow(psiTryStatement));
+            } else if (usingJUnit4) {
+                if (exceptionTestMethodsMap.size() > 1) {
+                    actions.add(new TestExceptionUsingExpectedJUnit4Test(testMethod, psiTryStatement, exceptionTestMethodsMap.keySet().stream().findFirst().get()));
+                }
+            }
+        }
+        hints.add("If throwing an exception is not part of the test delete the try catch and catch exception at method level");
+        hints.add("Instead it is recommended to use methods or tools provided by testing frameworks and testing libraries. For example annotation @expectException for testing framework JUnit version 4 or assertThrows method in JUnit version 5");
+        return new
+                BestPracticeViolation(
+                psiTryStatement,
+                DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
+                this.getCheckedBestPractice().get(0),
+                actions,
+                hints
+        );
+    }
+
+    private HashMap<PsiType, List<PsiMethodCallExpression>> gatherMethodsForExceptions(List<PsiType> caughtTypes, ElementSearchResult<PsiMethodCallExpression> methodCallsThrowingAnyException) {
         HashMap<PsiType, List<PsiMethodCallExpression>> exceptionTestMethodsMap = new HashMap<>();
         caughtTypes.forEach(catchType -> methodCallsThrowingAnyException.getElementsOfCurrentLevel().forEach(methodCallThrowingException -> {
             if (Optional.ofNullable(methodCallThrowingException.resolveMethod())
@@ -98,27 +124,9 @@ public class CatchExceptionsWithFrameworkToolsJUnitCheckingStrategy extends JUni
                 }
             }
         }));
-        if (!exceptionTestMethodsMap.isEmpty()){
-            if (usingJUnit5) {
-                actions.add(new ReplaceTryCatchWithAssertThrows(psiTryStatement, exceptionTestMethodsMap));
-                actions.add(new ReplaceTryCatchWithAssertDoesNotThrow(psiTryStatement));
-            } else if (usingJUnit4) {
-                if (exceptionTestMethodsMap.size() > 1) {
-                    actions.add(new TestExceptionUsingExpectedJUnit4Test(testMethod, psiTryStatement, exceptionTestMethodsMap.keySet().stream().findFirst().get()));
-                }
-            }
-        }
-        hints.add("If throwing an exception is not part of the test delete the try catch and catch exception at method level");
-        hints.add("Instead it is recommended to use methods or tools provided by testing frameworks and testing libraries. For example annotation @expectException for testing framework JUnit version 4 or assertThrows method in JUnit version 5");
-        return new
-                BestPracticeViolation(
-                psiTryStatement,
-                DEFAULT_PROBLEM_DESCRIPTION_MESSAGE,
-                this.getCheckedBestPractice().get(0),
-                actions,
-                hints
-        );
+        return exceptionTestMethodsMap;
     }
+
 
     private List<BestPracticeViolation> createBestPracticeViolation(ElementSearchResult<PsiTryStatement> elementSearchResult) {
         List<BestPracticeViolation> bestPracticeViolations = new ArrayList<>();
