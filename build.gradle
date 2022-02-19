@@ -28,22 +28,9 @@ intellij {
 }
 patchPluginXml {
     sinceBuild="193"
-    untilBuild = "213"
-    description(
-            "<p>Testspector is an IntelliJ IDEA plugin that helps developers with writing unit tests. It contains a dataset of best practices that should be followed when writing unit tests. " +
-                    "The unit tests are checked against the dataset and any violation is reported to the user. The user is provided with a description of the problem, hints on how to solve it and also parts of code causing the problem. " +
-                    "The report also contains links to the documentation where are all best practices described with examples.</p>" +
-            "<ul>" +
-            "Current version of the plugin supports checking of the following 7 best practices for JUnit 5 and JUnit 4:" +
-                "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#test-only-the-public-behaviour-of-the-tested-system\">Test only public behaviour</a></li>" +
-                "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#at-least-one-assertion-per-test\">At least one assertion</a></li>" +
-                 "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#only-one-assertion-per-test\">Only one assertion</a></li>" +
-                 "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#do-not-use-global-static-properties\">No global static properties</a></li>" +
-                 "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#setup-a-test-naming-strategy\">Set up a test naming strategy</a></li>" +
-                 "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#catch-tested-exceptions-using-framework-or-library-tools\">Catch tested exceptions using framework tools</a></li>" +
-                "<li><a href=\"/Hasatori/Testspector/blob/master/doc/Practices.md#do-not-use-if-switch-for-or-while-blocks-in-a-test\">No conditional logic</a></li>" +
-            "</ul>")
-    changeNotes("<p>Support for IntelliJ IDEA Ultimate version 2021.2 and IntelliJ IDEA Community Edition version 2021.2 was added</p>")
+    untilBuild = "214"
+    description("")
+    changeNotes("<p>Support for IntelliJ IDEA Ultimate version 2021.3 and IntelliJ IDEA Community Edition version 2021.3 was added</p>")
 }
 
 publishPlugin {
