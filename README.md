@@ -9,24 +9,7 @@ Plugin URL: https://plugins.jetbrains.com/plugin/16300-testspector
 
 ## Documentation
 
-### Best practices 
-The dataset of best practices was created by a detailed analysis of the world’s top books and studies regarding unit testing. 
-
-* ![Documentation](./doc/Practices.md)
-
-Current version of the plugin supports checking of the following 7 best practices for [JUnit 5](https://junit.org/junit5) and [JUnit 4](https://junit.org/junit4):
-
-* [Test only public behaviour](./doc/Practices.md#test-only-the-public-behaviour-of-the-tested-system)
-* [At least one assertion](./doc/Practices.md#at-least-one-assertion-per-test)
-* [Only one assertion](./doc/Practices.md#only-one-assertion-per-test)
-* [No global static properties](./doc/Practices.md#do-not-use-global-static-properties)
-* [Set up a test naming strategy](./doc/Practices.md#setup-a-test-naming-strategy)
-* [Catch tested exceptions using framework tools](./doc/Practices.md#catch-tested-exceptions-using-framework-or-library-tools)
-* [No conditional logic](./doc/Practices.md#do-not-use-if-switch-for-or-while-blocks-in-a-test)
-
-### Architecture
-The architecture of the plugin was designed in a way that supports implementation for any unit testing framework that is currently supported by the IntelliJ IDEA platform.
-* [Architecture](./doc/Architecture.md) 
+ Detailed documentation of all best practices and also plugin architecture is available on the following url - https://www.testspector.com/
 
 ## Supportability
 
