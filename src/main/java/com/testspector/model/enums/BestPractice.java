@@ -17,13 +17,13 @@ import static com.testspector.model.utils.Constants.WEB_PAGE_BEST_PRACTICES_ULR;
 public enum BestPractice {
 
 
-    TEST_ONLY_PUBLIC_BEHAVIOUR("Test only public behaviour", "","test-only-the-public-behaviour-of-the-tested-system"),
-    AT_LEAST_ONE_ASSERTION("At least one assertion", "","at-least-one-assertion-per-test"),
-    ONLY_ONE_ASSERTION("Only one assertion", "","only-one-assertion-per-test"),
-    NO_GLOBAL_STATIC_PROPERTIES("No global static properties", "","do-not-use-global-static-properties"),
-    SETUP_A_TEST_NAMING_STRATEGY("Setup a test naming strategy", "","setup-a-test-naming-strategy"),
-    CATCH_TESTED_EXCEPTIONS_USING_FRAMEWORK_TOOLS("Catch tested exceptions using framework or library tools", "","catch-tested-exceptions-using-framework-or-library-tools"),
-    NO_CONDITIONAL_LOGIC("No conditional logic", "","do-not-use-if-switch-for-or-while-blocks-in-a-test");
+    TEST_ONLY_PUBLIC_BEHAVIOUR("Test only public behaviour", "","defining-tests/code-coverage#testonlythepublicbehaviourofthetestedsystem"),
+    AT_LEAST_ONE_ASSERTION("At least one assertion", "","creating-tests/assertions#atleastoneassertionpertest"),
+    ONLY_ONE_ASSERTION("Only one assertion", "","creating-tests/assertions#onlyoneassertionpertest"),
+    NO_GLOBAL_STATIC_PROPERTIES("No global static properties", "","creating-tests/independence#donotuseglobalstaticproperties"),
+    SETUP_A_TEST_NAMING_STRATEGY("Setup a test naming strategy", "","creating-tests/naming-conventions#setupatestnamingstrategy"),
+    CATCH_TESTED_EXCEPTIONS_USING_FRAMEWORK_TOOLS("Catch tested exceptions using framework or library tools", "","creating-tests/testing-exceptions#catchtestedexceptionsusingframeworkorlibrarytools"),
+    NO_CONDITIONAL_LOGIC("No conditional logic", "","creating-tests/conditional-logic#donotuseif,switch,fororwhileblocksinatest");
 
     static {
         ONLY_ONE_ASSERTION.relatedRules = Collections.singletonList(AT_LEAST_ONE_ASSERTION);
@@ -40,7 +40,7 @@ public enum BestPractice {
         this.displayName = displayName;
         this.definition = definition;
         try {
-            this.webPageHyperlink = new URI(String.format("%s#%s",WEB_PAGE_BEST_PRACTICES_ULR,webPageSection));
+            this.webPageHyperlink = new URI(String.format("%s/%s",WEB_PAGE_BEST_PRACTICES_ULR,webPageSection));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
